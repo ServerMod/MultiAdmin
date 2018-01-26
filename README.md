@@ -1,5 +1,5 @@
 # MultiAdmin
-SCP LocalAdmin modification to support multiple configurations per instance
+SCP LocalAdmin modification to support multiple configurations per instance, based off LocalAdmin.exe and released under the same license as that (CC-BY-SA 4.0)
 
 ## Features:
 - Auto start all instances when running
@@ -22,6 +22,11 @@ SCP LocalAdmin modification to support multiple configurations per instance
 * servers/FirstServer/config.txt
 * servers/SecondServer/config.txt
 
-
 If you dont want a server to autolaunch place a blank file with no extension named "manual" in the server folder.
+
+Place any suggestions/problems in issues!
+
+Thanks & Enjoy.
+
+
 
