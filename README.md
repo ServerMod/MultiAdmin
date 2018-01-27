@@ -52,7 +52,8 @@ Currently supported variables (place in your servers name):
 - $port (the port of the current server) EG: "Welcome to SCPServer.com:$port"
 - $ip (the ip of the server) EG: "Welcome to SCPServer.com [$ip:$port]"
 - $full_player_count (will display player count as $player_count/20 or FULL if there are 20 players) EG: "Server.com $full_player_count"
-
+- $number (will display the number of the instance, assuming youre using default ports, this works by subtracting 7776 from the port (so $number will = 1 for the first server, #2 for the second)
+- $lobby_id (debugging to print the lobby_id)
 
 This DLL supports the version of SCP released on the 27th of January 2017 and for Windows only.
 
