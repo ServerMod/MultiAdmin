@@ -4,6 +4,8 @@ SCP LocalAdmin modification to support multiple configurations per instance, bas
 ## Features:
 - Auto start all instances when running
 - provide config folder when using new.
+- Individual Log files per instance (located under servers/<config_id>/logs/[date]_output_log.txt)
+- A crash reason log (located under servers/<config_id>/crash_reason.txt)
 - More detailed information printed to console + title to show which console is using which config
 - Supports the config reload command (when the SCP server actually has that command working)
 - Crash support.
@@ -23,6 +25,9 @@ SCP LocalAdmin modification to support multiple configurations per instance, bas
 * servers/SecondServer/config.txt
 
 If you dont want a server to autolaunch place a blank file with no extension named "manual" in the server folder.
+
+## Single Server
+If you only want a single server and just want the other features, have a single folder under servers.
 
 Place any suggestions/problems in issues!
 
