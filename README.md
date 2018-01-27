@@ -33,6 +33,11 @@ If you only want a single server and just want the other features, have a single
 ## ServerMod Installation:
 Additional to MultiAdmin, i have modified the ServerManager class and recompiled the DLL to allow variables in the server name. It also has an uncofirmed fix for the Server Ghosting issue on crash.
 
+Example:
+![player count](https://i.imgur.com/pJgS2WJ.png)
+
+The name of the server will update everytime someone leaves/joins!
+
 [Release link](https://github.com/Grover-c13/MultiAdmin/releases/tag/ServerMod0.1)
 
 To install:
