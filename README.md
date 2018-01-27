@@ -17,7 +17,7 @@ SCP LocalAdmin modification to support multiple configurations per instance, bas
 * Probably stay away with spaces in server folder names.
 
 
-## Instructions:
+## Instructions (MutliAdmin):
 1. Place MultiServer.exe next to your LocalAdmin.exe
 2. Create a new folder called servers within the same folder as LocalAdmin/MultiServer
 3. For each instance with a unique config, create a new directory in the servers directory and place each config.txt in there, so for example for two unique configs:
@@ -28,6 +28,26 @@ If you dont want a server to autolaunch place a blank file with no extension nam
 
 ## Single Server
 If you only want a single server and just want the other features, have a single folder under servers.
+
+## ServerMod Installation:
+Additional to MultiAdmin, i have modified the ServerManager class and recompiled the DLL to allow variables in the server name. It also has an uncofirmed fix for the Server Ghosting issue on crash.
+
+To install:
+1. Navigate to your SCP Secret Lab folder.
+2. Go into SCSL_Data/Managed/
+3. Make a backup of Assembly-CSharp.dll
+4. Replace Assembly-CSharp.dll with the one in the releases tab.
+
+Currently supported variables (place in your servers name):
+- $player_count (current number of connected players) EG: "$player_count playing!"
+- $port (the port of the current server) EG: "Welcome to SCPServer.com:$port"
+- $ip (the ip of the server) EG: "Welcome to SCPServer.com [$ip:$port]"
+- $full_player_count (will display player count as $player_count/20 or FULL if there are 20 players) EG: "Server.com $full_player_count"
+
+
+This DLL supports the version of SCP released on the 27th of January 2017 and for Windows only.
+
+##
 
 Place any suggestions/problems in issues!
 
