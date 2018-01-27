@@ -29,8 +29,11 @@ If you dont want a server to autolaunch place a blank file with no extension nam
 ## Single Server
 If you only want a single server and just want the other features, have a single folder under servers.
 
+# ServerMod
 ## ServerMod Installation:
 Additional to MultiAdmin, i have modified the ServerManager class and recompiled the DLL to allow variables in the server name. It also has an uncofirmed fix for the Server Ghosting issue on crash.
+
+[Release link](https://github.com/Grover-c13/MultiAdmin/releases/tag/ServerMod0.1)
 
 To install:
 1. Navigate to your SCP Secret Lab folder.
@@ -38,6 +41,7 @@ To install:
 3. Make a backup of Assembly-CSharp.dll
 4. Replace Assembly-CSharp.dll with the one in the releases tab.
 
+## Variables
 Currently supported variables (place in your servers name):
 - $player_count (current number of connected players) EG: "$player_count playing!"
 - $port (the port of the current server) EG: "Welcome to SCPServer.com:$port"
