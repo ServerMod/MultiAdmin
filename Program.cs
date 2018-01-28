@@ -6,84 +6,120 @@ using System.Threading;
 
 namespace MutliAdmin
 {
-	internal class Program
-	{
-		private static Thread readerThread = new Thread(new ThreadStart(Program.Reader));
-		private static Thread printerThread = new Thread(new ThreadStart(Program.Printer));
-		private static string verString = "18.01.b";
-		private static Process gameProcess = (Process)null;
-		private static int tooLowMemory = 0;
-		private static Random random = new Random();
-		private static string session = "";
-		private static int logID = 0;
-		private static string config;
-		private static string config_location;
+    internal class Program
+    {
+        private static Thread readerThread = new Thread(new ThreadStart(Program.Reader));
+        private static Thread printerThread = new Thread(new ThreadStart(Program.Printer));
+        private static string verString = "18.01.b";
+        private static Process gameProcess = (Process)null;
+        private static int tooLowMemory = 0;
+        private static Random random = new Random();
+        private static string session = "";
+        private static int logID = 0;
+        private static string config;
+        private static string config_location;
+        private static Boolean restart;
 
-		private static string RandomString(int length)
-		{
-			return new string(Enumerable.Repeat<string>("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", length).Select<string, char>((Func<string, char>)(s => s[Program.random.Next(s.Length)])).ToArray<char>());
-		}
+        private static string RandomString(int length)
+        {
+            return new string(Enumerable.Repeat<string>("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", length).Select<string, char>((Func<string, char>)(s => s[Program.random.Next(s.Length)])).ToArray<char>());
+        }
 
-		private static void Write(string content, ConsoleColor color = ConsoleColor.White, int height = 0)
-		{
-			Thread.Sleep(100);
-			Console.CursorTop += height;
-			Console.ForegroundColor = color;
-			DateTime now = DateTime.Now;
-			string str = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
-			Console.WriteLine(content == "" ? "" : str + content);
-			Console.ForegroundColor = ConsoleColor.White;
-			Console.BackgroundColor = ConsoleColor.Black;
-		}
+        private static void Write(string content, ConsoleColor color = ConsoleColor.White, int height = 0)
+        {
+            Thread.Sleep(100);
+            Console.CursorTop += height;
+            Console.ForegroundColor = color;
+            DateTime now = DateTime.Now;
+            string str = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
+            Console.WriteLine(content == "" ? "" : str + content);
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.BackgroundColor = ConsoleColor.Black;
+        }
 
-		private static void swapConfigs()
-		{
-			if (config_location == null) findConfig();
+        private static void SwapConfigs()
+        {
+ 
+  
+            if (File.Exists("servers\\" + config + "\\config.txt"))
+            {
+                var contents = File.ReadAllText(Directory.GetCurrentDirectory() + "\\servers\\" + config + "\\config.txt");
+                File.WriteAllText(config_location, contents);
+                Program.Write("Config file swapped", ConsoleColor.DarkYellow, 0);
+            }
+            else
+            {
+                Program.Write("Config file for server " + config + " does not exist! expected location:" + "servers\\" + config + "\\config.txt", ConsoleColor.DarkYellow, 0);
+                throw new FileNotFoundException("config file not found");
+            }
 
-			if (File.Exists("servers\\" + config + "\\config.txt"))
-			{
-				var contents = File.ReadAllText(Directory.GetCurrentDirectory() + "\\servers\\" + config + "\\config.txt");
-				File.WriteAllText(config_location, contents);
-				Program.Write("Config file swapped", ConsoleColor.DarkYellow, 0);
-			}
-			else
-			{
-				Program.Write("Config file for server " + config + " does not exist! expected location:" + "servers\\" + config + "\\config.txt", ConsoleColor.DarkYellow, 0);
-				throw new FileNotFoundException("config file not found");
-			}
+        }
+
+        public static void LoadMultiAdminConfig()
+        {
+            if (File.Exists(Directory.GetCurrentDirectory() + "\\multiadmin.cfg"))
+            {
+                foreach (String line in File.ReadAllLines("multiadmin.cfg"))
+                {
+                    if (line.Substring(0, 8).Equals("cfg_loc="))
+                    {
+                        config_location = Environment.ExpandEnvironmentVariables(line.Substring(8));
+                        Program.Write("CFG LOCATION FROM FILE:" + config_location);
+                    }
+                }
+               
+            }
+            else
+            {
+                FindConfig();
+            }
+        }
+
+  
+        public static void FindConfig()
+        {
+            var path = Environment.ExpandEnvironmentVariables("%appdata%\\SCP Secret Laboratory\\config.txt");
+            var backup = Environment.ExpandEnvironmentVariables("%appdata%\\SCP Secret Laboratory\\config_backup.txt");
+            if (File.Exists(path))
+            {
+                config_location = path;
+                Program.Write("Config file located at: " + path, ConsoleColor.DarkYellow, 0);
+
+                if (!File.Exists(backup))
+                {
+                    Program.Write("Config file has not been backed up, creating backup copy under: " + backup, ConsoleColor.DarkYellow, 0);
+                    File.Copy(path, backup);
+                }
+            }
+            else
+            {
+                throw new FileNotFoundException("Default config file not in expected location (%appdata%/SCP Secret Laboratory/config.txt), try runing LocalAdmin first");
+            }
+        }
 
 
+        private static void WriteCrashLog(String reason)
+        {
+            var path = "servers/" + config + "/crash_reasons.txt";
+        
+            using (StreamWriter sw = File.AppendText(path))
+            {
+                sw.WriteLine("[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "] " + reason);
+            }
 
+        }
 
-		}
+        public static String GetDate()
+        {
+            return DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+        }
 
-
-
-		public static void findConfig()
-		{
-			var path = Environment.ExpandEnvironmentVariables("%appdata%\\SCP Secret Laboratory\\config.txt");
-			var backup = Environment.ExpandEnvironmentVariables("%appdata%\\SCP Secret Laboratory\\config_backup.txt");
-			if (File.Exists(path))
-			{
-				config_location = path;
-				Program.Write("Config file located at: " + path, ConsoleColor.DarkYellow, 0);
-
-				if (!File.Exists(backup))
-				{
-					Program.Write("Config file has not been backed up, creating backup copy under: " + backup, ConsoleColor.DarkYellow, 0);
-					File.Copy(path, backup);
-				}
-			}
-			else
-			{
-				throw new FileNotFoundException("Default config file not in expected location (%appdata%/SCP Secret Laboratory/config.txt), try runing LocalAdmin first");
-			}
-		}
-
-
+      
 		
 		public static void Main(string[] args)
 		{
+            LoadMultiAdminConfig();
+            restart = false;
 			String chain = "";
 			if (args.Length > 0)
 			{
@@ -128,6 +164,13 @@ namespace MutliAdmin
 						}
 						
 					}
+
+                    // make log folder
+
+                    if (!Directory.Exists(file + "\\logs"))
+                    {
+                        Directory.CreateDirectory(file + "\\logs");
+                    }
 				}
 
 			}
@@ -155,8 +198,8 @@ namespace MutliAdmin
 			{
 				string[] files = Directory.GetFiles(Directory.GetCurrentDirectory(), "SCPSL.*", SearchOption.TopDirectoryOnly);
 				Program.Write("Executing: " + files[0], ConsoleColor.DarkGreen, 0);
-				swapConfigs();
-				Program.gameProcess = Process.Start(files[0], "-batchmode -nographics -key" + Program.session + " -id" + (object)Process.GetCurrentProcess().Id);
+				SwapConfigs();
+				Program.gameProcess = Process.Start(files[0], "-batchmode -nographics -key" + Program.session + " -id" + (object)Process.GetCurrentProcess().Id + " -logFile \"servers\\" + config +  "\\logs\\" + GetDate() + "_output_log.txt\"");
 			}
 			catch (Exception e)
 			{
@@ -202,15 +245,17 @@ namespace MutliAdmin
 				{
 					Program.Write("Session crashed. Trying to restart dedicated server...", ConsoleColor.Red, 0);
 
-					if (Program.gameProcess.HasExited)
-					{
-						Program.Write("Game engine exited", ConsoleColor.Red, 0);
-					}
+                    if (Program.gameProcess == null || Program.gameProcess.HasExited)
+                    {
+                        Program.Write("Game engine exited", ConsoleColor.Red, 0);
+                        WriteCrashLog("Game enginge has exited or the process is gone, check AppData\\LocalLow\\Hubert Moszka\\SCP_ Secret Laboratory\\Crashes for unity logs or servers/<config>/logs/.");
+                    }
 
 					if (Program.tooLowMemory > 5)
 					{
 						Program.Write("Out of memory", ConsoleColor.Red, 0);
-					}
+                        WriteCrashLog("The game engines working memory was too low for more than 5 ticks.");
+                    }
 
 
 					foreach (string file in Directory.GetFiles(Directory.GetCurrentDirectory(), "MultiAdmin.*"))
@@ -281,7 +326,8 @@ namespace MutliAdmin
 				Program.Write("EXIT - stops the server.", ConsoleColor.White, 0);
 				Program.Write("SEED - shows the current map seed in order to re-generate level in the future.", ConsoleColor.White, 0);
 				Program.Write("BANREFRESH - forces ban database to refresh.", ConsoleColor.White, 0);
-				Program.Write("------------" + Environment.NewLine, ConsoleColor.DarkGray, 0);
+                Program.Write("RESTARTNEXTROUND - restarts the server after this round completes.", ConsoleColor.White, 0);
+                Program.Write("------------" + Environment.NewLine, ConsoleColor.DarkGray, 0);
 			}
 		}
 
@@ -316,10 +362,19 @@ namespace MutliAdmin
 					}
 					catch
 					{
-						Program.Write("Message printer warning: Could not " + str2 + " file " + path + ". Make sure that LocalAdmin.exe has all necessary read-write permissions.", ConsoleColor.Yellow, 0);
+						Program.Write("Message printer warning: Could not " + str2 + " file " + path + ". Make sure that MultiAdmin.exe has all necessary read-write permissions.", ConsoleColor.Yellow, 0);
 						Program.Write("Press any key to ignore...", ConsoleColor.DarkGray, 0);
 						Console.ReadKey();
 					}
+
+                    if (str1.Contains("Waiting for players") && restart)
+                    {
+                        restart = false;
+                        Program.gameProcess.Kill();
+                        Process.Start(Directory.GetFiles(Directory.GetCurrentDirectory(), "MultiAdmin.*")[0], config);
+                        Process.GetCurrentProcess().Kill();
+                    }
+
 					if (str1.Contains("LOGTYPE"))
 					{
 						try
@@ -393,10 +448,15 @@ namespace MutliAdmin
 					}
 					else if (str == "CONFIG RELOAD")
 					{
-						swapConfigs();
+						SwapConfigs();
 						Program.SendMessage(message);
 					}
-					else
+                    else if (str == "RESTARTNEXTROUND")
+                    {
+                        restart = true;
+                        Program.Write("Server will restart at end of next round");
+                    }
+                    else
 					{
 						Program.SendMessage(message);
 					}

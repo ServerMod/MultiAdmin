@@ -121,6 +121,9 @@ public class CustomNetworkManager : NetworkManager
 	// Token: 0x0600065A RID: 1626
 	public void CreateMatch()
 	{
+		this.maxPlayers = ConfigFile.GetInt("max_players", 20);
+		base.maxConnections = this.maxPlayers;
+		ServerConsole.AddLog("max players:" + this.maxPlayers);
 		this.createpop.SetActive(false);
 		NetworkServer.Reset();
 		this.GetFreePort();
@@ -152,7 +155,9 @@ public class CustomNetworkManager : NetworkManager
 	private void NonsteamHost()
 	{
 		base.onlineScene = "Facility";
-		base.maxConnections = 20;
+		base.maxConnections = this.maxPlayers;
+		GameConsole.Console.singleton.AddLog("max players: " + this.maxPlayers, new Color32(128, 128, 128, byte.MaxValue), false);
+		ServerConsole.AddLog("max players: " + this.maxPlayers);
 		this.StartHostWithPort();
 	}
 
@@ -293,7 +298,7 @@ public class CustomNetworkManager : NetworkManager
 		yield break;
 	}
 
-	// Token: 0x06000B0C RID: 2828
+	// Token: 0x06000B29 RID: 2857
 	private void UpdateMotd()
 	{
 		CSteamID csteamID = this.steam_id;
@@ -305,6 +310,8 @@ public class CustomNetworkManager : NetworkManager
 		text2 = text2.Replace("$ip", ip);
 		text2 = text2.Replace("$number", (base.networkPort - 7776).ToString());
 		text2 = text2.Replace("$lobby_id", this.steam_id.ToString());
+		text2 = text2.Replace("$version", this.versionstring[0]);
+		text2 = text2.Replace("$max_players", this.maxPlayers.ToString());
 		string full = base.numPlayers.ToString();
 		if (base.numPlayers == 20)
 		{
@@ -312,20 +319,20 @@ public class CustomNetworkManager : NetworkManager
 		}
 		else
 		{
-			full = base.numPlayers.ToString() + "/20";
+			full = base.numPlayers.ToString() + "/" + this.maxPlayers;
 		}
 		text2 = text2.Replace("$full_player_count", full);
 		SteamMatchmaking.SetLobbyData(this.steam_id, "MOTD", text2);
 	}
 
-	// Token: 0x06000B2D RID: 2861
+	// Token: 0x06000B2A RID: 2858
 	public override void OnStopServer()
 	{
 		ServerConsole.AddLog("Server stopping, leaving steam lobby.");
 		SteamMatchmaking.LeaveLobby(this.steam_id);
 	}
 
-	// Token: 0x06000C42 RID: 3138
+	// Token: 0x06000B2B RID: 2859
 	public void CloseOrphanedLobbies(int current_port)
 	{
 		if (File.Exists(Application.persistentDataPath + "/lobby.registry"))
@@ -355,7 +362,7 @@ public class CustomNetworkManager : NetworkManager
 		this.steam_lobbies = lobby_list;
 	}
 
-	// Token: 0x06000C43 RID: 3139
+	// Token: 0x06000B2C RID: 2860
 	public void SaveCurrentLobby(CSteamID current_id, int current_port)
 	{
 		if (this.steam_lobbies == null)
@@ -412,11 +419,14 @@ public class CustomNetworkManager : NetworkManager
 	// Token: 0x04000586 RID: 1414
 	private GameConsole.Console console;
 
-	// Token: 0x04000B72 RID: 2930
+	// Token: 0x04000B8D RID: 2957
 	private CSteamID steam_id;
 
-	// Token: 0x04000CAF RID: 3247
+	// Token: 0x04000B8E RID: 2958
 	private List<CustomNetworkManager.Lobby> steam_lobbies;
+
+	// Token: 0x04000D00 RID: 3328
+	public int maxPlayers;
 
 	// Token: 0x020000E4 RID: 228
 	[Serializable]
@@ -463,21 +473,21 @@ public class CustomNetworkManager : NetworkManager
 		}
 	}
 
-	// Token: 0x02000235 RID: 565
+	// Token: 0x0200022D RID: 557
 	[Serializable]
 	public class Lobby
 	{
-		// Token: 0x06000C26 RID: 3110
+		// Token: 0x06000B0F RID: 2831
 		public Lobby(CSteamID id, int port)
 		{
 			this.lobby_id = id;
 			this.port = port;
 		}
 
-		// Token: 0x04000CA7 RID: 3239
+		// Token: 0x04000B77 RID: 2935
 		public CSteamID lobby_id;
 
-		// Token: 0x04000CA8 RID: 3240
+		// Token: 0x04000B78 RID: 2936
 		public int port;
 	}
 }
