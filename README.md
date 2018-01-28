@@ -10,6 +10,7 @@ SCP LocalAdmin modification to support multiple configurations per instance, bas
 - Supports the config reload command (when the SCP server actually has that command working)
 - Crash support.
 - Command line parameter support (MultiAdmin.exe <config folder 1> <config folder 2>
+- RESTARTNEXTROUND command - restart the server after this round is complete.
 
 ## Caveats:
 * The server works by hotswapping configs before certain events (new server, config reload etc), so if two servers crash at the same time they may have a conflict and load the wrong config. Should be very rare.
@@ -23,6 +24,8 @@ SCP LocalAdmin modification to support multiple configurations per instance, bas
 3. For each instance with a unique config, create a new directory in the servers directory and place each config.txt in there, so for example for two unique configs:
 * servers/FirstServer/config.txt
 * servers/SecondServer/config.txt
+4. If your config is not in its default location due to a different OS and such, make a new file next to MultiAdmin.exe called multiadmin.cfg and place the follwing setting like so:
+- cfg_loc=%appdata%\SCP Secret Laboratory\config.txt
 
 If you dont want a server to autolaunch place a blank file with no extension named "manual" in the server folder.
 
@@ -51,11 +54,15 @@ Currently supported variables (place in your servers name):
 - $player_count (current number of connected players) EG: "$player_count playing!"
 - $port (the port of the current server) EG: "Welcome to SCPServer.com:$port"
 - $ip (the ip of the server) EG: "Welcome to SCPServer.com [$ip:$port]"
-- $full_player_count (will display player count as $player_count/20 or FULL if there are 20 players) EG: "Server.com $full_player_count"
+- $full_player_count (will display player count as $player_count/$max_player_count or FULL if there are $max_player_count players) EG: "Server.com $full_player_count"
 - $number (will display the number of the instance, assuming youre using default ports, this works by subtracting 7776 from the port (so $number will = 1 for the first server, #2 for the second)
 - $lobby_id (debugging to print the lobby_id)
-
+- $version (version of the game)
+- $max_players (max amount of players in the config)
 This DLL supports the version of SCP released on the 27th of January 2017 and for Windows only.
+
+## Config Additions
+- max_players (default 20, max amount of players per server)
 
 ##
 
