@@ -31,7 +31,7 @@ If you only want a single server and just want the other features, have a single
 
 # ServerMod
 ## ServerMod Installation:
-Additional to MultiAdmin, i have modified the ServerManager class and recompiled the DLL to allow variables in the server name. It also has an uncofirmed fix for the Server Ghosting issue on crash.
+Additional to MultiAdmin, i have modified the ServerManager class and recompiled the DLL to allow variables in the server name. It also containts a fix for the server ghosting issue, no more duplicate servers showing after crash!
 
 Example:
 ![player count](https://i.imgur.com/pJgS2WJ.png)
