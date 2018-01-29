@@ -59,7 +59,8 @@ Currently supported variables (place in your servers name):
 - $lobby_id (debugging to print the lobby_id)
 - $version (version of the game)
 - $max_players (max amount of players in the config)
-This DLL supports the version of SCP released on the 27th of January 2017 and for Windows only.
+
+This DLL supports the version of SCP released on the 27th of January 2017 and tested on Windows. Unsure about linux at this point.
 
 ## Config Additions
 - max_players (default 20, max amount of players per server)
