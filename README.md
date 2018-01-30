@@ -73,12 +73,12 @@ This DLL supports the version of SCP released on the 27th of January 2017 and te
 ### servermod
 - max_players (default 20, max amount of players per server)
 - no_scp079_first (default true, computer will never be the first scp in a game)
-- SCP049_HP to config, use this to set the starting HP for the class. Default = 1200
-- SCP049-2_HP to config , use this to set the starting HP for the class. Default = 400
-- SCP079_HP to config, use this to set the starting HP for the class. Default = 100
-- SCP106_HP to config, use this to set the starting HP for the class. Default = 700
-- SCP457_HP to config, use this to set the starting HP for the class. Default = 700
-
+- SCP049_HP use this to set the starting HP for the class. Default = 1200
+- SCP049-2_HP use this to set the starting HP for the class. Default = 400
+- SCP079_HP use this to set the starting HP for the class. Default = 100
+- SCP106_HP use this to set the starting HP for the class. Default = 700
+- SCP457_HP use this to set the starting HP for the class. Default = 700
+- SCP173_HP use this to set the starting HP for the class. Default = 2000
 ##
 
 Place any suggestions/problems in issues!
