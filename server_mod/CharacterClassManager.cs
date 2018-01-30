@@ -1,607 +1,995 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Security;
-using UnityEngine.Internal;
-using UnityEngine.SceneManagement;
-using UnityEngine.Scripting;
-using UnityEngineInternal;
+using GameConsole;
+using Unity;
+using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.PostProcessing;
 
-namespace UnityEngine
+// Token: 0x02000068 RID: 104
+public class CharacterClassManager : NetworkBehaviour
 {
-	/// <summary>
-	///   <para>Base class for all entities in Unity scenes.</para>
-	/// </summary>
-	// Token: 0x0200003C RID: 60
-	public sealed class GameObject : Object
+	// Token: 0x060001E6 RID: 486
+	public CharacterClassManager()
 	{
-		/// <summary>
-		///   <para>Creates a new game object, named name.</para>
-		/// </summary>
-		/// <param name="name">The name that the GameObject is created with.</param>
-		/// <param name="components">A list of Components to add to the GameObject on creation.</param>
-		// Token: 0x06000463 RID: 1123 RVA: 0x0000754F File Offset: 0x0000574F
-		public GameObject(string name)
-		{
-			GameObject.Internal_CreateGameObject(this, name);
-		}
+	}
 
-		/// <summary>
-		///   <para>Creates a new game object, named name.</para>
-		/// </summary>
-		/// <param name="name">The name that the GameObject is created with.</param>
-		/// <param name="components">A list of Components to add to the GameObject on creation.</param>
-		// Token: 0x06000464 RID: 1124 RVA: 0x0000755F File Offset: 0x0000575F
-		public GameObject()
-		{
-			GameObject.Internal_CreateGameObject(this, null);
-		}
+	// Token: 0x060001E7 RID: 487
+	public void SetUnit(int unit)
+	{
+		this.NetworkntfUnit = unit;
+	}
 
-		/// <summary>
-		///   <para>Creates a new game object, named name.</para>
-		/// </summary>
-		/// <param name="name">The name that the GameObject is created with.</param>
-		/// <param name="components">A list of Components to add to the GameObject on creation.</param>
-		// Token: 0x06000465 RID: 1125 RVA: 0x00007570 File Offset: 0x00005770
-		public GameObject(string name, params Type[] components)
+	// Token: 0x060001E8 RID: 488
+	public void SyncDeathPos(Vector3 v)
+	{
+		this.NetworkdeathPosition = v;
+	}
+
+	// Token: 0x060001E9 RID: 489
+	[ServerCallback]
+	public void AllowContain()
+	{
+		if (!NetworkServer.active)
 		{
-			GameObject.Internal_CreateGameObject(this, name);
-			foreach (Type componentType in components)
+			return;
+		}
+		if (TutorialManager.status)
+		{
+			return;
+		}
+		foreach (GameObject gameObject in PlayerManager.singleton.players)
+		{
+			if (Vector3.Distance(gameObject.transform.position, this.lureSpj.transform.position) < 1.97f)
 			{
-				this.AddComponent(componentType);
-			}
-		}
-
-		/// <summary>
-		///   <para>Creates a game object with a primitive mesh renderer and appropriate collider.</para>
-		/// </summary>
-		/// <param name="type">The type of primitive object to create.</param>
-		// Token: 0x06000466 RID: 1126
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern GameObject CreatePrimitive(PrimitiveType type);
-
-		/// <summary>
-		///   <para>Returns the component of Type type if the game object has one attached, null if it doesn't.</para>
-		/// </summary>
-		/// <param name="type">The type of Component to retrieve.</param>
-		// Token: 0x06000467 RID: 1127
-		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Component GetComponent(Type type);
-
-		// Token: 0x06000468 RID: 1128
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		extern public void GetComponentFastPath(Type type, IntPtr oneFurtherThanResultValue);
-
-		// Token: 0x06000469 RID: 1129 RVA: 0x000075B0 File Offset: 0x000057B0
-		[SecuritySafeCritical]
-		public unsafe T GetComponent<T>()
-		{
-			CastHelper<T> castHelper = default(CastHelper<T>);
-			this.GetComponentFastPath(typeof(T), new IntPtr((void*)(&castHelper.onePointerFurtherThanT)));
-			return castHelper.t;
-		}
-
-		// Token: 0x0600046A RID: 1130
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		extern public Component GetComponentByName(string type);
-
-		/// <summary>
-		///   <para>Returns the component with name type if the game object has one attached, null if it doesn't.</para>
-		/// </summary>
-		/// <param name="type">The type of Component to retrieve.</param>
-		// Token: 0x0600046B RID: 1131 RVA: 0x000075F0 File Offset: 0x000057F0
-		public Component GetComponent(string type)
-		{
-			return this.GetComponentByName(type);
-		}
-
-		/// <summary>
-		///   <para>Returns the component of Type type in the GameObject or any of its children using depth first search.</para>
-		/// </summary>
-		/// <param name="type">The type of Component to retrieve.</param>
-		/// <param name="includeInactive"></param>
-		/// <returns>
-		///   <para>A component of the matching type, if found.</para>
-		/// </returns>
-		// Token: 0x0600046C RID: 1132
-		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Component GetComponentInChildren(Type type, bool includeInactive);
-
-		/// <summary>
-		///   <para>Returns the component of Type type in the GameObject or any of its children using depth first search.</para>
-		/// </summary>
-		/// <param name="type">The type of Component to retrieve.</param>
-		/// <param name="includeInactive"></param>
-		/// <returns>
-		///   <para>A component of the matching type, if found.</para>
-		/// </returns>
-		// Token: 0x0600046D RID: 1133 RVA: 0x0000760C File Offset: 0x0000580C
-		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
-		public Component GetComponentInChildren(Type type)
-		{
-			return this.GetComponentInChildren(type, false);
-		}
-
-		// Token: 0x0600046E RID: 1134 RVA: 0x0000762C File Offset: 0x0000582C
-		[ExcludeFromDocs]
-		public T GetComponentInChildren<T>()
-		{
-			bool includeInactive = false;
-			return this.GetComponentInChildren<T>(includeInactive);
-		}
-
-		// Token: 0x0600046F RID: 1135 RVA: 0x0000764C File Offset: 0x0000584C
-		public T GetComponentInChildren<T>([DefaultValue("false")] bool includeInactive)
-		{
-			return (T)((object)this.GetComponentInChildren(typeof(T), includeInactive));
-		}
-
-		/// <summary>
-		///   <para>Returns the component of Type type in the GameObject or any of its parents.</para>
-		/// </summary>
-		/// <param name="type">Type of component to find.</param>
-		// Token: 0x06000470 RID: 1136
-		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern Component GetComponentInParent(Type type);
-
-		// Token: 0x06000471 RID: 1137 RVA: 0x00007678 File Offset: 0x00005878
-		public T GetComponentInParent<T>()
-		{
-			return (T)((object)this.GetComponentInParent(typeof(T)));
-		}
-
-		/// <summary>
-		///   <para>Returns all components of Type type in the GameObject.</para>
-		/// </summary>
-		/// <param name="type">The type of Component to retrieve.</param>
-		// Token: 0x06000472 RID: 1138 RVA: 0x000076A4 File Offset: 0x000058A4
-		public Component[] GetComponents(Type type)
-		{
-			return (Component[])this.GetComponentsInternal(type, false, false, true, false, null);
-		}
-
-		// Token: 0x06000473 RID: 1139 RVA: 0x000076CC File Offset: 0x000058CC
-		public T[] GetComponents<T>()
-		{
-			return (T[])this.GetComponentsInternal(typeof(T), true, false, true, false, null);
-		}
-
-		// Token: 0x06000474 RID: 1140 RVA: 0x000076FB File Offset: 0x000058FB
-		public void GetComponents(Type type, List<Component> results)
-		{
-			this.GetComponentsInternal(type, false, false, true, false, results);
-		}
-
-		// Token: 0x06000475 RID: 1141 RVA: 0x0000770B File Offset: 0x0000590B
-		public void GetComponents<T>(List<T> results)
-		{
-			this.GetComponentsInternal(typeof(T), false, false, true, false, results);
-		}
-
-		/// <summary>
-		///   <para>Returns all components of Type type in the GameObject or any of its children.</para>
-		/// </summary>
-		/// <param name="type">The type of Component to retrieve.</param>
-		/// <param name="includeInactive">Should Components on inactive GameObjects be included in the found set?</param>
-		// Token: 0x06000476 RID: 1142 RVA: 0x00007724 File Offset: 0x00005924
-		[ExcludeFromDocs]
-		public Component[] GetComponentsInChildren(Type type)
-		{
-			bool includeInactive = false;
-			return this.GetComponentsInChildren(type, includeInactive);
-		}
-
-		/// <summary>
-		///   <para>Returns all components of Type type in the GameObject or any of its children.</para>
-		/// </summary>
-		/// <param name="type">The type of Component to retrieve.</param>
-		/// <param name="includeInactive">Should Components on inactive GameObjects be included in the found set?</param>
-		// Token: 0x06000477 RID: 1143 RVA: 0x00007744 File Offset: 0x00005944
-		public Component[] GetComponentsInChildren(Type type, [DefaultValue("false")] bool includeInactive)
-		{
-			return (Component[])this.GetComponentsInternal(type, false, true, includeInactive, false, null);
-		}
-
-		// Token: 0x06000478 RID: 1144 RVA: 0x0000776C File Offset: 0x0000596C
-		public T[] GetComponentsInChildren<T>(bool includeInactive)
-		{
-			return (T[])this.GetComponentsInternal(typeof(T), true, true, includeInactive, false, null);
-		}
-
-		// Token: 0x06000479 RID: 1145 RVA: 0x0000779B File Offset: 0x0000599B
-		public void GetComponentsInChildren<T>(bool includeInactive, List<T> results)
-		{
-			this.GetComponentsInternal(typeof(T), true, true, includeInactive, false, results);
-		}
-
-		// Token: 0x0600047A RID: 1146 RVA: 0x000077B4 File Offset: 0x000059B4
-		public T[] GetComponentsInChildren<T>()
-		{
-			return this.GetComponentsInChildren<T>(false);
-		}
-
-		// Token: 0x0600047B RID: 1147 RVA: 0x000077D0 File Offset: 0x000059D0
-		public void GetComponentsInChildren<T>(List<T> results)
-		{
-			this.GetComponentsInChildren<T>(false, results);
-		}
-
-		// Token: 0x0600047C RID: 1148 RVA: 0x000077DC File Offset: 0x000059DC
-		[ExcludeFromDocs]
-		public Component[] GetComponentsInParent(Type type)
-		{
-			bool includeInactive = false;
-			return this.GetComponentsInParent(type, includeInactive);
-		}
-
-		/// <summary>
-		///   <para>Returns all components of Type type in the GameObject or any of its parents.</para>
-		/// </summary>
-		/// <param name="type">The type of Component to retrieve.</param>
-		/// <param name="includeInactive">Should inactive Components be included in the found set?</param>
-		// Token: 0x0600047D RID: 1149 RVA: 0x000077FC File Offset: 0x000059FC
-		public Component[] GetComponentsInParent(Type type, [DefaultValue("false")] bool includeInactive)
-		{
-			return (Component[])this.GetComponentsInternal(type, false, true, includeInactive, true, null);
-		}
-
-		// Token: 0x0600047E RID: 1150 RVA: 0x00007822 File Offset: 0x00005A22
-		public void GetComponentsInParent<T>(bool includeInactive, List<T> results)
-		{
-			this.GetComponentsInternal(typeof(T), true, true, includeInactive, true, results);
-		}
-
-		// Token: 0x0600047F RID: 1151 RVA: 0x0000783C File Offset: 0x00005A3C
-		public T[] GetComponentsInParent<T>(bool includeInactive)
-		{
-			return (T[])this.GetComponentsInternal(typeof(T), true, true, includeInactive, true, null);
-		}
-
-		// Token: 0x06000480 RID: 1152 RVA: 0x0000786C File Offset: 0x00005A6C
-		public T[] GetComponentsInParent<T>()
-		{
-			return this.GetComponentsInParent<T>(false);
-		}
-
-		// Token: 0x06000481 RID: 1153
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		extern public Array GetComponentsInternal(Type type, bool useSearchTypeAsArrayReturnType, bool recursive, bool includeInactive, bool reverse, object resultList);
-
-		// Token: 0x06000482 RID: 1154
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		extern public Component AddComponentInternal(string className);
-
-		/// <summary>
-		///   <para>The Transform attached to this GameObject.</para>
-		/// </summary>
-		// Token: 0x170000E4 RID: 228
-		// (get) Token: 0x06000483 RID: 1155
-		public extern Transform transform { [GeneratedByOldBindingsGenerator] [MethodImpl(MethodImplOptions.InternalCall)] get; }
-
-		/// <summary>
-		///   <para>The layer the game object is in. A layer is in the range [0...31].</para>
-		/// </summary>
-		// Token: 0x170000E5 RID: 229
-		// (get) Token: 0x06000484 RID: 1156
-		// (set) Token: 0x06000485 RID: 1157
-		public extern int layer { [GeneratedByOldBindingsGenerator] [MethodImpl(MethodImplOptions.InternalCall)] get; [GeneratedByOldBindingsGenerator] [MethodImpl(MethodImplOptions.InternalCall)] set; }
-
-		// Token: 0x170000E6 RID: 230
-		// (get) Token: 0x06000486 RID: 1158
-		// (set) Token: 0x06000487 RID: 1159
-		[Obsolete("GameObject.active is obsolete. Use GameObject.SetActive(), GameObject.activeSelf or GameObject.activeInHierarchy.")]
-		public extern bool active { [GeneratedByOldBindingsGenerator] [MethodImpl(MethodImplOptions.InternalCall)] get; [GeneratedByOldBindingsGenerator] [MethodImpl(MethodImplOptions.InternalCall)] set; }
-
-		/// <summary>
-		///   <para>Activates/Deactivates the GameObject.</para>
-		/// </summary>
-		/// <param name="value">Activate or deactivation the  object.</param>
-		// Token: 0x06000488 RID: 1160
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetActive(bool value);
-
-		/// <summary>
-		///   <para>The local active state of this GameObject. (Read Only)</para>
-		/// </summary>
-		// Token: 0x170000E7 RID: 231
-		// (get) Token: 0x06000489 RID: 1161
-		public extern bool activeSelf { [GeneratedByOldBindingsGenerator] [MethodImpl(MethodImplOptions.InternalCall)] get; }
-
-		/// <summary>
-		///   <para>Is the GameObject active in the scene?</para>
-		/// </summary>
-		// Token: 0x170000E8 RID: 232
-		// (get) Token: 0x0600048A RID: 1162
-		public extern bool activeInHierarchy { [GeneratedByOldBindingsGenerator] [MethodImpl(MethodImplOptions.InternalCall)] get; }
-
-		// Token: 0x0600048B RID: 1163
-		[Obsolete("gameObject.SetActiveRecursively() is obsolete. Use GameObject.SetActive(), which is now inherited by children.")]
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SetActiveRecursively(bool state);
-
-		/// <summary>
-		///   <para>Editor only API that specifies if a game object is static.</para>
-		/// </summary>
-		// Token: 0x170000E9 RID: 233
-		// (get) Token: 0x0600048C RID: 1164
-		// (set) Token: 0x0600048D RID: 1165
-		public extern bool isStatic { [GeneratedByOldBindingsGenerator] [MethodImpl(MethodImplOptions.InternalCall)] get; [GeneratedByOldBindingsGenerator] [MethodImpl(MethodImplOptions.InternalCall)] set; }
-
-		// Token: 0x170000EA RID: 234
-		// (get) Token: 0x0600048E RID: 1166
-		public extern bool isStaticBatchable { [GeneratedByOldBindingsGenerator] [MethodImpl(MethodImplOptions.InternalCall)] get; }
-
-		/// <summary>
-		///   <para>The tag of this game object.</para>
-		/// </summary>
-		// Token: 0x170000EB RID: 235
-		// (get) Token: 0x0600048F RID: 1167
-		// (set) Token: 0x06000490 RID: 1168
-		public extern string tag { [GeneratedByOldBindingsGenerator] [MethodImpl(MethodImplOptions.InternalCall)] get; [GeneratedByOldBindingsGenerator] [MethodImpl(MethodImplOptions.InternalCall)] set; }
-
-		/// <summary>
-		///   <para>Is this game object tagged with tag ?</para>
-		/// </summary>
-		/// <param name="tag">The tag to compare.</param>
-		// Token: 0x06000491 RID: 1169
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool CompareTag(string tag);
-
-		// Token: 0x06000492 RID: 1170
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern GameObject FindGameObjectWithTag(string tag);
-
-		/// <summary>
-		///   <para>Returns one active GameObject tagged tag. Returns null if no GameObject was found.</para>
-		/// </summary>
-		/// <param name="tag">The tag to search for.</param>
-		// Token: 0x06000493 RID: 1171 RVA: 0x00007888 File Offset: 0x00005A88
-		public static GameObject FindWithTag(string tag)
-		{
-			return GameObject.FindGameObjectWithTag(tag);
-		}
-
-		/// <summary>
-		///   <para>Returns a list of active GameObjects tagged tag. Returns empty array if no GameObject was found.</para>
-		/// </summary>
-		/// <param name="tag">The name of the tag to search GameObjects for.</param>
-		// Token: 0x06000494 RID: 1172
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern GameObject[] FindGameObjectsWithTag(string tag);
-
-		/// <summary>
-		///   <para>Calls the method named methodName on every MonoBehaviour in this game object and on every ancestor of the behaviour.</para>
-		/// </summary>
-		/// <param name="methodName">The name of the method to call.</param>
-		/// <param name="value">An optional parameter value to pass to the called method.</param>
-		/// <param name="options">Should an error be raised if the method doesn't exist on the target object?</param>
-		// Token: 0x06000495 RID: 1173
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SendMessageUpwards(string methodName, [DefaultValue("null")] object value, [DefaultValue("SendMessageOptions.RequireReceiver")] SendMessageOptions options);
-
-		/// <summary>
-		///   <para>Calls the method named methodName on every MonoBehaviour in this game object and on every ancestor of the behaviour.</para>
-		/// </summary>
-		/// <param name="methodName">The name of the method to call.</param>
-		/// <param name="value">An optional parameter value to pass to the called method.</param>
-		/// <param name="options">Should an error be raised if the method doesn't exist on the target object?</param>
-		// Token: 0x06000496 RID: 1174 RVA: 0x000078A4 File Offset: 0x00005AA4
-		[ExcludeFromDocs]
-		public void SendMessageUpwards(string methodName, object value)
-		{
-			SendMessageOptions options = SendMessageOptions.RequireReceiver;
-			this.SendMessageUpwards(methodName, value, options);
-		}
-
-		/// <summary>
-		///   <para>Calls the method named methodName on every MonoBehaviour in this game object and on every ancestor of the behaviour.</para>
-		/// </summary>
-		/// <param name="methodName">The name of the method to call.</param>
-		/// <param name="value">An optional parameter value to pass to the called method.</param>
-		/// <param name="options">Should an error be raised if the method doesn't exist on the target object?</param>
-		// Token: 0x06000497 RID: 1175 RVA: 0x000078C0 File Offset: 0x00005AC0
-		[ExcludeFromDocs]
-		public void SendMessageUpwards(string methodName)
-		{
-			SendMessageOptions options = SendMessageOptions.RequireReceiver;
-			object value = null;
-			this.SendMessageUpwards(methodName, value, options);
-		}
-
-		/// <summary>
-		///   <para></para>
-		/// </summary>
-		/// <param name="methodName"></param>
-		/// <param name="options"></param>
-		// Token: 0x06000498 RID: 1176 RVA: 0x000078DB File Offset: 0x00005ADB
-		public void SendMessageUpwards(string methodName, SendMessageOptions options)
-		{
-			this.SendMessageUpwards(methodName, null, options);
-		}
-
-		/// <summary>
-		///   <para>Calls the method named methodName on every MonoBehaviour in this game object.</para>
-		/// </summary>
-		/// <param name="methodName">The name of the method to call.</param>
-		/// <param name="value">An optional parameter value to pass to the called method.</param>
-		/// <param name="options">Should an error be raised if the method doesn't exist on the target object?</param>
-		// Token: 0x06000499 RID: 1177
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void SendMessage(string methodName, [DefaultValue("null")] object value, [DefaultValue("SendMessageOptions.RequireReceiver")] SendMessageOptions options);
-
-		/// <summary>
-		///   <para>Calls the method named methodName on every MonoBehaviour in this game object.</para>
-		/// </summary>
-		/// <param name="methodName">The name of the method to call.</param>
-		/// <param name="value">An optional parameter value to pass to the called method.</param>
-		/// <param name="options">Should an error be raised if the method doesn't exist on the target object?</param>
-		// Token: 0x0600049A RID: 1178 RVA: 0x000078E8 File Offset: 0x00005AE8
-		[ExcludeFromDocs]
-		public void SendMessage(string methodName, object value)
-		{
-			SendMessageOptions options = SendMessageOptions.RequireReceiver;
-			this.SendMessage(methodName, value, options);
-		}
-
-		/// <summary>
-		///   <para>Calls the method named methodName on every MonoBehaviour in this game object.</para>
-		/// </summary>
-		/// <param name="methodName">The name of the method to call.</param>
-		/// <param name="value">An optional parameter value to pass to the called method.</param>
-		/// <param name="options">Should an error be raised if the method doesn't exist on the target object?</param>
-		// Token: 0x0600049B RID: 1179 RVA: 0x00007904 File Offset: 0x00005B04
-		[ExcludeFromDocs]
-		public void SendMessage(string methodName)
-		{
-			SendMessageOptions options = SendMessageOptions.RequireReceiver;
-			object value = null;
-			this.SendMessage(methodName, value, options);
-		}
-
-		/// <summary>
-		///   <para></para>
-		/// </summary>
-		/// <param name="methodName"></param>
-		/// <param name="options"></param>
-		// Token: 0x0600049C RID: 1180 RVA: 0x0000791F File Offset: 0x00005B1F
-		public void SendMessage(string methodName, SendMessageOptions options)
-		{
-			this.SendMessage(methodName, null, options);
-		}
-
-		/// <summary>
-		///   <para>Calls the method named methodName on every MonoBehaviour in this game object or any of its children.</para>
-		/// </summary>
-		/// <param name="methodName"></param>
-		/// <param name="parameter"></param>
-		/// <param name="options"></param>
-		// Token: 0x0600049D RID: 1181
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern void BroadcastMessage(string methodName, [DefaultValue("null")] object parameter, [DefaultValue("SendMessageOptions.RequireReceiver")] SendMessageOptions options);
-
-		/// <summary>
-		///   <para>Calls the method named methodName on every MonoBehaviour in this game object or any of its children.</para>
-		/// </summary>
-		/// <param name="methodName"></param>
-		/// <param name="parameter"></param>
-		/// <param name="options"></param>
-		// Token: 0x0600049E RID: 1182 RVA: 0x0000792C File Offset: 0x00005B2C
-		[ExcludeFromDocs]
-		public void BroadcastMessage(string methodName, object parameter)
-		{
-			SendMessageOptions options = SendMessageOptions.RequireReceiver;
-			this.BroadcastMessage(methodName, parameter, options);
-		}
-
-		/// <summary>
-		///   <para>Calls the method named methodName on every MonoBehaviour in this game object or any of its children.</para>
-		/// </summary>
-		/// <param name="methodName"></param>
-		/// <param name="parameter"></param>
-		/// <param name="options"></param>
-		// Token: 0x0600049F RID: 1183 RVA: 0x00007948 File Offset: 0x00005B48
-		[ExcludeFromDocs]
-		public void BroadcastMessage(string methodName)
-		{
-			SendMessageOptions options = SendMessageOptions.RequireReceiver;
-			object parameter = null;
-			this.BroadcastMessage(methodName, parameter, options);
-		}
-
-		/// <summary>
-		///   <para></para>
-		/// </summary>
-		/// <param name="methodName"></param>
-		/// <param name="options"></param>
-		// Token: 0x060004A0 RID: 1184 RVA: 0x00007963 File Offset: 0x00005B63
-		public void BroadcastMessage(string methodName, SendMessageOptions options)
-		{
-			this.BroadcastMessage(methodName, null, options);
-		}
-
-		// Token: 0x060004A1 RID: 1185
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		extern public Component Internal_AddComponentWithType(Type componentType);
-
-		/// <summary>
-		///   <para>Adds a component class of type componentType to the game object. C# Users can use a generic version.</para>
-		/// </summary>
-		/// <param name="componentType"></param>
-		// Token: 0x060004A2 RID: 1186 RVA: 0x00007970 File Offset: 0x00005B70
-		[TypeInferenceRule(TypeInferenceRules.TypeReferencedByFirstArgument)]
-		public Component AddComponent(Type componentType)
-		{
-			return this.Internal_AddComponentWithType(componentType);
-		}
-
-		// Token: 0x060004A3 RID: 1187 RVA: 0x0000798C File Offset: 0x00005B8C
-		public T AddComponent<T>() where T : Component
-		{
-			return this.AddComponent(typeof(T)) as T;
-		}
-
-		// Token: 0x060004A4 RID: 1188
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		static extern public void Internal_CreateGameObject([Writable] GameObject mono, string name);
-
-		/// <summary>
-		///   <para>Finds a GameObject by name and returns it.</para>
-		/// </summary>
-		/// <param name="name"></param>
-		// Token: 0x060004A5 RID: 1189
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public static extern GameObject Find(string name);
-
-		/// <summary>
-		///   <para>Scene that the GameObject is part of.</para>
-		/// </summary>
-		// Token: 0x170000EC RID: 236
-		// (get) Token: 0x060004A6 RID: 1190 RVA: 0x000079BC File Offset: 0x00005BBC
-		public Scene scene
-		{
-			get
-			{
-				Scene result;
-				this.INTERNAL_get_scene(out result);
-				return result;
-			}
-		}
-
-		// Token: 0x060004A7 RID: 1191
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		extern public void INTERNAL_get_scene(out Scene value);
-
-		// Token: 0x170000ED RID: 237
-		// (get) Token: 0x060004A8 RID: 1192 RVA: 0x000079DC File Offset: 0x00005BDC
-		public GameObject gameObject
-		{
-			get
-			{
-				return this;
+				CharacterClassManager component = gameObject.GetComponent<CharacterClassManager>();
+				PlayerStats component2 = gameObject.GetComponent<PlayerStats>();
+				if (component.klasy[component.curClass].team != Team.SCP && component.curClass != 2)
+				{
+					component2.HurtPlayer(new PlayerStats.HitInfo(10000f, "WORLD", "LURE"), gameObject);
+					this.lureSpj.SetState(true);
+				}
 			}
 		}
 	}
+
+	// Token: 0x060001EA RID: 490
+	public void Start()
+	{
+		this.lureSpj = UnityEngine.Object.FindObjectOfType<LureSubjectContainer>();
+		this.scp049 = base.GetComponent<Scp049PlayerScript>();
+		this.scp049_2 = base.GetComponent<Scp049_2PlayerScript>();
+		this.scp079 = base.GetComponent<Scp079PlayerScript>();
+		this.scp106 = base.GetComponent<Scp106PlayerScript>();
+		this.scp173 = base.GetComponent<Scp173PlayerScript>();
+		this.ban_computer_for_first_pick = (ConfigFile.GetString("NO_SCP079_FIRST", "true").ToLower() == "true");
+		this.forceClass = ConfigFile.GetInt("server_forced_class", -1);
+		this.ciPercentage = (float)ConfigFile.GetInt("ci_on_start_percent", 10);
+		base.StartCoroutine("Init");
+		string text = ConfigFile.GetString("team_respawn_queue", "401431403144144") + "...........................";
+		this.classTeamQueue.Clear();
+		for (int i = 0; i < text.Length; i++)
+		{
+			int item = 4;
+			if (!int.TryParse(text[i].ToString(), out item))
+			{
+				item = 4;
+			}
+			this.classTeamQueue.Add((Team)item);
+		}
+		if (!base.isLocalPlayer && TutorialManager.status)
+		{
+			this.ApplyProperties();
+		}
+		this.SetMaxHP(0, "SCP173_HP", 2000);
+		this.SetMaxHP(5, "SCP049_HP", 1200);
+		this.SetMaxHP(7, "SCP079_HP", 100);
+		this.SetMaxHP(3, "SCP106_HP", 700);
+		this.SetMaxHP(9, "SCP457_HP", 700);
+		this.SetMaxHP(10, "SCP049-2_HP", 400);
+	}
+
+	// Token: 0x060001EB RID: 491
+	public IEnumerator Init()
+	{
+		GameObject host = null;
+		while (host == null)
+		{
+			host = GameObject.Find("Host");
+			yield return new WaitForEndOfFrame();
+		}
+		while (this.seed == 0)
+		{
+			this.seed = host.GetComponent<RandomSeedSync>().seed;
+			UnityEngine.Object.FindObjectOfType<GameConsole.Console>().UpdateValue("seed", this.seed.ToString());
+		}
+		if (!base.isLocalPlayer)
+		{
+			yield break;
+		}
+		yield return new WaitForSeconds(2f);
+		if (base.isServer)
+		{
+			if (ServerStatic.isDedicated)
+			{
+				ServerConsole.AddLog("Waiting for players..");
+			}
+			CursorManager.roundStarted = true;
+			RoundStart rs = RoundStart.singleton;
+			if (TutorialManager.status)
+			{
+				this.ForceRoundStart();
+			}
+			else
+			{
+				rs.ShowButton();
+				int timeLeft = 20;
+				int maxPlayers = 1;
+				while (rs.info != "started")
+				{
+					if (maxPlayers > 1)
+					{
+						int num = timeLeft;
+						timeLeft = num - 1;
+					}
+					int count = PlayerManager.singleton.players.Length;
+					if (count > maxPlayers)
+					{
+						maxPlayers = count;
+						if (timeLeft < 5)
+						{
+							timeLeft = 5;
+						}
+						else if (timeLeft < 10)
+						{
+							timeLeft = 10;
+						}
+						else if (timeLeft < 15)
+						{
+							timeLeft = 15;
+						}
+						else
+						{
+							timeLeft = 20;
+						}
+						if (maxPlayers == NetworkManager.singleton.maxConnections)
+						{
+							timeLeft = 0;
+						}
+					}
+					if (timeLeft > 0)
+					{
+						this.CmdUpdateStartText(timeLeft.ToString());
+					}
+					else
+					{
+						this.ForceRoundStart();
+					}
+					yield return new WaitForSeconds(1f);
+				}
+			}
+			CursorManager.roundStarted = false;
+			this.CmdStartRound();
+			this.SetRandomRoles();
+			rs = null;
+			rs = null;
+		}
+		else
+		{
+			while (!host.GetComponent<CharacterClassManager>().roundStarted)
+			{
+				yield return new WaitForEndOfFrame();
+			}
+			yield return new WaitForSeconds(2f);
+			if (this.curClass < 0)
+			{
+				this.CallCmdSuicide(default(PlayerStats.HitInfo));
+			}
+		}
+		int iteration = 0;
+		for (;;)
+		{
+			GameObject[] plys = PlayerManager.singleton.players;
+			if (iteration >= plys.Length)
+			{
+				yield return new WaitForSeconds(3f);
+				iteration = 0;
+			}
+			try
+			{
+				plys[iteration].GetComponent<CharacterClassManager>().InitSCPs();
+			}
+			catch
+			{
+			}
+			int num2 = iteration;
+			iteration = num2 + 1;
+			yield return new WaitForEndOfFrame();
+			plys = null;
+			plys = null;
+		}
+		yield break;
+	}
+
+	// Token: 0x060001EC RID: 492
+	[Client]
+	[Command]
+	public void CmdSuicide(PlayerStats.HitInfo hitInfo)
+	{
+		if (!NetworkClient.active)
+		{
+			Debug.LogWarning("[Client] function 'System.Void CharacterClassManager::CmdSuicide(PlayerStats/HitInfo)' called on server");
+			return;
+		}
+		hitInfo.amount = ((hitInfo.amount != 0f) ? hitInfo.amount : 999799f);
+		base.GetComponent<PlayerStats>().HurtPlayer(hitInfo, base.gameObject);
+	}
+
+	// Token: 0x060001ED RID: 493
+	public void ForceRoundStart()
+	{
+		ServerConsole.AddLog("New round has been started.");
+		this.CmdUpdateStartText("started");
+	}
+
+	// Token: 0x060001EE RID: 494
+	[ServerCallback]
+	public void CmdUpdateStartText(string str)
+	{
+		if (!NetworkServer.active)
+		{
+			return;
+		}
+		RoundStart.singleton.Networkinfo = str;
+	}
+
+	// Token: 0x060001EF RID: 495
+	public void InitSCPs()
+	{
+		if (this.curClass != -1 && !TutorialManager.status)
+		{
+			Class c = this.klasy[this.curClass];
+			this.scp049.Init(this.curClass, c);
+			this.scp049_2.Init(this.curClass, c);
+			this.scp079.Init(this.curClass, c);
+			this.scp106.Init(this.curClass, c);
+			this.scp173.Init(this.curClass, c);
+		}
+	}
+
+	// Token: 0x060001F0 RID: 496
+	public void RegisterEscape()
+	{
+		this.CallCmdRegisterEscape(base.gameObject);
+	}
+
+	// Token: 0x060001F1 RID: 497
+	[Command(channel = 2)]
+	public void CmdRegisterEscape(GameObject sender)
+	{
+		CharacterClassManager component = sender.GetComponent<CharacterClassManager>();
+		if (Vector3.Distance(sender.transform.position, base.GetComponent<Escape>().worldPosition) < (float)(base.GetComponent<Escape>().radius * 2))
+		{
+			RoundSummary component2 = GameObject.Find("Host").GetComponent<RoundSummary>();
+			if (this.klasy[component.curClass].team == Team.CDP)
+			{
+				component2.summary.classD_escaped++;
+				this.SetClassID(8);
+				base.GetComponent<PlayerStats>().SetHPAmount(this.klasy[8].maxHP);
+			}
+			if (this.klasy[component.curClass].team == Team.RSC)
+			{
+				component2.summary.scientists_escaped++;
+				this.SetClassID(4);
+				base.GetComponent<PlayerStats>().SetHPAmount(this.klasy[4].maxHP);
+			}
+		}
+	}
+
+	// Token: 0x060001F2 RID: 498
+	public void ApplyProperties()
+	{
+		Class @class = this.klasy[this.curClass];
+		this.InitSCPs();
+		Inventory component = base.GetComponent<Inventory>();
+		if (base.isLocalPlayer)
+		{
+			base.GetComponent<Radio>().UpdateClass();
+			base.GetComponent<Handcuffs>().CallCmdTarget(null);
+			base.GetComponent<Spectator>().Init();
+			base.GetComponent<Searching>().Init(@class.team == Team.SCP | @class.team == Team.RIP);
+		}
+		if (TutorialManager.status || base.isLocalPlayer)
+		{
+			if (@class.team == Team.RIP)
+			{
+				if (base.isLocalPlayer)
+				{
+					base.GetComponent<WeaponManager>().DisableAllWeaponCameras();
+					base.GetComponent<Inventory>().DropAll();
+					component.items.Clear();
+					component.NetworkcurItem = -1;
+					base.GetComponent<FirstPersonController>().enabled = false;
+					UnityEngine.Object.FindObjectOfType<StartScreen>().PlayAnimation(this.curClass);
+					base.GetComponent<HorrorSoundController>().horrorSoundSource.PlayOneShot(this.bell_dead);
+					base.transform.position = new Vector3(0f, 2048f, 0f);
+					base.transform.rotation = Quaternion.Euler(Vector3.zero);
+					base.GetComponent<PlayerStats>().maxHP = @class.maxHP;
+					this.unfocusedCamera.GetComponent<Camera>().enabled = false;
+					this.unfocusedCamera.GetComponent<PostProcessingBehaviour>().enabled = false;
+				}
+				this.RefreshPlyModel(-1);
+			}
+			else
+			{
+				if (base.isLocalPlayer)
+				{
+					base.GetComponent<Scp106PlayerScript>().SetDoors();
+					GameObject randomPosition = UnityEngine.Object.FindObjectOfType<SpawnpointManager>().GetRandomPosition(this.curClass);
+					if (randomPosition != null)
+					{
+						base.transform.position = randomPosition.transform.position;
+						base.transform.rotation = randomPosition.transform.rotation;
+					}
+					else
+					{
+						base.transform.position = this.deathPosition;
+					}
+					component.items.Clear();
+					component.NetworkcurItem = -1;
+					foreach (int id in @class.startItems)
+					{
+						component.AddItem(id, -4.65664672E+11f);
+					}
+					UnityEngine.Object.FindObjectOfType<StartScreen>().PlayAnimation(this.curClass);
+					if (!base.GetComponent<HorrorSoundController>().horrorSoundSource.isPlaying)
+					{
+						base.GetComponent<HorrorSoundController>().horrorSoundSource.PlayOneShot(this.bell);
+					}
+					base.Invoke("EnableFPC", 0.2f);
+				}
+				this.RefreshPlyModel(-1);
+				if (base.isLocalPlayer)
+				{
+					base.GetComponent<Radio>().NetworkcurPreset = 0;
+					base.GetComponent<Radio>().CallCmdUpdatePreset(0);
+					base.GetComponent<AmmoBox>().SetAmmoAmount();
+					FirstPersonController component3 = base.GetComponent<FirstPersonController>();
+					PlayerStats component2 = base.GetComponent<PlayerStats>();
+					if (@class.postprocessingProfile != null && base.GetComponentInChildren<PostProcessingBehaviour>() != null)
+					{
+						base.GetComponentInChildren<PostProcessingBehaviour>().profile = @class.postprocessingProfile;
+					}
+					this.unfocusedCamera.GetComponent<Camera>().enabled = true;
+					this.unfocusedCamera.GetComponent<PostProcessingBehaviour>().enabled = true;
+					component3.m_WalkSpeed = @class.walkSpeed;
+					component3.m_RunSpeed = @class.runSpeed;
+					component3.m_UseHeadBob = @class.useHeadBob;
+					component3.m_FootstepSounds = @class.stepClips;
+					component3.m_JumpSpeed = @class.jumpSpeed;
+					base.GetComponent<WeaponManager>().SetRecoil(@class.classRecoil);
+					int maxHP = @class.maxHP;
+					component2.maxHP = maxHP;
+					UnityEngine.Object.FindObjectOfType<UserMainInterface>().lerpedHP = (float)maxHP;
+				}
+				else
+				{
+					base.GetComponent<PlayerStats>().maxHP = @class.maxHP;
+				}
+			}
+			if (base.isLocalPlayer)
+			{
+				UnityEngine.Object.FindObjectOfType<InventoryDisplay>().isSCP = (this.curClass == 2 | @class.team == Team.SCP);
+				UnityEngine.Object.FindObjectOfType<InterfaceColorAdjuster>().ChangeColor(@class.classColor);
+				return;
+			}
+		}
+		else
+		{
+			this.RefreshPlyModel(-1);
+		}
+	}
+
+	// Token: 0x060001F3 RID: 499
+	public void EnableFPC()
+	{
+		base.GetComponent<FirstPersonController>().enabled = true;
+	}
+
+	// Token: 0x060001F4 RID: 500
+	public void RefreshPlyModel(int classID = -1)
+	{
+		if (this.myModel != null)
+		{
+			UnityEngine.Object.Destroy(this.myModel);
+		}
+		Class @class = this.klasy[(classID >= 0) ? classID : this.curClass];
+		if (@class.team != Team.RIP)
+		{
+			GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(@class.model_player);
+			gameObject.transform.SetParent(base.gameObject.transform);
+			gameObject.transform.localPosition = @class.model_offset.position;
+			gameObject.transform.localRotation = Quaternion.Euler(@class.model_offset.rotation);
+			gameObject.transform.localScale = @class.model_offset.scale;
+			this.myModel = gameObject;
+			if (this.myModel.GetComponent<Animator>() != null)
+			{
+				base.GetComponent<AnimationController>().animator = this.myModel.GetComponent<Animator>();
+			}
+			if (base.isLocalPlayer)
+			{
+				if (this.myModel.GetComponent<Renderer>() != null)
+				{
+					this.myModel.GetComponent<Renderer>().enabled = false;
+				}
+				Renderer[] componentsInChildren = this.myModel.GetComponentsInChildren<Renderer>();
+				for (int i = 0; i < componentsInChildren.Length; i++)
+				{
+					componentsInChildren[i].enabled = false;
+				}
+				foreach (Collider collider in this.myModel.GetComponentsInChildren<Collider>())
+				{
+					if (collider.name != "LookingTarget")
+					{
+						collider.enabled = false;
+					}
+				}
+			}
+		}
+		base.GetComponent<CapsuleCollider>().enabled = (@class.team != Team.RIP);
+	}
+
+	// Token: 0x060001F5 RID: 501
+	public void SetClassID(int id)
+	{
+		this.NetworkcurClass = id;
+		if (id != 2 || base.isLocalPlayer)
+		{
+			this.aliveTime = 0f;
+			this.ApplyProperties();
+		}
+	}
+
+	// Token: 0x060001F6 RID: 502
+	public void InstantiateRagdoll(int id)
+	{
+		if (id < 0 || id == 7)
+		{
+			return;
+		}
+		Class @class = this.klasy[this.curClass];
+		GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(@class.model_ragdoll);
+		gameObject.transform.position = base.transform.position + @class.ragdoll_offset.position;
+		gameObject.transform.rotation = Quaternion.Euler(base.transform.rotation.eulerAngles + @class.ragdoll_offset.rotation);
+		gameObject.transform.localScale = @class.ragdoll_offset.scale;
+	}
+
+	// Token: 0x060001F7 RID: 503
+	public void SetRandomRoles()
+	{
+		MTFRespawn component = base.GetComponent<MTFRespawn>();
+		if (base.isLocalPlayer && base.isServer)
+		{
+			List<GameObject> list = new List<GameObject>();
+			List<GameObject> list2 = new List<GameObject>();
+			foreach (GameObject item in PlayerManager.singleton.players)
+			{
+				list.Add(item);
+			}
+			while (list.Count > 0)
+			{
+				int index = UnityEngine.Random.Range(0, list.Count);
+				list2.Add(list[index]);
+				list.RemoveAt(index);
+			}
+			GameObject[] array2 = list2.ToArray();
+			RoundSummary component2 = base.GetComponent<RoundSummary>();
+			bool flag = false;
+			if ((float)UnityEngine.Random.Range(0, 100) < this.ciPercentage)
+			{
+				flag = true;
+			}
+			if (this.ban_computer_for_first_pick)
+			{
+				this.klasy[7].banClass = true;
+			}
+			this.first_scp = true;
+			for (int i = 0; i < array2.Length; i++)
+			{
+				int num = (this.forceClass != -1) ? this.forceClass : this.Find_Random_ID_Using_Defined_Team(this.classTeamQueue[i]);
+				if (this.klasy[num].team == Team.CDP)
+				{
+					component2.summary.classD_start++;
+				}
+				if (this.klasy[num].team == Team.RSC)
+				{
+					component2.summary.scientists_start++;
+				}
+				if (this.klasy[num].team == Team.SCP)
+				{
+					if (this.ban_computer_for_first_pick && this.first_scp)
+					{
+						this.klasy[7].banClass = false;
+					}
+					this.first_scp = false;
+					component2.summary.scp_start++;
+				}
+				if (num == 4)
+				{
+					if (flag)
+					{
+						num = 8;
+					}
+					else
+					{
+						component.playersToNTF.Add(array2[i]);
+					}
+				}
+				if (TutorialManager.status)
+				{
+					this.SetPlayersClass(14, base.gameObject);
+				}
+				else if (num != 4)
+				{
+					this.SetPlayersClass(num, array2[i]);
+				}
+			}
+			component.SummonNTF();
+		}
+	}
+
+	// Token: 0x060001F8 RID: 504
+	public void SetRoundStart(bool b)
+	{
+		this.NetworkroundStarted = b;
+	}
+
+	// Token: 0x060001F9 RID: 505
+	[ServerCallback]
+	public void CmdStartRound()
+	{
+		if (!NetworkServer.active)
+		{
+			return;
+		}
+		if (!TutorialManager.status)
+		{
+			Door componentInChildren = GameObject.Find("MeshDoor173").GetComponentInChildren<Door>();
+			componentInChildren.curCooldown = 25f;
+			componentInChildren.InvokeDeductCooldown();
+			UnityEngine.Object.FindObjectOfType<ChopperAutostart>().SetState(false);
+		}
+		this.SetRoundStart(true);
+	}
+
+	// Token: 0x060001FA RID: 506
+	[ServerCallback]
+	public void SetPlayersClass(int classid, GameObject ply)
+	{
+		if (!NetworkServer.active)
+		{
+			return;
+		}
+		ply.GetComponent<CharacterClassManager>().SetClassID(classid);
+		ply.GetComponent<PlayerStats>().SetHPAmount(this.klasy[classid].maxHP);
+	}
+
+	// Token: 0x060001FB RID: 507
+	public int Find_Random_ID_Using_Defined_Team(Team team)
+	{
+		List<int> list = new List<int>();
+		for (int i = 0; i < this.klasy.Length; i++)
+		{
+			if (this.klasy[i].team == team && !this.klasy[i].banClass)
+			{
+				list.Add(i);
+			}
+		}
+		int index = UnityEngine.Random.Range(0, list.Count);
+		if (this.klasy[list[index]].team == Team.SCP)
+		{
+			this.klasy[list[index]].banClass = true;
+			this.first_scp = true;
+		}
+		return list[index];
+	}
+
+	// Token: 0x060001FC RID: 508
+	public bool SpawnProtection()
+	{
+		return this.aliveTime < 2f;
+	}
+
+	// Token: 0x060001FD RID: 509
+	public void Update()
+	{
+		if (this.curClass == 2)
+		{
+			this.aliveTime = 0f;
+		}
+		else
+		{
+			this.aliveTime += Time.deltaTime;
+		}
+		if (base.isLocalPlayer)
+		{
+			if (ServerStatic.isDedicated)
+			{
+				CursorManager.isServerOnly = true;
+			}
+			if (base.isServer)
+			{
+				this.AllowContain();
+			}
+		}
+		if (this.prevId != this.curClass)
+		{
+			this.RefreshPlyModel(-1);
+			this.prevId = this.curClass;
+		}
+		if (base.name == "Host")
+		{
+			Radio.roundStarted = this.roundStarted;
+		}
+	}
+
+	// Token: 0x060001FE RID: 510
+	public void UNetVersion()
+	{
+	}
+
+	// Token: 0x17000027 RID: 39
+	// (get) Token: 0x060001FF RID: 511
+	// (set) Token: 0x06000200 RID: 512
+	public int NetworkntfUnit
+	{
+		get
+		{
+			return this.ntfUnit;
+		}
+		set
+		{
+			uint dirtyBit = 1u;
+			if (NetworkServer.localClientActive && !base.syncVarHookGuard)
+			{
+				base.syncVarHookGuard = true;
+				this.SetUnit(value);
+				base.syncVarHookGuard = false;
+			}
+			base.SetSyncVar<int>(value, ref this.ntfUnit, dirtyBit);
+		}
+	}
+
+	// Token: 0x17000028 RID: 40
+	// (get) Token: 0x06000201 RID: 513
+	// (set) Token: 0x06000202 RID: 514
+	public int NetworkcurClass
+	{
+		get
+		{
+			return this.curClass;
+		}
+		set
+		{
+			uint dirtyBit = 2u;
+			if (NetworkServer.localClientActive && !base.syncVarHookGuard)
+			{
+				base.syncVarHookGuard = true;
+				this.SetClassID(value);
+				base.syncVarHookGuard = false;
+			}
+			base.SetSyncVar<int>(value, ref this.curClass, dirtyBit);
+		}
+	}
+
+	// Token: 0x17000029 RID: 41
+	// (get) Token: 0x06000203 RID: 515
+	// (set) Token: 0x06000204 RID: 516
+	public Vector3 NetworkdeathPosition
+	{
+		get
+		{
+			return this.deathPosition;
+		}
+		set
+		{
+			uint dirtyBit = 4u;
+			if (NetworkServer.localClientActive && !base.syncVarHookGuard)
+			{
+				base.syncVarHookGuard = true;
+				this.SyncDeathPos(value);
+				base.syncVarHookGuard = false;
+			}
+			base.SetSyncVar<Vector3>(value, ref this.deathPosition, dirtyBit);
+		}
+	}
+
+	// Token: 0x1700002A RID: 42
+	// (get) Token: 0x06000205 RID: 517
+	// (set) Token: 0x06000206 RID: 518
+	public bool NetworkroundStarted
+	{
+		get
+		{
+			return this.roundStarted;
+		}
+		set
+		{
+			uint dirtyBit = 8u;
+			if (NetworkServer.localClientActive && !base.syncVarHookGuard)
+			{
+				base.syncVarHookGuard = true;
+				this.SetRoundStart(value);
+				base.syncVarHookGuard = false;
+			}
+			base.SetSyncVar<bool>(value, ref this.roundStarted, dirtyBit);
+		}
+	}
+
+	// Token: 0x06000207 RID: 519
+	public static void InvokeCmdCmdSuicide(NetworkBehaviour obj, NetworkReader reader)
+	{
+		if (!NetworkServer.active)
+		{
+			Debug.LogError("Command CmdSuicide called on client.");
+			return;
+		}
+		((CharacterClassManager)obj).CmdSuicide(GeneratedNetworkCode._ReadHitInfo_PlayerStats(reader));
+	}
+
+	// Token: 0x06000208 RID: 520
+	public static void InvokeCmdCmdRegisterEscape(NetworkBehaviour obj, NetworkReader reader)
+	{
+		if (!NetworkServer.active)
+		{
+			Debug.LogError("Command CmdRegisterEscape called on client.");
+			return;
+		}
+		((CharacterClassManager)obj).CmdRegisterEscape(reader.ReadGameObject());
+	}
+
+	// Token: 0x06000209 RID: 521
+	public void CallCmdSuicide(PlayerStats.HitInfo hitInfo)
+	{
+		if (!NetworkClient.active)
+		{
+			Debug.LogError("Command function CmdSuicide called on server.");
+			return;
+		}
+		if (base.isServer)
+		{
+			this.CmdSuicide(hitInfo);
+			return;
+		}
+		NetworkWriter networkWriter = new NetworkWriter();
+		networkWriter.Write(0);
+		networkWriter.Write(5);
+		networkWriter.WritePackedUInt32((uint)CharacterClassManager.kCmdCmdSuicide);
+		networkWriter.Write(base.GetComponent<NetworkIdentity>().netId);
+		GeneratedNetworkCode._WriteHitInfo_PlayerStats(networkWriter, hitInfo);
+		base.SendCommandInternal(networkWriter, 0, "CmdSuicide");
+	}
+
+	// Token: 0x0600020A RID: 522
+	public void CallCmdRegisterEscape(GameObject sender)
+	{
+		if (!NetworkClient.active)
+		{
+			Debug.LogError("Command function CmdRegisterEscape called on server.");
+			return;
+		}
+		if (base.isServer)
+		{
+			this.CmdRegisterEscape(sender);
+			return;
+		}
+		NetworkWriter networkWriter = new NetworkWriter();
+		networkWriter.Write(0);
+		networkWriter.Write(5);
+		networkWriter.WritePackedUInt32((uint)CharacterClassManager.kCmdCmdRegisterEscape);
+		networkWriter.Write(base.GetComponent<NetworkIdentity>().netId);
+		networkWriter.Write(sender);
+		base.SendCommandInternal(networkWriter, 2, "CmdRegisterEscape");
+	}
+
+	// Token: 0x0600020B RID: 523
+	static CharacterClassManager()
+	{
+		NetworkBehaviour.RegisterCommandDelegate(typeof(CharacterClassManager), CharacterClassManager.kCmdCmdSuicide, new NetworkBehaviour.CmdDelegate(CharacterClassManager.InvokeCmdCmdSuicide));
+		CharacterClassManager.kCmdCmdRegisterEscape = -1826587486;
+		NetworkBehaviour.RegisterCommandDelegate(typeof(CharacterClassManager), CharacterClassManager.kCmdCmdRegisterEscape, new NetworkBehaviour.CmdDelegate(CharacterClassManager.InvokeCmdCmdRegisterEscape));
+		NetworkCRC.RegisterBehaviour("CharacterClassManager", 0);
+	}
+
+	// Token: 0x0600020C RID: 524
+	public override bool OnSerialize(NetworkWriter writer, bool forceAll)
+	{
+		if (forceAll)
+		{
+			writer.WritePackedUInt32((uint)this.ntfUnit);
+			writer.WritePackedUInt32((uint)this.curClass);
+			writer.Write(this.deathPosition);
+			writer.Write(this.roundStarted);
+			return true;
+		}
+		bool flag = false;
+		if ((base.syncVarDirtyBits & 1u) != 0u)
+		{
+			if (!flag)
+			{
+				writer.WritePackedUInt32(base.syncVarDirtyBits);
+				flag = true;
+			}
+			writer.WritePackedUInt32((uint)this.ntfUnit);
+		}
+		if ((base.syncVarDirtyBits & 2u) != 0u)
+		{
+			if (!flag)
+			{
+				writer.WritePackedUInt32(base.syncVarDirtyBits);
+				flag = true;
+			}
+			writer.WritePackedUInt32((uint)this.curClass);
+		}
+		if ((base.syncVarDirtyBits & 4u) != 0u)
+		{
+			if (!flag)
+			{
+				writer.WritePackedUInt32(base.syncVarDirtyBits);
+				flag = true;
+			}
+			writer.Write(this.deathPosition);
+		}
+		if ((base.syncVarDirtyBits & 8u) != 0u)
+		{
+			if (!flag)
+			{
+				writer.WritePackedUInt32(base.syncVarDirtyBits);
+				flag = true;
+			}
+			writer.Write(this.roundStarted);
+		}
+		if (!flag)
+		{
+			writer.WritePackedUInt32(base.syncVarDirtyBits);
+		}
+		return flag;
+	}
+
+	// Token: 0x0600020D RID: 525
+	public override void OnDeserialize(NetworkReader reader, bool initialState)
+	{
+		if (initialState)
+		{
+			this.ntfUnit = (int)reader.ReadPackedUInt32();
+			this.curClass = (int)reader.ReadPackedUInt32();
+			this.deathPosition = reader.ReadVector3();
+			this.roundStarted = reader.ReadBoolean();
+			return;
+		}
+		uint num = reader.ReadPackedUInt32();
+		if ((num & 1u) != 0u)
+		{
+			this.SetUnit((int)reader.ReadPackedUInt32());
+		}
+		if ((num & 2u) != 0u)
+		{
+			this.SetClassID((int)reader.ReadPackedUInt32());
+		}
+		if ((num & 4u) != 0u)
+		{
+			this.SyncDeathPos(reader.ReadVector3());
+		}
+		if ((num & 8u) != 0u)
+		{
+			this.SetRoundStart(reader.ReadBoolean());
+		}
+	}
+
+	// Token: 0x06000C57 RID: 3159
+	public void SetMaxHP(int id, string config_key, int defaultHp)
+	{
+		Class c = this.klasy[id];
+		c.maxHP = ConfigFile.GetInt(config_key, defaultHp);
+		if (c.maxHP != defaultHp)
+		{
+			ServerConsole.AddLog(string.Concat(new object[]
+			{
+				"Set non-default hp for ",
+				c.fullName,
+				" with value ",
+				c.maxHP
+			}));
+		}
+	}
+
+	// Token: 0x040001F3 RID: 499
+	[SyncVar(hook = "SetUnit")]
+	public int ntfUnit;
+
+	// Token: 0x040001F4 RID: 500
+	public float ciPercentage;
+
+	// Token: 0x040001F5 RID: 501
+	public int forceClass = -1;
+
+	// Token: 0x040001F6 RID: 502
+	[SerializeField]
+	public AudioClip bell;
+
+	// Token: 0x040001F7 RID: 503
+	[SerializeField]
+	public AudioClip bell_dead;
+
+	// Token: 0x040001F8 RID: 504
+	[HideInInspector]
+	public GameObject myModel;
+
+	// Token: 0x040001F9 RID: 505
+	[HideInInspector]
+	public GameObject charCamera;
+
+	// Token: 0x040001FA RID: 506
+	public Class[] klasy;
+
+	// Token: 0x040001FB RID: 507
+	public List<Team> classTeamQueue = new List<Team>();
+
+	// Token: 0x040001FC RID: 508
+	[SyncVar(hook = "SetClassID")]
+	public int curClass;
+
+	// Token: 0x040001FD RID: 509
+	public int seed;
+
+	// Token: 0x040001FE RID: 510
+	public GameObject plyCam;
+
+	// Token: 0x040001FF RID: 511
+	public GameObject unfocusedCamera;
+
+	// Token: 0x04000200 RID: 512
+	[SyncVar(hook = "SyncDeathPos")]
+	public Vector3 deathPosition;
+
+	// Token: 0x04000201 RID: 513
+	[SyncVar(hook = "SetRoundStart")]
+	public bool roundStarted;
+
+	// Token: 0x04000202 RID: 514
+	public Scp049PlayerScript scp049;
+
+	// Token: 0x04000203 RID: 515
+	public Scp049_2PlayerScript scp049_2;
+
+	// Token: 0x04000204 RID: 516
+	public Scp079PlayerScript scp079;
+
+	// Token: 0x04000205 RID: 517
+	public Scp106PlayerScript scp106;
+
+	// Token: 0x04000206 RID: 518
+	public Scp173PlayerScript scp173;
+
+	// Token: 0x04000207 RID: 519
+	public LureSubjectContainer lureSpj;
+
+	// Token: 0x04000208 RID: 520
+	public float aliveTime;
+
+	// Token: 0x04000209 RID: 521
+	public int prevId = -1;
+
+	// Token: 0x0400020A RID: 522
+	public static int kCmdCmdSuicide = -1051695024;
+
+	// Token: 0x0400020B RID: 523
+	public static int kCmdCmdRegisterEscape;
+
+	// Token: 0x04000C94 RID: 3220
+	public bool first_scp;
+
+	// Token: 0x04000C95 RID: 3221
+	public bool ban_computer_for_first_pick;
 }
