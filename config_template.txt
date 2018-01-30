@@ -1,0 +1,37 @@
+GAME SETTINGS:
+minimum_MTF_time_to_spawn = 280;
+maximum_MTF_time_to_spawn = 350;
+ci_respawn_percent = 35;
+ci_on_start_percent = 10;
+team_respawn_queue = 40143140314414041340;
+server_forced_class = -1; (-1 = random)
+map_seed = -1; (-1 = random)
+intercom_cooldown = 120;
+intercom_max_speech_time = 20;
+auto_round_restart_time = 10;
+friendly_fire = true;
+
+///////////////////////////////////
+
+THESE SETTINGS REQUIRES THE GAME TO RESTART:
+
+MUTLIADMIN SETTINGS:
+manual_start = true;
+start_config_on_full=2;
+shutdown_once_empty=-1;
+restart_every_num_rounds=15;
+
+SERVERMOD SETTINGS:
+NO_SCP079_FIRST = true;
+SCP049_HP = 1200;
+SCP049-2_HP = 400;
+SCP079_HP = 100;
+SCP106_HP = 700;
+SCP457_HP = 700;
+max_players = 30;
+
+
+// server_name can stuff up the cfg reader depending on its contents, so keep it down the bottom.
+server_ip = auto;
+server_name = servername;
+administrator_password = pwd;

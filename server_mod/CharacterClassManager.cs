@@ -572,7 +572,7 @@ public class CharacterClassManager : NetworkBehaviour
 		{
 			if (this.klasy[i].team == team && !this.klasy[i].banClass)
 			{
-				if (this.ban_computer_for_first_pick)
+				if (team == Team.SCP && this.ban_computer_for_first_pick)
 				{
 					if (this.first_scp && i != 7)
 					{
