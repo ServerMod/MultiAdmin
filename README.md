@@ -11,6 +11,8 @@ SCP LocalAdmin modification to support multiple configurations per instance, bas
 - Crash support.
 - Command line parameter support (MultiAdmin.exe <config folder 1> <config folder 2>
 - RESTARTNEXTROUND command - restart the server after this round is complete.
+- SHUTDOWNNEXTROUND command - shutdown the server after next round
+- Autoscale more servers once one becomes full/
 
 ## Caveats:
 * The server works by hotswapping configs before certain events (new server, config reload etc), so if two servers crash at the same time they may have a conflict and load the wrong config. Should be very rare.
@@ -63,7 +65,19 @@ Currently supported variables (place in your servers name):
 This DLL supports the version of SCP released on the 27th of January 2017 and tested on Windows. Unsure about linux at this point.
 
 ## Config Additions
+### mutliadmin
+- manual_start (wether of not to start the server automatically when launching multiadmin, default = true)
+- start_config_on_full (start server with config this config folder when the server becomes full) [requires servermod]
+- shutdown_once_empty_for (shutdown the server once a round hasnt started in x seconds)
+- restart_every_num_rounds (restart the server every x rounds)
+### servermod
 - max_players (default 20, max amount of players per server)
+- no_scp079_first (default true, computer will never be the first scp in a game)
+- SCP049_HP to config, use this to set the starting HP for the class. Default = 1200
+- SCP049-2_HP to config , use this to set the starting HP for the class. Default = 400
+- SCP079_HP to config, use this to set the starting HP for the class. Default = 100
+- SCP106_HP to config, use this to set the starting HP for the class. Default = 700
+- SCP457_HP to config, use this to set the starting HP for the class. Default = 700
 
 ##
 
