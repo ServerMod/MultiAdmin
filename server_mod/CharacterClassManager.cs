@@ -10,11 +10,6 @@ using UnityEngine.PostProcessing;
 // Token: 0x02000068 RID: 104
 public class CharacterClassManager : NetworkBehaviour
 {
-	// Token: 0x060001E6 RID: 486
-	public CharacterClassManager()
-	{
-	}
-
 	// Token: 0x060001E7 RID: 487
 	public void SetUnit(int unit)
 	{
@@ -55,7 +50,7 @@ public class CharacterClassManager : NetworkBehaviour
 	}
 
 	// Token: 0x060001EA RID: 490
-	public void Start()
+	private void Start()
 	{
 		this.lureSpj = UnityEngine.Object.FindObjectOfType<LureSubjectContainer>();
 		this.scp049 = base.GetComponent<Scp049PlayerScript>();
@@ -91,7 +86,7 @@ public class CharacterClassManager : NetworkBehaviour
 	}
 
 	// Token: 0x060001EB RID: 491
-	public IEnumerator Init()
+	private IEnumerator Init()
 	{
 		GameObject host = null;
 		while (host == null)
@@ -174,6 +169,7 @@ public class CharacterClassManager : NetworkBehaviour
 			this.SetRandomRoles();
 			rs = null;
 			rs = null;
+			rs = null;
 		}
 		else
 		{
@@ -208,6 +204,7 @@ public class CharacterClassManager : NetworkBehaviour
 			yield return new WaitForEndOfFrame();
 			plys = null;
 			plys = null;
+			plys = null;
 		}
 		yield break;
 	}
@@ -235,7 +232,7 @@ public class CharacterClassManager : NetworkBehaviour
 
 	// Token: 0x060001EE RID: 494
 	[ServerCallback]
-	public void CmdUpdateStartText(string str)
+	private void CmdUpdateStartText(string str)
 	{
 		if (!NetworkServer.active)
 		{
@@ -266,7 +263,7 @@ public class CharacterClassManager : NetworkBehaviour
 
 	// Token: 0x060001F1 RID: 497
 	[Command(channel = 2)]
-	public void CmdRegisterEscape(GameObject sender)
+	private void CmdRegisterEscape(GameObject sender)
 	{
 		CharacterClassManager component = sender.GetComponent<CharacterClassManager>();
 		if (Vector3.Distance(sender.transform.position, base.GetComponent<Escape>().worldPosition) < (float)(base.GetComponent<Escape>().radius * 2))
@@ -392,7 +389,7 @@ public class CharacterClassManager : NetworkBehaviour
 	}
 
 	// Token: 0x060001F3 RID: 499
-	public void EnableFPC()
+	private void EnableFPC()
 	{
 		base.GetComponent<FirstPersonController>().enabled = true;
 	}
@@ -540,14 +537,14 @@ public class CharacterClassManager : NetworkBehaviour
 	}
 
 	// Token: 0x060001F8 RID: 504
-	public void SetRoundStart(bool b)
+	private void SetRoundStart(bool b)
 	{
 		this.NetworkroundStarted = b;
 	}
 
 	// Token: 0x060001F9 RID: 505
 	[ServerCallback]
-	public void CmdStartRound()
+	private void CmdStartRound()
 	{
 		if (!NetworkServer.active)
 		{
@@ -576,7 +573,7 @@ public class CharacterClassManager : NetworkBehaviour
 	}
 
 	// Token: 0x060001FB RID: 507
-	public int Find_Random_ID_Using_Defined_Team(Team team)
+	private int Find_Random_ID_Using_Defined_Team(Team team)
 	{
 		List<int> list = new List<int>();
 		for (int i = 0; i < this.klasy.Length; i++)
@@ -590,7 +587,6 @@ public class CharacterClassManager : NetworkBehaviour
 		if (this.klasy[list[index]].team == Team.SCP)
 		{
 			this.klasy[list[index]].banClass = true;
-			this.first_scp = true;
 		}
 		return list[index];
 	}
@@ -602,7 +598,7 @@ public class CharacterClassManager : NetworkBehaviour
 	}
 
 	// Token: 0x060001FD RID: 509
-	public void Update()
+	private void Update()
 	{
 		if (this.curClass == 2)
 		{
@@ -635,7 +631,7 @@ public class CharacterClassManager : NetworkBehaviour
 	}
 
 	// Token: 0x060001FE RID: 510
-	public void UNetVersion()
+	private void UNetVersion()
 	{
 	}
 
@@ -728,7 +724,7 @@ public class CharacterClassManager : NetworkBehaviour
 	}
 
 	// Token: 0x06000207 RID: 519
-	public static void InvokeCmdCmdSuicide(NetworkBehaviour obj, NetworkReader reader)
+	protected static void InvokeCmdCmdSuicide(NetworkBehaviour obj, NetworkReader reader)
 	{
 		if (!NetworkServer.active)
 		{
@@ -739,7 +735,7 @@ public class CharacterClassManager : NetworkBehaviour
 	}
 
 	// Token: 0x06000208 RID: 520
-	public static void InvokeCmdCmdRegisterEscape(NetworkBehaviour obj, NetworkReader reader)
+	protected static void InvokeCmdCmdRegisterEscape(NetworkBehaviour obj, NetworkReader reader)
 	{
 		if (!NetworkServer.active)
 		{
@@ -916,11 +912,11 @@ public class CharacterClassManager : NetworkBehaviour
 
 	// Token: 0x040001F6 RID: 502
 	[SerializeField]
-	public AudioClip bell;
+	private AudioClip bell;
 
 	// Token: 0x040001F7 RID: 503
 	[SerializeField]
-	public AudioClip bell_dead;
+	private AudioClip bell_dead;
 
 	// Token: 0x040001F8 RID: 504
 	[HideInInspector]
@@ -941,10 +937,10 @@ public class CharacterClassManager : NetworkBehaviour
 	public int curClass;
 
 	// Token: 0x040001FD RID: 509
-	public int seed;
+	private int seed;
 
 	// Token: 0x040001FE RID: 510
-	public GameObject plyCam;
+	private GameObject plyCam;
 
 	// Token: 0x040001FF RID: 511
 	public GameObject unfocusedCamera;
@@ -958,38 +954,38 @@ public class CharacterClassManager : NetworkBehaviour
 	public bool roundStarted;
 
 	// Token: 0x04000202 RID: 514
-	public Scp049PlayerScript scp049;
+	private Scp049PlayerScript scp049;
 
 	// Token: 0x04000203 RID: 515
-	public Scp049_2PlayerScript scp049_2;
+	private Scp049_2PlayerScript scp049_2;
 
 	// Token: 0x04000204 RID: 516
-	public Scp079PlayerScript scp079;
+	private Scp079PlayerScript scp079;
 
 	// Token: 0x04000205 RID: 517
-	public Scp106PlayerScript scp106;
+	private Scp106PlayerScript scp106;
 
 	// Token: 0x04000206 RID: 518
-	public Scp173PlayerScript scp173;
+	private Scp173PlayerScript scp173;
 
 	// Token: 0x04000207 RID: 519
-	public LureSubjectContainer lureSpj;
+	private LureSubjectContainer lureSpj;
 
 	// Token: 0x04000208 RID: 520
-	public float aliveTime;
+	private float aliveTime;
 
 	// Token: 0x04000209 RID: 521
-	public int prevId = -1;
+	private int prevId = -1;
 
 	// Token: 0x0400020A RID: 522
-	public static int kCmdCmdSuicide = -1051695024;
+	private static int kCmdCmdSuicide = -1051695024;
 
 	// Token: 0x0400020B RID: 523
-	public static int kCmdCmdRegisterEscape;
+	private static int kCmdCmdRegisterEscape;
 
 	// Token: 0x04000C94 RID: 3220
-	public bool first_scp;
+	private bool first_scp;
 
 	// Token: 0x04000C95 RID: 3221
-	public bool ban_computer_for_first_pick;
+	private bool ban_computer_for_first_pick;
 }
