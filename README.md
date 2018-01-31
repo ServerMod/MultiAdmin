@@ -21,7 +21,7 @@ SCP LocalAdmin modification to support multiple configurations per instance, bas
 
 
 ## Instructions (MutliAdmin):
-1. Place MultiServer.exe next to your LocalAdmin.exe
+1. Place MultiAdmin.exe next to your LocalAdmin.exe
 2. Create a new folder called servers within the same folder as LocalAdmin/MultiServer
 3. For each instance with a unique config, create a new directory in the servers directory and place each config.txt in there, so for example for two unique configs:
 * servers/FirstServer/config.txt
