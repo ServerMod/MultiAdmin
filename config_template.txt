@@ -28,6 +28,7 @@ SCP049-2_HP = 400;
 SCP079_HP = 100;
 SCP106_HP = 700;
 SCP457_HP = 700;
+SCP173_HP = 2000;
 max_players = 30;
 
 
