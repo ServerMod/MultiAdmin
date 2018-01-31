@@ -33,5 +33,6 @@ max_players = 30;
 
 // server_name can stuff up the cfg reader depending on its contents, so keep it down the bottom.
 server_ip = auto;
-server_name = servername;
 administrator_password = pwd;
+server_name = servername;
+
