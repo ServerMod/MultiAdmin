@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace MultiAdmin
 {
-    class ConfigParser
+    public class Config
     {
         public Dictionary<String, String> values;
-        public ConfigParser(String config_file)
+        public Config(String config_file)
         {
             values = new Dictionary<string, string>();
             var multi_line_value = false;
@@ -58,6 +58,22 @@ namespace MultiAdmin
             }
 
             return val;
+        }
+
+        public int GetIntValue(String key, int def)
+        {
+            int result;
+            bool successful = int.TryParse(GetValue(key, def.ToString()), out result);
+
+            if (successful)
+            {
+                return result;
+            }
+            else
+            {
+                Console.WriteLine("WARNING: failed to parse integer value for config setting:" + key + " using default value.");
+                return def;
+            }
         }
     }
 }

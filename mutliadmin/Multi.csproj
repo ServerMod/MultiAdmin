@@ -37,11 +37,29 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MultiAdmin\ConfigParser.cs" />
+    <Compile Include="MultiAdmin\Features\MultiAdminInfo.cs" />
+    <Compile Include="MultiAdmin\Features\NewCommand.cs" />
+    <Compile Include="MultiAdmin\Features\ChainStart.cs" />
+    <Compile Include="MultiAdmin\Features\EventTest.cs" />
+    <Compile Include="MultiAdmin\Features\TitleBar.cs" />
+    <Compile Include="MultiAdmin\Features\Autoscale.cs" />
+    <Compile Include="MultiAdmin\Features\MemoryChecker.cs" />
+    <Compile Include="MultiAdmin\Features\InactivityShutdown.cs" />
+    <Compile Include="MultiAdmin\Features\RestartRoundCounter.cs" />
+    <Compile Include="MultiAdmin\Features\StopNextRound.cs" />
+    <Compile Include="MultiAdmin\Features\RestartNextRound.cs" />
+    <Compile Include="MultiAdmin\Config.cs" />
+    <Compile Include="MultiAdmin\Feature.cs" />
+    <Compile Include="MultiAdmin\InputThread.cs" />
+    <Compile Include="MultiAdmin\Interfaces.cs" />
     <Compile Include="MultiAdmin\Program.cs" />
+    <Compile Include="MultiAdmin\Server.cs" />
+    <Compile Include="MultiAdmin\OutputThread.cs" />
+    <Compile Include="MultiAdmin\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
