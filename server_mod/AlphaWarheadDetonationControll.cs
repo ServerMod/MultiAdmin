@@ -5,6 +5,11 @@ using UnityEngine.Networking;
 // Token: 0x0200005D RID: 93
 public class AlphaWarheadDetonationController : NetworkBehaviour
 {
+	// Token: 0x06000185 RID: 389
+	public AlphaWarheadDetonationController()
+	{
+	}
+
 	// Token: 0x06000186 RID: 390
 	public void StartDetonation()
 	{
@@ -21,9 +26,8 @@ public class AlphaWarheadDetonationController : NetworkBehaviour
 	// Token: 0x06000187 RID: 391
 	public void CancelDetonation()
 	{
-		int cooldown = ConfigFile.GetInt("nuke_disable_cooldown", 0);
 		float timeSinceStart = Time.time - this.startTime;
-		if (this.detonationInProgress && this.detonationTime > 2f && timeSinceStart >= (float)cooldown)
+		if (this.detonationInProgress && this.detonationTime > 2f && timeSinceStart >= (float)this.cooldown)
 		{
 			this.detonationInProgress = false;
 			this.NetworkdetonationTime = 0f;
@@ -31,7 +35,7 @@ public class AlphaWarheadDetonationController : NetworkBehaviour
 	}
 
 	// Token: 0x06000188 RID: 392
-	private void FixedUpdate()
+	public void FixedUpdate()
 	{
 		if (base.isLocalPlayer && this.awdc != null && this.lightStatus != (this.awdc.detonationTime != 0f))
 		{
@@ -92,7 +96,7 @@ public class AlphaWarheadDetonationController : NetworkBehaviour
 	}
 
 	// Token: 0x06000189 RID: 393
-	private void Explode()
+	public void Explode()
 	{
 		this.detonated = true;
 		this.ExplodePlayers();
@@ -100,7 +104,7 @@ public class AlphaWarheadDetonationController : NetworkBehaviour
 
 	// Token: 0x0600018A RID: 394
 	[ServerCallback]
-	private void CmdOpenDoors()
+	public void CmdOpenDoors()
 	{
 		if (!NetworkServer.active)
 		{
@@ -117,7 +121,7 @@ public class AlphaWarheadDetonationController : NetworkBehaviour
 
 	// Token: 0x0600018B RID: 395
 	[ServerCallback]
-	private void ExplodePlayers()
+	public void ExplodePlayers()
 	{
 		if (!NetworkServer.active)
 		{
@@ -132,7 +136,7 @@ public class AlphaWarheadDetonationController : NetworkBehaviour
 
 	// Token: 0x0600018C RID: 396
 	[ServerCallback]
-	private void CmdCloseBlastDoors()
+	public void CmdCloseBlastDoors()
 	{
 		if (!NetworkServer.active)
 		{
@@ -147,7 +151,7 @@ public class AlphaWarheadDetonationController : NetworkBehaviour
 
 	// Token: 0x0600018D RID: 397
 	[ClientCallback]
-	private void TransmitData(float t)
+	public void TransmitData(float t)
 	{
 		if (!NetworkClient.active)
 		{
@@ -158,7 +162,7 @@ public class AlphaWarheadDetonationController : NetworkBehaviour
 
 	// Token: 0x0600018E RID: 398
 	[ServerCallback]
-	private void CmdSyncData(float t)
+	public void CmdSyncData(float t)
 	{
 		if (!NetworkServer.active)
 		{
@@ -168,14 +172,19 @@ public class AlphaWarheadDetonationController : NetworkBehaviour
 	}
 
 	// Token: 0x0600018F RID: 399
-	private void Start()
+	public void Start()
 	{
+		this.cooldown = ConfigFile.GetInt("nuke_disable_cooldown", 0);
+		if (this.cooldown != 0)
+		{
+			ServerConsole.AddLog("|SM| Nuke cooldown is on for " + this.cooldown + " seconds");
+		}
 		this.lever = GameObject.Find("Lever_Alpha_Controller").GetComponent<LeverButton>();
 		this.lights = UnityEngine.Object.FindObjectsOfType<ToggleableLight>();
 	}
 
 	// Token: 0x06000190 RID: 400
-	private void SetLights(bool b)
+	public void SetLights(bool b)
 	{
 		ToggleableLight[] array = this.lights;
 		for (int i = 0; i < array.Length; i++)
@@ -185,7 +194,7 @@ public class AlphaWarheadDetonationController : NetworkBehaviour
 	}
 
 	// Token: 0x06000191 RID: 401
-	private void UNetVersion()
+	public void UNetVersion()
 	{
 	}
 
@@ -248,35 +257,38 @@ public class AlphaWarheadDetonationController : NetworkBehaviour
 	public float detonationTime;
 
 	// Token: 0x040001B2 RID: 434
-	private bool detonationInProgress;
+	public bool detonationInProgress;
 
 	// Token: 0x040001B3 RID: 435
-	private bool detonated;
+	public bool detonated;
 
 	// Token: 0x040001B4 RID: 436
-	private bool doorsOpen;
+	public bool doorsOpen;
 
 	// Token: 0x040001B5 RID: 437
-	private bool blastDoors;
+	public bool blastDoors;
 
 	// Token: 0x040001B6 RID: 438
-	private GameObject host;
+	public GameObject host;
 
 	// Token: 0x040001B7 RID: 439
-	private bool lightStatus;
+	public bool lightStatus;
 
 	// Token: 0x040001B8 RID: 440
-	private AWSoundController awsc;
+	public AWSoundController awsc;
 
 	// Token: 0x040001B9 RID: 441
-	private LeverButton lever;
+	public LeverButton lever;
 
 	// Token: 0x040001BA RID: 442
-	private AlphaWarheadDetonationController awdc;
+	public AlphaWarheadDetonationController awdc;
 
 	// Token: 0x040001BB RID: 443
-	private ToggleableLight[] lights;
+	public ToggleableLight[] lights;
 
 	// Token: 0x04000D1A RID: 3354
-	private float startTime;
+	public float startTime;
+
+	// Token: 0x04000D26 RID: 3366
+	public int cooldown;
 }

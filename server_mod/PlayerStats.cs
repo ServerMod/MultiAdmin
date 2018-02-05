@@ -14,11 +14,16 @@ public class PlayerStats : NetworkBehaviour
 	{
 	}
 
-	// Token: 0x0600040E RID: 1038 RVA: 0x00004BE7 File Offset: 0x00002DE7
+	// Token: 0x0600040E RID: 1038
 	public void Start()
 	{
 		this.ccm = base.GetComponent<CharacterClassManager>();
 		this.ui = UserMainInterface.singleton;
+		this.do106Clean = ConfigFile.GetString("clean_106", "no").Equals("yes");
+		if (this.do106Clean)
+		{
+			ServerConsole.AddLog("|SM| 106 Cleaning is on.");
+		}
 	}
 
 	// Token: 0x0600040F RID: 1039 RVA: 0x00004C00 File Offset: 0x00002E00
@@ -391,6 +396,9 @@ public class PlayerStats : NetworkBehaviour
 
 	// Token: 0x040003A4 RID: 932
 	public static int kRpcRpcRoundrestart;
+
+	// Token: 0x04001017 RID: 4119
+	public bool do106Clean;
 
 	// Token: 0x020000A5 RID: 165
 	[Serializable]
