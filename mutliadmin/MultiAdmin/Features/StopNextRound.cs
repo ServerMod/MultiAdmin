@@ -59,5 +59,10 @@ namespace MultiAdmin.MultiAdmin.Commands
         {
             return "STOPNEXTROUND";
         }
+
+        public string GetUsage()
+        {
+            return "";
+        }
     }
 }

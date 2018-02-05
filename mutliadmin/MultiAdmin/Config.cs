@@ -16,36 +16,40 @@ namespace MultiAdmin
             var multi_line_value = false;
             var current_key = "";
             var current_value = "";
-            var lines = File.ReadAllLines(config_file);
-            foreach (String line in lines)
+            if (File.Exists(config_file))
             {
-                if (line.Trim().Length == 0) continue;
-                if (line.StartsWith("/")) continue;
-                if (line.EndsWith(":")) continue;
+                var lines = File.ReadAllLines(config_file);
+                foreach (String line in lines)
+                {
+                    if (line.Trim().Length == 0) continue;
+                    if (line.StartsWith("/")) continue;
+                    if (line.EndsWith(":")) continue;
 
-                if (multi_line_value)
-                {
-                    current_value += line;
-                    if (line.EndsWith(";"))
+                    if (multi_line_value)
                     {
-                        values.Add(current_key, current_value.Substring(0, current_value.Length - 1).Trim());
-                        multi_line_value = false;
-                    }
-                }
-                else
-                {
-                    current_key = line.Substring(0, line.IndexOf("=")).ToLower().Trim();
-                    current_value = line.Substring(line.IndexOf("=")+1);
-                    if (current_value.EndsWith(";"))
-                    {
-                        values.Add(current_key, current_value.Substring(0, current_value.Length - 1).Trim());
+                        current_value += line;
+                        if (line.EndsWith(";"))
+                        {
+                            values.Add(current_key, current_value.Substring(0, current_value.Length - 1).Trim());
+                            multi_line_value = false;
+                        }
                     }
                     else
                     {
-                        multi_line_value = true;
+                        current_key = line.Substring(0, line.IndexOf("=")).ToLower().Trim();
+                        current_value = line.Substring(line.IndexOf("=") + 1);
+                        if (current_value.EndsWith(";"))
+                        {
+                            values.Add(current_key, current_value.Substring(0, current_value.Length - 1).Trim());
+                        }
+                        else
+                        {
+                            multi_line_value = true;
+                        }
                     }
                 }
             }
+
         }
 
 

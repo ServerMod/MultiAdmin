@@ -70,6 +70,7 @@ namespace MultiAdmin.MultiAdmin
     {
         void OnCall(String[] args);
         String GetCommand();
+        String GetUsage();
         Boolean PassToGame();
         String GetCommandDescription();
     }

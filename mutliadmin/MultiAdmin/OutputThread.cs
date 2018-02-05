@@ -28,21 +28,28 @@ namespace MultiAdmin
 
                     string gameMessage = "";
                     string fileCommand = "open";
-                    try
+                    int attempts = 0;
+                    Boolean read = false;
+                    while (attempts < 5 && !read)
                     {
-                        StreamReader streamReader = new StreamReader(path);
-                        gameMessage = streamReader.ReadToEnd();
-                        fileCommand = "close";
-                        streamReader.Close();
-                        fileCommand = "delete";
-                        File.Delete(path);
+                        try
+                        {
+                            StreamReader streamReader = new StreamReader(path);
+                            gameMessage = streamReader.ReadToEnd();
+                            fileCommand = "close";
+                            streamReader.Close();
+                            fileCommand = "delete";
+                            File.Delete(path);
+                            read = true;
+                        }
+                        catch
+                        {
+                            attempts++;
+                            server.Write("Message printer warning: Could not " + fileCommand + " file " + path + ". Make sure that MultiAdmin.exe has all necessary read-write permissions.", ConsoleColor.Yellow);
+                            server.Write("Retrying.", ConsoleColor.DarkGray);
+                        }
                     }
-                    catch
-                    {
-                        server.Write("Message printer warning: Could not " + fileCommand + " file " + path + ". Make sure that MultiAdmin.exe has all necessary read-write permissions.", ConsoleColor.Yellow);
-                        server.Write("Press any key to ignore...", ConsoleColor.DarkGray);
-                        Console.ReadKey();
-                    }
+
 
                     if (!string.IsNullOrEmpty(gameMessage.Trim()))
                     {
@@ -74,6 +81,7 @@ namespace MultiAdmin
                     if (gameMessage.Contains("ServerMod"))
                     {
                         server.HasServerMod = true;
+                        server.ServerModVersion = gameMessage.Replace("ServerMod - Version", "");
                     }
 
                     if (gameMessage.Contains("Waiting for players"))

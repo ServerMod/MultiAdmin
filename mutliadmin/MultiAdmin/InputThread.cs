@@ -28,7 +28,16 @@ namespace MultiAdmin.MultiAdmin
                 string[] strArray = message.ToUpper().Split(' ');
                 if (strArray.Length > 0)
                 {
-                    server.SendMessage(message);
+                    ICommand command;
+                    Boolean callServer = true;
+                    server.Commands.TryGetValue(strArray[0].ToLower().Trim(), out command);
+                    if (command != null)
+                    {
+                        command.OnCall(strArray.Skip(1).Take(strArray.Length - 1).ToArray());
+                        callServer = command.PassToGame();
+                    }
+
+                    if (callServer) server.SendMessage(message);
                 }
             }
         }

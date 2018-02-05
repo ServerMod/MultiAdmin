@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MultiAdmin.MultiAdmin.Commands
 {
-    class Titlebar : Feature, IEventPlayerConnect, IEventPlayerDisconnect
+    class Titlebar : Feature, IEventPlayerConnect, IEventPlayerDisconnect, IEventServerStart
     {
         private int playerCount;
         private int maxPlayers;
@@ -45,9 +45,19 @@ namespace MultiAdmin.MultiAdmin.Commands
             UpdateTitlebar();
         }
 
+        public void OnServerStart()
+        {
+            UpdateTitlebar();
+        }
+
         public void UpdateTitlebar()
         {
-            Console.Title = "SCP:SL MutliAdmin | Config: " + Server.ConfigKey + " | Session ID:" + Server.GetSessionId() + " | " + playerCount + "/" + maxPlayers;
+            var smod = "";
+            if (Server.HasServerMod)
+            {
+                smod = "ServerMod Version " + Server.ServerModVersion;
+            }
+            Console.Title = "SCP:SL MutliAdmin " + Server.MA_VERSION + " | Config: " + Server.ConfigKey + " | Session ID:" + Server.GetSessionId() + " | " + playerCount + "/" + maxPlayers + " | " + smod;
         }
     }
 }

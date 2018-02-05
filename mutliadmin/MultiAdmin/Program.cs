@@ -15,7 +15,7 @@ namespace MutliAdmin
         private static MultiAdmin.Config multiadminConfig;
         private static Server server;
 
-  
+
         public static void Write(String message, ConsoleColor color = ConsoleColor.DarkYellow)
         {
             Console.ForegroundColor = color;
@@ -26,27 +26,9 @@ namespace MutliAdmin
             Console.BackgroundColor = ConsoleColor.Black;
         }
 
-        public static void LoadMultiAdminConfig()
-        {
-            if (File.Exists(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "spc_multiadmin.cfg"))
-            {
-                foreach (String line in File.ReadAllLines("spc_multiadmin.cfg"))
-                {
-                    if (line.Substring(0, 8).Equals("cfg_loc="))
-                    {
-                        configLocation = Environment.ExpandEnvironmentVariables(line.Substring(8));
-                        Write("CFG LOCATION FROM FILE:" + configLocation);
-                    }
-                }
-               
-            }
-            else
-            {
-                FindConfig();
-            }
-        }
 
-  
+
+
         public static void FindConfig()
         {
             var defaultLoc = Environment.ExpandEnvironmentVariables(String.Format("%appdata%{0}SCP Secret Laboratory{0}config.txt", Path.DirectorySeparatorChar));
@@ -115,7 +97,7 @@ namespace MutliAdmin
                             Write("Starting this instance with config directory: " + name, ConsoleColor.DarkYellow);
                             first = false;
                         }
-     
+
                     }
                     else
                     {
@@ -150,11 +132,10 @@ namespace MutliAdmin
             return hasServerToStart;
         }
 
-		
-		public static void Main(string[] args)
-		{
+
+        public static void Main(string[] args)
+        {
             multiadminConfig = new MultiAdmin.Config("spc_multiadmin.cfg");
-            LoadMultiAdminConfig();
             FindConfig();
             configChain = "";
             if (StartHandleConfigs(args))
@@ -165,9 +146,9 @@ namespace MutliAdmin
             {
                 Console.ReadKey();
             }
-            
-		
-		}
+
+
+        }
 
         public static String GetServerDirectory()
         {
@@ -177,5 +158,5 @@ namespace MutliAdmin
 
 
 
-	}
+    }
 }

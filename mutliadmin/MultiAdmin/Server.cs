@@ -4,14 +4,16 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using MultiAdmin.MultiAdmin.Commands;
+using MultiAdmin.MultiAdmin.Features;
 
 namespace MultiAdmin.MultiAdmin
 {
     public class Server
     {
-        
+        public static readonly string MA_VERSION = "1.0";
 
         public Boolean HasServerMod { get; set; }
+        public String ServerModVersion { get; set; }
         public Config MultiAdminCfg { get; }
         public Config ServerConfig
         {
@@ -29,7 +31,7 @@ namespace MultiAdmin.MultiAdmin
         public Boolean InitialRoundStarted { get; set; }
 
         public List<Feature> Features { get; }
-        public List<ICommand> Commands { get; }
+        public Dictionary<String, ICommand> Commands { get; }
         private List<IEventTick> tick; // we want a tick only list since its the only event that happens constantly, all the rest can be in a single list
 
         private Thread readerThread;
@@ -47,7 +49,7 @@ namespace MultiAdmin.MultiAdmin
             ConfigChain = configChain;
             ServerDir = serverDir;
             session_id = Utils.GetUnixTime().ToString();
-            Commands = new List<ICommand>();
+            Commands = new Dictionary<string, ICommand>();
             Features = new List<Feature>();
             tick = new List<IEventTick>();
             MultiAdminCfg = multiAdminCfg;
@@ -70,7 +72,9 @@ namespace MultiAdmin.MultiAdmin
         {
             RegisterFeature(new Autoscale(this));
             RegisterFeature(new ChainStart(this));
-            RegisterFeature(new EventTest(this));
+            RegisterFeature(new ConfigReload(this));
+            //RegisterFeature(new EventTest(this));
+            RegisterFeature(new HelpCommand(this));
             RegisterFeature(new InactivityShutdown(this));
             RegisterFeature(new MemoryChecker(this));
             RegisterFeature(new MultiAdminInfo(this));
@@ -130,7 +134,11 @@ namespace MultiAdmin.MultiAdmin
         public void RegisterFeature(Feature feature)
         {
             if (feature is IEventTick) tick.Add((IEventTick) feature);
-            if (feature is ICommand) Commands.Add((ICommand) feature);
+            if (feature is ICommand)
+            {
+                ICommand command = (ICommand)feature;
+                Commands.Add(command.GetCommand().ToLower().Trim(), command);
+            }
             Features.Add(feature);
         }
 
@@ -237,7 +245,7 @@ namespace MultiAdmin.MultiAdmin
             InitFeatures();
         }
 
-        private void SwapConfigs()
+        public void SwapConfigs()
         {
             if (File.Exists("servers" + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "config.txt"))
             {

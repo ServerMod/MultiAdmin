@@ -10,19 +10,24 @@ using UnityEngine.PostProcessing;
 // Token: 0x02000068 RID: 104
 public class CharacterClassManager : NetworkBehaviour
 {
-	// Token: 0x060001E7 RID: 487
+	// Token: 0x060001E9 RID: 489
+	public CharacterClassManager()
+	{
+	}
+
+	// Token: 0x060001EA RID: 490
 	public void SetUnit(int unit)
 	{
 		this.NetworkntfUnit = unit;
 	}
 
-	// Token: 0x060001E8 RID: 488
+	// Token: 0x060001EB RID: 491
 	public void SyncDeathPos(Vector3 v)
 	{
 		this.NetworkdeathPosition = v;
 	}
 
-	// Token: 0x060001E9 RID: 489
+	// Token: 0x060001EC RID: 492
 	[ServerCallback]
 	public void AllowContain()
 	{
@@ -49,8 +54,8 @@ public class CharacterClassManager : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x060001EA RID: 490
-	private void Start()
+	// Token: 0x060001ED RID: 493
+	public void Start()
 	{
 		this.lureSpj = UnityEngine.Object.FindObjectOfType<LureSubjectContainer>();
 		this.scp049 = base.GetComponent<Scp049PlayerScript>();
@@ -78,15 +83,27 @@ public class CharacterClassManager : NetworkBehaviour
 			this.ApplyProperties();
 		}
 		this.SetMaxHP(0, "SCP173_HP", 2000);
-		this.SetMaxHP(5, "SCP049_HP", 1200);
-		this.SetMaxHP(7, "SCP079_HP", 100);
+		this.SetMaxHP(1, "CLASSD_HP", 100);
 		this.SetMaxHP(3, "SCP106_HP", 700);
+		this.SetMaxHP(4, "NTFSCIENTIST_HP", 120);
+		this.SetMaxHP(5, "SCP049_HP", 1200);
+		this.SetMaxHP(6, "SCIENTIST_HP", 100);
+		this.SetMaxHP(7, "SCP079_HP", 100);
+		this.SetMaxHP(8, "CI_HP", 120);
 		this.SetMaxHP(9, "SCP457_HP", 700);
 		this.SetMaxHP(10, "SCP049-2_HP", 400);
+		this.SetMaxHP(11, "NTFL_HP", 120);
+		this.SetMaxHP(12, "NTFC_HP", 150);
+		this.SetMaxHP(13, "NTFG_HP", 100);
+		this.ban049 = !ConfigFile.GetString("SCP049_DISABLE", "no").Equals("no");
+		this.ban079 = !ConfigFile.GetString("SCP079_DISABLE", "no").Equals("no");
+		this.ban106 = !ConfigFile.GetString("SCP106_DISABLE", "no").Equals("no");
+		this.ban173 = !ConfigFile.GetString("SCP173_DISABLE", "no").Equals("no");
+		this.ban457 = !ConfigFile.GetString("SCP457_DISABLE", "no").Equals("no");
 	}
 
-	// Token: 0x060001EB RID: 491
-	private IEnumerator Init()
+	// Token: 0x060001EE RID: 494
+	public IEnumerator Init()
 	{
 		GameObject host = null;
 		while (host == null)
@@ -128,10 +145,10 @@ public class CharacterClassManager : NetworkBehaviour
 						int num = timeLeft;
 						timeLeft = num - 1;
 					}
-					int count = PlayerManager.singleton.players.Length;
-					if (count > maxPlayers)
+					int num2 = PlayerManager.singleton.players.Length;
+					if (num2 > maxPlayers)
 					{
-						maxPlayers = count;
+						maxPlayers = num2;
 						if (timeLeft < 5)
 						{
 							timeLeft = 5;
@@ -170,6 +187,9 @@ public class CharacterClassManager : NetworkBehaviour
 			rs = null;
 			rs = null;
 			rs = null;
+			rs = null;
+			rs = null;
+			rs = null;
 		}
 		else
 		{
@@ -199,9 +219,12 @@ public class CharacterClassManager : NetworkBehaviour
 			catch
 			{
 			}
-			int num2 = iteration;
-			iteration = num2 + 1;
+			int num3 = iteration;
+			iteration = num3 + 1;
 			yield return new WaitForEndOfFrame();
+			plys = null;
+			plys = null;
+			plys = null;
 			plys = null;
 			plys = null;
 			plys = null;
@@ -209,7 +232,7 @@ public class CharacterClassManager : NetworkBehaviour
 		yield break;
 	}
 
-	// Token: 0x060001EC RID: 492
+	// Token: 0x060001EF RID: 495
 	[Client]
 	[Command]
 	public void CmdSuicide(PlayerStats.HitInfo hitInfo)
@@ -223,16 +246,16 @@ public class CharacterClassManager : NetworkBehaviour
 		base.GetComponent<PlayerStats>().HurtPlayer(hitInfo, base.gameObject);
 	}
 
-	// Token: 0x060001ED RID: 493
+	// Token: 0x060001F0 RID: 496
 	public void ForceRoundStart()
 	{
 		ServerConsole.AddLog("New round has been started.");
 		this.CmdUpdateStartText("started");
 	}
 
-	// Token: 0x060001EE RID: 494
+	// Token: 0x060001F1 RID: 497
 	[ServerCallback]
-	private void CmdUpdateStartText(string str)
+	public void CmdUpdateStartText(string str)
 	{
 		if (!NetworkServer.active)
 		{
@@ -241,7 +264,7 @@ public class CharacterClassManager : NetworkBehaviour
 		RoundStart.singleton.Networkinfo = str;
 	}
 
-	// Token: 0x060001EF RID: 495
+	// Token: 0x060001F2 RID: 498
 	public void InitSCPs()
 	{
 		if (this.curClass != -1 && !TutorialManager.status)
@@ -255,15 +278,15 @@ public class CharacterClassManager : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x060001F0 RID: 496
+	// Token: 0x060001F3 RID: 499
 	public void RegisterEscape()
 	{
 		this.CallCmdRegisterEscape(base.gameObject);
 	}
 
-	// Token: 0x060001F1 RID: 497
+	// Token: 0x060001F4 RID: 500
 	[Command(channel = 2)]
-	private void CmdRegisterEscape(GameObject sender)
+	public void CmdRegisterEscape(GameObject sender)
 	{
 		CharacterClassManager component = sender.GetComponent<CharacterClassManager>();
 		if (Vector3.Distance(sender.transform.position, base.GetComponent<Escape>().worldPosition) < (float)(base.GetComponent<Escape>().radius * 2))
@@ -284,7 +307,7 @@ public class CharacterClassManager : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x060001F2 RID: 498
+	// Token: 0x060001F5 RID: 501
 	public void ApplyProperties()
 	{
 		Class @class = this.klasy[this.curClass];
@@ -388,13 +411,13 @@ public class CharacterClassManager : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x060001F3 RID: 499
-	private void EnableFPC()
+	// Token: 0x060001F6 RID: 502
+	public void EnableFPC()
 	{
 		base.GetComponent<FirstPersonController>().enabled = true;
 	}
 
-	// Token: 0x060001F4 RID: 500
+	// Token: 0x060001F7 RID: 503
 	public void RefreshPlyModel(int classID = -1)
 	{
 		if (this.myModel != null)
@@ -437,7 +460,7 @@ public class CharacterClassManager : NetworkBehaviour
 		base.GetComponent<CapsuleCollider>().enabled = (@class.team != Team.RIP);
 	}
 
-	// Token: 0x060001F5 RID: 501
+	// Token: 0x060001F8 RID: 504
 	public void SetClassID(int id)
 	{
 		this.NetworkcurClass = id;
@@ -448,7 +471,7 @@ public class CharacterClassManager : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x060001F6 RID: 502
+	// Token: 0x060001F9 RID: 505
 	public void InstantiateRagdoll(int id)
 	{
 		if (id < 0 || id == 7)
@@ -462,9 +485,10 @@ public class CharacterClassManager : NetworkBehaviour
 		gameObject.transform.localScale = @class.ragdoll_offset.scale;
 	}
 
-	// Token: 0x060001F7 RID: 503
+	// Token: 0x060001FA RID: 506
 	public void SetRandomRoles()
 	{
+		this.is173InRound = false;
 		MTFRespawn component = base.GetComponent<MTFRespawn>();
 		if (base.isLocalPlayer && base.isServer)
 		{
@@ -480,19 +504,35 @@ public class CharacterClassManager : NetworkBehaviour
 				list2.Add(list[index]);
 				list.RemoveAt(index);
 			}
-			GameObject[] array2 = list2.ToArray();
+			GameObject[] array = list2.ToArray();
 			RoundSummary component2 = base.GetComponent<RoundSummary>();
 			bool flag = false;
 			if ((float)UnityEngine.Random.Range(0, 100) < this.ciPercentage)
 			{
 				flag = true;
 			}
-			if (this.ban_computer_for_first_pick)
+			if (this.ban_computer_for_first_pick || this.ban079)
 			{
 				this.klasy[7].banClass = true;
 			}
+			if (this.ban049)
+			{
+				this.klasy[5].banClass = true;
+			}
+			if (this.ban173)
+			{
+				this.klasy[0].banClass = true;
+			}
+			if (this.ban457)
+			{
+				this.klasy[9].banClass = true;
+			}
+			if (this.ban106)
+			{
+				this.klasy[3].banClass = true;
+			}
 			this.first_scp = true;
-			for (int i = 0; i < array2.Length; i++)
+			for (int i = 0; i < array.Length; i++)
 			{
 				int num = (this.forceClass != -1) ? this.forceClass : this.Find_Random_ID_Using_Defined_Team(this.classTeamQueue[i]);
 				if (this.klasy[num].team == Team.CDP)
@@ -505,7 +545,7 @@ public class CharacterClassManager : NetworkBehaviour
 				}
 				if (this.klasy[num].team == Team.SCP)
 				{
-					if (this.ban_computer_for_first_pick && this.first_scp)
+					if (this.ban_computer_for_first_pick && this.first_scp && !this.ban079)
 					{
 						this.klasy[7].banClass = false;
 					}
@@ -520,7 +560,7 @@ public class CharacterClassManager : NetworkBehaviour
 					}
 					else
 					{
-						component.playersToNTF.Add(array2[i]);
+						component.playersToNTF.Add(array[i]);
 					}
 				}
 				if (TutorialManager.status)
@@ -529,22 +569,22 @@ public class CharacterClassManager : NetworkBehaviour
 				}
 				else if (num != 4)
 				{
-					this.SetPlayersClass(num, array2[i]);
+					this.SetPlayersClass(num, array[i]);
 				}
 			}
 			component.SummonNTF();
 		}
 	}
 
-	// Token: 0x060001F8 RID: 504
-	private void SetRoundStart(bool b)
+	// Token: 0x060001FB RID: 507
+	public void SetRoundStart(bool b)
 	{
 		this.NetworkroundStarted = b;
 	}
 
-	// Token: 0x060001F9 RID: 505
+	// Token: 0x060001FC RID: 508
 	[ServerCallback]
-	private void CmdStartRound()
+	public void CmdStartRound()
 	{
 		if (!NetworkServer.active)
 		{
@@ -560,7 +600,7 @@ public class CharacterClassManager : NetworkBehaviour
 		this.SetRoundStart(true);
 	}
 
-	// Token: 0x060001FA RID: 506
+	// Token: 0x060001FD RID: 509
 	[ServerCallback]
 	public void SetPlayersClass(int classid, GameObject ply)
 	{
@@ -572,8 +612,8 @@ public class CharacterClassManager : NetworkBehaviour
 		ply.GetComponent<PlayerStats>().SetHPAmount(this.klasy[classid].maxHP);
 	}
 
-	// Token: 0x060001FB RID: 507
-	private int Find_Random_ID_Using_Defined_Team(Team team)
+	// Token: 0x060001FE RID: 510
+	public int Find_Random_ID_Using_Defined_Team(Team team)
 	{
 		List<int> list = new List<int>();
 		for (int i = 0; i < this.klasy.Length; i++)
@@ -587,18 +627,22 @@ public class CharacterClassManager : NetworkBehaviour
 		if (this.klasy[list[index]].team == Team.SCP)
 		{
 			this.klasy[list[index]].banClass = true;
+			if (list[index] == 0)
+			{
+				this.is173InRound = true;
+			}
 		}
 		return list[index];
 	}
 
-	// Token: 0x060001FC RID: 508
+	// Token: 0x060001FF RID: 511
 	public bool SpawnProtection()
 	{
 		return this.aliveTime < 2f;
 	}
 
-	// Token: 0x060001FD RID: 509
-	private void Update()
+	// Token: 0x06000200 RID: 512
+	public void Update()
 	{
 		if (this.curClass == 2)
 		{
@@ -630,14 +674,14 @@ public class CharacterClassManager : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x060001FE RID: 510
-	private void UNetVersion()
+	// Token: 0x06000201 RID: 513
+	public void UNetVersion()
 	{
 	}
 
 	// Token: 0x17000027 RID: 39
-	// (get) Token: 0x060001FF RID: 511
-	// (set) Token: 0x06000200 RID: 512
+	// (get) Token: 0x06000202 RID: 514
+	// (set) Token: 0x06000203 RID: 515
 	public int NetworkntfUnit
 	{
 		get
@@ -658,8 +702,8 @@ public class CharacterClassManager : NetworkBehaviour
 	}
 
 	// Token: 0x17000028 RID: 40
-	// (get) Token: 0x06000201 RID: 513
-	// (set) Token: 0x06000202 RID: 514
+	// (get) Token: 0x06000204 RID: 516
+	// (set) Token: 0x06000205 RID: 517
 	public int NetworkcurClass
 	{
 		get
@@ -680,8 +724,8 @@ public class CharacterClassManager : NetworkBehaviour
 	}
 
 	// Token: 0x17000029 RID: 41
-	// (get) Token: 0x06000203 RID: 515
-	// (set) Token: 0x06000204 RID: 516
+	// (get) Token: 0x06000206 RID: 518
+	// (set) Token: 0x06000207 RID: 519
 	public Vector3 NetworkdeathPosition
 	{
 		get
@@ -702,8 +746,8 @@ public class CharacterClassManager : NetworkBehaviour
 	}
 
 	// Token: 0x1700002A RID: 42
-	// (get) Token: 0x06000205 RID: 517
-	// (set) Token: 0x06000206 RID: 518
+	// (get) Token: 0x06000208 RID: 520
+	// (set) Token: 0x06000209 RID: 521
 	public bool NetworkroundStarted
 	{
 		get
@@ -723,8 +767,8 @@ public class CharacterClassManager : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x06000207 RID: 519
-	protected static void InvokeCmdCmdSuicide(NetworkBehaviour obj, NetworkReader reader)
+	// Token: 0x0600020A RID: 522
+	public static void InvokeCmdCmdSuicide(NetworkBehaviour obj, NetworkReader reader)
 	{
 		if (!NetworkServer.active)
 		{
@@ -734,8 +778,8 @@ public class CharacterClassManager : NetworkBehaviour
 		((CharacterClassManager)obj).CmdSuicide(GeneratedNetworkCode._ReadHitInfo_PlayerStats(reader));
 	}
 
-	// Token: 0x06000208 RID: 520
-	protected static void InvokeCmdCmdRegisterEscape(NetworkBehaviour obj, NetworkReader reader)
+	// Token: 0x0600020B RID: 523
+	public static void InvokeCmdCmdRegisterEscape(NetworkBehaviour obj, NetworkReader reader)
 	{
 		if (!NetworkServer.active)
 		{
@@ -745,7 +789,7 @@ public class CharacterClassManager : NetworkBehaviour
 		((CharacterClassManager)obj).CmdRegisterEscape(reader.ReadGameObject());
 	}
 
-	// Token: 0x06000209 RID: 521
+	// Token: 0x0600020C RID: 524
 	public void CallCmdSuicide(PlayerStats.HitInfo hitInfo)
 	{
 		if (!NetworkClient.active)
@@ -767,7 +811,7 @@ public class CharacterClassManager : NetworkBehaviour
 		base.SendCommandInternal(networkWriter, 0, "CmdSuicide");
 	}
 
-	// Token: 0x0600020A RID: 522
+	// Token: 0x0600020D RID: 525
 	public void CallCmdRegisterEscape(GameObject sender)
 	{
 		if (!NetworkClient.active)
@@ -789,7 +833,7 @@ public class CharacterClassManager : NetworkBehaviour
 		base.SendCommandInternal(networkWriter, 2, "CmdRegisterEscape");
 	}
 
-	// Token: 0x0600020B RID: 523
+	// Token: 0x0600020E RID: 526
 	static CharacterClassManager()
 	{
 		NetworkBehaviour.RegisterCommandDelegate(typeof(CharacterClassManager), CharacterClassManager.kCmdCmdSuicide, new NetworkBehaviour.CmdDelegate(CharacterClassManager.InvokeCmdCmdSuicide));
@@ -798,7 +842,7 @@ public class CharacterClassManager : NetworkBehaviour
 		NetworkCRC.RegisterBehaviour("CharacterClassManager", 0);
 	}
 
-	// Token: 0x0600020C RID: 524
+	// Token: 0x0600020F RID: 527
 	public override bool OnSerialize(NetworkWriter writer, bool forceAll)
 	{
 		if (forceAll)
@@ -853,7 +897,7 @@ public class CharacterClassManager : NetworkBehaviour
 		return flag;
 	}
 
-	// Token: 0x0600020D RID: 525
+	// Token: 0x06000210 RID: 528
 	public override void OnDeserialize(NetworkReader reader, bool initialState)
 	{
 		if (initialState)
@@ -883,21 +927,27 @@ public class CharacterClassManager : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x06000C57 RID: 3159
+	// Token: 0x06000211 RID: 529
 	public void SetMaxHP(int id, string config_key, int defaultHp)
 	{
-		Class c = this.klasy[id];
-		c.maxHP = ConfigFile.GetInt(config_key, defaultHp);
-		if (c.maxHP != defaultHp)
+		Class @class = this.klasy[id];
+		@class.maxHP = ConfigFile.GetInt(config_key, defaultHp);
+		if (@class.maxHP != defaultHp)
 		{
 			ServerConsole.AddLog(string.Concat(new object[]
 			{
 				"Set non-default hp for ",
-				c.fullName,
+				@class.fullName,
 				" with value ",
-				c.maxHP
+				@class.maxHP
 			}));
 		}
+	}
+
+	// Token: 0x06000212 RID: 530
+	public bool Is173InRound()
+	{
+		return this.is173InRound;
 	}
 
 	// Token: 0x040001F3 RID: 499
@@ -912,11 +962,11 @@ public class CharacterClassManager : NetworkBehaviour
 
 	// Token: 0x040001F6 RID: 502
 	[SerializeField]
-	private AudioClip bell;
+	public AudioClip bell;
 
 	// Token: 0x040001F7 RID: 503
 	[SerializeField]
-	private AudioClip bell_dead;
+	public AudioClip bell_dead;
 
 	// Token: 0x040001F8 RID: 504
 	[HideInInspector]
@@ -937,10 +987,10 @@ public class CharacterClassManager : NetworkBehaviour
 	public int curClass;
 
 	// Token: 0x040001FD RID: 509
-	private int seed;
+	public int seed;
 
 	// Token: 0x040001FE RID: 510
-	private GameObject plyCam;
+	public GameObject plyCam;
 
 	// Token: 0x040001FF RID: 511
 	public GameObject unfocusedCamera;
@@ -954,38 +1004,56 @@ public class CharacterClassManager : NetworkBehaviour
 	public bool roundStarted;
 
 	// Token: 0x04000202 RID: 514
-	private Scp049PlayerScript scp049;
+	public Scp049PlayerScript scp049;
 
 	// Token: 0x04000203 RID: 515
-	private Scp049_2PlayerScript scp049_2;
+	public Scp049_2PlayerScript scp049_2;
 
 	// Token: 0x04000204 RID: 516
-	private Scp079PlayerScript scp079;
+	public Scp079PlayerScript scp079;
 
 	// Token: 0x04000205 RID: 517
-	private Scp106PlayerScript scp106;
+	public Scp106PlayerScript scp106;
 
 	// Token: 0x04000206 RID: 518
-	private Scp173PlayerScript scp173;
+	public Scp173PlayerScript scp173;
 
 	// Token: 0x04000207 RID: 519
-	private LureSubjectContainer lureSpj;
+	public LureSubjectContainer lureSpj;
 
 	// Token: 0x04000208 RID: 520
-	private float aliveTime;
+	public float aliveTime;
 
 	// Token: 0x04000209 RID: 521
-	private int prevId = -1;
+	public int prevId = -1;
 
 	// Token: 0x0400020A RID: 522
-	private static int kCmdCmdSuicide = -1051695024;
+	public static int kCmdCmdSuicide = -1051695024;
 
 	// Token: 0x0400020B RID: 523
-	private static int kCmdCmdRegisterEscape;
+	public static int kCmdCmdRegisterEscape;
 
-	// Token: 0x04000C94 RID: 3220
-	private bool first_scp;
+	// Token: 0x0400020C RID: 524
+	public bool first_scp;
 
-	// Token: 0x04000C95 RID: 3221
-	private bool ban_computer_for_first_pick;
+	// Token: 0x0400020D RID: 525
+	public bool ban_computer_for_first_pick;
+
+	// Token: 0x0400020E RID: 526
+	public bool is173InRound;
+
+	// Token: 0x04000F83 RID: 3971
+	public bool ban173;
+
+	// Token: 0x04000F84 RID: 3972
+	public bool ban106;
+
+	// Token: 0x04000F85 RID: 3973
+	public bool ban049;
+
+	// Token: 0x04000F86 RID: 3974
+	public bool ban079;
+
+	// Token: 0x04000F87 RID: 3975
+	public bool ban457;
 }

@@ -58,5 +58,10 @@ namespace MultiAdmin.MultiAdmin.Commands
         {
             return "RESTARTNEXTROUND";
         }
+
+        public string GetUsage()
+        {
+            return "";
+        }
     }
 }

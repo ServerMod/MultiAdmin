@@ -55,7 +55,13 @@ namespace MultiAdmin.MultiAdmin.Commands
 
         public string GetCommandDescription()
         {
-            return "Starts a new server with the given config id. Usage: new <config id>";
+            return "Starts a new server with the given config id.";
+        }
+
+
+        public string GetUsage()
+        {
+            return "<config_id>";
         }
     }
 }
