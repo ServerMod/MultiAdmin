@@ -30,6 +30,7 @@ namespace MultiAdmin
                     string fileCommand = "open";
                     int attempts = 0;
                     Boolean read = false;
+
                     while (attempts < 5 && !read)
                     {
                         try
@@ -50,10 +51,11 @@ namespace MultiAdmin
                         }
                     }
 
+                    Boolean display = true;
+                    ConsoleColor colour = ConsoleColor.Cyan;
 
                     if (!string.IsNullOrEmpty(gameMessage.Trim()))
                     {
-                        ConsoleColor colour = ConsoleColor.Cyan;
                         if (gameMessage.Contains("LOGTYPE"))
                         {
                             String type = gameMessage.Substring(gameMessage.IndexOf("LOGTYPE")).Trim();
@@ -75,7 +77,7 @@ namespace MultiAdmin
                                     break;
                             }
                         }
-                        server.Write(gameMessage.Trim(), colour);
+                       
                     }
 
                     if (gameMessage.Contains("ServerMod"))
@@ -141,6 +143,7 @@ namespace MultiAdmin
 
                     if (gameMessage.Contains("Player connect"))
                     {
+                        display = false;
                         foreach (Feature f in server.Features)
                         {
                             if (f is IEventPlayerConnect)
@@ -153,6 +156,7 @@ namespace MultiAdmin
 
                     if (gameMessage.Contains("Player disconnect"))
                     {
+                        display = false;
                         foreach (Feature f in server.Features)
                         {
                             if (f is IEventPlayerDisconnect)
@@ -163,10 +167,12 @@ namespace MultiAdmin
                         }
                     }
 
+                    if (display) server.Write(gameMessage.Trim(), colour);
                 }
+
                 Thread.Sleep(300);
             }
-            Console.WriteLine("READ THREAD DEAD");
+
         }
     }
 }

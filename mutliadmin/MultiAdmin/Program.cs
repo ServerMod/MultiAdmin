@@ -133,8 +133,23 @@ namespace MutliAdmin
         }
 
 
+
+
+        public static String GetServerDirectory()
+        {
+            return Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers";
+        }
+
+        static void OnExit(object sender, EventArgs e)
+        {
+            Console.WriteLine("exit");
+            Debug.Write("exit");
+            Console.ReadKey();
+        }
+
         public static void Main(string[] args)
         {
+            AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnExit);
             multiadminConfig = new MultiAdmin.Config("spc_multiadmin.cfg");
             FindConfig();
             configChain = "";
@@ -146,17 +161,6 @@ namespace MutliAdmin
             {
                 Console.ReadKey();
             }
-
-
         }
-
-        public static String GetServerDirectory()
-        {
-            return Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers";
-        }
-
-
-
-
     }
 }

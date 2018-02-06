@@ -73,6 +73,7 @@ namespace MultiAdmin.MultiAdmin
             RegisterFeature(new Autoscale(this));
             RegisterFeature(new ChainStart(this));
             RegisterFeature(new ConfigReload(this));
+            RegisterFeature(new ExitCommand(this));
             //RegisterFeature(new EventTest(this));
             RegisterFeature(new HelpCommand(this));
             RegisterFeature(new InactivityShutdown(this));
@@ -104,7 +105,7 @@ namespace MultiAdmin.MultiAdmin
                         tickEvent.OnTick();
                     }
                 }
-                else
+                else if (!stopping)
                 {
                     foreach (Feature f in Features)
                     {
@@ -124,6 +125,8 @@ namespace MultiAdmin.MultiAdmin
 
                 Thread.Sleep(1000);
             }
+            Thread.Sleep(100);
+            CleanUp();
         }
 
         public Boolean IsStopping()
@@ -179,8 +182,8 @@ namespace MultiAdmin.MultiAdmin
             Process.Start(Directory.GetFiles(Directory.GetCurrentDirectory(), "MultiAdmin.*")[0], ConfigKey);
             stopping = true;
         }
-            
-        public void StopServer()
+
+        public void StopServer(bool killGame = true)
         {
             foreach (Feature f in Features)
             {
@@ -190,11 +193,16 @@ namespace MultiAdmin.MultiAdmin
                 }
             }
 
-            gameProcess.Kill();
-            RemoveRunFile();
-            DeleteSession();
+            if (killGame) gameProcess.Kill();
             stopping = true;
         }
+
+        public void CleanUp()
+        {
+            RemoveRunFile();
+            DeleteSession();
+        }
+
 
         public Boolean StartServer()
         {
@@ -273,6 +281,10 @@ namespace MultiAdmin.MultiAdmin
 
         private void DeleteSession()
         {
+            foreach (String file in Directory.GetFiles("SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" + Path.DirectorySeparatorChar + session_id))
+            {
+                File.Delete(file);
+            }
             Directory.Delete("SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" + Path.DirectorySeparatorChar + session_id);
         }
 

@@ -113,9 +113,19 @@ public class PlayerStats : NetworkBehaviour
 			{
 				go.GetComponent<Inventory>().RemoveAll();
 			}
-			if (info.amount != 999799f && !info.tool.Equals("POCKET") && component2.curClass != 7)
+			if (info.amount != 999799f && component2.curClass != 7)
 			{
-				this.DoRagdoll(info, go);
+				if (info.tool.Equals("POCKET"))
+				{
+					if (!this.do106Clean)
+					{
+						this.DoRagdoll(info, go);
+					}
+				}
+				else
+				{
+					this.DoRagdoll(info, go);
+				}
 			}
 			component2.NetworkdeathPosition = go.transform.position;
 			component.SetHPAmount(100);
