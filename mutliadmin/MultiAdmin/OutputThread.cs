@@ -49,6 +49,7 @@ namespace MultiAdmin
                             server.Write("Message printer warning: Could not " + fileCommand + " file " + path + ". Make sure that MultiAdmin.exe has all necessary read-write permissions.", ConsoleColor.Yellow);
                             server.Write("Retrying.", ConsoleColor.DarkGray);
                         }
+                        Thread.Sleep(300);
                     }
 
                     Boolean display = true;

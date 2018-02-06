@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MultiAdmin.MultiAdmin
@@ -18,6 +19,7 @@ namespace MultiAdmin.MultiAdmin
                     {
                         return;
                     }
+                    Thread.Sleep(300);
                 }
                 string message = Console.ReadLine();
                 int cursorTop = Console.CursorTop;
