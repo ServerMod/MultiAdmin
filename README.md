@@ -43,7 +43,7 @@ Example:
 
 The name of the server will update everytime someone leaves/joins!
 
-[Release link](https://github.com/Grover-c13/MultiAdmin/releases/tag/ServerMod0.1)
+[Release link](https://github.com/Grover-c13/MultiAdmin/releases/latest)
 
 To install:
 1. Navigate to your SCP Secret Lab folder.
@@ -73,12 +73,25 @@ This DLL supports the version of SCP released on the 27th of January 2017 and te
 ### servermod
 - max_players (default 20, max amount of players per server)
 - no_scp079_first (default true, computer will never be the first scp in a game)
+- nuke_disable_cooldown stop the nuke from being spammed, will stop the nuke arm switch from being disabled until this has elapsed. Default = 0
+- SCP106_cleanup use this to stop ragdolls spawning in the pocket dimension [currently items still spawn]
 - SCP049_HP use this to set the starting HP for the class. Default = 1200
 - SCP049-2_HP use this to set the starting HP for the class. Default = 400
 - SCP079_HP use this to set the starting HP for the class. Default = 100
 - SCP106_HP use this to set the starting HP for the class. Default = 700
 - SCP457_HP use this to set the starting HP for the class. Default = 700
-- SCP173_HP use this to set the starting HP for the class. Default = 2000
+- CLASSD_HP use this to set the starting HP for the class. Default = 100
+- NTFSCIENTIST_HP use this to set the starting HP for the class. Default = 100
+- SCIENTIST_HP use this to set the starting HP for the class. Default = 100
+- CI_HP use this to set the starting HP for the class. Default = 120
+- NTFL_HP use this to set the starting HP for the class. Default = 120
+- NTFC_HP use this to set the starting HP for the class. Default = 150
+- NTFG_HP use this to set the starting HP for the class. Default = 100
+- SCP049_DISABLE disable this spc, default: no
+- SCP079_DISABLE disable this spc, default: no
+- SCP106_DISABLE disable this spc, default: no
+- SCP173_DISABLE disable this spc, default: no
+- SCP457_DISABLE disable this spc, default: no
 ##
 
 Place any suggestions/problems in issues!
