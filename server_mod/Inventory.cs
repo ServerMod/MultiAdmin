@@ -7,18 +7,18 @@ using UnityEngine.UI;
 // Token: 0x0200008A RID: 138
 public class Inventory : NetworkBehaviour
 {
-	// Token: 0x06000309 RID: 777 RVA: 0x00003F18 File Offset: 0x00002118
+	// Token: 0x06000309 RID: 777 RVA: 0x00003EF2 File Offset: 0x000020F2
 	public Inventory()
 	{
 	}
 
-	// Token: 0x0600030A RID: 778 RVA: 0x00003F3E File Offset: 0x0000213E
+	// Token: 0x0600030A RID: 778 RVA: 0x00003F18 File Offset: 0x00002118
 	public void SyncVerItems(SyncListInt i)
 	{
 		this.verifiedItems = i;
 	}
 
-	// Token: 0x0600030B RID: 779 RVA: 0x00016030 File Offset: 0x00014230
+	// Token: 0x0600030B RID: 779 RVA: 0x00016200 File Offset: 0x00014400
 	public void Awake()
 	{
 		for (int i = 0; i < this.availableItems.Length; i++)
@@ -33,7 +33,7 @@ public class Inventory : NetworkBehaviour
 	{
 	}
 
-	// Token: 0x0600030D RID: 781 RVA: 0x00003F47 File Offset: 0x00002147
+	// Token: 0x0600030D RID: 781 RVA: 0x00003F21 File Offset: 0x00002121
 	public void SetCurItem(int ci)
 	{
 		if (base.GetComponent<MicroHID_GFX>().onFire)
@@ -43,7 +43,7 @@ public class Inventory : NetworkBehaviour
 		this.NetworkcurItem = ci;
 	}
 
-	// Token: 0x0600030E RID: 782 RVA: 0x00016078 File Offset: 0x00014278
+	// Token: 0x0600030E RID: 782 RVA: 0x00016248 File Offset: 0x00014448
 	public void Start()
 	{
 		if (base.isLocalPlayer && base.isServer)
@@ -63,7 +63,7 @@ public class Inventory : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x0600030F RID: 783 RVA: 0x00016114 File Offset: 0x00014314
+	// Token: 0x0600030F RID: 783 RVA: 0x000162E4 File Offset: 0x000144E4
 	public void RefreshModels()
 	{
 		for (int i = 0; i < this.availableItems.Length; i++)
@@ -72,7 +72,7 @@ public class Inventory : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x06000310 RID: 784
+	// Token: 0x06000310 RID: 784 RVA: 0x0001632C File Offset: 0x0001452C
 	public void DropItem(int id)
 	{
 		if (base.isLocalPlayer)
@@ -86,7 +86,7 @@ public class Inventory : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x06000311 RID: 785
+	// Token: 0x06000311 RID: 785 RVA: 0x000163BC File Offset: 0x000145BC
 	public void DropAll()
 	{
 		for (int i = 0; i < 20; i++)
@@ -107,7 +107,7 @@ public class Inventory : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x06000312 RID: 786 RVA: 0x000162B4 File Offset: 0x000144B4
+	// Token: 0x06000312 RID: 786 RVA: 0x0001646C File Offset: 0x0001466C
 	public void AddItem(int id, float dur = -4.65664672E+11f)
 	{
 		if (base.isLocalPlayer)
@@ -151,7 +151,7 @@ public class Inventory : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x06000313 RID: 787 RVA: 0x000163D0 File Offset: 0x000145D0
+	// Token: 0x06000313 RID: 787 RVA: 0x00016588 File Offset: 0x00014788
 	public void Update()
 	{
 		if (TutorialManager.status && !base.isLocalPlayer)
@@ -176,7 +176,7 @@ public class Inventory : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x06000314 RID: 788 RVA: 0x000164DC File Offset: 0x000146DC
+	// Token: 0x06000314 RID: 788 RVA: 0x00016694 File Offset: 0x00014894
 	[Command(channel = 2)]
 	public void CmdSetPickup(int dropedItemID, float dur, Vector3 pos, Quaternion camRot, Quaternion myRot)
 	{
@@ -201,8 +201,8 @@ public class Inventory : NetworkBehaviour
 	}
 
 	// Token: 0x17000040 RID: 64
-	// (get) Token: 0x06000316 RID: 790 RVA: 0x000165D8 File Offset: 0x000147D8
-	// (set) Token: 0x06000317 RID: 791 RVA: 0x00003F61 File Offset: 0x00002161
+	// (get) Token: 0x06000316 RID: 790 RVA: 0x00016790 File Offset: 0x00014990
+	// (set) Token: 0x06000317 RID: 791 RVA: 0x00003F3B File Offset: 0x0000213B
 	public int NetworkcurItem
 	{
 		get
@@ -222,7 +222,7 @@ public class Inventory : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x06000318 RID: 792 RVA: 0x00003FA0 File Offset: 0x000021A0
+	// Token: 0x06000318 RID: 792 RVA: 0x00003F7A File Offset: 0x0000217A
 	public static void InvokeSyncListverifiedItems(NetworkBehaviour obj, NetworkReader reader)
 	{
 		if (!NetworkClient.active)
@@ -233,7 +233,7 @@ public class Inventory : NetworkBehaviour
 		((Inventory)obj).verifiedItems.HandleMsg(reader);
 	}
 
-	// Token: 0x06000319 RID: 793 RVA: 0x000165EC File Offset: 0x000147EC
+	// Token: 0x06000319 RID: 793 RVA: 0x000167A4 File Offset: 0x000149A4
 	public static void InvokeCmdCmdSetPickup(NetworkBehaviour obj, NetworkReader reader)
 	{
 		if (!NetworkServer.active)
@@ -244,7 +244,7 @@ public class Inventory : NetworkBehaviour
 		((Inventory)obj).CmdSetPickup((int)reader.ReadPackedUInt32(), reader.ReadSingle(), reader.ReadVector3(), reader.ReadQuaternion(), reader.ReadQuaternion());
 	}
 
-	// Token: 0x0600031A RID: 794 RVA: 0x0001663C File Offset: 0x0001483C
+	// Token: 0x0600031A RID: 794 RVA: 0x000167F4 File Offset: 0x000149F4
 	public void CallCmdSetPickup(int dropedItemID, float dur, Vector3 pos, Quaternion camRot, Quaternion myRot)
 	{
 		if (!NetworkClient.active)
@@ -270,7 +270,7 @@ public class Inventory : NetworkBehaviour
 		base.SendCommandInternal(networkWriter, 2, "CmdSetPickup");
 	}
 
-	// Token: 0x0600031B RID: 795 RVA: 0x00016700 File Offset: 0x00014900
+	// Token: 0x0600031B RID: 795 RVA: 0x000168B8 File Offset: 0x00014AB8
 	static Inventory()
 	{
 		NetworkBehaviour.RegisterCommandDelegate(typeof(Inventory), Inventory.kCmdCmdSetPickup, new NetworkBehaviour.CmdDelegate(Inventory.InvokeCmdCmdSetPickup));
@@ -279,7 +279,7 @@ public class Inventory : NetworkBehaviour
 		NetworkCRC.RegisterBehaviour("Inventory", 0);
 	}
 
-	// Token: 0x0600031C RID: 796 RVA: 0x00016770 File Offset: 0x00014970
+	// Token: 0x0600031C RID: 796 RVA: 0x00016928 File Offset: 0x00014B28
 	public override bool OnSerialize(NetworkWriter writer, bool forceAll)
 	{
 		if (forceAll)
@@ -314,7 +314,7 @@ public class Inventory : NetworkBehaviour
 		return flag;
 	}
 
-	// Token: 0x0600031D RID: 797 RVA: 0x0001681C File Offset: 0x00014A1C
+	// Token: 0x0600031D RID: 797 RVA: 0x000169D4 File Offset: 0x00014BD4
 	public override void OnDeserialize(NetworkReader reader, bool initialState)
 	{
 		if (initialState)
@@ -334,7 +334,7 @@ public class Inventory : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x06001054 RID: 4180
+	// Token: 0x0600031E RID: 798 RVA: 0x00003FA3 File Offset: 0x000021A3
 	public void RemoveItem(int id)
 	{
 		if (this.items[id].id == this.curItem)
@@ -344,51 +344,50 @@ public class Inventory : NetworkBehaviour
 		this.items.RemoveAt(id);
 	}
 
-	// Token: 0x0600106A RID: 4202
+	// Token: 0x0600031F RID: 799
 	public void RemoveAll()
 	{
-		ServerConsole.AddLog("Remove all on player");
 		this.items.Clear();
 	}
 
-	// Token: 0x040002F1 RID: 753
+	// Token: 0x040002F9 RID: 761
 	public Item[] availableItems;
 
-	// Token: 0x040002F2 RID: 754
+	// Token: 0x040002FA RID: 762
 	public List<Item> items = new List<Item>();
 
-	// Token: 0x040002F3 RID: 755
+	// Token: 0x040002FB RID: 763
 	[SyncVar(hook = "SyncVerItems")]
 	public SyncListInt verifiedItems = new SyncListInt();
 
-	// Token: 0x040002F4 RID: 756
+	// Token: 0x040002FC RID: 764
 	public AnimationController ac;
 
-	// Token: 0x040002F5 RID: 757
+	// Token: 0x040002FD RID: 765
 	[SyncVar(hook = "SetCurItem")]
 	public int curItem;
 
-	// Token: 0x040002F6 RID: 758
+	// Token: 0x040002FE RID: 766
 	public GameObject kamera;
 
-	// Token: 0x040002F7 RID: 759
+	// Token: 0x040002FF RID: 767
 	public Item localInventoryItem;
 
-	// Token: 0x040002F8 RID: 760
+	// Token: 0x04000300 RID: 768
 	public GameObject pickupPrefab;
 
-	// Token: 0x040002F9 RID: 761
+	// Token: 0x04000301 RID: 769
 	public RawImage crosshair;
 
-	// Token: 0x040002FA RID: 762
+	// Token: 0x04000302 RID: 770
 	public CharacterClassManager ccm;
 
-	// Token: 0x040002FB RID: 763
+	// Token: 0x04000303 RID: 771
 	public int prevIt = -10;
 
-	// Token: 0x040002FC RID: 764
+	// Token: 0x04000304 RID: 772
 	public static int kListverifiedItems;
 
-	// Token: 0x040002FD RID: 765
+	// Token: 0x04000305 RID: 773
 	public static int kCmdCmdSetPickup = 1938936418;
 }

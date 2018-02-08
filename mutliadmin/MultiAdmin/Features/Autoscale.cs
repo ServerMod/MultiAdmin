@@ -21,7 +21,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 
         public override string GetFeatureDescription()
         {
-            return "Auto-starts a new server once this one becomes full.";
+            return "Auto-starts a new server once this one becomes full. (Requires servermod to function fully)";
         }
 
         public override string GetFeatureName()

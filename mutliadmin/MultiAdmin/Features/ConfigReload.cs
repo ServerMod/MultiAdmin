@@ -26,7 +26,7 @@ namespace MultiAdmin.MultiAdmin.Features
 
         public override string GetFeatureDescription()
         {
-            return "Implements config reload with swapping";
+            return "Config reload will swap configs";
         }
 
         public override string GetFeatureName()

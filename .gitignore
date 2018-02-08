@@ -45,3 +45,10 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+*.ide-wal
+mutliadmin/.vs/MultiAdmin/v15/Server/sqlite3/db.lock
+*.ide-shm
+mutliadmin/.vs/MultiAdmin/v15/Server/sqlite3/db.lock
+mutliadmin/.vs/MultiAdmin/v15/Server/sqlite3/storage.ide
+*.ide
+*.ide

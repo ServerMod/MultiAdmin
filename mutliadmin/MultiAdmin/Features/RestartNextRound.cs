@@ -26,6 +26,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 
         public void OnCall(string[] args)
         {
+            Server.Write("Server will restart next round");
             restart = true;
         }
 

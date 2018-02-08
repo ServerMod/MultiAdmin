@@ -18,7 +18,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 
         public override string GetFeatureDescription()
         {
-            return "Updates the title bar with instance based information, such as session id and player count.";
+            return "Updates the title bar with instance based information, such as session id and player count. (Requires servermod to function fully)";
         }
 
         public override string GetFeatureName()
@@ -29,7 +29,7 @@ namespace MultiAdmin.MultiAdmin.Commands
         public override void Init()
         {
             maxPlayers = Server.ServerConfig.GetIntValue("MAX_PLAYERS", 20);
-            playerCount = -1; // -1 for the "server" player
+            playerCount = -1; // -1 for the "server" player, once the server starts this will increase to 0.
             UpdateTitlebar();
         }
 
@@ -57,7 +57,9 @@ namespace MultiAdmin.MultiAdmin.Commands
             {
                 smod = "ServerMod Version " + Server.ServerModVersion;
             }
-            Console.Title = "SCP:SL MutliAdmin " + Server.MA_VERSION + " | Config: " + Server.ConfigKey + " | Session ID:" + Server.GetSessionId() + " | " + playerCount + "/" + maxPlayers + " | " + smod;
+            var displayPlayerCount = playerCount;
+            if (playerCount == -1) displayPlayerCount = 0;
+            Console.Title = "SCP:SL MutliAdmin " + Server.MA_VERSION + " | Config: " + Server.ConfigKey + " | Session ID:" + Server.GetSessionId() + " | " + displayPlayerCount + "/" + maxPlayers + " | " + smod;
         }
     }
 }

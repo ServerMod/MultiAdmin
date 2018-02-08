@@ -24,7 +24,7 @@ namespace MultiAdmin.MultiAdmin.Features
 
         public override string GetFeatureDescription()
         {
-            return "Handles the help command";
+            return "Display a full list of multiadmin commands and in game commands.";
         }
 
         public override string GetFeatureName()
@@ -38,6 +38,7 @@ namespace MultiAdmin.MultiAdmin.Features
 
         public void OnCall(string[] args)
         {
+            Server.Write("Commands from MultiAdmin:");
             List<String> helpOutput = new List<String>();
             foreach (KeyValuePair<String, ICommand> command in base.Server.Commands)
             {

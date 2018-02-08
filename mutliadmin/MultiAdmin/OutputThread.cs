@@ -31,7 +31,7 @@ namespace MultiAdmin
                     int attempts = 0;
                     Boolean read = false;
 
-                    while (attempts < 5 && !read)
+                    while (attempts < 5 && !read && !server.IsStopping())
                     {
                         try
                         {

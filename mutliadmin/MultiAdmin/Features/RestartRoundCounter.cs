@@ -31,7 +31,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 
         public override string GetFeatureDescription()
         {
-            return "Restarts the server after X num rounds complated.";
+            return "Restarts the server after X num rounds completed.";
         }
 
         public override string GetFeatureName()

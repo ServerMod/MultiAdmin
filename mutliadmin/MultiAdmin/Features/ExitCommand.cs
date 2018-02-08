@@ -26,7 +26,7 @@ namespace MultiAdmin.MultiAdmin.Features
 
         public override string GetFeatureDescription()
         {
-            return "Implements the exit command";
+            return "Adds a graceful exit command.";
         }
 
         public override string GetFeatureName()
