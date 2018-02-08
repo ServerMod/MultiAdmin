@@ -1,26 +1,25 @@
 # MultiAdmin
-SCP LocalAdmin modification to support multiple configurations per instance, based off LocalAdmin.exe and released under the same license as that (CC-BY-SA 4.0)
+MultiAdmin is a replacement server tool for SCP: Secret Labratories, which was built to help enable servers to have multiple configurations per server instance.
 
-## Features:
-- Auto start all instances when running
-- provide config folder when using new.
-- Individual Log files per instance (located under servers/<config_id>/logs/[date]_output_log.txt)
-- A crash reason log (located under servers/<config_id>/crash_reason.txt)
-- More detailed information printed to console + title to show which console is using which config
-- Supports the config reload command (when the SCP server actually has that command working)
-- Crash support.
-- Command line parameter support (MultiAdmin.exe <config folder 1> <config folder 2>
-- RESTARTNEXTROUND command - restart the server after this round is complete.
-- SHUTDOWNNEXTROUND command - shutdown the server after next round
-- Autoscale more servers once one becomes full/
+The latest release can be found here: [Release link](https://github.com/Grover-c13/MultiAdmin/releases/latest)
 
-## Caveats:
-* The server works by hotswapping configs before certain events (new server, config reload etc), so if two servers crash at the same time they may have a conflict and load the wrong config. Should be very rare.
-* new now takes a <conf> parameter, which refers to the folder where the config file is located.
-* Probably stay away with spaces in server folder names.
+## Features
+- Autoscale: Auto-starts a new server once this one becomes full. (Requires servermod to function fully)
+- ChainStart: Automatically starts the next server after the first one is done loading.
+- Config reload: Config reload will swap configs
+- Exit command: Adds a graceful exit command.
+- Help: Display a full list of multiadmin commands and in game commands.
+- Stop Server once Inactive: Stops the server after a period inactivity.
+- Restart On Low Memory: Restarts the server if the working memory becomes too low
+- MutliAdminInfo: Prints the license/author information
+- New: Adds a command to start a new server given a config folder.
+- Restart Next Round: Restarts the server after the current round ends.
+- Restart After X Rounds: Restarts the server after X num rounds completed.
+- Stop Next Round: Stops the server after the current round ends.
+- Titlebar: Updates the title bar with instance based information, such as session id and player count. (Requires servermod to function fully)
 
 
-## Instructions (MutliAdmin):
+## Installation Instructions:
 1. Place MultiAdmin.exe next to your LocalAdmin.exe
 2. Create a new folder called servers within the same folder as LocalAdmin/MultiServer
 3. For each instance with a unique config, create a new directory in the servers directory and place each config.txt in there, so for example for two unique configs:
@@ -29,22 +28,39 @@ SCP LocalAdmin modification to support multiple configurations per instance, bas
 4. If your config is not in its default location due to a different OS and such, make a new file next to MultiAdmin.exe called spc_multiadmin.cfg and place the follwing setting like so:
 - cfg_loc=%appdata%\SCP Secret Laboratory\config.txt
 
-If you dont want a server to autolaunch place a blank file with no extension named "manual" in the server folder.
+## MultiAdmin Commands
+This does not include ServerMod or ingame commands, for a full list type HELP in multiadmin which will produce all commands.
 
-## Single Server
-If you only want a single server and just want the other features, have a single folder under servers.
+- CONFIG <reload>: Handles reloading the config
+- EXIT: Exits the server
+- GITHUBGEN [filelocation]: Generates a github .md file outlining all the features/commands
+- HELP: Prints out available commands and their function.
+- INFO: Prints license and author information.
+- NEW <config_id>: Starts a new server with the given config id.
+- RESTARTNEXTROUND: Restarts the server at the end of this round
+- STOPNEXTROUND: Stops the server at the end of this round
+## Config settings
+- manual_start (wether of not to start the server automatically when launching multiadmin, default = true)
+- start_config_on_full (start server with config this config folder when the server becomes full) [requires servermod]
+- shutdown_once_empty_for (shutdown the server once a round hasnt started in x seconds)
+- restart_every_num_rounds (restart the server every x rounds)
+
 
 # ServerMod
+ServerMod is an additional tool i have developed to add more configuration settings, fix bugs, and attempt to make servers more stable where possible. You dont need multiadmin for this, but it is recommended!
+
+The latest release can be found here: [Release link](https://github.com/Grover-c13/MultiAdmin/releases/latest)
+
+## Features:
+- Fixes as many null reference errors as i can find, making your log files smaller.
+- Dynamic server names with player count etc.
+- Increasing the player count.
+- Disabling of SCPs
+- Configuring max class healths.
+- Anti-nuke spam.
+
+
 ## ServerMod Installation:
-Additional to MultiAdmin, i have modified the ServerManager class and recompiled the DLL to allow variables in the server name. It also containts a fix for the server ghosting issue, no more duplicate servers showing after crash!
-
-Example:
-![player count](https://i.imgur.com/pJgS2WJ.png)
-
-The name of the server will update everytime someone leaves/joins!
-
-[Release link](https://github.com/Grover-c13/MultiAdmin/releases/tag/ServerMod0.1)
-
 To install:
 1. Navigate to your SCP Secret Lab folder.
 2. Go into SCSL_Data/Managed/
@@ -62,23 +78,31 @@ Currently supported variables (place in your servers name):
 - $version (version of the game)
 - $max_players (max amount of players in the config)
 
-This DLL supports the version of SCP released on the 27th of January 2017 and tested on Windows. Unsure about linux at this point.
+Example:
+![player count](https://i.imgur.com/pJgS2WJ.png)
 
 ## Config Additions
-### mutliadmin
-- manual_start (wether of not to start the server automatically when launching multiadmin, default = true)
-- start_config_on_full (start server with config this config folder when the server becomes full) [requires servermod]
-- shutdown_once_empty_for (shutdown the server once a round hasnt started in x seconds)
-- restart_every_num_rounds (restart the server every x rounds)
-### servermod
 - max_players (default 20, max amount of players per server)
 - no_scp079_first (default true, computer will never be the first scp in a game)
+- nuke_disable_cooldown stop the nuke from being spammed, will stop the nuke arm switch from being disabled until this has elapsed. Default = 0
+- SCP106_cleanup use this to stop ragdolls spawning in the pocket dimension [currently items still spawn]
 - SCP049_HP use this to set the starting HP for the class. Default = 1200
 - SCP049-2_HP use this to set the starting HP for the class. Default = 400
 - SCP079_HP use this to set the starting HP for the class. Default = 100
 - SCP106_HP use this to set the starting HP for the class. Default = 700
 - SCP457_HP use this to set the starting HP for the class. Default = 700
-- SCP173_HP use this to set the starting HP for the class. Default = 2000
+- CLASSD_HP use this to set the starting HP for the class. Default = 100
+- NTFSCIENTIST_HP use this to set the starting HP for the class. Default = 100
+- SCIENTIST_HP use this to set the starting HP for the class. Default = 100
+- CI_HP use this to set the starting HP for the class. Default = 120
+- NTFL_HP use this to set the starting HP for the class. Default = 120
+- NTFC_HP use this to set the starting HP for the class. Default = 150
+- NTFG_HP use this to set the starting HP for the class. Default = 100
+- SCP049_DISABLE disable this spc, default: no
+- SCP079_DISABLE disable this spc, default: no
+- SCP106_DISABLE disable this spc, default: no
+- SCP173_DISABLE disable this spc, default: no
+- SCP457_DISABLE disable this spc, default: no
 ##
 
 Place any suggestions/problems in issues!
