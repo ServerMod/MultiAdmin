@@ -14,7 +14,7 @@ The latest release can be found here: [Release link](https://github.com/Grover-c
 - MutliAdminInfo: Prints the license/author information
 - New: Adds a command to start a new server given a config folder.
 - Restart Next Round: Restarts the server after the current round ends.
-- Restart After X Rounds: Restarts the server after X num rounds complated.
+- Restart After X Rounds: Restarts the server after X num rounds completed.
 - Stop Next Round: Stops the server after the current round ends.
 - Titlebar: Updates the title bar with instance based information, such as session id and player count. (Requires servermod to function fully)
 
@@ -47,7 +47,9 @@ This does not include ServerMod or ingame commands, for a full list type HELP in
 
 
 # ServerMod
-ServerMod is an additional tool i have developed to add more configuration settings, fix bugs, and attempt to make servers more stable where possible.
+ServerMod is an additional tool i have developed to add more configuration settings, fix bugs, and attempt to make servers more stable where possible. You dont need multiadmin for this, but it is recommended!
+
+The latest release can be found here: [Release link](https://github.com/Grover-c13/MultiAdmin/releases/latest)
 
 ## Features:
 - Fixes as many null reference errors as i can find, making your log files smaller.
