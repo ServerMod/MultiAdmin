@@ -59,7 +59,7 @@ namespace MultiAdmin.MultiAdmin.Commands
             }
             var displayPlayerCount = playerCount;
             if (playerCount == -1) displayPlayerCount = 0;
-            Console.Title = "SCP:SL MutliAdmin " + Server.MA_VERSION + " | Config: " + Server.ConfigKey + " | Session ID:" + Server.GetSessionId() + " | " + displayPlayerCount + "/" + maxPlayers + " | " + smod;
+            Console.Title = "SCP:SL MultiAdmin " + Server.MA_VERSION + " | Config: " + Server.ConfigKey + " | Session ID:" + Server.GetSessionId() + " | " + displayPlayerCount + "/" + maxPlayers + " | " + smod;
         }
     }
 }

@@ -12,11 +12,6 @@ using UnityEngine.UI;
 // Token: 0x020000E6 RID: 230
 public class CustomNetworkManager : NetworkManager
 {
-	// Token: 0x0600064E RID: 1614
-	public CustomNetworkManager()
-	{
-	}
-
 	// Token: 0x0600064F RID: 1615
 	public override void OnClientDisconnect(NetworkConnection conn)
 	{
@@ -38,11 +33,11 @@ public class CustomNetworkManager : NetworkManager
 			{
 				conn.Disconnect();
 			}
-			ServerConsole.AddLog("Player connect:");
-			if (base.numPlayers == base.maxConnections)
-			{
-				ServerConsole.AddLog("Server full");
-			}
+		}
+		ServerConsole.AddLog("Player connect:" + conn.address.ToString());
+		if (base.numPlayers == base.maxConnections)
+		{
+			ServerConsole.AddLog("Server full");
 		}
 	}
 
@@ -76,7 +71,7 @@ public class CustomNetworkManager : NetworkManager
 	}
 
 	// Token: 0x06000655 RID: 1621
-	public void Reconnect()
+	private void Reconnect()
 	{
 		if (this.reconnect)
 		{
@@ -114,7 +109,7 @@ public class CustomNetworkManager : NetworkManager
 	}
 
 	// Token: 0x06000659 RID: 1625
-	public void Start()
+	private void Start()
 	{
 		this.console = GameConsole.Console.singleton;
 		if (!SteamAPI.Init())
@@ -141,7 +136,7 @@ public class CustomNetworkManager : NetworkManager
 	}
 
 	// Token: 0x0600065B RID: 1627
-	public IEnumerator CreateLobby()
+	private IEnumerator CreateLobby()
 	{
 		yield return new WaitForEndOfFrame();
 		string ip = string.Empty;
@@ -260,7 +255,7 @@ public class CustomNetworkManager : NetworkManager
 	}
 
 	// Token: 0x0600065C RID: 1628
-	public void NonsteamHost()
+	private void NonsteamHost()
 	{
 		base.onlineScene = "Facility";
 		base.maxConnections = 20;
@@ -351,7 +346,7 @@ public class CustomNetworkManager : NetworkManager
 	public CustomNetworkManager.DisconnectLog[] logs;
 
 	// Token: 0x0400059D RID: 1437
-	public int curLogID;
+	private int curLogID;
 
 	// Token: 0x0400059E RID: 1438
 	public bool reconnect;
@@ -361,17 +356,12 @@ public class CustomNetworkManager : NetworkManager
 	public string versionstring;
 
 	// Token: 0x040005A0 RID: 1440
-	public GameConsole.Console console;
+	private GameConsole.Console console;
 
 	// Token: 0x020000E7 RID: 231
 	[Serializable]
 	public class DisconnectLog
 	{
-		// Token: 0x0600065F RID: 1631
-		public DisconnectLog()
-		{
-		}
-
 		// Token: 0x040005A1 RID: 1441
 		[Multiline]
 		public string msg_en;
@@ -396,11 +386,6 @@ public class CustomNetworkManager : NetworkManager
 		[Serializable]
 		public class LogButton
 		{
-			// Token: 0x06000660 RID: 1632
-			public LogButton()
-			{
-			}
-
 			// Token: 0x040005A7 RID: 1447
 			public ConnInfoButton[] actions;
 
