@@ -1,4 +1,3 @@
-// PROBLEMATIC FILE - HAD TO USE IL ASSEMBLY TO MODIFY.
 using System;
 using Dissonance.Integrations.UNet_HLAPI;
 using GameConsole;
@@ -6,40 +5,31 @@ using Unity;
 using UnityEngine;
 using UnityEngine.Networking;
 
-// Token: 0x020000A4 RID: 164
+// Token: 0x020000A6 RID: 166
 public class PlayerStats : NetworkBehaviour
 {
-	// Token: 0x0600040D RID: 1037 RVA: 0x00004BC5 File Offset: 0x00002DC5
-	public PlayerStats()
-	{
-	}
-
-	// Token: 0x0600040E RID: 1038
-	public void Start()
+	// Token: 0x06000409 RID: 1033
+	private void Start()
 	{
 		this.ccm = base.GetComponent<CharacterClassManager>();
 		this.ui = UserMainInterface.singleton;
-		this.do106Clean = ConfigFile.GetString("clean_106", "no").Equals("yes");
-		if (this.do106Clean)
-		{
-			ServerConsole.AddLog("|SM| 106 Cleaning is on.");
-		}
+		this.smDo106Cleaning = ConfigFile.GetString("clean_106", "no").Equals("yes");
 	}
 
-	// Token: 0x0600040F RID: 1039 RVA: 0x00004C00 File Offset: 0x00002E00
+	// Token: 0x0600040A RID: 1034 RVA: 0x00016140 File Offset: 0x00014340
 	public float GetHealthPercent()
 	{
 		return Mathf.Clamp01(1f - (float)this.health / (float)this.ccm.klasy[this.ccm.curClass].maxHP);
 	}
 
-	// Token: 0x06000410 RID: 1040 RVA: 0x00004C33 File Offset: 0x00002E33
+	// Token: 0x0600040B RID: 1035 RVA: 0x00016173 File Offset: 0x00014373
 	[Command(channel = 2)]
 	public void CmdSelfDeduct(PlayerStats.HitInfo info)
 	{
 		this.HurtPlayer(info, base.gameObject);
 	}
 
-	// Token: 0x06000411 RID: 1041 RVA: 0x0001A318 File Offset: 0x00018518
+	// Token: 0x0600040C RID: 1036 RVA: 0x00016184 File Offset: 0x00014384
 	public void Explode()
 	{
 		bool flag = this.health >= 1 && base.transform.position.y < 900f;
@@ -69,8 +59,8 @@ public class PlayerStats : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x06000412 RID: 1042 RVA: 0x0001A3EC File Offset: 0x000185EC
-	public void Update()
+	// Token: 0x0600040D RID: 1037 RVA: 0x00016258 File Offset: 0x00014458
+	private void Update()
 	{
 		if (base.isLocalPlayer && this.ccm.curClass != 2)
 		{
@@ -83,20 +73,20 @@ public class PlayerStats : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x06000413 RID: 1043 RVA: 0x00004C42 File Offset: 0x00002E42
+	// Token: 0x0600040E RID: 1038 RVA: 0x000162DE File Offset: 0x000144DE
 	[Command(channel = 2)]
 	public void CmdTesla()
 	{
 		this.HurtPlayer(new PlayerStats.HitInfo((float)UnityEngine.Random.Range(100, 200), base.GetComponent<HlapiPlayer>().PlayerId, "TESLA"), base.gameObject);
 	}
 
-	// Token: 0x06000414 RID: 1044
+	// Token: 0x0600040F RID: 1039
 	public void SetHPAmount(int hp)
 	{
 		this.Networkhealth = hp;
 	}
 
-	// Token: 0x06000415 RID: 1045
+	// Token: 0x06000410 RID: 1040
 	public void HurtPlayer(PlayerStats.HitInfo info, GameObject go)
 	{
 		PlayerStats component = go.GetComponent<PlayerStats>();
@@ -109,22 +99,18 @@ public class PlayerStats : NetworkBehaviour
 			{
 				go.GetComponent<Scp106PlayerScript>().CallRpcAnnounceContaining();
 			}
-			if (info.tool.Equals("POCKET"))
-			{
-				go.GetComponent<Inventory>().RemoveAll();
-			}
 			if (info.amount != 999799f && component2.curClass != 7)
 			{
 				if (info.tool.Equals("POCKET"))
 				{
-					if (!this.do106Clean)
+					if (!this.smDo106Cleaning)
 					{
-						this.DoRagdoll(info, go);
+						this.smDoRagdoll(info, go);
 					}
 				}
 				else
 				{
-					this.DoRagdoll(info, go);
+					this.smDoRagdoll(info, go);
 				}
 			}
 			component2.NetworkdeathPosition = go.transform.position;
@@ -137,9 +123,9 @@ public class PlayerStats : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x06000416 RID: 1046 RVA: 0x00004C7B File Offset: 0x00002E7B
+	// Token: 0x06000411 RID: 1041 RVA: 0x0001641B File Offset: 0x0001461B
 	[ServerCallback]
-	public void CmdRoundrestart()
+	private void CmdRoundrestart()
 	{
 		if (!NetworkServer.active)
 		{
@@ -148,9 +134,9 @@ public class PlayerStats : NetworkBehaviour
 		this.CallRpcRoundrestart();
 	}
 
-	// Token: 0x06000417 RID: 1047 RVA: 0x0001A578 File Offset: 0x00018778
+	// Token: 0x06000412 RID: 1042 RVA: 0x00016430 File Offset: 0x00014630
 	[ClientRpc(channel = 7)]
-	public void RpcRoundrestart()
+	private void RpcRoundrestart()
 	{
 		if (!base.isServer)
 		{
@@ -160,33 +146,34 @@ public class PlayerStats : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x06000418 RID: 1048 RVA: 0x00004C8E File Offset: 0x00002E8E
+	// Token: 0x06000413 RID: 1043 RVA: 0x00016465 File Offset: 0x00014665
 	public void Roundrestart()
 	{
 		this.CmdRoundrestart();
 		base.Invoke("ChangeLevel", 2.5f);
 	}
 
-	// Token: 0x06000419 RID: 1049 RVA: 0x0001A5B0 File Offset: 0x000187B0
-	public void ChangeLevel()
+	// Token: 0x06000414 RID: 1044 RVA: 0x0001647D File Offset: 0x0001467D
+	private void ChangeLevel()
 	{
 		if (base.isServer)
 		{
-			GameConsole.Console.singleton.AddLog("round ended", new Color32(128, 128, 128, byte.MaxValue), false);
 			NetworkManager.singleton.ServerChangeScene(NetworkManager.singleton.onlineScene);
-			return;
 		}
-		NetworkManager.singleton.StopClient();
+		else
+		{
+			NetworkManager.singleton.StopClient();
+		}
 	}
 
-	// Token: 0x0600041A RID: 1050 RVA: 0x000020C4 File Offset: 0x000002C4
-	public void UNetVersion()
+	// Token: 0x06000415 RID: 1045 RVA: 0x00002495 File Offset: 0x00000695
+	private void UNetVersion()
 	{
 	}
 
-	// Token: 0x17000058 RID: 88
-	// (get) Token: 0x0600041B RID: 1051 RVA: 0x0001A610 File Offset: 0x00018810
-	// (set) Token: 0x0600041C RID: 1052 RVA: 0x00004CA6 File Offset: 0x00002EA6
+	// Token: 0x1700005A RID: 90
+	// (get) Token: 0x06000416 RID: 1046 RVA: 0x000164B0 File Offset: 0x000146B0
+	// (set) Token: 0x06000417 RID: 1047 RVA: 0x000164C3 File Offset: 0x000146C3
 	public int Networkhealth
 	{
 		get
@@ -206,8 +193,8 @@ public class PlayerStats : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x0600041D RID: 1053 RVA: 0x00004CE5 File Offset: 0x00002EE5
-	public static void InvokeCmdCmdSelfDeduct(NetworkBehaviour obj, NetworkReader reader)
+	// Token: 0x06000418 RID: 1048 RVA: 0x00016502 File Offset: 0x00014702
+	protected static void InvokeCmdCmdSelfDeduct(NetworkBehaviour obj, NetworkReader reader)
 	{
 		if (!NetworkServer.active)
 		{
@@ -217,8 +204,8 @@ public class PlayerStats : NetworkBehaviour
 		((PlayerStats)obj).CmdSelfDeduct(GeneratedNetworkCode._ReadHitInfo_PlayerStats(reader));
 	}
 
-	// Token: 0x0600041E RID: 1054 RVA: 0x00004D0E File Offset: 0x00002F0E
-	public static void InvokeCmdCmdTesla(NetworkBehaviour obj, NetworkReader reader)
+	// Token: 0x06000419 RID: 1049 RVA: 0x0001652B File Offset: 0x0001472B
+	protected static void InvokeCmdCmdTesla(NetworkBehaviour obj, NetworkReader reader)
 	{
 		if (!NetworkServer.active)
 		{
@@ -228,7 +215,7 @@ public class PlayerStats : NetworkBehaviour
 		((PlayerStats)obj).CmdTesla();
 	}
 
-	// Token: 0x0600041F RID: 1055 RVA: 0x0001A624 File Offset: 0x00018824
+	// Token: 0x0600041A RID: 1050 RVA: 0x00016550 File Offset: 0x00014750
 	public void CallCmdSelfDeduct(PlayerStats.HitInfo info)
 	{
 		if (!NetworkClient.active)
@@ -250,7 +237,7 @@ public class PlayerStats : NetworkBehaviour
 		base.SendCommandInternal(networkWriter, 2, "CmdSelfDeduct");
 	}
 
-	// Token: 0x06000420 RID: 1056 RVA: 0x0001A6B0 File Offset: 0x000188B0
+	// Token: 0x0600041B RID: 1051 RVA: 0x000165DC File Offset: 0x000147DC
 	public void CallCmdTesla()
 	{
 		if (!NetworkClient.active)
@@ -271,8 +258,8 @@ public class PlayerStats : NetworkBehaviour
 		base.SendCommandInternal(networkWriter, 2, "CmdTesla");
 	}
 
-	// Token: 0x06000421 RID: 1057 RVA: 0x00004D31 File Offset: 0x00002F31
-	public static void InvokeRpcRpcRoundrestart(NetworkBehaviour obj, NetworkReader reader)
+	// Token: 0x0600041C RID: 1052 RVA: 0x00016658 File Offset: 0x00014858
+	protected static void InvokeRpcRpcRoundrestart(NetworkBehaviour obj, NetworkReader reader)
 	{
 		if (!NetworkClient.active)
 		{
@@ -282,7 +269,7 @@ public class PlayerStats : NetworkBehaviour
 		((PlayerStats)obj).RpcRoundrestart();
 	}
 
-	// Token: 0x06000422 RID: 1058 RVA: 0x0001A72C File Offset: 0x0001892C
+	// Token: 0x0600041D RID: 1053 RVA: 0x0001667C File Offset: 0x0001487C
 	public void CallRpcRoundrestart()
 	{
 		if (!NetworkServer.active)
@@ -298,7 +285,7 @@ public class PlayerStats : NetworkBehaviour
 		this.SendRPCInternal(networkWriter, 7, "RpcRoundrestart");
 	}
 
-	// Token: 0x06000423 RID: 1059 RVA: 0x0001A798 File Offset: 0x00018998
+	// Token: 0x0600041E RID: 1054 RVA: 0x000166E8 File Offset: 0x000148E8
 	static PlayerStats()
 	{
 		NetworkBehaviour.RegisterCommandDelegate(typeof(PlayerStats), PlayerStats.kCmdCmdSelfDeduct, new NetworkBehaviour.CmdDelegate(PlayerStats.InvokeCmdCmdSelfDeduct));
@@ -309,7 +296,7 @@ public class PlayerStats : NetworkBehaviour
 		NetworkCRC.RegisterBehaviour("PlayerStats", 0);
 	}
 
-	// Token: 0x06000424 RID: 1060 RVA: 0x0001A834 File Offset: 0x00018A34
+	// Token: 0x0600041F RID: 1055 RVA: 0x00016784 File Offset: 0x00014984
 	public override bool OnSerialize(NetworkWriter writer, bool forceAll)
 	{
 		if (forceAll)
@@ -334,7 +321,7 @@ public class PlayerStats : NetworkBehaviour
 		return flag;
 	}
 
-	// Token: 0x06000425 RID: 1061 RVA: 0x0001A8A0 File Offset: 0x00018AA0
+	// Token: 0x06000420 RID: 1056 RVA: 0x000167F0 File Offset: 0x000149F0
 	public override void OnDeserialize(NetworkReader reader, bool initialState)
 	{
 		if (initialState)
@@ -349,72 +336,47 @@ public class PlayerStats : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x06000B22 RID: 2850
-	public void ServerModHurtHook(GameObject go)
+	// Token: 0x06000BA0 RID: 2976
+	public void smDoRagdoll(PlayerStats.HitInfo info, GameObject go)
 	{
-		CharacterClassManager component2 = go.GetComponent<CharacterClassManager>();
-		if (component2.curClass == 0)
-		{
-			component2.is173InRound = false;
-		}
+		PlayerStats component = go.GetComponent<PlayerStats>();
+		CharacterClassManager characterClassManager;
+		base.GetComponent<RagdollManager>().SpawnRagdoll(go.transform.position, go.transform.rotation, characterClassManager.curClass, info, characterClassManager.klasy[characterClassManager.curClass].team != Team.SCP, go.GetComponent<HlapiPlayer>().PlayerId, go.GetComponent<NicknameSync>().myNick);
 	}
 
-	// Token: 0x06000B73 RID: 2931
-	public void test(GameObject ob)
-	{
-	}
-
-	// Token: 0x06000EE5 RID: 3813
-	public void test(PlayerStats.HitInfo info)
-	{
-	}
-
-	// Token: 0x06000F59 RID: 3929
-	public void DoRagdoll(GameObject go, CharacterClassManager component2, PlayerStats.HitInfo info)
-	{
-		info.ToString();
-	}
-
-	// Token: 0x06000FF4 RID: 4084
-	public void DoRagdoll(PlayerStats.HitInfo info, GameObject go)
-	{
-		CharacterClassManager component = go.GetComponent<CharacterClassManager>();
-		base.GetComponent<RagdollManager>().SpawnRagdoll(go.transform.position, go.transform.rotation, component.curClass, info, component.klasy[component.curClass].team != Team.SCP, go.GetComponent<HlapiPlayer>().PlayerId, go.GetComponent<NicknameSync>().myNick);
-	}
-
-	// Token: 0x0400039D RID: 925
+	// Token: 0x040003A4 RID: 932
 	public PlayerStats.HitInfo lastHitInfo = new PlayerStats.HitInfo(0f, "NONE", "NONE");
 
-	// Token: 0x0400039E RID: 926
+	// Token: 0x040003A5 RID: 933
 	[SyncVar(hook = "SetHPAmount")]
 	public int health;
 
-	// Token: 0x0400039F RID: 927
+	// Token: 0x040003A6 RID: 934
 	public int maxHP;
 
-	// Token: 0x040003A0 RID: 928
-	public UserMainInterface ui;
+	// Token: 0x040003A7 RID: 935
+	private UserMainInterface ui;
 
-	// Token: 0x040003A1 RID: 929
-	public CharacterClassManager ccm;
+	// Token: 0x040003A8 RID: 936
+	private CharacterClassManager ccm;
 
-	// Token: 0x040003A2 RID: 930
-	public static int kCmdCmdSelfDeduct = -2147454163;
+	// Token: 0x040003A9 RID: 937
+	private static int kCmdCmdSelfDeduct = -2147454163;
 
-	// Token: 0x040003A3 RID: 931
-	public static int kCmdCmdTesla;
+	// Token: 0x040003AA RID: 938
+	private static int kCmdCmdTesla;
 
-	// Token: 0x040003A4 RID: 932
-	public static int kRpcRpcRoundrestart;
+	// Token: 0x040003AB RID: 939
+	private static int kRpcRpcRoundrestart;
 
-	// Token: 0x04001017 RID: 4119
-	public bool do106Clean;
+	// Token: 0x04000C26 RID: 3110
+	public bool smDo106Cleaning;
 
-	// Token: 0x020000A5 RID: 165
+	// Token: 0x020000A7 RID: 167
 	[Serializable]
 	public struct HitInfo
 	{
-		// Token: 0x06000426 RID: 1062 RVA: 0x00004D54 File Offset: 0x00002F54
+		// Token: 0x06000421 RID: 1057 RVA: 0x00016831 File Offset: 0x00014A31
 		public HitInfo(float amnt, string plyID, string weapon)
 		{
 			this.amount = amnt;
@@ -422,13 +384,13 @@ public class PlayerStats : NetworkBehaviour
 			this.time = ServerTime.time;
 		}
 
-		// Token: 0x040003A5 RID: 933
+		// Token: 0x040003AC RID: 940
 		public float amount;
 
-		// Token: 0x040003A6 RID: 934
+		// Token: 0x040003AD RID: 941
 		public string tool;
 
-		// Token: 0x040003A7 RID: 935
+		// Token: 0x040003AE RID: 942
 		public int time;
 	}
 }

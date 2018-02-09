@@ -52,6 +52,8 @@ namespace MultiAdmin
                         Thread.Sleep(300);
                     }
 
+                    if (server.IsStopping()) break;
+
                     Boolean display = true;
                     ConsoleColor colour = ConsoleColor.Cyan;
 
@@ -92,6 +94,13 @@ namespace MultiAdmin
                         if (!server.InitialRoundStarted)
                         {
                             server.InitialRoundStarted = true;
+                            foreach (Feature f in server.Features)
+                            {
+                                if (f is IEventRoundStart)
+                                {
+                                    ((IEventRoundStart)f).OnRoundStart();
+                                }
+                            }
                         }
                         else
                         {
@@ -118,7 +127,7 @@ namespace MultiAdmin
                         }
                     }
 
-                    if (gameMessage.Contains("Server starting at port"))
+                    if (gameMessage.Contains("Level loaded. Creating match..."))
                     {
                         foreach (Feature f in server.Features)
                         {

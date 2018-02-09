@@ -10,7 +10,7 @@ namespace MultiAdmin.MultiAdmin
 {
     public class Server
     {
-        public static readonly string MA_VERSION = "1.1";
+        public static readonly string MA_VERSION = "1.2";
 
         public Boolean HasServerMod { get; set; }
         public String ServerModVersion { get; set; }
@@ -74,7 +74,7 @@ namespace MultiAdmin.MultiAdmin
             RegisterFeature(new ChainStart(this));
             RegisterFeature(new ConfigReload(this));
             RegisterFeature(new ExitCommand(this));
-            //RegisterFeature(new EventTest(this));
+            RegisterFeature(new EventTest(this));
             RegisterFeature(new GithubGenerator(this));
             RegisterFeature(new HelpCommand(this));
             RegisterFeature(new InactivityShutdown(this));
@@ -217,8 +217,8 @@ namespace MultiAdmin.MultiAdmin
                 SwapConfigs();
                 String logdir = "servers" + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "logs" + Path.DirectorySeparatorChar + Utils.GetDate() + "_output_log.txt";
                 Write("Starting server with the following parameters");
-                Write(files[0] + " -batchmode -nographics -key" + session_id  + " -id" + (object)Process.GetCurrentProcess().Id + " -logFile \"" + logdir + "\"");
-                gameProcess = Process.Start(files[0], "-batchmode -nographics -key" + session_id + " -id" + (object)Process.GetCurrentProcess().Id + " -logFile \"" + logdir + "\"");
+                Write(files[0] + " -batchmode -nographics -key" + session_id  + " -silent-crashes -id" + (object)Process.GetCurrentProcess().Id + " -logFile \"" + logdir + "\"");
+                gameProcess = Process.Start(files[0], "-batchmode -nographics -key" + session_id + " -silent-crashes -id" + (object)Process.GetCurrentProcess().Id + " -logFile \"" + logdir + "\"");
                 CreateRunFile();
                 started = true;
                 foreach (Feature f in Features)
