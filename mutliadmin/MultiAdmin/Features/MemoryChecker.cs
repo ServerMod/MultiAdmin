@@ -16,7 +16,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 
         public override void Init()
         {
-            lowMb = Server.ServerConfig.GetIntValue("SHUTDOWN_LOW_MEMORY", 400);
+            lowMb = Server.ServerConfig.GetIntValue("RESTART_LOW_MEMORY", 400);
             tickCount = 0;
         }
 
