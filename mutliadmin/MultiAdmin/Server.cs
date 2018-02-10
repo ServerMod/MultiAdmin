@@ -302,7 +302,9 @@ namespace MultiAdmin.MultiAdmin
 
         public void NewInstance(String configChain)
         {
-            Process.Start(Directory.GetFiles(Directory.GetCurrentDirectory(), "MultiAdmin.*")[0], configChain);
+            String file = Directory.GetFiles(Directory.GetCurrentDirectory(), "MultiAdmin.*")[0];
+            ProcessStartInfo psi = new ProcessStartInfo(file, configChain);
+            Process.Start(psi);
         }
 
         public void SendMessage(string message)

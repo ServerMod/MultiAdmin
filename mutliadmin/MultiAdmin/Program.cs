@@ -149,6 +149,7 @@ namespace MutliAdmin
 
         public static void Main(string[] args)
         {
+            Write("ARGS:" + string.Join(",", args));
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnExit);
             multiadminConfig = new MultiAdmin.Config("spc_multiadmin.cfg");
             FindConfig();

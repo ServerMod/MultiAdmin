@@ -9,9 +9,11 @@ namespace MultiAdmin.MultiAdmin.Commands
     class ChainStart : Feature, IEventServerStart
     {
         private String config;
+        private Boolean dontstart;
 
         public ChainStart(Server server) : base(server)
         {
+            dontstart = false;
         }
 
         public override void Init()
@@ -31,8 +33,9 @@ namespace MultiAdmin.MultiAdmin.Commands
 
         public void OnServerStart()
         {
-            if (!(String.IsNullOrWhiteSpace(Server.ConfigChain) || Server.ConfigChain.Trim().Equals("\"\"")))
+            if ((!(String.IsNullOrWhiteSpace(Server.ConfigChain) || Server.ConfigChain.Trim().Equals("\"\""))) && !dontstart)
             {
+                dontstart = true;
                 Server.Write("Starting next with chained config:" + Server.ConfigChain);
                 Server.NewInstance(Server.ConfigChain);
             }

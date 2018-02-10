@@ -42,6 +42,11 @@ namespace MultiAdmin.MultiAdmin.Commands
             {
                 tickCount = 0;
             }
+
+            if (tickCount == 5)
+            {
+                Server.RestartServer();
+            }
  
         }
     }
