@@ -18,6 +18,10 @@ namespace MultiAdmin.MultiAdmin.Commands
         public override void Init()
         {
             count = 0;
+        }
+
+        public override void OnConfigReload()
+        {
             restartAfter = Server.ServerConfig.GetIntValue("RESTART_EVERY_NUM_ROUNDS", -1);
         }
 
@@ -25,7 +29,7 @@ namespace MultiAdmin.MultiAdmin.Commands
         {
             if (restartAfter < 0) return;
             count++; 
-            if (count > restartAfter) base.Server.RestartServer();
+            if (count > restartAfter) base.Server.SoftRestartServer();
         }
 
 

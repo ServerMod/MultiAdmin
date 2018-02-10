@@ -16,6 +16,10 @@ namespace MultiAdmin.MultiAdmin.Commands
 
         public override void Init()
         {
+        }
+
+        public override void OnConfigReload()
+        {
             config = Server.ServerConfig.GetValue("START_CONFIG_ON_FULL", "disabled");
         }
 

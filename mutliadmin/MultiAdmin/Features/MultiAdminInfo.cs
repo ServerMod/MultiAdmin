@@ -18,6 +18,10 @@ namespace MultiAdmin.MultiAdmin.Commands
         {
         }
 
+        public override void OnConfigReload()
+        { 
+        }
+
         public void PrintInfo()
         {
             Server.Write("MultiAdmin for SCP: Secret Laboratory made by Courtney (Grover_c13), who is not a girl.", ConsoleColor.DarkMagenta);

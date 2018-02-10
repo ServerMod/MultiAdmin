@@ -17,6 +17,10 @@ namespace MultiAdmin.MultiAdmin.Features
             return "HELP";
         }
 
+        public override void OnConfigReload()
+        {
+        }
+
         public string GetCommandDescription()
         {
             return "Prints out available commands and their function.";

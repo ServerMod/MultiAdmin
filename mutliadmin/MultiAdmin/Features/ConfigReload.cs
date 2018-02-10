@@ -50,8 +50,18 @@ namespace MultiAdmin.MultiAdmin.Features
             {
                 Server.SwapConfigs();
                 pass = true;
+                Server.ServerConfig.Reload();
+                Server.Log("Reloading config");
+                foreach (Feature feature in Server.Features)
+                {
+                    feature.OnConfigReload();
+                }
             }
 
+        }
+
+        public override void OnConfigReload()
+        {
         }
 
         public bool PassToGame()

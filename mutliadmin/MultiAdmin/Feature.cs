@@ -15,6 +15,7 @@ namespace MultiAdmin.MultiAdmin
         }
 
         public abstract String GetFeatureDescription();
+        public abstract void OnConfigReload();
         public abstract String GetFeatureName();
         public abstract void Init();
         

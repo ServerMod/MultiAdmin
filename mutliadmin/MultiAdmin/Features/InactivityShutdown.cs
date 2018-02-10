@@ -18,8 +18,12 @@ namespace MultiAdmin.MultiAdmin.Commands
 
         public override void Init()
         {
-            waitFor = Server.ServerConfig.GetIntValue("SHUTDOWN_ONCE_EMPTY_FOR", -1);
             roundEndTime = Utils.GetUnixTime();
+        }
+
+        public override void OnConfigReload()
+        {
+            waitFor = Server.ServerConfig.GetIntValue("SHUTDOWN_ONCE_EMPTY_FOR", -1);
         }
 
         public void OnRoundEnd()

@@ -30,6 +30,10 @@ namespace MultiAdmin.MultiAdmin.Commands
             return "ChainStart";
         }
 
+        public override void OnConfigReload()
+        {
+        }
+
 
         public void OnServerStart()
         {

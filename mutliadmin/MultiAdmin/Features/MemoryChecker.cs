@@ -16,7 +16,6 @@ namespace MultiAdmin.MultiAdmin.Commands
 
         public override void Init()
         {
-            lowMb = Server.ServerConfig.GetIntValue("RESTART_LOW_MEMORY", 400);
             tickCount = 0;
         }
 
@@ -32,10 +31,13 @@ namespace MultiAdmin.MultiAdmin.Commands
 
         public void OnTick()
         {
-            long workingMemory = Server.GetGameProccess().WorkingSet64 / 1048576L;
-            Boolean runningFor3Mins = (Server.GetGameProccess().StartTime.AddMinutes(3.0) < DateTime.Now);
-            if (workingMemory < lowMb && runningFor3Mins)
+            Server.GetGameProccess().Refresh();
+            long workingMemory = Server.GetGameProccess().WorkingSet64 / 1048576L; // process memory in MB
+            long memoryLeft = 2048 - workingMemory; // 32 bit limited to 2GB
+
+            if (memoryLeft < lowMb)
             {
+                Server.Write("Warning: program is running low on memory (" + memoryLeft + " MB left)");
                 tickCount++;
             }
             else
@@ -43,11 +45,17 @@ namespace MultiAdmin.MultiAdmin.Commands
                 tickCount = 0;
             }
 
-            if (tickCount == 5)
+            if (tickCount == 10)
             {
-                Server.RestartServer();
+                Server.Write("Restarting due to lower memory");
+                Server.SoftRestartServer();
             }
  
+        }
+
+        public override void OnConfigReload()
+        {
+            lowMb = Server.ServerConfig.GetIntValue("RESTART_LOW_MEMORY", 400);
         }
     }
 }

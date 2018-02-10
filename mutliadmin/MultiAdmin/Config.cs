@@ -10,7 +10,14 @@ namespace MultiAdmin
     public class Config
     {
         public Dictionary<String, String> values;
+        private String config_file;
         public Config(String config_file)
+        {
+            this.config_file = config_file;
+            Reload();
+        }
+
+        public void Reload()
         {
             values = new Dictionary<string, string>();
             var multi_line_value = false;

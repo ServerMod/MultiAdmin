@@ -17,6 +17,10 @@ namespace MultiAdmin.MultiAdmin.Commands
         {
         }
 
+        public override void OnConfigReload()
+        {
+        }
+
         public override string GetFeatureDescription()
         {
             return "Tests the events";

@@ -33,6 +33,10 @@ namespace MultiAdmin.MultiAdmin.Commands
             UpdateTitlebar();
         }
 
+        public override void OnConfigReload()
+        {
+        }
+
         public void OnPlayerConnect(String name)
         {
             playerCount++;
@@ -59,7 +63,8 @@ namespace MultiAdmin.MultiAdmin.Commands
             }
             var displayPlayerCount = playerCount;
             if (playerCount == -1) displayPlayerCount = 0;
-            Console.Title = "SCP:SL MultiAdmin " + Server.MA_VERSION + " | Config: " + Server.ConfigKey + " | Session ID:" + Server.GetSessionId() + " | " + displayPlayerCount + "/" + maxPlayers + " | " + smod;
+            string proccessId = (Server.GetGameProccess() == null) ? "" : Server.GetGameProccess().Id.ToString();
+            Console.Title = "SCP:SL MultiAdmin " + Server.MA_VERSION + " | Config: " + Server.ConfigKey + " | Session ID:" + Server.GetSessionId() + " Game PID: " + proccessId+ " | " + displayPlayerCount + "/" + maxPlayers + " | " + smod;
         }
     }
 }

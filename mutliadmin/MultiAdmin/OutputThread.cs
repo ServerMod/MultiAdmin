@@ -19,8 +19,6 @@ namespace MultiAdmin
                 catch
                 {
                     server.Write("Message printer warning: 'SCPSL_Data/Dedicated' directory not found.", ConsoleColor.Yellow);
-                    server.Write("Press any key to ignore...", ConsoleColor.DarkGray);
-                    Console.ReadKey();
                 }
 
                 foreach (string path in strArray)
@@ -154,6 +152,7 @@ namespace MultiAdmin
                     if (gameMessage.Contains("Player connect"))
                     {
                         display = false;
+                        server.Log("Player connect event");
                         foreach (Feature f in server.Features)
                         {
                             if (f is IEventPlayerConnect)
@@ -167,6 +166,7 @@ namespace MultiAdmin
                     if (gameMessage.Contains("Player disconnect"))
                     {
                         display = false;
+                        server.Log("Player disconnect event");
                         foreach (Feature f in server.Features)
                         {
                             if (f is IEventPlayerDisconnect)

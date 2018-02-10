@@ -13,6 +13,10 @@ namespace MultiAdmin.MultiAdmin.Features
         {
         }
 
+        public override void OnConfigReload()
+        {
+        }
+
         public string GetCommand()
         {
             return "GITHUBGEN";

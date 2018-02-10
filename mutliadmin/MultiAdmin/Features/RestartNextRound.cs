@@ -24,6 +24,7 @@ namespace MultiAdmin.MultiAdmin.Commands
             return "Restarts the server at the end of this round";
         }
 
+
         public void OnCall(string[] args)
         {
             Server.Write("Server will restart next round");
@@ -32,7 +33,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 
         public void OnRoundEnd()
         {
-            if (restart) base.Server.RestartServer();
+            if (restart) base.Server.SoftRestartServer();
         }
 
         public bool PassToGame()
@@ -63,6 +64,10 @@ namespace MultiAdmin.MultiAdmin.Commands
         public string GetUsage()
         {
             return "";
+        }
+
+        public override void OnConfigReload()
+        {
         }
     }
 }

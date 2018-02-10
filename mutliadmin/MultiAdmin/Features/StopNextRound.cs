@@ -25,6 +25,11 @@ namespace MultiAdmin.MultiAdmin.Commands
             stop = false;
         }
 
+
+        public override void OnConfigReload()
+        {
+        }
+
         public void OnCall(string[] args)
         {
             stop = true;

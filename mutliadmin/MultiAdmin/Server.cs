@@ -10,7 +10,7 @@ namespace MultiAdmin.MultiAdmin
 {
     public class Server
     {
-        public static readonly string MA_VERSION = "1.2.1";
+        public static readonly string MA_VERSION = "1.2.2";
 
         public Boolean HasServerMod { get; set; }
         public String ServerModVersion { get; set; }
@@ -41,6 +41,7 @@ namespace MultiAdmin.MultiAdmin
         private Process gameProcess;
         private Boolean stopping;
         private String session_id;
+        private String maLogLocation;
 
         public Server(String serverDir, String configKey, Config multiAdminCfg, String mainConfigLocation, String configChain)
         {
@@ -53,12 +54,19 @@ namespace MultiAdmin.MultiAdmin
             Features = new List<Feature>();
             tick = new List<IEventTick>();
             MultiAdminCfg = multiAdminCfg;
+            maLogLocation = "servers" + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "logs" + Path.DirectorySeparatorChar + Utils.GetDate() + "_MA_output_log.txt";
             stopping = false;
             InitialRoundStarted = false;
             readerThread = new Thread(new ThreadStart(() => InputThread.Write(this)));
             printerThread = new Thread(new ThreadStart(() => OutputThread.Read(this)));
+
+            // Register all features 
             RegisterFeatures();
-            ReloadConfig();
+            // Load config 
+            serverConfig = new Config(ServerDir + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "config.txt");
+            // Init features
+            InitFeatures();
+            // Start the server and threads
             if (StartServer())
             {
                 readerThread.Start();
@@ -92,6 +100,7 @@ namespace MultiAdmin.MultiAdmin
             foreach (Feature feature in Features)
             {
                 feature.Init();
+                feature.OnConfigReload();
             }
         }
 
@@ -119,8 +128,8 @@ namespace MultiAdmin.MultiAdmin
                     Write("Removing Session", ConsoleColor.Red);
                     DeleteSession();
                     Write("Restarting game with same session id");
-                    ReloadConfig();
                     StartServer();
+                    InitFeatures();
 
                 }
 
@@ -167,7 +176,7 @@ namespace MultiAdmin.MultiAdmin
 
         public void Write(String message, ConsoleColor color = ConsoleColor.Yellow, int height = 0)
         {
-            Thread.Sleep(100);
+            Log(message);
             Console.CursorTop += height;
             Console.ForegroundColor = color;
             DateTime now = DateTime.Now;
@@ -175,6 +184,21 @@ namespace MultiAdmin.MultiAdmin
             Console.WriteLine(message == "" ? "" : str + message);
             Console.ForegroundColor = ConsoleColor.White;
             Console.BackgroundColor = ConsoleColor.Black;
+        }
+
+        public void Log(String message)
+        {
+            using (StreamWriter sw = File.AppendText(this.maLogLocation))
+            {
+                DateTime now = DateTime.Now;
+                string date = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
+                sw.WriteLine(date + message);
+            }
+        }
+
+        public void SoftRestartServer()
+        {
+            gameProcess.Kill();
         }
 
         public void RestartServer()
@@ -215,7 +239,7 @@ namespace MultiAdmin.MultiAdmin
                 string[] files = Directory.GetFiles(Directory.GetCurrentDirectory(), "SCPSL.*", SearchOption.TopDirectoryOnly);
                 Write("Executing: " + files[0], ConsoleColor.DarkGreen);
                 SwapConfigs();
-                String logdir = "servers" + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "logs" + Path.DirectorySeparatorChar + Utils.GetDate() + "_output_log.txt";
+                String logdir = "servers" + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "logs" + Path.DirectorySeparatorChar + Utils.GetDate() + "SPC_output_log.txt";
                 Write("Starting server with the following parameters");
                 Write(files[0] + " -batchmode -nographics -key" + session_id  + " -silent-crashes -id" + (object)Process.GetCurrentProcess().Id + " -logFile \"" + logdir + "\"");
                 gameProcess = Process.Start(files[0], "-batchmode -nographics -key" + session_id + " -silent-crashes -id" + (object)Process.GetCurrentProcess().Id + " -logFile \"" + logdir + "\"");
@@ -245,13 +269,6 @@ namespace MultiAdmin.MultiAdmin
         public Process GetGameProccess()
         {
             return gameProcess;
-        }
-
-
-        private void ReloadConfig()
-        {
-            serverConfig = new Config(ServerDir + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "config.txt");
-            InitFeatures();
         }
 
         public void SwapConfigs()

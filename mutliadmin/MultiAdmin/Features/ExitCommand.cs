@@ -19,6 +19,10 @@ namespace MultiAdmin.MultiAdmin.Features
             return "EXIT";
         }
 
+        public override void OnConfigReload()
+        {
+        }
+
         public string GetCommandDescription()
         {
             return "Exits the server";
@@ -47,7 +51,6 @@ namespace MultiAdmin.MultiAdmin.Features
         public void OnCall(string[] args)
         {
             Server.StopServer(false);
-
         }
 
         public bool PassToGame()
