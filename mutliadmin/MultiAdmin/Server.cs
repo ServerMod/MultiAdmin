@@ -10,7 +10,7 @@ namespace MultiAdmin.MultiAdmin
 {
     public class Server
     {
-        public static readonly string MA_VERSION = "1.2.2";
+        public static readonly string MA_VERSION = "1.2.3";
 
         public Boolean HasServerMod { get; set; }
         public String ServerModVersion { get; set; }
@@ -42,6 +42,7 @@ namespace MultiAdmin.MultiAdmin
         private Boolean stopping;
         private String session_id;
         private String maLogLocation;
+        public String logFolder { get; }
 
         public Server(String serverDir, String configKey, Config multiAdminCfg, String mainConfigLocation, String configChain)
         {
@@ -54,7 +55,8 @@ namespace MultiAdmin.MultiAdmin
             Features = new List<Feature>();
             tick = new List<IEventTick>();
             MultiAdminCfg = multiAdminCfg;
-            maLogLocation = "servers" + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "logs" + Path.DirectorySeparatorChar + Utils.GetDate() + "_MA_output_log.txt";
+            logFolder = "servers" + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "logs" + Path.DirectorySeparatorChar;
+            maLogLocation = logFolder + Utils.GetDate() + "_MA_output_log.txt";
             stopping = false;
             InitialRoundStarted = false;
             readerThread = new Thread(new ThreadStart(() => InputThread.Write(this)));
@@ -84,9 +86,11 @@ namespace MultiAdmin.MultiAdmin
             RegisterFeature(new ExitCommand(this));
             //RegisterFeature(new EventTest(this));
             RegisterFeature(new GithubGenerator(this));
+            RegisterFeature(new GithubLogSubmitter(this));
             RegisterFeature(new HelpCommand(this));
             RegisterFeature(new InactivityShutdown(this));
             RegisterFeature(new MemoryChecker(this));
+            RegisterFeature(new MemoryCheckerSoft(this));
             RegisterFeature(new MultiAdminInfo(this));
             RegisterFeature(new NewCommand(this));
             RegisterFeature(new RestartNextRound(this));
@@ -177,6 +181,7 @@ namespace MultiAdmin.MultiAdmin
         public void Write(String message, ConsoleColor color = ConsoleColor.Yellow, int height = 0)
         {
             Log(message);
+            Thread.Sleep(50);
             Console.CursorTop += height;
             Console.ForegroundColor = color;
             DateTime now = DateTime.Now;
@@ -239,10 +244,10 @@ namespace MultiAdmin.MultiAdmin
                 string[] files = Directory.GetFiles(Directory.GetCurrentDirectory(), "SCPSL.*", SearchOption.TopDirectoryOnly);
                 Write("Executing: " + files[0], ConsoleColor.DarkGreen);
                 SwapConfigs();
-                String logdir = "servers" + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "logs" + Path.DirectorySeparatorChar + Utils.GetDate() + "SPC_output_log.txt";
+                string args = "-batchmode -nographics -key" + session_id  + " -silent-crashes -id" + (object)Process.GetCurrentProcess().Id + " -logFile \"" + logFolder + Utils.GetDate() + "_SPC_output_log.txt" + "\"";
                 Write("Starting server with the following parameters");
-                Write(files[0] + " -batchmode -nographics -key" + session_id  + " -silent-crashes -id" + (object)Process.GetCurrentProcess().Id + " -logFile \"" + logdir + "\"");
-                gameProcess = Process.Start(files[0], "-batchmode -nographics -key" + session_id + " -silent-crashes -id" + (object)Process.GetCurrentProcess().Id + " -logFile \"" + logdir + "\"");
+                Write(files[0] + " " + args);
+                gameProcess = Process.Start(files[0], args);
                 CreateRunFile();
                 started = true;
                 foreach (Feature f in Features)
@@ -310,7 +315,6 @@ namespace MultiAdmin.MultiAdmin
         {
             return session_id;
         }
-
 
         public Boolean IsConfigRunning(String config)
         {

@@ -29,6 +29,8 @@ namespace MultiAdmin.MultiAdmin.Commands
             Server.Write("You can request LocalAdmin source code at moszka.hubert@gmail.com.", ConsoleColor.DarkMagenta);
             Server.Write("You can find MultiAdmin source code at https://github.com/Grover-c13/MultiAdmin/.", ConsoleColor.DarkMagenta);
             Server.Write("Released under CC-BY-SA 4.0", ConsoleColor.DarkMagenta);
+            Server.Write("Do you have too much money? appreciate multiadmin/servermod? consider sending me some!", ConsoleColor.Gray);
+            Server.Write("Paypal: Grover.c13@gmail.com Patreon: https://www.patreon.com/Grover_c13", ConsoleColor.Gray);
         }
 
         public override string GetFeatureDescription()

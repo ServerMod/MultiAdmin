@@ -43,7 +43,7 @@ namespace MultiAdmin.MultiAdmin.Commands
             else
             {
                 // maybe check if the config exists?
-                Server.NewInstance(args[0]);
+                Server.NewInstance(args[0].ToLower());
             }
         }
 

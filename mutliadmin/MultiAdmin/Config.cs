@@ -86,5 +86,22 @@ namespace MultiAdmin
                 return def;
             }
         }
+
+        public Boolean GetBoolean(String key, bool def)
+        {
+            String result = GetValue(key, def.ToString());
+            if (result.ToLower().Equals("yes") || result.ToLower().Equals("y") || result.ToLower().Equals("t") || result.ToLower().Equals("true") || result.ToLower().Equals("1"))
+            {
+                return true;
+            }
+
+            if (result.ToLower().Equals("n") || result.ToLower().Equals("no") || result.ToLower().Equals("f") || result.ToLower().Equals("false") || result.ToLower().Equals("f"))
+            {
+                return true;
+            }
+
+            Console.WriteLine("WARNING: config setting " + key + " is suppose to be a boolean value, but it is set to" + result + " usign default value.");
+            return def;
+        }
     }
 }

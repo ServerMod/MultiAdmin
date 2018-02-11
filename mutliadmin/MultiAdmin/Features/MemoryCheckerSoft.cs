@@ -6,27 +6,29 @@ using System.Threading.Tasks;
 
 namespace MultiAdmin.MultiAdmin.Commands
 {
-    class MemoryChecker : Feature, IEventTick
+    class MemoryCheckerSoft : Feature, IEventTick, IEventRoundEnd
     {
         private int lowMb;
         private int tickCount;
-        public MemoryChecker(Server server) : base(server)
+        private Boolean restart;
+        public MemoryCheckerSoft(Server server) : base(server)
         {
         }
 
         public override void Init()
         {
             tickCount = 0;
+            restart = false;
         }
 
         public override string GetFeatureDescription()
         {
-            return "Restarts the server if the working memory becomes too low";
+            return "Restarts the server if the working memory becomes too low at the end of the round";
         }
 
         public override string GetFeatureName()
         {
-            return "Restart On Low Memory";
+            return "Restart On Low Memory at the end of the round";
         }
 
         public void OnTick()
@@ -37,7 +39,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 
             if (memoryLeft < lowMb)
             {
-                Server.Write("Warning: program is running low on memory (" + memoryLeft + " MB left)", ConsoleColor.Red);
+                Server.Write("Warning: program is running low on memory (" + memoryLeft + " MB left) the server will restart at the end of the round if it continues", ConsoleColor.Red);
                 tickCount++;
             }
             else
@@ -47,7 +49,8 @@ namespace MultiAdmin.MultiAdmin.Commands
 
             if (tickCount == 10)
             {
-                Server.Write("Restarting due to lower memory", ConsoleColor.Red);
+                restart = true;
+                Server.Write("Restarting the server at end of the round due to low memory");
                 Server.SoftRestartServer();
             }
  
@@ -55,7 +58,12 @@ namespace MultiAdmin.MultiAdmin.Commands
 
         public override void OnConfigReload()
         {
-            lowMb = Server.ServerConfig.GetIntValue("RESTART_LOW_MEMORY", 400);
+            lowMb = Server.ServerConfig.GetIntValue("RESTART_LOW_MEMORY_ROUNDEND", 400);
+        }
+
+        public void OnRoundEnd()
+        {
+            if (restart) base.Server.SoftRestartServer();
         }
     }
 }

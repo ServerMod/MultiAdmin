@@ -46,12 +46,14 @@ namespace MultiAdmin.MultiAdmin.Features
 
         public void OnCall(string[] args)
         {
-            if (args[1].Equals("reload"))
+            if (args.Length == 0) return;
+            if (args[0].ToLower().Equals("reload"))
             {
                 Server.SwapConfigs();
                 pass = true;
+                Server.Write("Reloading config");
+                Server.Write("if the config opens in notepad, dont worry, thats just the game. It should be reloaded.");
                 Server.ServerConfig.Reload();
-                Server.Log("Reloading config");
                 foreach (Feature feature in Server.Features)
                 {
                     feature.OnConfigReload();
