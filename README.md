@@ -8,16 +8,17 @@ The latest release can be found here: [Release link](https://github.com/Grover-c
 - ChainStart: Automatically starts the next server after the first one is done loading.
 - Config reload: Config reload will swap configs
 - Exit command: Adds a graceful exit command.
+- GitHub log submitted: Goes through the last log file and submits any stacktraces
 - Help: Display a full list of multiadmin commands and in game commands.
 - Stop Server once Inactive: Stops the server after a period inactivity.
 - Restart On Low Memory: Restarts the server if the working memory becomes too low
+- Restart On Low Memory at the end of the round: Restarts the server if the working memory becomes too low at the end of the round
 - MutliAdminInfo: Prints the license/author information
 - New: Adds a command to start a new server given a config folder.
 - Restart Next Round: Restarts the server after the current round ends.
 - Restart After X Rounds: Restarts the server after X num rounds completed.
 - Stop Next Round: Stops the server after the current round ends.
 - Titlebar: Updates the title bar with instance based information, such as session id and player count. (Requires servermod to function fully)
-
 
 ## Installation Instructions:
 1. Place MultiAdmin.exe next to your LocalAdmin.exe
@@ -39,12 +40,14 @@ This does not include ServerMod or ingame commands, for a full list type HELP in
 - NEW <config_id>: Starts a new server with the given config id.
 - RESTARTNEXTROUND: Restarts the server at the end of this round
 - STOPNEXTROUND: Stops the server at the end of this round
+
 ## Config settings
 - manual_start (wether of not to start the server automatically when launching multiadmin, default = true)
 - start_config_on_full (start server with config this config folder when the server becomes full) [requires servermod]
 - shutdown_once_empty_for (shutdown the server once a round hasnt started in x seconds)
 - restart_every_num_rounds (restart the server every x rounds)
-
+- restart_low_memory (restart if the games memory falls below this, default = 400)
+- restart_low_memory_roundend (restart if the games memory falls below this at the end of this round, default = 400)
 
 # ServerMod
 ServerMod is an additional tool i have developed to add more configuration settings, fix bugs, and attempt to make servers more stable where possible. You dont need multiadmin for this, but it is recommended!
@@ -77,9 +80,22 @@ Currently supported variables (place in your servers name):
 - $lobby_id (debugging to print the lobby_id)
 - $version (version of the game)
 - $max_players (max amount of players in the config)
+- $scp_alive - number of alive SCPS.
+- $scp_start - number of SCPs at start of the round.
+- $scp_counter - prints $scp_alive/$scp_start
+- $scp_dead - number of dead scps.
+- $scp_zombies - current number of zombies.
+- $classd_escape - how many class ds have escaped.
+- $classd_start - the amount of starting class ds.
+- $classd_counter - $classd_escape/$classd_counter.
+- $scientists_escape - The number of scientists to escape so far.
+- $scientists_start - the amount of starting scientists
+- $scientists_counter - $scientists_escape/$scientist_start.
+- $scp_kills - number of people killed by scps.
+- $warhead_detonated - prints ☢ WARHEAD DETONATED ☢ if its gone off.
 
 Example:
-![player count](https://i.imgur.com/pJgS2WJ.png)
+![player count](https://user-images.githubusercontent.com/1520101/36029888-04689b5c-0de0-11e8-81cd-b1d458caf7e9.png)
 
 ## Config Additions
 - max_players (default 20, max amount of players per server)
@@ -90,6 +106,7 @@ Example:
 - SCP049-2_HP use this to set the starting HP for the class. Default = 400
 - SCP079_HP use this to set the starting HP for the class. Default = 100
 - SCP106_HP use this to set the starting HP for the class. Default = 700
+- SCP173_HP use this to set the starting HP for the class. Default = 2000
 - SCP457_HP use this to set the starting HP for the class. Default = 700
 - CLASSD_HP use this to set the starting HP for the class. Default = 100
 - NTFSCIENTIST_HP use this to set the starting HP for the class. Default = 100
