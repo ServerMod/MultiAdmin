@@ -107,7 +107,6 @@ namespace MultiAdmin.MultiAdmin.Features
                         AddException(excps, details);
                     }
                     details = new ExceptionDetails();
-                    details.stacktrace += line + "\n";
                     details.id += line;
                     firstExpLine = true;
                     details.tags.Add("Autosubmission");
