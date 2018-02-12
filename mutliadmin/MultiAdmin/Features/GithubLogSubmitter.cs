@@ -37,48 +37,57 @@ namespace MultiAdmin.MultiAdmin.Features
                 if (files.Count == 0) return;
                 String lastGameLog = files[0];
 
-                IEnumerable<String> lines = File.ReadLines(lastGameLog);
-                List<ExceptionDetails> details = GetExceptions(lines);
-                String submitted = lines.Last();
-
-                if (!submitted.Equals("STACKTRACK SUBMITTED"))
+                try
                 {
-                    Server.Write("Submitting " + details.Count + " game exceptions/errors to MultiAdmin github");
-                    try
+                    IEnumerable<String> lines = File.ReadLines(lastGameLog);
+                    List<ExceptionDetails> details = GetExceptions(lines);
+                    String submitted = lines.Last();
+
+                    if (!submitted.Equals("STACKTRACK SUBMITTED"))
                     {
-                        submitThread = new Thread(new ThreadStart(() => SubmitIssues(details)));
-                        submitThread.Start();
-                        using (StreamWriter sw = File.AppendText(lastGameLog))
-                        {
-                            sw.WriteLine("STACKTRACK SUBMITTED");
+                        Server.Write("Submitting " + details.Count + " game exceptions/errors to MultiAdmin github");
+                            submitThread = new Thread(new ThreadStart(() => SubmitIssues(details)));
+                            submitThread.Start();
+                            using (StreamWriter sw = File.AppendText(lastGameLog))
+                            {
+                                sw.WriteLine("STACKTRACK SUBMITTED");
+                            }
                         }
+       
                     }
-                    catch (Exception e)
-                    {
-                        // not a big deal if we dont get the exception logged.
-                    }
+
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    // not a big deal if we dont get the exception logged.
                 }
 
 
-                
+
 
             }
         }
 
         private void SubmitIssues(List<ExceptionDetails> details)
         {
-            foreach (ExceptionDetails detail in details)
+            try
             {
-                
-                var postData = "identifier={0}&stacktrace={1}&labels={2}";
-                var query = String.Format(postData, WebUtility.UrlEncode(detail.id), WebUtility.UrlEncode(detail.stacktrace), String.Join(",", detail.tags));
-                var url = "http://stacktrack.may.mx:8000/exception?" + query;
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-                request.Method = "POST";
-                request.Proxy = null;
-                var response = request.GetResponse();
+                foreach (ExceptionDetails detail in details)
+                {
 
+                    var postData = "identifier={0}&stacktrace={1}&seen={2}&labels={3}";
+                    var query = String.Format(postData, WebUtility.UrlEncode(detail.id), WebUtility.UrlEncode(detail.stacktrace), detail.seen.ToString(), String.Join(",", detail.tags));
+                    var url = "http://stracktrack.may.mx:8000/exception?" + query;
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                    request.Method = "POST";
+                    request.Proxy = null;
+                    var response = request.GetResponse();
+                }
             }
+            catch
+            {
+            }
+
 
 
         }
@@ -95,7 +104,7 @@ namespace MultiAdmin.MultiAdmin.Features
                 {
                     if (details != null)
                     {
-                        excps.Add(details);
+                        AddException(excps, details);
                     }
                     details = new ExceptionDetails();
                     details.stacktrace += line + "\n";
@@ -107,25 +116,44 @@ namespace MultiAdmin.MultiAdmin.Features
 
                 if (details != null)
                 {
-                    if (line.Length > 2 && line.Substring(0, 2).Equals("  "))
+                    details.stacktrace += line + "\n";
+                    if (firstExpLine)
                     {
-                        details.stacktrace += line + "\n";
-                        if (firstExpLine)
-                        {
-                            details.id += line;
-                            firstExpLine = false;
-                        }
+                        details.id += line;
+                        firstExpLine = false;
                     }
 
                     if (line.Equals(" "))
                     {
-                        excps.Add(details);
+                        details.stacktrace.Trim();
+                        AddException(excps, details);
                         details = null;
                     }
                 }
             }
 
             return excps;
+        }
+
+
+        private void AddException(List<ExceptionDetails> list, ExceptionDetails details)
+        {
+            Boolean add = true;
+            foreach (ExceptionDetails existing in list)
+            {
+                if (existing.stacktrace.Equals(details.stacktrace))
+                {
+                    existing.seen += 1;
+                    add = false;
+                }
+            }
+
+            if (add)
+            {
+                list.Add(details);
+                details.seen = 1;
+            }
+
         }
 
         public override void OnConfigReload()
@@ -136,6 +164,7 @@ namespace MultiAdmin.MultiAdmin.Features
         {
             public String id = "";
             public String stacktrace = "";
+            public int seen = 0;
             public List<String> tags = new List<String>();
         }
     }
