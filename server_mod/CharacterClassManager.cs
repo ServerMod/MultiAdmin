@@ -56,6 +56,26 @@ public class CharacterClassManager : NetworkBehaviour
 		this.forceClass = ConfigFile.GetInt("server_forced_class", -1);
 		this.smBanComputerFirstPick = (ConfigFile.GetString("NO_SCP079_FIRST", "true").ToLower() == "true");
 		this.ciPercentage = (float)ConfigFile.GetInt("ci_on_start_percent", 10);
+		this.smSetMaxHP(0, "SCP173_HP", 2000);
+		this.smSetMaxHP(1, "CLASSD_HP", 100);
+		this.smSetMaxHP(3, "SCP106_HP", 700);
+		this.smSetMaxHP(4, "NTFSCIENTIST_HP", 120);
+		this.smSetMaxHP(5, "SCP049_HP", 1200);
+		this.smSetMaxHP(6, "SCIENTIST_HP", 100);
+		this.smSetMaxHP(7, "SCP079_HP", 100);
+		this.smSetMaxHP(8, "CI_HP", 120);
+		this.smSetMaxHP(9, "SCP457_HP", 700);
+		this.smSetMaxHP(10, "SCP049-2_HP", 400);
+		this.smSetMaxHP(11, "NTFL_HP", 120);
+		this.smSetMaxHP(12, "NTFC_HP", 150);
+		this.smSetMaxHP(13, "NTFG_HP", 100);
+		this.smBan049 = !ConfigFile.GetString("SCP049_DISABLE", "no").Equals("no");
+		this.smBan079 = !ConfigFile.GetString("SCP079_DISABLE", "yes").Equals("no");
+		this.smBan106 = !ConfigFile.GetString("SCP106_DISABLE", "no").Equals("no");
+		this.smBan173 = !ConfigFile.GetString("SCP173_DISABLE", "no").Equals("no");
+		this.smBan457 = !ConfigFile.GetString("SCP457_DISABLE", "no").Equals("no");
+		this.smStartRoundTimer = ConfigFile.GetInt("START_ROUND_TIMER", 20);
+		this.smWaitForPlayers = ConfigFile.GetInt("START_ROUND_MINIMUM_PLAYERS", 2) - 1;
 		base.StartCoroutine("Init");
 		string text = ConfigFile.GetString("team_respawn_queue", "401431403144144") + "...........................";
 		this.classTeamQueue.Clear();
@@ -72,26 +92,6 @@ public class CharacterClassManager : NetworkBehaviour
 		{
 			this.ApplyProperties();
 		}
-		this.SetMaxHP(0, "SCP173_HP", 2000);
-		this.SetMaxHP(1, "CLASSD_HP", 100);
-		this.SetMaxHP(3, "SCP106_HP", 700);
-		this.SetMaxHP(4, "NTFSCIENTIST_HP", 120);
-		this.SetMaxHP(5, "SCP049_HP", 1200);
-		this.SetMaxHP(6, "SCIENTIST_HP", 100);
-		this.SetMaxHP(7, "SCP079_HP", 100);
-		this.SetMaxHP(8, "CI_HP", 120);
-		this.SetMaxHP(9, "SCP457_HP", 700);
-		this.SetMaxHP(10, "SCP049-2_HP", 400);
-		this.SetMaxHP(11, "NTFL_HP", 120);
-		this.SetMaxHP(12, "NTFC_HP", 150);
-		this.SetMaxHP(13, "NTFG_HP", 100);
-		this.smBan049 = !ConfigFile.GetString("SCP049_DISABLE", "no").Equals("no");
-		this.smBan079 = !ConfigFile.GetString("SCP079_DISABLE", "yes").Equals("no");
-		this.smBan106 = !ConfigFile.GetString("SCP106_DISABLE", "no").Equals("no");
-		this.smBan173 = !ConfigFile.GetString("SCP173_DISABLE", "no").Equals("no");
-		this.smBan457 = !ConfigFile.GetString("SCP457_DISABLE", "no").Equals("no");
-		this.smStartRoundTimer = ConfigFile.GetInt("START_ROUND_TIMER", 20);
-		this.smWaitForPlayers = ConfigFile.GetInt("START_ROUND_MINIMUM_PLAYERS", 2) - 1;
 	}
 
 	private IEnumerator Init()
@@ -133,7 +133,8 @@ public class CharacterClassManager : NetworkBehaviour
 				{
 					if (maxPlayers > this.smWaitForPlayers)
 					{
-						timeLeft--;
+						int num4 = timeLeft;
+						timeLeft = num4 - 1;
 					}
 					int players = PlayerManager.singleton.players.Length;
 					if (players > maxPlayers)
@@ -162,6 +163,7 @@ public class CharacterClassManager : NetworkBehaviour
 			CursorManager.roundStarted = false;
 			this.CmdStartRound();
 			this.SetRandomRoles();
+			rs = null;
 			rs = null;
 			rs = null;
 			rs = null;
@@ -197,6 +199,7 @@ public class CharacterClassManager : NetworkBehaviour
 			int num3 = iteration;
 			iteration = num3 + 1;
 			yield return new WaitForEndOfFrame();
+			plys = null;
 			plys = null;
 			plys = null;
 			plys = null;
@@ -864,7 +867,7 @@ public class CharacterClassManager : NetworkBehaviour
 		}
 	}
 
-	public void SetMaxHP(int id, string config_key, int defaultHp)
+	public void smSetMaxHP(int id, string config_key, int defaultHp)
 	{
 		this.klasy[id].maxHP = ConfigFile.GetInt(config_key, defaultHp);
 	}
