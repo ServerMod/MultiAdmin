@@ -91,6 +91,7 @@ public class CharacterClassManager : NetworkBehaviour
 		this.smBan173 = !ConfigFile.GetString("SCP173_DISABLE", "no").Equals("no");
 		this.smBan457 = !ConfigFile.GetString("SCP457_DISABLE", "no").Equals("no");
 		this.smStartRoundTimer = ConfigFile.GetInt("START_ROUND_TIMER", 20);
+		this.smWaitForPlayers = ConfigFile.GetInt("START_ROUND_MINIMUM_PLAYERS", 2) - 1;
 	}
 
 	private IEnumerator Init()
