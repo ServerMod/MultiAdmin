@@ -56,24 +56,6 @@ public class CharacterClassManager : NetworkBehaviour
 		this.forceClass = ConfigFile.GetInt("server_forced_class", -1);
 		this.smBanComputerFirstPick = (ConfigFile.GetString("NO_SCP079_FIRST", "true").ToLower() == "true");
 		this.ciPercentage = (float)ConfigFile.GetInt("ci_on_start_percent", 10);
-		this.smSetMaxHP(0, "SCP173_HP", 2000);
-		this.smSetMaxHP(1, "CLASSD_HP", 100);
-		this.smSetMaxHP(3, "SCP106_HP", 700);
-		this.smSetMaxHP(4, "NTFSCIENTIST_HP", 120);
-		this.smSetMaxHP(5, "SCP049_HP", 1200);
-		this.smSetMaxHP(6, "SCIENTIST_HP", 100);
-		this.smSetMaxHP(7, "SCP079_HP", 100);
-		this.smSetMaxHP(8, "CI_HP", 120);
-		this.smSetMaxHP(9, "SCP457_HP", 700);
-		this.smSetMaxHP(10, "SCP049-2_HP", 400);
-		this.smSetMaxHP(11, "NTFL_HP", 120);
-		this.smSetMaxHP(12, "NTFC_HP", 150);
-		this.smSetMaxHP(13, "NTFG_HP", 100);
-		this.smBan049 = !ConfigFile.GetString("SCP049_DISABLE", "no").Equals("no");
-		this.smBan079 = !ConfigFile.GetString("SCP079_DISABLE", "yes").Equals("no");
-		this.smBan106 = !ConfigFile.GetString("SCP106_DISABLE", "no").Equals("no");
-		this.smBan173 = !ConfigFile.GetString("SCP173_DISABLE", "no").Equals("no");
-		this.smBan457 = !ConfigFile.GetString("SCP457_DISABLE", "no").Equals("no");
 		this.smStartRoundTimer = ConfigFile.GetInt("START_ROUND_TIMER", 20);
 		this.smWaitForPlayers = ConfigFile.GetInt("START_ROUND_MINIMUM_PLAYERS", 2) - 1;
 		base.StartCoroutine("Init");
@@ -92,6 +74,24 @@ public class CharacterClassManager : NetworkBehaviour
 		{
 			this.ApplyProperties();
 		}
+		this.SetMaxHP(0, "SCP173_HP", 2000);
+		this.SetMaxHP(1, "CLASSD_HP", 100);
+		this.SetMaxHP(3, "SCP106_HP", 700);
+		this.SetMaxHP(4, "NTFSCIENTIST_HP", 120);
+		this.SetMaxHP(5, "SCP049_HP", 1200);
+		this.SetMaxHP(6, "SCIENTIST_HP", 100);
+		this.SetMaxHP(7, "SCP079_HP", 100);
+		this.SetMaxHP(8, "CI_HP", 120);
+		this.SetMaxHP(9, "SCP457_HP", 700);
+		this.SetMaxHP(10, "SCP049-2_HP", 400);
+		this.SetMaxHP(11, "NTFL_HP", 120);
+		this.SetMaxHP(12, "NTFC_HP", 150);
+		this.SetMaxHP(13, "NTFG_HP", 100);
+		this.smBan049 = !ConfigFile.GetString("SCP049_DISABLE", "no").Equals("no");
+		this.smBan079 = !ConfigFile.GetString("SCP079_DISABLE", "yes").Equals("no");
+		this.smBan106 = !ConfigFile.GetString("SCP106_DISABLE", "no").Equals("no");
+		this.smBan173 = !ConfigFile.GetString("SCP173_DISABLE", "no").Equals("no");
+		this.smBan457 = !ConfigFile.GetString("SCP457_DISABLE", "no").Equals("no");
 	}
 
 	private IEnumerator Init()
@@ -127,19 +127,19 @@ public class CharacterClassManager : NetworkBehaviour
 			else
 			{
 				rs.ShowButton();
-				int maxPlayers = 1;
 				int timeLeft = this.smStartRoundTimer;
+				int maxPlayers = 1;
 				while (rs.info != "started")
 				{
 					if (maxPlayers > this.smWaitForPlayers)
 					{
-						int num4 = timeLeft;
-						timeLeft = num4 - 1;
+						int num = timeLeft;
+						timeLeft = num - 1;
 					}
-					int players = PlayerManager.singleton.players.Length;
-					if (players > maxPlayers)
+					int num2 = PlayerManager.singleton.players.Length;
+					if (num2 > maxPlayers)
 					{
-						maxPlayers = players;
+						maxPlayers = num2;
 						if (maxPlayers == NetworkManager.singleton.maxConnections)
 						{
 							timeLeft = 0;
@@ -163,7 +163,6 @@ public class CharacterClassManager : NetworkBehaviour
 			CursorManager.roundStarted = false;
 			this.CmdStartRound();
 			this.SetRandomRoles();
-			rs = null;
 			rs = null;
 			rs = null;
 			rs = null;
@@ -202,13 +201,12 @@ public class CharacterClassManager : NetworkBehaviour
 			plys = null;
 			plys = null;
 			plys = null;
-			plys = null;
 		}
 		yield break;
 	}
 
-	[Command]
 	[Client]
+	[Command]
 	public void CmdSuicide(PlayerStats.HitInfo hitInfo)
 	{
 		if (!NetworkClient.active)
@@ -222,6 +220,7 @@ public class CharacterClassManager : NetworkBehaviour
 
 	public void ForceRoundStart()
 	{
+		this.smRoundStartTime = Time.time;
 		ServerConsole.AddLog("New round has been started.");
 		this.CmdUpdateStartText("started");
 	}
@@ -344,21 +343,21 @@ public class CharacterClassManager : NetworkBehaviour
 					base.GetComponent<Radio>().NetworkcurPreset = 0;
 					base.GetComponent<Radio>().CallCmdUpdatePreset(0);
 					base.GetComponent<AmmoBox>().SetAmmoAmount();
-					FirstPersonController component3 = base.GetComponent<FirstPersonController>();
-					PlayerStats component2 = base.GetComponent<PlayerStats>();
+					FirstPersonController component2 = base.GetComponent<FirstPersonController>();
+					PlayerStats component3 = base.GetComponent<PlayerStats>();
 					if (@class.postprocessingProfile != null && base.GetComponentInChildren<PostProcessingBehaviour>() != null)
 					{
 						base.GetComponentInChildren<PostProcessingBehaviour>().profile = @class.postprocessingProfile;
 					}
 					this.unfocusedCamera.GetComponent<Camera>().enabled = true;
 					this.unfocusedCamera.GetComponent<PostProcessingBehaviour>().enabled = true;
-					component3.m_WalkSpeed = @class.walkSpeed;
-					component3.m_RunSpeed = @class.runSpeed;
-					component3.m_UseHeadBob = @class.useHeadBob;
-					component3.m_JumpSpeed = @class.jumpSpeed;
+					component2.m_WalkSpeed = @class.walkSpeed;
+					component2.m_RunSpeed = @class.runSpeed;
+					component2.m_UseHeadBob = @class.useHeadBob;
+					component2.m_JumpSpeed = @class.jumpSpeed;
 					base.GetComponent<WeaponManager>().SetRecoil(@class.classRecoil);
 					int maxHP = @class.maxHP;
-					component2.maxHP = maxHP;
+					component3.maxHP = maxHP;
 					UnityEngine.Object.FindObjectOfType<UserMainInterface>().lerpedHP = (float)maxHP;
 				}
 				else
@@ -494,9 +493,9 @@ public class CharacterClassManager : NetworkBehaviour
 				this.klasy[3].banClass = true;
 			}
 			this.smFirstPick = true;
-			for (int i = 0; i < array.Length; i++)
+			for (int j = 0; j < array.Length; j++)
 			{
-				int num = (this.forceClass != -1) ? this.forceClass : this.Find_Random_ID_Using_Defined_Team(this.classTeamQueue[i]);
+				int num = (this.forceClass != -1) ? this.forceClass : this.Find_Random_ID_Using_Defined_Team(this.classTeamQueue[j]);
 				if (this.klasy[num].team == Team.CDP)
 				{
 					component2.summary.classD_start++;
@@ -522,7 +521,7 @@ public class CharacterClassManager : NetworkBehaviour
 					}
 					else
 					{
-						component.playersToNTF.Add(array[i]);
+						component.playersToNTF.Add(array[j]);
 					}
 				}
 				if (TutorialManager.status)
@@ -531,7 +530,7 @@ public class CharacterClassManager : NetworkBehaviour
 				}
 				else if (num != 4)
 				{
-					this.SetPlayersClass(num, array[i]);
+					this.SetPlayersClass(num, array[j]);
 				}
 			}
 			component.SummonNTF();
@@ -867,7 +866,7 @@ public class CharacterClassManager : NetworkBehaviour
 		}
 	}
 
-	public void smSetMaxHP(int id, string config_key, int defaultHp)
+	public void SetMaxHP(int id, string config_key, int defaultHp)
 	{
 		this.klasy[id].maxHP = ConfigFile.GetInt(config_key, defaultHp);
 	}
@@ -944,7 +943,9 @@ public class CharacterClassManager : NetworkBehaviour
 
 	public bool smFirstPick;
 
+	private int smStartRoundTimer;
+
 	private int smWaitForPlayers;
 
-	private int smStartRoundTimer;
+	public float smRoundStartTime;
 }

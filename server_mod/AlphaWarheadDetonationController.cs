@@ -36,8 +36,13 @@ public class AlphaWarheadDetonationController : NetworkBehaviour
 		}
 		if (base.name == "Host")
 		{
+			if (this.detonated)
+			{
+				this.ExplodePlayers();
+			}
 			if (this.detonationTime > 0f)
 			{
+				this.detonated = false;
 				this.NetworkdetonationTime = this.detonationTime - Time.deltaTime;
 				if (!this.lever.GetState())
 				{
@@ -60,6 +65,7 @@ public class AlphaWarheadDetonationController : NetworkBehaviour
 				{
 					base.GetComponent<RoundSummary>().summary.warheadDetonated = true;
 					this.Explode();
+					this.smDetonated = true;
 				}
 				this.NetworkdetonationTime = 0f;
 			}
@@ -162,6 +168,7 @@ public class AlphaWarheadDetonationController : NetworkBehaviour
 		this.smCharacterClassManager = base.GetComponent<CharacterClassManager>();
 		this.smCooldown = ConfigFile.GetInt("nuke_disable_cooldown", 0);
 		this.smNukeActivationMinTime = ConfigFile.GetInt("nuke_min_time", 0);
+		this.smDetonated = false;
 		if (!TutorialManager.status)
 		{
 			this.lever = GameObject.Find("Lever_Alpha_Controller").GetComponent<LeverButton>();
@@ -261,4 +268,6 @@ public class AlphaWarheadDetonationController : NetworkBehaviour
 	private int smNukeActivationMinTime;
 
 	private CharacterClassManager smCharacterClassManager;
+
+	public bool smDetonated;
 }
