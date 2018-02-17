@@ -1,30 +1,39 @@
 using System;
 using System.Collections;
 using System.IO;
+using Dissonance.Integrations.UNet_HLAPI;
 using GameConsole;
 using Steamworks;
-using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-// Token: 0x020000E6 RID: 230
+// Token: 0x020000EC RID: 236
 public class CustomNetworkManager : NetworkManager
 {
-	// Token: 0x0600064F RID: 1615
+	// Token: 0x06000685 RID: 1669 RVA: 0x00006673 File Offset: 0x00004873
+	private void Update()
+	{
+		if (this.popup.activeSelf && Input.GetKey(KeyCode.Escape))
+		{
+			this.ClickButton();
+		}
+	}
+
+	// Token: 0x06000686 RID: 1670 RVA: 0x00006697 File Offset: 0x00004897
 	public override void OnClientDisconnect(NetworkConnection conn)
 	{
 		this.ShowLog((int)conn.lastError);
 	}
 
-	// Token: 0x06000650 RID: 1616
+	// Token: 0x06000687 RID: 1671 RVA: 0x000066A5 File Offset: 0x000048A5
 	public override void OnClientError(NetworkConnection conn, int errorCode)
 	{
 		this.ShowLog(errorCode);
 	}
 
-	// Token: 0x06000651 RID: 1617
+	// Token: 0x06000688 RID: 1672 RVA: 0x00026184 File Offset: 0x00024384
 	public override void OnServerConnect(NetworkConnection conn)
 	{
 		foreach (BanPlayer.Ban ban in BanPlayer.bans)
@@ -41,16 +50,17 @@ public class CustomNetworkManager : NetworkManager
 		}
 	}
 
-	// Token: 0x06000652 RID: 1618
+	// Token: 0x06000689 RID: 1673 RVA: 0x000066AE File Offset: 0x000048AE
 	public override void OnServerDisconnect(NetworkConnection conn)
 	{
+		HlapiServer.OnServerDisconnect(conn);
 		base.OnServerDisconnect(conn);
 		ServerConsole.AddLog("Player disconnect:");
 		conn.Disconnect();
 		conn.Dispose();
 	}
 
-	// Token: 0x06000653 RID: 1619
+	// Token: 0x0600068A RID: 1674 RVA: 0x000066D3 File Offset: 0x000048D3
 	public void OnLevelWasLoaded(int level)
 	{
 		if (this.reconnect)
@@ -60,7 +70,7 @@ public class CustomNetworkManager : NetworkManager
 		}
 	}
 
-	// Token: 0x06000654 RID: 1620
+	// Token: 0x0600068B RID: 1675 RVA: 0x000066F8 File Offset: 0x000048F8
 	public override void OnClientSceneChanged(NetworkConnection conn)
 	{
 		base.OnClientSceneChanged(conn);
@@ -70,7 +80,7 @@ public class CustomNetworkManager : NetworkManager
 		}
 	}
 
-	// Token: 0x06000655 RID: 1621
+	// Token: 0x0600068C RID: 1676 RVA: 0x0000672F File Offset: 0x0000492F
 	private void Reconnect()
 	{
 		if (this.reconnect)
@@ -80,35 +90,31 @@ public class CustomNetworkManager : NetworkManager
 		}
 	}
 
-	// Token: 0x06000656 RID: 1622
+	// Token: 0x0600068D RID: 1677 RVA: 0x0000674A File Offset: 0x0000494A
 	public void StopReconnecting()
 	{
 		this.reconnect = false;
 	}
 
-	// Token: 0x06000657 RID: 1623
+	// Token: 0x0600068E RID: 1678 RVA: 0x00026228 File Offset: 0x00024428
 	public void ShowLog(int id)
 	{
 		this.curLogID = id;
-		bool flag = PlayerPrefs.GetString("langver", "en") == "pl";
 		this.popup.SetActive(true);
-		this.contSize.sizeDelta = ((!flag) ? this.logs[id].msgSize_en : this.logs[id].msgSize_pl);
-		this.content.text = ((!flag) ? this.logs[id].msg_en : this.logs[id].msg_pl);
-		this.button.GetComponentInChildren<Text>().text = ((!flag) ? this.logs[id].button.content_en : this.logs[id].button.content_pl);
-		this.button.GetComponent<RectTransform>().sizeDelta = new Vector2((!flag) ? this.logs[id].button.size_en : this.logs[id].button.size_pl, 80f);
+		this.content.text = TranslationReader.Get("Connection_Errors", id);
+		this.content.rectTransform.sizeDelta = Vector3.zero;
 	}
 
-	// Token: 0x06000658 RID: 1624
+	// Token: 0x0600068F RID: 1679 RVA: 0x00026278 File Offset: 0x00024478
 	public void ClickButton()
 	{
-		ConnInfoButton[] actions = this.logs[this.curLogID].button.actions;
-		for (int i = 0; i < actions.Length; i++)
+		foreach (ConnInfoButton connInfoButton in this.logs[this.curLogID].button.actions)
 		{
-			actions[i].UseButton();
+			connInfoButton.UseButton();
 		}
 	}
 
-	// Token: 0x06000659 RID: 1625
+	// Token: 0x06000690 RID: 1680 RVA: 0x000262BC File Offset: 0x000244BC
 	private void Start()
 	{
 		this.console = GameConsole.Console.singleton;
@@ -118,11 +124,10 @@ public class CustomNetworkManager : NetworkManager
 		}
 	}
 
-	// Token: 0x0600065A RID: 1626
+	// Token: 0x06000691 RID: 1681 RVA: 0x00026308 File Offset: 0x00024508
 	public void CreateMatch()
 	{
-		ServerConsole.AddLog("ServerMod - Version 1.2");
-		base.maxConnections = ConfigFile.GetInt("max_players", 20);
+		ServerConsole.AddLog("ServerMod - Version 1.4 beta (Patch 1)");
 		this.ShowLog(13);
 		this.createpop.SetActive(false);
 		NetworkServer.Reset();
@@ -135,10 +140,11 @@ public class CustomNetworkManager : NetworkManager
 		this.NonsteamHost();
 	}
 
-	// Token: 0x0600065B RID: 1627
+	// Token: 0x06000692 RID: 1682 RVA: 0x00006753 File Offset: 0x00004953
 	private IEnumerator CreateLobby()
 	{
 		yield return new WaitForEndOfFrame();
+		base.maxConnections = ConfigFile.GetInt("max_players", 20);
 		string ip = string.Empty;
 		if (ConfigFile.GetString("server_ip", "auto") != "auto")
 		{
@@ -158,8 +164,6 @@ public class CustomNetworkManager : NetworkManager
 			ip = www.text.Remove(www.text.Length - 1);
 			ServerConsole.AddLog("Done, your game-server IP will be " + ip);
 			www = null;
-			www = null;
-			www = null;
 		}
 		ServerConsole.AddLog("Initializing game-server...");
 		this.StartHost();
@@ -168,30 +172,37 @@ public class CustomNetworkManager : NetworkManager
 			yield return new WaitForEndOfFrame();
 		}
 		ServerConsole.AddLog("Level loaded. Creating match...");
-		string info = UnityEngine.Object.FindObjectOfType<ServerConsole>().smParseName(ConfigFile.GetString("server_name", "Unnamed server"), 0);
+		string value = string.Concat(new string[]
+		{
+			ConfigFile.GetString("server_name", "Unnamed server"),
+			":[:BREAK:]:",
+			ConfigFile.GetString("serverinfo_pastebin_id", "7wV681fT"),
+			":[:BREAK:]:",
+			this.versionstring
+		});
 		ServerConsole.ip = ip;
-		WWWForm form = new WWWForm();
-		form.AddField("update", 1);
-		form.AddField("ip", ip);
-		form.AddField("info", info);
-		form.AddField("port", base.networkPort);
-		form.AddField("players", 0);
+		WWWForm wwwform = new WWWForm();
+		wwwform.AddField("update", 1);
+		wwwform.AddField("ip", ip);
+		wwwform.AddField("info", value);
+		wwwform.AddField("port", base.networkPort);
+		wwwform.AddField("players", 0);
 		bool codeNotGenerated = false;
 		string pth = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/SCP Secret Laboratory/verkey.txt";
 		if (File.Exists(pth))
 		{
 			StreamReader streamReader = new StreamReader(pth);
 			string text = streamReader.ReadToEnd();
-			form.AddField("passcode", text);
+			wwwform.AddField("passcode", text);
 			ServerConsole.password = text;
 			streamReader.Close();
 		}
 		else
 		{
-			form.AddField("passcode", string.Empty);
+			wwwform.AddField("passcode", string.Empty);
 			codeNotGenerated = true;
 		}
-		WWW www2 = new WWW("https://hubertmoszka.pl/authenticator.php", form);
+		WWW www2 = new WWW("https://hubertmoszka.pl/authenticator.php", wwwform);
 		yield return www2;
 		if (string.IsNullOrEmpty(www2.error))
 		{
@@ -254,7 +265,7 @@ public class CustomNetworkManager : NetworkManager
 		yield break;
 	}
 
-	// Token: 0x0600065C RID: 1628
+	// Token: 0x06000693 RID: 1683 RVA: 0x00006762 File Offset: 0x00004962
 	private void NonsteamHost()
 	{
 		base.onlineScene = "Facility";
@@ -262,14 +273,14 @@ public class CustomNetworkManager : NetworkManager
 		this.StartHostWithPort();
 	}
 
-	// Token: 0x0600065D RID: 1629
+	// Token: 0x06000694 RID: 1684 RVA: 0x0000677D File Offset: 0x0000497D
 	public void StartHostWithPort()
 	{
 		ServerConsole.AddLog("Server starting at port " + base.networkPort);
 		this.StartHost();
 	}
 
-	// Token: 0x0600065E RID: 1630
+	// Token: 0x06000695 RID: 1685 RVA: 0x0002635C File Offset: 0x0002455C
 	public int GetFreePort()
 	{
 		string @string = ConfigFile.GetString("port_queue", "7777,7778,7779,7780,7781,7782,7783,7784");
@@ -327,79 +338,54 @@ public class CustomNetworkManager : NetworkManager
 		return 7777;
 	}
 
-	// Token: 0x04000597 RID: 1431
+	// Token: 0x040005D8 RID: 1496
 	public GameObject popup;
 
-	// Token: 0x04000598 RID: 1432
+	// Token: 0x040005D9 RID: 1497
 	public GameObject createpop;
 
-	// Token: 0x04000599 RID: 1433
+	// Token: 0x040005DA RID: 1498
 	public RectTransform contSize;
 
-	// Token: 0x0400059A RID: 1434
-	public TextMeshProUGUI content;
+	// Token: 0x040005DB RID: 1499
+	public Text content;
 
-	// Token: 0x0400059B RID: 1435
-	public Button button;
-
-	// Token: 0x0400059C RID: 1436
+	// Token: 0x040005DC RID: 1500
 	public CustomNetworkManager.DisconnectLog[] logs;
 
-	// Token: 0x0400059D RID: 1437
+	// Token: 0x040005DD RID: 1501
 	private int curLogID;
 
-	// Token: 0x0400059E RID: 1438
+	// Token: 0x040005DE RID: 1502
 	public bool reconnect;
 
-	// Token: 0x0400059F RID: 1439
+	// Token: 0x040005DF RID: 1503
 	[Space(20f)]
 	public string versionstring;
 
-	// Token: 0x040005A0 RID: 1440
+	// Token: 0x040005E0 RID: 1504
 	private GameConsole.Console console;
 
-	// Token: 0x020000E7 RID: 231
+	// Token: 0x020000ED RID: 237
 	[Serializable]
 	public class DisconnectLog
 	{
-		// Token: 0x040005A1 RID: 1441
+		// Token: 0x040005E1 RID: 1505
 		[Multiline]
 		public string msg_en;
 
-		// Token: 0x040005A2 RID: 1442
-		[Multiline]
-		public string msg_pl;
-
-		// Token: 0x040005A3 RID: 1443
-		public Vector2 msgSize_en;
-
-		// Token: 0x040005A4 RID: 1444
-		public Vector2 msgSize_pl;
-
-		// Token: 0x040005A5 RID: 1445
+		// Token: 0x040005E2 RID: 1506
 		public CustomNetworkManager.DisconnectLog.LogButton button;
 
-		// Token: 0x040005A6 RID: 1446
+		// Token: 0x040005E3 RID: 1507
 		public bool autoHideOnSceneLoad;
 
-		// Token: 0x020000E8 RID: 232
+		// Token: 0x020000EE RID: 238
 		[Serializable]
 		public class LogButton
 		{
-			// Token: 0x040005A7 RID: 1447
+			// Token: 0x040005E4 RID: 1508
 			public ConnInfoButton[] actions;
-
-			// Token: 0x040005A8 RID: 1448
-			public string content_en;
-
-			// Token: 0x040005A9 RID: 1449
-			public string content_pl;
-
-			// Token: 0x040005AA RID: 1450
-			public float size_en;
-
-			// Token: 0x040005AB RID: 1451
-			public float size_pl;
 		}
 	}
 }

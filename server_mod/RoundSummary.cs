@@ -5,16 +5,16 @@ using Unity;
 using UnityEngine;
 using UnityEngine.Networking;
 
-// Token: 0x020000BC RID: 188
+// Token: 0x020000C0 RID: 192
 public class RoundSummary : NetworkBehaviour
 {
-	// Token: 0x0600049D RID: 1181 RVA: 0x00005191 File Offset: 0x00003391
+	// Token: 0x060004C4 RID: 1220 RVA: 0x00005226 File Offset: 0x00003426
 	private void Awake()
 	{
 		Radio.roundEnded = false;
 	}
 
-	// Token: 0x0600049E RID: 1182 RVA: 0x00005199 File Offset: 0x00003399
+	// Token: 0x060004C5 RID: 1221 RVA: 0x0000522E File Offset: 0x0000342E
 	private void Start()
 	{
 		this.pm = PlayerManager.singleton;
@@ -22,7 +22,7 @@ public class RoundSummary : NetworkBehaviour
 		base.InvokeRepeating("CheckForEnding", 12f, 3f);
 	}
 
-	// Token: 0x0600049F RID: 1183 RVA: 0x0001D0D0 File Offset: 0x0001B2D0
+	// Token: 0x060004C6 RID: 1222 RVA: 0x0001DE18 File Offset: 0x0001C018
 	private void RoundRestart()
 	{
 		bool flag = false;
@@ -42,7 +42,7 @@ public class RoundSummary : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x060004A0 RID: 1184
+	// Token: 0x060004C7 RID: 1223 RVA: 0x0001DEC0 File Offset: 0x0001C0C0
 	public void CheckForEnding()
 	{
 		if (base.isLocalPlayer && base.isServer && !this.roundHasEnded)
@@ -134,7 +134,7 @@ public class RoundSummary : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x060004A1 RID: 1185 RVA: 0x0001D410 File Offset: 0x0001B610
+	// Token: 0x060004C8 RID: 1224 RVA: 0x0001E104 File Offset: 0x0001C304
 	private void Update()
 	{
 		if (RoundSummary.host == null)
@@ -147,131 +147,87 @@ public class RoundSummary : NetworkBehaviour
 		}
 	}
 
-	// Token: 0x060004A2 RID: 1186 RVA: 0x000051C7 File Offset: 0x000033C7
+	// Token: 0x060004C9 RID: 1225 RVA: 0x0000525C File Offset: 0x0000345C
 	[Command(channel = 15)]
 	private void CmdSetSummary(RoundSummary.Summary sum, int posttime)
 	{
 		this.CallRpcSetSummary(sum, posttime);
 	}
 
-	// Token: 0x060004A3 RID: 1187 RVA: 0x0001D450 File Offset: 0x0001B650
+	// Token: 0x060004CA RID: 1226 RVA: 0x0001E144 File Offset: 0x0001C344
 	[ClientRpc(channel = 15)]
 	public void RpcSetSummary(RoundSummary.Summary sum, int posttime)
 	{
 		Radio.roundEnded = true;
 		string text = string.Empty;
-		if (PlayerPrefs.GetString("langver", "en") == "pl")
+		string text2 = text;
+		text = string.Concat(new object[]
 		{
-			string text2 = text;
-			text = string.Concat(new object[]
-			{
-				text2,
-				"<color=#ff0000>",
-				sum.classD_escaped,
-				"/",
-				sum.classD_start,
-				"</color> Personelu Klasy D uciekło z placówki\n"
-			});
-			text2 = text;
-			text = string.Concat(new object[]
-			{
-				text2,
-				"<color=#ff0000>",
-				sum.scientists_escaped,
-				"/",
-				sum.scientists_start,
-				"</color> Naukowców ocalało\n"
-			});
-			text2 = text;
-			text = string.Concat(new object[]
-			{
-				text2,
-				"<color=#ff0000>",
-				sum.scp_frags,
-				"</color> Zabitych przez SCP\n"
-			});
-			text2 = text;
-			text = string.Concat(new object[]
-			{
-				text2,
-				"<color=#ff0000>",
-				sum.scp_start - sum.scp_nozombies,
-				"/",
-				sum.scp_start,
-				"</color> Unieszkodliwionych podmiotów SCP\n"
-			});
-			text = text + "Głowica Alfa: <color=#ff0000>" + ((!sum.warheadDetonated) ? "Nie została użyta" : "Zdetonowana") + "</color>\n\n";
-			text2 = text;
-			text = string.Concat(new object[]
-			{
-				text2,
-				"Następna runda rozpocznie się w ciągu ",
-				posttime,
-				" sekund."
-			});
-		}
-		else
+			text2,
+			"<color=#ff0000>",
+			sum.classD_escaped,
+			"/",
+			sum.classD_start,
+			"</color> ",
+			TranslationReader.Get("Legancy_Interfaces", 3),
+			"\n"
+		});
+		text2 = text;
+		text = string.Concat(new object[]
 		{
-			string text2 = text;
-			text = string.Concat(new object[]
-			{
-				text2,
-				"<color=#ff0000>",
-				sum.classD_escaped,
-				"/",
-				sum.classD_start,
-				"</color> Class-D Personnel escaped\n"
-			});
-			text2 = text;
-			text = string.Concat(new object[]
-			{
-				text2,
-				"<color=#ff0000>",
-				sum.scientists_escaped,
-				"/",
-				sum.scientists_start,
-				"</color> Scientists survived\n"
-			});
-			text2 = text;
-			text = string.Concat(new object[]
-			{
-				text2,
-				"<color=#ff0000>",
-				sum.scp_frags,
-				"</color> Killed by SCP\n"
-			});
-			text2 = text;
-			text = string.Concat(new object[]
-			{
-				text2,
-				"<color=#ff0000>",
-				sum.scp_start - sum.scp_alive,
-				"/",
-				sum.scp_start,
-				"</color> Terminated SCP subjects\n"
-			});
-			text = text + "Alpha Warhead: <color=#ff0000>" + ((!sum.warheadDetonated) ? "Unused" : "Detonated") + "</color>\n\n";
-			text2 = text;
-			text = string.Concat(new object[]
-			{
-				text2,
-				"The next round will start within ",
-				posttime,
-				" seconds."
-			});
-		}
+			text2,
+			"<color=#ff0000>",
+			sum.scientists_escaped,
+			"/",
+			sum.scientists_start,
+			"</color> ",
+			TranslationReader.Get("Legancy_Interfaces", 4),
+			"\n"
+		});
+		text2 = text;
+		text = string.Concat(new object[]
+		{
+			text2,
+			"<color=#ff0000>",
+			sum.scp_frags,
+			"</color> ",
+			TranslationReader.Get("Legancy_Interfaces", 5),
+			"\n"
+		});
+		text2 = text;
+		text = string.Concat(new object[]
+		{
+			text2,
+			"<color=#ff0000>",
+			Mathf.Clamp(sum.scp_start - sum.scp_alive, 0, sum.scp_start),
+			"/",
+			sum.scp_start,
+			"</color> ",
+			TranslationReader.Get("Legancy_Interfaces", 6),
+			"\n"
+		});
+		text2 = text;
+		text = string.Concat(new string[]
+		{
+			text2,
+			TranslationReader.Get("Legancy_Interfaces", 7),
+			": <color=#ff0000>",
+			(!sum.warheadDetonated) ? TranslationReader.Get("Legancy_Interfaces", 9) : TranslationReader.Get("Legancy_Interfaces", 8),
+			"</color>\n\n"
+		});
+		text += TranslationReader.Get("Legancy_Interfaces", 10).Replace("[time]", posttime.ToString());
 		GameObject gameObject = UserMainInterface.singleton.summary;
 		gameObject.SetActive(true);
 		TextMeshProUGUI component = GameObject.FindGameObjectWithTag("Summary").GetComponent<TextMeshProUGUI>();
 		component.text = text;
 	}
 
-	// Token: 0x060004A4 RID: 1188 RVA: 0x0000215A File Offset: 0x0000035A
+	// Token: 0x060004CB RID: 1227 RVA: 0x00002195 File Offset: 0x00000395
 	private void UNetVersion()
 	{
 	}
 
-	// Token: 0x060004A5 RID: 1189 RVA: 0x000051D1 File Offset: 0x000033D1
+	// Token: 0x060004CC RID: 1228 RVA: 0x00005266 File Offset: 0x00003466
 	protected static void InvokeCmdCmdSetSummary(NetworkBehaviour obj, NetworkReader reader)
 	{
 		if (!NetworkServer.active)
@@ -282,7 +238,7 @@ public class RoundSummary : NetworkBehaviour
 		((RoundSummary)obj).CmdSetSummary(GeneratedNetworkCode._ReadSummary_RoundSummary(reader), (int)reader.ReadPackedUInt32());
 	}
 
-	// Token: 0x060004A6 RID: 1190 RVA: 0x0001D774 File Offset: 0x0001B974
+	// Token: 0x060004CD RID: 1229 RVA: 0x0001E378 File Offset: 0x0001C578
 	public void CallCmdSetSummary(RoundSummary.Summary sum, int posttime)
 	{
 		if (!NetworkClient.active)
@@ -305,7 +261,7 @@ public class RoundSummary : NetworkBehaviour
 		base.SendCommandInternal(networkWriter, 15, "CmdSetSummary");
 	}
 
-	// Token: 0x060004A7 RID: 1191 RVA: 0x00005200 File Offset: 0x00003400
+	// Token: 0x060004CE RID: 1230 RVA: 0x00005295 File Offset: 0x00003495
 	protected static void InvokeRpcRpcSetSummary(NetworkBehaviour obj, NetworkReader reader)
 	{
 		if (!NetworkClient.active)
@@ -316,7 +272,7 @@ public class RoundSummary : NetworkBehaviour
 		((RoundSummary)obj).RpcSetSummary(GeneratedNetworkCode._ReadSummary_RoundSummary(reader), (int)reader.ReadPackedUInt32());
 	}
 
-	// Token: 0x060004A8 RID: 1192 RVA: 0x0001D80C File Offset: 0x0001BA0C
+	// Token: 0x060004CF RID: 1231 RVA: 0x0001E410 File Offset: 0x0001C610
 	public void CallRpcSetSummary(RoundSummary.Summary sum, int posttime)
 	{
 		if (!NetworkServer.active)
@@ -334,7 +290,7 @@ public class RoundSummary : NetworkBehaviour
 		this.SendRPCInternal(networkWriter, 15, "RpcSetSummary");
 	}
 
-	// Token: 0x060004A9 RID: 1193 RVA: 0x0001D88C File Offset: 0x0001BA8C
+	// Token: 0x060004D0 RID: 1232 RVA: 0x0001E490 File Offset: 0x0001C690
 	static RoundSummary()
 	{
 		NetworkBehaviour.RegisterCommandDelegate(typeof(RoundSummary), RoundSummary.kCmdCmdSetSummary, new NetworkBehaviour.CmdDelegate(RoundSummary.InvokeCmdCmdSetSummary));
@@ -343,92 +299,92 @@ public class RoundSummary : NetworkBehaviour
 		NetworkCRC.RegisterBehaviour("RoundSummary", 0);
 	}
 
-	// Token: 0x060004AA RID: 1194 RVA: 0x0000A298 File Offset: 0x00008498
+	// Token: 0x060004D1 RID: 1233 RVA: 0x0000A490 File Offset: 0x00008690
 	public override bool OnSerialize(NetworkWriter writer, bool forceAll)
 	{
 		bool result;
 		return result;
 	}
 
-	// Token: 0x060004AB RID: 1195 RVA: 0x0000215A File Offset: 0x0000035A
+	// Token: 0x060004D2 RID: 1234 RVA: 0x00002195 File Offset: 0x00000395
 	public override void OnDeserialize(NetworkReader reader, bool initialState)
 	{
 	}
 
-	// Token: 0x04000426 RID: 1062
+	// Token: 0x04000455 RID: 1109
 	public bool debugMode;
 
-	// Token: 0x04000427 RID: 1063
+	// Token: 0x04000456 RID: 1110
 	private bool roundHasEnded;
 
-	// Token: 0x04000428 RID: 1064
+	// Token: 0x04000457 RID: 1111
 	private PlayerManager pm;
 
-	// Token: 0x04000429 RID: 1065
+	// Token: 0x04000458 RID: 1112
 	private CharacterClassManager ccm;
 
-	// Token: 0x0400042A RID: 1066
+	// Token: 0x04000459 RID: 1113
 	public static RoundSummary host;
 
-	// Token: 0x0400042B RID: 1067
+	// Token: 0x0400045A RID: 1114
 	public RoundSummary.Summary summary;
 
-	// Token: 0x0400042C RID: 1068
+	// Token: 0x0400045B RID: 1115
 	private int _ClassDs;
 
-	// Token: 0x0400042D RID: 1069
+	// Token: 0x0400045C RID: 1116
 	private int _ChaosInsurgency;
 
-	// Token: 0x0400042E RID: 1070
+	// Token: 0x0400045D RID: 1117
 	private int _MobileForces;
 
-	// Token: 0x0400042F RID: 1071
+	// Token: 0x0400045E RID: 1118
 	private int _Spectators;
 
-	// Token: 0x04000430 RID: 1072
+	// Token: 0x0400045F RID: 1119
 	private int _Scientists;
 
-	// Token: 0x04000431 RID: 1073
+	// Token: 0x04000460 RID: 1120
 	private int _SCPs;
 
-	// Token: 0x04000432 RID: 1074
+	// Token: 0x04000461 RID: 1121
 	private int _SCPsNozombies;
 
-	// Token: 0x04000433 RID: 1075
+	// Token: 0x04000462 RID: 1122
 	private static int kCmdCmdSetSummary = 509590172;
 
-	// Token: 0x04000434 RID: 1076
+	// Token: 0x04000463 RID: 1123
 	private static int kRpcRpcSetSummary;
 
-	// Token: 0x020000BD RID: 189
+	// Token: 0x020000C1 RID: 193
 	[Serializable]
 	public class Summary
 	{
-		// Token: 0x04000435 RID: 1077
+		// Token: 0x04000464 RID: 1124
 		public int classD_escaped;
 
-		// Token: 0x04000436 RID: 1078
+		// Token: 0x04000465 RID: 1125
 		public int classD_start;
 
-		// Token: 0x04000437 RID: 1079
+		// Token: 0x04000466 RID: 1126
 		public int scientists_escaped;
 
-		// Token: 0x04000438 RID: 1080
+		// Token: 0x04000467 RID: 1127
 		public int scientists_start;
 
-		// Token: 0x04000439 RID: 1081
+		// Token: 0x04000468 RID: 1128
 		public int scp_frags;
 
-		// Token: 0x0400043A RID: 1082
+		// Token: 0x04000469 RID: 1129
 		public int scp_start;
 
-		// Token: 0x0400043B RID: 1083
+		// Token: 0x0400046A RID: 1130
 		public int scp_alive;
 
-		// Token: 0x0400043C RID: 1084
+		// Token: 0x0400046B RID: 1131
 		public int scp_nozombies;
 
-		// Token: 0x0400043D RID: 1085
+		// Token: 0x0400046C RID: 1132
 		public bool warheadDetonated;
 	}
 }
