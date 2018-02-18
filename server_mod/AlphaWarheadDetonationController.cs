@@ -5,22 +5,25 @@ using UnityEngine.Networking;
 // Token: 0x0200006D RID: 109
 public class AlphaWarheadDetonationController : NetworkBehaviour
 {
-	// Token: 0x060001F8 RID: 504 RVA: 0x0000323E File Offset: 0x0000143E
+	// Token: 0x060001F8 RID: 504
 	public void StartDetonation()
 	{
-		if (this.detonationInProgress || !this.lever.GetState())
+		float elapsed = Time.time - this.smCharacterClassManager.smRoundStartTime;
+		if (this.detonationInProgress || !this.lever.GetState() || elapsed < (float)this.smNukeActivationMinTime)
 		{
 			return;
 		}
 		this.detonationInProgress = true;
 		this.NetworkdetonationTime = 90f;
 		this.doorsOpen = false;
+		this.smStartTime = Time.time;
 	}
 
-	// Token: 0x060001F9 RID: 505 RVA: 0x0000326F File Offset: 0x0000146F
+	// Token: 0x060001F9 RID: 505
 	public void CancelDetonation()
 	{
-		if (this.detonationInProgress && this.detonationTime > 2f)
+		float elapsed = Time.time - this.smStartTime;
+		if (this.detonationInProgress && this.detonationTime > 2f && elapsed >= (float)this.smCooldown)
 		{
 			this.detonationInProgress = false;
 			this.NetworkdetonationTime = 0f;
