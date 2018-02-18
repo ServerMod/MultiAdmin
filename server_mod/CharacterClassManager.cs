@@ -249,6 +249,7 @@ public class CharacterClassManager : NetworkBehaviour
 	// Token: 0x06000262 RID: 610 RVA: 0x0000361A File Offset: 0x0000181A
 	public void ForceRoundStart()
 	{
+		this.smRoundStartTime = Time.time;
 		ServerConsole.AddLog("New round has been started.");
 		this.CmdUpdateStartText("started");
 	}
