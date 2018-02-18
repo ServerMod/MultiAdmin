@@ -124,10 +124,10 @@ public class CustomNetworkManager : NetworkManager
 		}
 	}
 
-	// Token: 0x06000691 RID: 1681 RVA: 0x00026308 File Offset: 0x00024508
+	// Token: 0x06000691 RID: 1681
 	public void CreateMatch()
 	{
-		ServerConsole.AddLog("ServerMod - Version 1.4 beta (Patch 1)");
+		ServerConsole.AddLog("ServerMod - Version 1.4 beta (Patch 2)");
 		this.ShowLog(13);
 		this.createpop.SetActive(false);
 		NetworkServer.Reset();
