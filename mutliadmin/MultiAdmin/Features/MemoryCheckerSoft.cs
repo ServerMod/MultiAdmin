@@ -61,7 +61,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 
         public override void OnConfigReload()
         {
-            lowMb = Server.ServerConfig.GetIntValue("RESTART_LOW_MEMORY_ROUNDEND", 1800);
+            lowMb = Server.ServerConfig.GetIntValue("RESTART_LOW_MEMORY_ROUNDEND", 450);
         }
 
         public void OnRoundEnd()
