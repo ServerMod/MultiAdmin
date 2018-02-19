@@ -45,7 +45,7 @@ namespace MultiAdmin.MultiAdmin.Features
 
                     if (!submitted.Equals("STACKTRACK SUBMITTED"))
                     {
-                        Server.Write("Submitting " + details.Count + " game exceptions/errors to MultiAdmin github");
+                            Server.Write("Submitting " + details.Count + " game exceptions/errors to MultiAdmin github");
                             submitThread = new Thread(new ThreadStart(() => SubmitIssues(details)));
                             submitThread.Start();
                             using (StreamWriter sw = File.AppendText(lastGameLog))

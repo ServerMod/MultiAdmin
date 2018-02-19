@@ -11,6 +11,7 @@ namespace MultiAdmin.MultiAdmin.Commands
         private int lowMb;
         private int tickCount;
         private Boolean restart;
+        private Boolean warn;
         public MemoryCheckerSoft(Server server) : base(server)
         {
         }
@@ -19,6 +20,7 @@ namespace MultiAdmin.MultiAdmin.Commands
         {
             tickCount = 0;
             restart = false;
+            warn = false;
         }
 
         public override string GetFeatureDescription()
@@ -39,11 +41,13 @@ namespace MultiAdmin.MultiAdmin.Commands
 
             if (memoryLeft < lowMb)
             {
-                Server.Write("Warning: program is running low on memory (" + memoryLeft + " MB left) the server will restart at the end of the round if it continues", ConsoleColor.Red);
+                if (!warn) Server.Write("Warning: program is running low on memory (" + memoryLeft + " MB left) the server will restart at the end of the round if it continues", ConsoleColor.Red);
+                warn = true;
                 tickCount++;
             }
             else
             {
+                warn = false;
                 tickCount = 0;
             }
 
@@ -51,14 +55,13 @@ namespace MultiAdmin.MultiAdmin.Commands
             {
                 restart = true;
                 Server.Write("Restarting the server at end of the round due to low memory");
-                Server.SoftRestartServer();
             }
  
         }
 
         public override void OnConfigReload()
         {
-            lowMb = Server.ServerConfig.GetIntValue("RESTART_LOW_MEMORY_ROUNDEND", 400);
+            lowMb = Server.ServerConfig.GetIntValue("RESTART_LOW_MEMORY_ROUNDEND", 1800);
         }
 
         public void OnRoundEnd()

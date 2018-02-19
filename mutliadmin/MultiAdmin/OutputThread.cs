@@ -21,6 +21,7 @@ namespace MultiAdmin
                     server.Write("Message printer warning: 'SCPSL_Data/Dedicated' directory not found.", ConsoleColor.Yellow);
                 }
 
+                if (strArray == null) continue;
                 foreach (string path in strArray)
                 {
 
