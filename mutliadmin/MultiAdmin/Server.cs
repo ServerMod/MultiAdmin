@@ -10,7 +10,7 @@ namespace MultiAdmin.MultiAdmin
 {
     public class Server
     {
-        public static readonly string MA_VERSION = "1.2.4";
+        public static readonly string MA_VERSION = "1.2.5";
 
         public Boolean HasServerMod { get; set; }
         public String ServerModVersion { get; set; }
@@ -130,7 +130,7 @@ namespace MultiAdmin.MultiAdmin
                     }
                     Write("Game engine exited/crashed", ConsoleColor.Red);
                     Write("Removing Session", ConsoleColor.Red);
-                    DeleteSession();
+                    CleanSession();
                     Write("Restarting game with same session id");
                     StartServer();
                     InitFeatures();
@@ -302,14 +302,20 @@ namespace MultiAdmin.MultiAdmin
             File.Create(ServerDir + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "running").Close();
         }
 
-        private void DeleteSession()
+        private void CleanSession()
         {
             foreach (String file in Directory.GetFiles("SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" + Path.DirectorySeparatorChar + session_id))
             {
                 File.Delete(file);
             }
+        }
+
+        private void DeleteSession()
+        {
+            CleanSession();
             Directory.Delete("SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" + Path.DirectorySeparatorChar + session_id);
         }
+
 
         public String GetSessionId()
         {
