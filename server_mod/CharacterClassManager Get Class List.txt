@@ -1,0 +1,15 @@
+			int classID = 0;
+			foreach (Class curClass in this.klasy)
+			{
+				ServerConsole.AddLog(string.Concat(new object[]
+				{
+					"Class #",
+					classID,
+					": ",
+					curClass.fullName,
+					" - ",
+					curClass.maxHP,
+					"HP"
+				}));
+				classID++;
+			}

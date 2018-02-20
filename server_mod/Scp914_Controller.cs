@@ -15,11 +15,12 @@ public partial class Scp914_Controller : NetworkBehaviour
 		if (gameObject != null)
 		{
 			Pickup pickup = gameObject.GetComponent<Pickup>();
-			if (pickup != null)
+			Pickup pickupParent = gameObject.GetComponentInParent<Pickup>();
+			if (pickup != null && pickupParent != null)
 			{
 				pickup.SetDurability(this.avItems[result].durability);
-				pickup.SetID(result);
-				pickup.SetPosition(pos);
+				pickupParent.SetID(result);
+				pickupParent.SetPosition(pos);
 			}
 		}
 	}

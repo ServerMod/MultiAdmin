@@ -9,21 +9,16 @@ using UnityEngine.UI;
 
 namespace GameConsole
 {
-	// Token: 0x02000016 RID: 22
+	// Token: 0x0200001D RID: 29
 	public class Console : MonoBehaviour
 	{
-		// Token: 0x06000063 RID: 99
-		public Console()
-		{
-		}
-
-		// Token: 0x06000064 RID: 100
+		// Token: 0x06000092 RID: 146 RVA: 0x0000255F File Offset: 0x0000075F
 		public List<Console.Log> GetAllLogs()
 		{
 			return this.logs;
 		}
 
-		// Token: 0x06000065 RID: 101
+		// Token: 0x06000093 RID: 147 RVA: 0x0000B20C File Offset: 0x0000940C
 		public void UpdateValue(string key, string value)
 		{
 			bool flag = false;
@@ -42,8 +37,8 @@ namespace GameConsole
 			}
 		}
 
-		// Token: 0x06000066 RID: 102
-		public void Awake()
+		// Token: 0x06000094 RID: 148 RVA: 0x00002567 File Offset: 0x00000767
+		private void Awake()
 		{
 			UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 			if (Console.singleton == null)
@@ -54,17 +49,16 @@ namespace GameConsole
 			UnityEngine.Object.DestroyImmediate(base.gameObject);
 		}
 
-		// Token: 0x06000067 RID: 103
-		public void Start()
+		// Token: 0x06000095 RID: 149 RVA: 0x0000B290 File Offset: 0x00009490
+		private void Start()
 		{
 			this.AddLog("Hi there! Initializing console...", new Color32(0, byte.MaxValue, 0, byte.MaxValue), false);
 			this.AddLog("Done! Type 'help' to print the list of available commands.", new Color32(0, byte.MaxValue, 0, byte.MaxValue), false);
-			Debug.logger.logEnabled = true;
 			this.RefreshConsoleScreen();
 		}
 
-		// Token: 0x06000068 RID: 104
-		public void RefreshConsoleScreen()
+		// Token: 0x06000096 RID: 150 RVA: 0x0000B2E0 File Offset: 0x000094E0
+		private void RefreshConsoleScreen()
 		{
 			bool flag = false;
 			if (this.txt.text.Length > 15000)
@@ -113,7 +107,7 @@ namespace GameConsole
 			}
 		}
 
-		// Token: 0x06000069 RID: 105
+		// Token: 0x06000097 RID: 151 RVA: 0x0000B4AC File Offset: 0x000096AC
 		public void AddLog(string text, Color32 c, bool nospace = false)
 		{
 			this.response = this.response + text + Environment.NewLine;
@@ -126,14 +120,14 @@ namespace GameConsole
 			this.RefreshConsoleScreen();
 		}
 
-		// Token: 0x0600006A RID: 106
-		public string ColorToHex(Color32 color)
+		// Token: 0x06000098 RID: 152 RVA: 0x0000B50C File Offset: 0x0000970C
+		private string ColorToHex(Color32 color)
 		{
 			string str = color.r.ToString("X2") + color.g.ToString("X2") + color.b.ToString("X2");
 			return "#" + str;
 		}
 
-		// Token: 0x0600006B RID: 107
+		// Token: 0x06000099 RID: 153 RVA: 0x0000B560 File Offset: 0x00009760
 		public static GameObject FindConnectedRoot(NetworkConnection conn)
 		{
 			try
@@ -148,11 +142,12 @@ namespace GameConsole
 			}
 			catch
 			{
+				return null;
 			}
 			return null;
 		}
 
-		// Token: 0x0600006C RID: 108
+		// Token: 0x0600009A RID: 154 RVA: 0x0000B5E4 File Offset: 0x000097E4
 		public string TypeCommand(string cmd)
 		{
 			try
@@ -246,18 +241,18 @@ namespace GameConsole
 								return this.response;
 							}
 							Item[] availableItems = component2.availableItems;
-							for (int i = 10 * (num2 - 1); i < 10 * num2; i++)
+							for (int j = 10 * (num2 - 1); j < 10 * num2; j++)
 							{
 								if (10 * (num2 - 1) > availableItems.Length)
 								{
 									this.AddLog("Page '" + num2 + "' does not exist!", new Color32(byte.MaxValue, 180, 0, byte.MaxValue), false);
 									break;
 								}
-								if (i >= availableItems.Length)
+								if (j >= availableItems.Length)
 								{
 									break;
 								}
-								this.AddLog("ITEM#" + i.ToString("000") + " : " + availableItems[i].label, new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue), false);
+								this.AddLog("ITEM#" + j.ToString("000") + " : " + availableItems[j].label, new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue), false);
 							}
 						}
 					}
@@ -289,7 +284,7 @@ namespace GameConsole
 					{
 						if (commandHint.name == b)
 						{
-							this.AddLog(commandHint.name + " - " + commandHint.fullDesc + "LOGTYPE02", new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue), false);
+							this.AddLog(commandHint.name + " - " + commandHint.fullDesc, new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue), false);
 							this.RefreshConsoleScreen();
 							return this.response;
 						}
@@ -298,10 +293,10 @@ namespace GameConsole
 					this.RefreshConsoleScreen();
 					return this.response;
 				}
-				this.AddLog("List of available commands:LOGTYPE02", new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue), false);
+				this.AddLog("List of available commands:\n", new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue), false);
 				foreach (Console.CommandHint commandHint2 in this.hints)
 				{
-					this.AddLog(commandHint2.name + " - " + commandHint2.shortDesc + "LOGTYPE02", new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue), true);
+					this.AddLog(commandHint2.name + " - " + commandHint2.shortDesc, new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue), true);
 				}
 				this.AddLog("Type 'HELP [COMMAND]' to print a full description of the chosen command.", new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue), false);
 				this.RefreshConsoleScreen();
@@ -357,15 +352,15 @@ namespace GameConsole
 			}
 			else if (cmd == "SHOWRIDS")
 			{
-				GameObject[] array2 = GameObject.FindGameObjectsWithTag("RoomID");
-				foreach (GameObject gameObject4 in array2)
+				GameObject[] array4 = GameObject.FindGameObjectsWithTag("RoomID");
+				foreach (GameObject gameObject4 in array4)
 				{
 					gameObject4.GetComponentsInChildren<MeshRenderer>()[0].enabled = !gameObject4.GetComponentsInChildren<MeshRenderer>()[0].enabled;
 					gameObject4.GetComponentsInChildren<MeshRenderer>()[1].enabled = !gameObject4.GetComponentsInChildren<MeshRenderer>()[1].enabled;
 				}
-				if (array2.Length != 0)
+				if (array4.Length != 0)
 				{
-					this.AddLog("Show RIDS: " + array2[0].GetComponentInChildren<MeshRenderer>().enabled.ToString(), new Color32(0, byte.MaxValue, 0, byte.MaxValue), false);
+					this.AddLog("Show RIDS: " + array4[0].GetComponentInChildren<MeshRenderer>().enabled.ToString(), new Color32(0, byte.MaxValue, 0, byte.MaxValue), false);
 				}
 				else
 				{
@@ -397,27 +392,18 @@ namespace GameConsole
 								return this.response;
 							}
 							Class[] klasy = component3.klasy;
-							for (int j = 10 * (num4 - 1); j <= 10 * num4; j++)
+							for (int k = 10 * (num4 - 1); k < 10 * num4; k++)
 							{
 								if (10 * (num4 - 1) > klasy.Length)
 								{
 									this.AddLog("Page '" + num4 + "' does not exist!", new Color32(byte.MaxValue, 180, 0, byte.MaxValue), false);
 									break;
 								}
-								if (j >= klasy.Length)
+								if (k >= klasy.Length)
 								{
 									break;
 								}
-								this.AddLog(string.Concat(new object[]
-								{
-									"CLASS#",
-									j.ToString("000"),
-									" : ",
-									klasy[j].fullName,
-									" (Max HP: ",
-									klasy[j].maxHP,
-									")"
-								}), new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue), false);
+								this.AddLog("CLASS#" + k.ToString("000") + " : " + klasy[k].fullName, new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue), false);
 							}
 						}
 					}
@@ -509,10 +495,10 @@ namespace GameConsole
 			else if (cmd == "ROUNDRESTART")
 			{
 				bool flag2 = false;
-				GameObject[] array3 = GameObject.FindGameObjectsWithTag("Player");
-				for (int k = 0; k < array3.Length; k++)
+				GameObject[] array2 = GameObject.FindGameObjectsWithTag("Player");
+				for (int i = 0; i < array2.Length; i++)
 				{
-					PlayerStats component5 = array3[k].GetComponent<PlayerStats>();
+					PlayerStats component5 = array2[i].GetComponent<PlayerStats>();
 					if (component5.isLocalPlayer && component5.isServer)
 					{
 						flag2 = true;
@@ -560,7 +546,6 @@ namespace GameConsole
 						}
 						else if (ConfigFile.singleton.ReloadConfig())
 						{
-							((CustomNetworkManager)NetworkManager.singleton).UpdateMotd(0);
 							this.AddLog("Configuration file <b>successfully reloaded</b>. New settings will be applied on <b>your</b> server in <b>next</b> round.", new Color32(0, byte.MaxValue, 0, byte.MaxValue), false);
 						}
 						else
@@ -598,7 +583,7 @@ namespace GameConsole
 									this.AddLog("Player :: " + text3 + " :: " + networkConnection.address, new Color32(128, 160, 128, byte.MaxValue), true);
 								}
 							}
-							goto IL_1386;
+							goto IL_1332;
 						}
 					}
 					int duration = 0;
@@ -645,11 +630,11 @@ namespace GameConsole
 			{
 				this.AddLog("Command " + cmd + " does not exist!", new Color32(byte.MaxValue, 180, 0, byte.MaxValue), false);
 			}
-			IL_1386:
+			IL_1332:
 			return this.response;
 		}
 
-		// Token: 0x0600006D RID: 109
+		// Token: 0x0600009B RID: 155 RVA: 0x0000C960 File Offset: 0x0000AB60
 		public void ProceedButton()
 		{
 			if (this.cmdField.text != string.Empty)
@@ -660,8 +645,8 @@ namespace GameConsole
 			EventSystem.current.SetSelectedGameObject(this.cmdField.gameObject);
 		}
 
-		// Token: 0x0600006E RID: 110
-		public void LateUpdate()
+		// Token: 0x0600009C RID: 156 RVA: 0x0000C9BC File Offset: 0x0000ABBC
+		private void LateUpdate()
 		{
 			if (Input.GetKeyDown(KeyCode.Return))
 			{
@@ -705,7 +690,7 @@ namespace GameConsole
 			}
 		}
 
-		// Token: 0x0600006F RID: 111
+		// Token: 0x0600009D RID: 157 RVA: 0x0000CAEC File Offset: 0x0000ACEC
 		public void ToggleConsole()
 		{
 			CursorManager.consoleOpen = !this.console.activeSelf;
@@ -731,13 +716,13 @@ namespace GameConsole
 			}
 		}
 
-		// Token: 0x06000070 RID: 112
-		public void QuitGame()
+		// Token: 0x0600009E RID: 158 RVA: 0x00002593 File Offset: 0x00000793
+		private void QuitGame()
 		{
 			Application.Quit();
 		}
 
-		// Token: 0x06000071 RID: 113
+		// Token: 0x0600009F RID: 159 RVA: 0x0000CBB0 File Offset: 0x0000ADB0
 		public void DumpGameObjStats()
 		{
 			GameObject[] array = UnityEngine.Object.FindObjectsOfType<GameObject>();
@@ -762,7 +747,7 @@ namespace GameConsole
 			ServerConsole.AddLog("Scene dumped to " + text);
 		}
 
-		// Token: 0x06000072 RID: 114
+		// Token: 0x060000A0 RID: 160 RVA: 0x0000CCD4 File Offset: 0x0000AED4
 		public void GetStats(string parent, Component obj, Dictionary<string, int> dictionary)
 		{
 			string key = parent + "_" + obj.GetType().Name;
@@ -771,7 +756,7 @@ namespace GameConsole
 			dictionary.Add(parent + obj.tag, num++);
 		}
 
-		// Token: 0x06000073 RID: 115
+		// Token: 0x060000A1 RID: 161 RVA: 0x0000CD1C File Offset: 0x0000AF1C
 		public void GetStats(string parent, GameObject obj, Dictionary<string, int> dictionary, HashSet<int> done)
 		{
 			if (done.Contains(obj.GetInstanceID()))
@@ -792,85 +777,80 @@ namespace GameConsole
 			}
 		}
 
-		// Token: 0x04000069 RID: 105
-		public bool allwaysRefreshing;
+		// Token: 0x0400009F RID: 159
+		private bool allwaysRefreshing;
 
-		// Token: 0x0400006A RID: 106
-		public List<Console.Log> logs = new List<Console.Log>();
+		// Token: 0x040000A0 RID: 160
+		private List<Console.Log> logs = new List<Console.Log>();
 
-		// Token: 0x0400006B RID: 107
-		public List<Console.Value> values = new List<Console.Value>();
+		// Token: 0x040000A1 RID: 161
+		private List<Console.Value> values = new List<Console.Value>();
 
-		// Token: 0x0400006C RID: 108
+		// Token: 0x040000A2 RID: 162
 		public Console.CommandHint[] hints;
 
-		// Token: 0x0400006D RID: 109
+		// Token: 0x040000A3 RID: 163
 		public Text txt;
 
-		// Token: 0x0400006E RID: 110
+		// Token: 0x040000A4 RID: 164
 		public InputField cmdField;
 
-		// Token: 0x0400006F RID: 111
+		// Token: 0x040000A5 RID: 165
 		public GameObject console;
 
-		// Token: 0x04000070 RID: 112
+		// Token: 0x040000A6 RID: 166
 		public static Console singleton;
 
-		// Token: 0x04000071 RID: 113
-		public int scrollup;
+		// Token: 0x040000A7 RID: 167
+		private int scrollup;
 
-		// Token: 0x04000072 RID: 114
-		public int previous_scrlup;
+		// Token: 0x040000A8 RID: 168
+		private int previous_scrlup;
 
-		// Token: 0x04000073 RID: 115
-		public string loadedLevel;
+		// Token: 0x040000A9 RID: 169
+		private string loadedLevel;
 
-		// Token: 0x04000074 RID: 116
-		public string response = string.Empty;
+		// Token: 0x040000AA RID: 170
+		private string response = string.Empty;
 
-		// Token: 0x02000017 RID: 23
+		// Token: 0x0200001E RID: 30
 		[Serializable]
 		public class CommandHint
 		{
-			// Token: 0x06000074 RID: 116
-			public CommandHint()
-			{
-			}
-
-			// Token: 0x04000075 RID: 117
+			// Token: 0x040000AB RID: 171
 			public string name;
 
-			// Token: 0x04000076 RID: 118
+			// Token: 0x040000AC RID: 172
 			public string shortDesc;
 
-			// Token: 0x04000077 RID: 119
+			// Token: 0x040000AD RID: 173
 			[Multiline]
 			public string fullDesc;
 		}
 
-		// Token: 0x02000018 RID: 24
+		// Token: 0x0200001F RID: 31
 		[Serializable]
 		public class Value
 		{
-			// Token: 0x06000075 RID: 117
+			// Token: 0x060000A3 RID: 163 RVA: 0x0000259A File Offset: 0x0000079A
 			public Value(string k, string v)
 			{
 				this.key = k;
 				this.value = v;
 			}
 
-			// Token: 0x04000078 RID: 120
+			// Token: 0x040000AE RID: 174
 			public string key;
 
-			// Token: 0x04000079 RID: 121
+			// Token: 0x040000AF RID: 175
 			public string value;
 		}
 
-		// Token: 0x02000019 RID: 25
+		// Token: 0x02000020 RID: 32
 		[Serializable]
 		public class Log
 		{
-			// Token: 0x06000076 RID: 118
+			// Token: 0x060000A4 RID: 164 RVA: 0x000025B0 File Offset: 0x000007B0
 			public Log(string t, Color32 c, bool b)
 			{
 				this.text = t;
@@ -878,13 +858,13 @@ namespace GameConsole
 				this.nospace = b;
 			}
 
-			// Token: 0x0400007A RID: 122
+			// Token: 0x040000B0 RID: 176
 			public string text;
 
-			// Token: 0x0400007B RID: 123
+			// Token: 0x040000B1 RID: 177
 			public Color32 color;
 
-			// Token: 0x0400007C RID: 124
+			// Token: 0x040000B2 RID: 178
 			public bool nospace;
 		}
 	}
