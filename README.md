@@ -26,7 +26,7 @@ The latest release can be found here: [Release link](https://github.com/Grover-c
 3. For each instance with a unique config, create a new directory in the servers directory and place each config.txt in there, so for example for two unique configs:
 * servers/FirstServer/config.txt
 * servers/SecondServer/config.txt
-4. If your config is not in its default location due to a different OS and such, make a new file next to MultiAdmin.exe called spc_multiadmin.cfg and place the follwing setting like so:
+4. If your config is not in its default location due to a different OS and such, make a new file next to MultiAdmin.exe called scp_multiadmin.cfg and place the follwing setting like so:
 - cfg_loc=%appdata%\SCP Secret Laboratory\config.txt
 
 ## MultiAdmin Commands
