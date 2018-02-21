@@ -115,11 +115,11 @@ Example:
 - NTFL_HP use this to set the starting HP for the class. Default = 120
 - NTFC_HP use this to set the starting HP for the class. Default = 150
 - NTFG_HP use this to set the starting HP for the class. Default = 100
-- SCP049_DISABLE disable this spc, default: no
-- SCP079_DISABLE disable this spc, default: no
-- SCP106_DISABLE disable this spc, default: no
-- SCP173_DISABLE disable this spc, default: no
-- SCP457_DISABLE disable this spc, default: no
+- SCP049_DISABLE disable this scp, default: no
+- SCP079_DISABLE disable this scp, default: no
+- SCP106_DISABLE disable this scp, default: no
+- SCP173_DISABLE disable this scp, default: no
+- SCP457_DISABLE disable this scp, default: no
 ##
 
 Place any suggestions/problems in issues!
