@@ -129,8 +129,8 @@ namespace MultiAdmin.MultiAdmin
                             ((IEventCrash)f).OnCrash();
                         }
                     }
-                    Write("Game engine exited/crashed", ConsoleColor.Red);
-                    Write("Removing Session", ConsoleColor.Red);
+                    Write("Game engine exited/crashed/closed/restarting", ConsoleColor.Red);
+                    Write("Cleaning Session", ConsoleColor.Red);
                     CleanSession();
                     Write("Restarting game with same session id");
                     StartServer();
@@ -245,7 +245,7 @@ namespace MultiAdmin.MultiAdmin
                 string[] files = Directory.GetFiles(Directory.GetCurrentDirectory(), "SCPSL.*", SearchOption.TopDirectoryOnly);
                 Write("Executing: " + files[0], ConsoleColor.DarkGreen);
                 SwapConfigs();
-                string args = "-batchmode -nographics -key" + session_id  + " -silent-crashes -id" + (object)Process.GetCurrentProcess().Id + " -logFile \"" + logFolder + Utils.GetDate() + "_SPC_output_log.txt" + "\"";
+                string args = "-batchmode -nographics -key" + session_id  + " -silent-crashes -id" + (object)Process.GetCurrentProcess().Id + " -logFile \"" + logFolder + Utils.GetDate() + "_SCP_output_log.txt" + "\"";
                 Write("Starting server with the following parameters");
                 Write(files[0] + " " + args);
                 gameProcess = Process.Start(files[0], args);
