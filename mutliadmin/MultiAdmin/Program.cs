@@ -27,24 +27,11 @@ namespace MutliAdmin
         }
 
 
-		private static String findDefaultConfig()
-		{
-			String windows = Environment.ExpandEnvironmentVariables(String.Format("%appdata%{0}SCP Secret Laboratory{0}config.txt", Path.DirectorySeparatorChar));
-			String linux = String.Format("~{0}.config{0}SCP\\ Secret\\ Laboratory{0}config.txt", Path.DirectorySeparatorChar);
-			if (File.Exists(windows)) return windows;
-			if (File.Exists(linux)) return linux;
-			return "invalid"; // dont want to throw an exception here, just set to invalid so that it 
-		}
 
         public static bool FindConfig()
         {
-			var defaultLoc = findDefaultConfig();
-            var path = Program.multiadminConfig.GetValue("cfg_loc", defaultLoc);
-			if (path.Equals("Invalid"))
-			{
-				Write("MultiAdmin was unable to find the default location, please specify the location in scp_multiadmin.cfg");
-				return false;
-			}
+			var defaultLoc = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/SCP Secret Laboratory/config.txt";
+			var path = Program.multiadminConfig.GetValue("cfg_loc", defaultLoc);
             var backup = path.Replace(".txt", "_backup.txt");
 
 			if (!File.Exists(path))
