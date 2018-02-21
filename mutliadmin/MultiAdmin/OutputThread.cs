@@ -72,7 +72,7 @@ namespace MultiAdmin
                                     colour = ConsoleColor.DarkRed;
                                     break;
                                 case "LOGTYPE14":
-                                    colour = ConsoleColor.White;
+									colour = ConsoleColor.Magenta;
                                     break;
                                 default:
                                     colour = ConsoleColor.Cyan;
@@ -82,10 +82,21 @@ namespace MultiAdmin
                        
                     }
 
+					if (gameMessage.Contains("Mod Log:"))
+					{
+						foreach (Feature f in server.Features)
+						{
+							if (f is IEventAdminAction)
+							{
+								((IEventAdminAction)f).OnAdminAction(gameMessage.Replace("Mod log:", ""));
+							}
+						}
+					}
+
                     if (gameMessage.Contains("ServerMod"))
                     {
                         server.HasServerMod = true;
-                        server.ServerModVersion = gameMessage.Replace("ServerMod - Version", "");
+                        server.ServerModVersion = gameMessage.Replace("ServerMod - Version", "").Trim();
                     }
 
                     if (gameMessage.Contains("Waiting for players"))

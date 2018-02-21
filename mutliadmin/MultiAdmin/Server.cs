@@ -42,7 +42,8 @@ namespace MultiAdmin.MultiAdmin
         private Boolean stopping;
         private String session_id;
         private String maLogLocation;
-        public String logFolder { get; }
+		public String StartDateTime { get; }
+        public String LogFolder { get; }
 
         public Server(String serverDir, String configKey, Config multiAdminCfg, String mainConfigLocation, String configChain)
         {
@@ -55,8 +56,9 @@ namespace MultiAdmin.MultiAdmin
             Features = new List<Feature>();
             tick = new List<IEventTick>();
             MultiAdminCfg = multiAdminCfg;
-            logFolder = "servers" + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "logs" + Path.DirectorySeparatorChar;
-            maLogLocation = logFolder + Utils.GetDate() + "_MA_output_log.txt";
+            LogFolder = "servers" + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "logs" + Path.DirectorySeparatorChar;
+			StartDateTime = Utils.GetDate();
+			maLogLocation = LogFolder + StartDateTime + "_MA_output_log.txt";
             stopping = false;
             InitialRoundStarted = false;
             readerThread = new Thread(new ThreadStart(() => InputThread.Write(this)));
@@ -91,9 +93,11 @@ namespace MultiAdmin.MultiAdmin
             RegisterFeature(new InactivityShutdown(this));
             RegisterFeature(new MemoryChecker(this));
             RegisterFeature(new MemoryCheckerSoft(this));
-            RegisterFeature(new MultiAdminInfo(this));
+			RegisterFeature(new ModLog(this));
+			RegisterFeature(new MultiAdminInfo(this));
             RegisterFeature(new NewCommand(this));
-            RegisterFeature(new RestartNextRound(this));
+			RegisterFeature(new Restart(this));
+			RegisterFeature(new RestartNextRound(this));
             RegisterFeature(new RestartRoundCounter(this));
             RegisterFeature(new StopNextRound(this));
             RegisterFeature(new Titlebar(this));
@@ -128,8 +132,8 @@ namespace MultiAdmin.MultiAdmin
                             ((IEventCrash)f).OnCrash();
                         }
                     }
-                    Write("Game engine exited/crashed", ConsoleColor.Red);
-                    Write("Removing Session", ConsoleColor.Red);
+                    Write("Game engine exited/crashed/closed/restarting", ConsoleColor.Red);
+                    Write("Cleaning Session", ConsoleColor.Red);
                     CleanSession();
                     Write("Restarting game with same session id");
                     StartServer();
@@ -201,10 +205,48 @@ namespace MultiAdmin.MultiAdmin
             }
         }
 
-        public void SoftRestartServer()
-        {
-            gameProcess.Kill();
+		public void SoftRestartServer()
+		{
+			if (ServerModCheck(1, 5, 0))
+			{
+				SendMessage("RESTARTRC");
+			}
+			else
+			{
+				gameProcess.Kill();
+			}
         }
+
+		public Boolean ServerModCheck(int major, int minor, int fix)
+		{
+			if (this.ServerModVersion == null)
+			{
+				return false;
+			}
+
+			String[] parts = ServerModVersion.Split('.');
+			int verMajor = 0;
+			int verMinor = 0;
+			int verFix = 0;
+			if (parts.Length == 3)
+			{
+				Int32.TryParse(parts[0], out verMajor);
+				Int32.TryParse(parts[1], out verMinor);
+				Int32.TryParse(parts[1], out verFix);
+			}
+			else if (parts.Length == 2)
+			{
+				Int32.TryParse(parts[0], out verMajor);
+				Int32.TryParse(parts[1], out verMinor);
+			}
+			else
+			{
+				return false;
+			}
+
+			return major >= verMajor && minor >= verMinor && fix >= verFix;
+
+		}
 
         public void RestartServer()
         {
@@ -244,7 +286,11 @@ namespace MultiAdmin.MultiAdmin
                 string[] files = Directory.GetFiles(Directory.GetCurrentDirectory(), "SCPSL.*", SearchOption.TopDirectoryOnly);
                 Write("Executing: " + files[0], ConsoleColor.DarkGreen);
                 SwapConfigs();
+<<<<<<< HEAD
                 string args = "-batchmode -nographics -key" + session_id  + " -silent-crashes -id" + (object)Process.GetCurrentProcess().Id + " -logFile \"" + logFolder + Utils.GetDate() + "_SCP_output_log.txt" + "\"";
+=======
+                string args = "-batchmode -nographics -key" + session_id  + " -silent-crashes -id" + (object)Process.GetCurrentProcess().Id + " -logFile \"" + LogFolder + Utils.GetDate() + "_SCP_output_log.txt" + "\"";
+>>>>>>> f86cf09741f51ad0e431ecc84d309b02a30ef3e6
                 Write("Starting server with the following parameters");
                 Write(files[0] + " " + args);
                 gameProcess = Process.Start(files[0], args);
