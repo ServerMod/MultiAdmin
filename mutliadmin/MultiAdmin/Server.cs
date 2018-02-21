@@ -93,7 +93,8 @@ namespace MultiAdmin.MultiAdmin
             RegisterFeature(new MemoryCheckerSoft(this));
             RegisterFeature(new MultiAdminInfo(this));
             RegisterFeature(new NewCommand(this));
-            RegisterFeature(new RestartNextRound(this));
+			RegisterFeature(new Restart(this));
+			RegisterFeature(new RestartNextRound(this));
             RegisterFeature(new RestartRoundCounter(this));
             RegisterFeature(new StopNextRound(this));
             RegisterFeature(new Titlebar(this));

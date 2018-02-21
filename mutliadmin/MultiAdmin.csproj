@@ -47,6 +47,7 @@
     <Compile Include="MultiAdmin\Features\NewCommand.cs" />
     <Compile Include="MultiAdmin\Features\ChainStart.cs" />
     <Compile Include="MultiAdmin\Features\EventTest.cs" />
+    <Compile Include="MultiAdmin\Features\Restart.cs" />
     <Compile Include="MultiAdmin\Features\TitleBar.cs" />
     <Compile Include="MultiAdmin\Features\Autoscale.cs" />
     <Compile Include="MultiAdmin\Features\MemoryChecker.cs" />

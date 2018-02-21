@@ -27,13 +27,32 @@ namespace MutliAdmin
         }
 
 
+		private static String findDefaultConfig()
+		{
+			String windows = Environment.ExpandEnvironmentVariables(String.Format("%appdata%{0}SCP Secret Laboratory{0}config.txt", Path.DirectorySeparatorChar));
+			String linux = String.Format("~{0}.config{0}SCP\\ Secret\\ Laboratory{0}config.txt", Path.DirectorySeparatorChar);
+			if (File.Exists(windows)) return windows;
+			if (File.Exists(linux)) return linux;
+			return "invalid"; // dont want to throw an exception here, just set to invalid so that it 
+		}
 
-
-        public static void FindConfig()
+        public static bool FindConfig()
         {
-            var defaultLoc = Environment.ExpandEnvironmentVariables(String.Format("%appdata%{0}SCP Secret Laboratory{0}config.txt", Path.DirectorySeparatorChar));
+			var defaultLoc = findDefaultConfig();
             var path = Program.multiadminConfig.GetValue("cfg_loc", defaultLoc);
+			if (path.Equals("Invalid"))
+			{
+				Write("MultiAdmin was unable to find the default location, please specify the location in scp_multiadmin.cfg");
+				return false;
+			}
             var backup = path.Replace(".txt", "_backup.txt");
+
+			if (!File.Exists(path))
+			{
+				Write("Default config file not in expected location (" + path + "), copying config_template.txt");
+				File.Copy("config_template.txt", path);
+			}
+
             if (File.Exists(path))
             {
                 configLocation = path;
@@ -47,8 +66,11 @@ namespace MutliAdmin
             }
             else
             {
-                throw new FileNotFoundException("Default config file not in expected location (" + path + "), try runing LocalAdmin first");
+				// should never happen
+				throw new FileNotFoundException("Config.txt file not found! something has gone wrong with initial setup, try running LocalAdmin.exe first");
             }
+
+			return true;
         }
 
 
@@ -147,12 +169,28 @@ namespace MutliAdmin
             Console.ReadKey();
         }
 
+		private static void FixTypo()
+		{
+			// some idiot (courtney) accidently made the config file spc_multiadmin.cfg instead of scp_multiadmin.cfg
+			// this method fixes it
+			if (File.Exists("spc_multiadmin.cfg"))
+			{
+				Write("Renaming spc_multiadmin.cfg to scp_multiadmin.cfg");
+				File.Move("spc_multiadmin.cfg", "scp_multiadmin.cfg");
+			}
+		}
+
         public static void Main(string[] args)
         {
-            Write("ARGS:" + string.Join(",", args));
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnExit);
-            multiadminConfig = new MultiAdmin.Config("spc_multiadmin.cfg");
-            FindConfig();
+			FixTypo();
+            multiadminConfig = new MultiAdmin.Config("scp_multiadmin.cfg");
+            if (!FindConfig())
+			{
+				Console.ReadKey();
+				return;
+			}
+
             configChain = "";
             if (StartHandleConfigs(args))
             {

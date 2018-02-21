@@ -52,3 +52,5 @@ mutliadmin/.vs/MultiAdmin/v15/Server/sqlite3/db.lock
 mutliadmin/.vs/MultiAdmin/v15/Server/sqlite3/storage.ide
 *.ide
 *.ide
+*.ide
+mutliadmin/.vs/MultiAdmin/v15/Server/sqlite3/storage.ide
