@@ -43,6 +43,7 @@
     <Compile Include="MultiAdmin\Features\GithubLogSubmitter.cs" />
     <Compile Include="MultiAdmin\Features\HelpCommand.cs" />
     <Compile Include="MultiAdmin\Features\MemoryCheckerSoft.cs" />
+    <Compile Include="MultiAdmin\Features\ModLog.cs" />
     <Compile Include="MultiAdmin\Features\MultiAdminInfo.cs" />
     <Compile Include="MultiAdmin\Features\NewCommand.cs" />
     <Compile Include="MultiAdmin\Features\ChainStart.cs" />

@@ -30,7 +30,7 @@ namespace MultiAdmin.MultiAdmin.Features
             if (Server.MultiAdminCfg.GetBoolean("submit_errors", true))
             {
                 // init happens befoe game start, so take the directory and find the latest SPC log
-                var files = Directory.GetFiles(Server.logFolder, "*SCP*").ToList();
+                var files = Directory.GetFiles(Server.LogFolder, "*SCP*").ToList();
 
 				files.Sort();
                 files.Reverse();

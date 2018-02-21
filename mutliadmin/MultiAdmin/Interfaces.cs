@@ -61,7 +61,12 @@ namespace MultiAdmin.MultiAdmin
         void OnPlayerDisconnect(String name);
     }
 
-    public interface IServerMod
+	public interface IEventAdminAction : IServerMod
+	{
+		void OnAdminAction(String message);
+	}
+
+	public interface IServerMod
     {
     }
 
