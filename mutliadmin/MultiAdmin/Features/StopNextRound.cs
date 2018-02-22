@@ -32,7 +32,8 @@ namespace MultiAdmin.MultiAdmin.Commands
 
         public void OnCall(string[] args)
         {
-            stop = true;
+			Server.Write("Server will stop next round");
+			stop = true;
         }
 
         public void OnRoundEnd()

@@ -43,10 +43,12 @@
     <Compile Include="MultiAdmin\Features\GithubLogSubmitter.cs" />
     <Compile Include="MultiAdmin\Features\HelpCommand.cs" />
     <Compile Include="MultiAdmin\Features\MemoryCheckerSoft.cs" />
+    <Compile Include="MultiAdmin\Features\ModLog.cs" />
     <Compile Include="MultiAdmin\Features\MultiAdminInfo.cs" />
     <Compile Include="MultiAdmin\Features\NewCommand.cs" />
     <Compile Include="MultiAdmin\Features\ChainStart.cs" />
     <Compile Include="MultiAdmin\Features\EventTest.cs" />
+    <Compile Include="MultiAdmin\Features\Restart.cs" />
     <Compile Include="MultiAdmin\Features\TitleBar.cs" />
     <Compile Include="MultiAdmin\Features\Autoscale.cs" />
     <Compile Include="MultiAdmin\Features\MemoryChecker.cs" />

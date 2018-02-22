@@ -59,12 +59,12 @@ namespace MultiAdmin.MultiAdmin.Commands
             var smod = "";
             if (Server.HasServerMod)
             {
-                smod = "ServerMod Version " + Server.ServerModVersion;
+                smod = "SMod " + Server.ServerModVersion;
             }
             var displayPlayerCount = playerCount;
             if (playerCount == -1) displayPlayerCount = 0;
             string proccessId = (Server.GetGameProccess() == null) ? "" : Server.GetGameProccess().Id.ToString();
-            Console.Title = "SCP:SL MultiAdmin " + Server.MA_VERSION + " | Config: " + Server.ConfigKey + " | Session ID:" + Server.GetSessionId() + " Game PID: " + proccessId+ " | " + displayPlayerCount + "/" + maxPlayers + " | " + smod;
+            Console.Title = "MultiAdmin " + Server.MA_VERSION + " | Config: " + Server.ConfigKey + " | Session:" + Server.GetSessionId() + " PID: " + proccessId+ " | " + displayPlayerCount + "/" + maxPlayers + " | " + smod;
         }
     }
 }

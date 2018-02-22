@@ -28,12 +28,18 @@ namespace MutliAdmin
 
 
 
-
-        public static void FindConfig()
+        public static bool FindConfig()
         {
-            var defaultLoc = Environment.ExpandEnvironmentVariables(String.Format("%appdata%{0}SCP Secret Laboratory{0}config.txt", Path.DirectorySeparatorChar));
-            var path = Program.multiadminConfig.GetValue("cfg_loc", defaultLoc);
+			var defaultLoc = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/SCP Secret Laboratory/config.txt";
+			var path = Program.multiadminConfig.GetValue("cfg_loc", defaultLoc);
             var backup = path.Replace(".txt", "_backup.txt");
+
+			if (!File.Exists(path))
+			{
+				Write("Default config file not in expected location (" + path + "), copying config_template.txt");
+				File.Copy("config_template.txt", path);
+			}
+
             if (File.Exists(path))
             {
                 configLocation = path;
@@ -47,8 +53,11 @@ namespace MutliAdmin
             }
             else
             {
-                throw new FileNotFoundException("Default config file not in expected location (" + path + "), try runing LocalAdmin first");
+				// should never happen
+				throw new FileNotFoundException("Config.txt file not found! something has gone wrong with initial setup, try running LocalAdmin.exe first");
             }
+
+			return true;
         }
 
 
@@ -147,12 +156,28 @@ namespace MutliAdmin
             Console.ReadKey();
         }
 
+		private static void FixTypo()
+		{
+			// some idiot (courtney) accidently made the config file spc_multiadmin.cfg instead of scp_multiadmin.cfg
+			// this method fixes it
+			if (File.Exists("spc_multiadmin.cfg"))
+			{
+				Write("Renaming spc_multiadmin.cfg to scp_multiadmin.cfg");
+				File.Move("spc_multiadmin.cfg", "scp_multiadmin.cfg");
+			}
+		}
+
         public static void Main(string[] args)
         {
-            Write("ARGS:" + string.Join(",", args));
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnExit);
+			FixTypo();
             multiadminConfig = new MultiAdmin.Config("scp_multiadmin.cfg");
-            FindConfig();
+            if (!FindConfig())
+			{
+				Console.ReadKey();
+				return;
+			}
+
             configChain = "";
             if (StartHandleConfigs(args))
             {
