@@ -209,7 +209,7 @@ namespace MultiAdmin.MultiAdmin
 		{
 			if (ServerModCheck(1, 5, 0))
 			{
-				SendMessage("RESTARTRC");
+				SendMessage("RECONNECTRS");
 			}
 			else
 			{
