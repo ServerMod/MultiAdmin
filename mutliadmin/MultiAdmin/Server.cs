@@ -286,11 +286,7 @@ namespace MultiAdmin.MultiAdmin
                 string[] files = Directory.GetFiles(Directory.GetCurrentDirectory(), "SCPSL.*", SearchOption.TopDirectoryOnly);
                 Write("Executing: " + files[0], ConsoleColor.DarkGreen);
                 SwapConfigs();
-<<<<<<< HEAD
-                string args = "-batchmode -nographics -key" + session_id  + " -silent-crashes -id" + (object)Process.GetCurrentProcess().Id + " -logFile \"" + logFolder + Utils.GetDate() + "_SCP_output_log.txt" + "\"";
-=======
                 string args = "-batchmode -nographics -key" + session_id  + " -silent-crashes -id" + (object)Process.GetCurrentProcess().Id + " -logFile \"" + LogFolder + Utils.GetDate() + "_SCP_output_log.txt" + "\"";
->>>>>>> f86cf09741f51ad0e431ecc84d309b02a30ef3e6
                 Write("Starting server with the following parameters");
                 Write(files[0] + " " + args);
                 gameProcess = Process.Start(files[0], args);

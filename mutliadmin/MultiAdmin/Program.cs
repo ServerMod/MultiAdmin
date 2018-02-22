@@ -170,10 +170,6 @@ namespace MutliAdmin
         public static void Main(string[] args)
         {
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnExit);
-<<<<<<< HEAD
-            multiadminConfig = new MultiAdmin.Config("scp_multiadmin.cfg");
-            FindConfig();
-=======
 			FixTypo();
             multiadminConfig = new MultiAdmin.Config("scp_multiadmin.cfg");
             if (!FindConfig())
@@ -182,7 +178,6 @@ namespace MutliAdmin
 				return;
 			}
 
->>>>>>> f86cf09741f51ad0e431ecc84d309b02a30ef3e6
             configChain = "";
             if (StartHandleConfigs(args))
             {
