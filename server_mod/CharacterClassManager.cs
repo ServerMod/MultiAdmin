@@ -104,9 +104,9 @@ public class CharacterClassManager : NetworkBehaviour
 		this.SetMaxHP(0, "SCP173_HP", 2000);
 		this.SetMaxHP(1, "CLASSD_HP", 100);
 		this.SetMaxHP(3, "SCP106_HP", 700);
-		this.SetMaxHP(4, "SCIENTIST_HP", 120); // For some reason this and "NTFSCIENTIST_HP" are swapped?
+		this.SetMaxHP(4, "NTFSCIENTIST_HP", 120);
 		this.SetMaxHP(5, "SCP049_HP", 1200);
-		this.SetMaxHP(6, "NTFSCIENTIST_HP", 100);
+		this.SetMaxHP(6, "SCIENTIST_HP", 100);
 		this.SetMaxHP(7, "SCP079_HP", 100);
 		this.SetMaxHP(8, "CI_HP", 120);
 		this.SetMaxHP(9, "SCP096_HP", 2000);
