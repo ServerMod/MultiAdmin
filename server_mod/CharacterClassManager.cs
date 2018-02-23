@@ -150,7 +150,7 @@ public class CharacterClassManager : NetworkBehaviour
                     ": ",
                     this.klasy[classID].fullName,
                     " - ",
-                    this.klasy[classID].curClass.maxHP,
+                    this.klasy[classID].maxHP,
                     "HP"
                 }));
             }
