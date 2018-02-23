@@ -3,10 +3,8 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
-// Token: 0x020000D7 RID: 215
 public partial class Searching : NetworkBehaviour
 {
-	// Token: 0x060005E6 RID: 1510 RVA: 0x000236B0 File Offset: 0x000218B0
 	[Command(channel = 2)]
 	public void CmdPickupItem(GameObject t, GameObject taker)
 	{
