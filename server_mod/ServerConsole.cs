@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Diagnostics;
 using UnityEngine;
@@ -44,11 +44,13 @@ public partial class ServerConsole : MonoBehaviour
 				ServerConsole.AddLog("Could not update the session - " + www.error + www.text + "LOGTYPE-8");
 			}
 			yield return new WaitForSeconds(5f - (Time.realtimeSinceStartup - timeBefore));
-			form = null;
-			www = null;
-		}
+
+            form = null;
+            www = null;
+        }
 		yield break;
 	}
+
 
 	public string smParseName(string name, int players)
 	{

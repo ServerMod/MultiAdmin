@@ -3,10 +3,8 @@ using System.IO;
 using GameConsole;
 using UnityEngine;
 
-// Token: 0x0200001C RID: 28
 public class ConfigFile : MonoBehaviour
 {
-	// Token: 0x0600008B RID: 139 RVA: 0x0000AF80 File Offset: 0x00009180
 	private void Awake()
 	{
 		ConfigFile.singleton = this;
@@ -25,7 +23,6 @@ public class ConfigFile : MonoBehaviour
 		ConfigFile.path += "/config.txt";
 	}
 
-	// Token: 0x0600008C RID: 140 RVA: 0x0000B00C File Offset: 0x0000920C
 	private void Start()
 	{
 		if (!this.ReloadConfig())
@@ -35,7 +32,6 @@ public class ConfigFile : MonoBehaviour
 		}
 	}
 
-	// Token: 0x0600008D RID: 141 RVA: 0x0000B068 File Offset: 0x00009268
 	public bool ReloadConfig()
 	{
 		if (!File.Exists(ConfigFile.path))
@@ -55,7 +51,6 @@ public class ConfigFile : MonoBehaviour
 		return true;
 	}
 
-	// Token: 0x0600008E RID: 142 RVA: 0x0000B0C8 File Offset: 0x000092C8
 	public static string GetString(string key, string defaultValue = "")
 	{
 		string text = ConfigFile.singleton.cfg;
@@ -69,16 +64,10 @@ public class ConfigFile : MonoBehaviour
 					{
 						return defaultValue;
 					}
-					text = text.Remove(0, text.IndexOf(Environment.NewLine) + Environment.NewLine.Length).TrimStart(new char[]
-					{
-						' '
-					});
+                    text = text.Remove(0, text.IndexOf(Environment.NewLine) + Environment.NewLine.Length);
 				}
 				text = text.Remove(0, text.IndexOf("=") + 1);
-				text = text.TrimStart(new char[]
-				{
-					' '
-				});
+                text = text.TrimStart(' ');
 				return text.Remove(text.IndexOf(";"));
 			}
 			catch
@@ -90,23 +79,60 @@ public class ConfigFile : MonoBehaviour
 		return defaultValue;
 	}
 
-	// Token: 0x0600008F RID: 143 RVA: 0x0000B1B0 File Offset: 0x000093B0
-	public static int GetInt(string key, int defaultValue = 0)
-	{
-		int result = 0;
-		if (int.TryParse(ConfigFile.GetString(key, "errorInConverting"), out result))
-		{
-			return result;
-		}
-		return defaultValue;
-	}
+    public static int GetInt(string key, int defaultValue = 0)
+    {
+        int result = 0;
+        if (int.TryParse(ConfigFile.GetString(key, "errorInConverting"), out result))
+        {
+            return result;
+        }
+        return defaultValue;
+    }
 
-	// Token: 0x0400009C RID: 156
-	public static ConfigFile singleton;
+    public static bool GetBool(string key, bool defaultValue = true)
+    {
+        string configValue = ConfigFile.GetString(key, "errorInConverting").ToLower();
 
-	// Token: 0x0400009D RID: 157
+        // Why did I make it so you can use these words? Because I can.
+        string[] trueWords = new string[]
+        {
+            "true",
+            "yes",
+            "sure",
+            "yeah",
+            "yea",
+            "affirmative",
+            "aye"
+        };
+
+        string[] falseWords = new string[]
+        {
+            "false",
+            "no",
+            "nope",
+            "nah",
+            "negative",
+            "nay"
+        };
+
+        foreach (string word in trueWords)
+        {
+            if (configValue.Equals(word.ToLower()))
+                return true;
+        }
+
+        foreach (string word in falseWords)
+        {
+            if (configValue.Equals(word.ToLower()))
+                return false;
+        }
+
+        return defaultValue;
+    }
+
+    public static ConfigFile singleton;
+
 	public static string path;
 
-	// Token: 0x0400009E RID: 158
 	public string cfg;
 }

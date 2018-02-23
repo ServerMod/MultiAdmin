@@ -19,7 +19,7 @@ public partial class Searching : NetworkBehaviour
 			component.PickupItem();
 			if (component2 != null)
 			{
-				component2.netFreeSlots--;
+				component2.smNetFreeSlots--;
 			}
 		}
 		Locker component3 = t.GetComponent<Locker>();
@@ -29,7 +29,7 @@ public partial class Searching : NetworkBehaviour
 			component3.SetTaken(true);
 			if (component2 != null)
 			{
-				component2.netFreeSlots--;
+				component2.smNetFreeSlots--;
 			}
 		}
 		this.CallRpcPickupItem(taker, id, (!(t.GetComponent<Pickup>() == null)) ? component.durability : -1f);

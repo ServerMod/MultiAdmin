@@ -4,10 +4,8 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
-// Token: 0x02000092 RID: 146
 public partial class Inventory : NetworkBehaviour
 {
-	// Token: 0x06000348 RID: 840 RVA: 0x000181B8 File Offset: 0x000163B8
 	[Command(channel = 2)]
 	public void CmdSetPickup(int dropedItemID, float dur, Vector3 pos, Quaternion camRot, Quaternion myRot)
 	{
@@ -24,8 +22,8 @@ public partial class Inventory : NetworkBehaviour
 			":",
 			UnityEngine.Random.Range(0f, 1E+10f).ToString("0000000000")
 		}));
-		this.netFreeSlots++;
+		this.smNetFreeSlots++;
 	}
 
-	public int netFreeSlots;
+	public int smNetFreeSlots;
 }
