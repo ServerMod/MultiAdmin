@@ -233,7 +233,7 @@ namespace GameConsole
                                         Locker locker = UnityEngine.Object.FindObjectOfType<Locker>();
                                         if (locker != null)
                                         {
-                                            if (component3.netFreeSlots > 0)
+                                            if (component3.smNetFreeSlots > 0)
                                             {
                                                 int[] ids = locker.ids;
                                                 locker.ids = new int[]
@@ -255,7 +255,7 @@ namespace GameConsole
                                         {
                                             this.AddLog("Failed to add ITEM#" + num2.ToString("000") + " - There are no lockers, silently dropping instead...", new Color32(byte.MaxValue, 180, 0, byte.MaxValue), false);
                                             component3.CallCmdSetPickup(num2, -4.65664672E+11f, component3.transform.position, component3.transform.rotation, component3.transform.localRotation);
-                                            component3.netFreeSlots--;
+                                            component3.smNetFreeSlots--;
                                         }
                                     }
                                     a2 = "none";
@@ -319,7 +319,7 @@ namespace GameConsole
                                                 Locker locker2 = UnityEngine.Object.FindObjectOfType<Locker>();
                                                 if (locker2 != null)
                                                 {
-                                                    if (component7.netFreeSlots > 0)
+                                                    if (component7.smNetFreeSlots > 0)
                                                     {
                                                         int[] ids2 = locker2.ids;
                                                         locker2.ids = new int[]
@@ -341,7 +341,7 @@ namespace GameConsole
                                                 {
                                                     this.AddLog("Failed to add ITEM#" + num3.ToString("000") + " - There are no lockers, silently dropping instead...", new Color32(byte.MaxValue, 180, 0, byte.MaxValue), false);
                                                     component7.CallCmdSetPickup(num3, -4.65664672E+11f, component7.transform.position, component7.transform.rotation, component7.transform.localRotation);
-                                                    component7.netFreeSlots--;
+                                                    component7.smNetFreeSlots--;
                                                 }
                                             }
                                             a3 = "none";
