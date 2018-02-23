@@ -217,19 +217,13 @@ public class CharacterClassManager : NetworkBehaviour
                         }
 
                         /*
-                         * Don't know why this isn't just adding five, like so
-                         * 
-                         * timeLeft += 5;
+                         * Brings wait time to the nearest number divisible by 5
                          */
                         else if (timeLeft % 5 > 0)
                         {
                             timeLeft = timeLeft / 5 * 5 + 5;
                         }
 
-                        else
-                        {
-                            timeLeft += 5;
-                        }
 					}
 
 					if (timeLeft > 0)
@@ -592,6 +586,11 @@ public class CharacterClassManager : NetworkBehaviour
             // SCP-096
             this.klasy[9].banClass = this.smForceSCPBans ? this.smBan096 : (this.smBan096 ? true : this.klasy[9].banClass);
 
+            // Debug thing for if the classes are banned
+            if (false)
+            {
+                ServerConsole.AddLog();
+            }
 
             /*
              * Unreleased SCP, not implemented yet
