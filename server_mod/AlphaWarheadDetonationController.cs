@@ -146,10 +146,13 @@ public class AlphaWarheadDetonationController : NetworkBehaviour
          * }
          */
 
-        GameObject[] players = PlayerManager.singleton.players;
-		for (int i = 0; i < players.Length; i++)
+        GameObject[] array = GameObject.FindGameObjectsWithTag("LiftTarget");
+		foreach (GameObject player in PlayerManager.singleton.players)
 		{
-			players[i].GetComponent<PlayerStats>().Explode();
+			foreach (GameObject lift in array)
+			{
+				player.GetComponent<PlayerStats>().Explode(Vector3.Distance(lift.transform.position, player.transform.position) < 3.5f);
+			}
 		}
 	}
 
