@@ -124,6 +124,12 @@ Example:
 - SCP173_DISABLE disable this scp, default: no
 - SCP457_DISABLE disable this scp, default: yes
 - FORCE_DISABLE_ENABLE overrides game's default ban value with chosen values (USE OF THIS IS NOT RECOMMENDED)
+- SCP049_AMOUNT max amount of this scp that can be spawned in randomly, default: 1
+- SCP079_AMOUNT max amount of this scp that can be spawned in randomly, default: 1
+- SCP096_AMOUNT max amount of this scp that can be spawned in randomly, default: 1
+- SCP106_AMOUNT max amount of this scp that can be spawned in randomly, default: 1
+- SCP173_AMOUNT max amount of this scp that can be spawned in randomly, default: 1
+- SCP457_AMOUNT max amount of this scp that can be spawned in randomly, default: 1
 ##
 
 Place any suggestions/problems in issues!
