@@ -105,7 +105,7 @@ public class CharacterClassManager : NetworkBehaviour
 		}
 
         // While the team queue is shorter than max player count, add more NTF to spawn in
-        while (this.classTeamQueue.Length < CustomNetworkManager.singleton.maxConnections)
+        while (this.classTeamQueue.Count < CustomNetworkManager.singleton.maxConnections)
         {
             this.classTeamQueue.Add((Team) 4);
         }
