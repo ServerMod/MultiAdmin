@@ -101,25 +101,29 @@ Example:
 - max_players (default 20, max amount of players per server)
 - no_scp079_first (default true, computer will never be the first scp in a game)
 - nuke_disable_cooldown stop the nuke from being spammed, will stop the nuke arm switch from being disabled until this has elapsed. Default = 0
+- 173_door_starting_cooldown time (in seconds) before SCP-173's door can be opened
 - SCP106_cleanup use this to stop ragdolls spawning in the pocket dimension [currently items still spawn]
 - SCP049_HP use this to set the starting HP for the class. Default = 1200
 - SCP049-2_HP use this to set the starting HP for the class. Default = 400
 - SCP079_HP use this to set the starting HP for the class. Default = 100
+- SCP096_HP use this to set the starting HP for the class. Default = 2000
 - SCP106_HP use this to set the starting HP for the class. Default = 700
 - SCP173_HP use this to set the starting HP for the class. Default = 2000
 - SCP457_HP use this to set the starting HP for the class. Default = 700
 - CLASSD_HP use this to set the starting HP for the class. Default = 100
-- NTFSCIENTIST_HP use this to set the starting HP for the class. Default = 100
+- NTFSCIENTIST_HP use this to set the starting HP for the class. Default = 120
 - SCIENTIST_HP use this to set the starting HP for the class. Default = 100
 - CI_HP use this to set the starting HP for the class. Default = 120
 - NTFL_HP use this to set the starting HP for the class. Default = 120
 - NTFC_HP use this to set the starting HP for the class. Default = 150
 - NTFG_HP use this to set the starting HP for the class. Default = 100
 - SCP049_DISABLE disable this scp, default: no
-- SCP079_DISABLE disable this scp, default: no
+- SCP079_DISABLE disable this scp, default: yes
+- SCP096_DISABLE disable this scp, default: yes
 - SCP106_DISABLE disable this scp, default: no
 - SCP173_DISABLE disable this scp, default: no
-- SCP457_DISABLE disable this scp, default: no
+- SCP457_DISABLE disable this scp, default: yes
+- FORCE_DISABLE_ENABLE overrides game's default ban value with chosen values (USE OF THIS IS NOT RECOMMENDED)
 ##
 
 Place any suggestions/problems in issues!
