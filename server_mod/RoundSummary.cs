@@ -148,7 +148,7 @@ public class RoundSummary : NetworkBehaviour
     {
     }
 
-    protected static void InvokeCmdCmdSetSummary(NetworkBehaviour obj, NetworkReader reader)
+    protected static void InvokeCmdCmdSetSummary(NetworkBehaviour roundSummary, NetworkReader reader)
     {
         if (!NetworkServer.active)
         {
