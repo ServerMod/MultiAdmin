@@ -736,7 +736,6 @@ namespace GameConsole
 						}
 						else if (ConfigFile.singleton.ReloadConfig())
 						{
-							((CustomNetworkManager) NetworkManager.singleton).UpdateMotd(0);
 							this.AddLog("Configuration file <b>successfully reloaded</b>. New settings will be applied on <b>your</b> server in <b>next</b> round.", new Color32(0, byte.MaxValue, 0, byte.MaxValue), false);
 						}
 						else
