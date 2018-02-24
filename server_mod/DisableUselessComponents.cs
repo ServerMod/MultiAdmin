@@ -27,10 +27,6 @@ public partial class DisableUselessComponents : NetworkBehaviour
 		{
 			PlayerManager.localPlayer = base.gameObject;
 			this.CallCmdSetName((!base.isServer) ? "Player" : "Host", ServerStatic.isDedicated);
-			if (UnityEngine.Object.FindObjectOfType<MusicManager>() != null)
-			{
-				UnityEngine.Object.FindObjectOfType<MusicManager>().SetPlayer(base.gameObject);
-			}
 			if (base.GetComponent<FirstPersonController>() != null)
 			{
 				base.GetComponent<FirstPersonController>().enabled = false;

@@ -108,9 +108,19 @@ public class AlphaWarheadDetonationController : NetworkBehaviour
 		}
 		foreach (Door door in UnityEngine.Object.FindObjectsOfType<Door>())
 		{
-			if (door.isOpen)
+            /*
+             * Old version is missing the checks for
+             * 
+             * ... !door.permissionLevel.Contains("CONT") && door.permissionLevel != "UNACCESSIBLE" ...
+             */
+            if (!door.isOpen && !door.permissionLevel.Contains("CONT") && door.permissionLevel != "UNACCESSIBLE")
 			{
-				door.GetComponent<Door>().SetState(true);
+                /*
+                 * New update uses this code, is it a more standardized / labelled way of opening the warhead room door?
+                 * 
+                 * door.OpenWarhead();
+                 */
+                door.GetComponent<Door>().SetState(true);
 			}
 		}
 	}
@@ -122,10 +132,27 @@ public class AlphaWarheadDetonationController : NetworkBehaviour
 		{
 			return;
 		}
-		GameObject[] players = PlayerManager.singleton.players;
-		for (int i = 0; i < players.Length; i++)
+
+        /*
+         * New update uses this code, try and find what difference it makes?
+         * 
+         * GameObject[] array = GameObject.FindGameObjectsWithTag("LiftTarget");
+		 * foreach (GameObject gameObject in PlayerManager.singleton.players)
+         * {
+         *  foreach (GameObject gameObject2 in array)
+		 *	{
+		 *		gameObject.GetComponent<PlayerStats>().Explode(Vector3.Distance(gameObject2.transform.position, gameObject.transform.position) < 3.5f);
+		 *	}
+         * }
+         */
+
+        GameObject[] array = GameObject.FindGameObjectsWithTag("LiftTarget");
+		foreach (GameObject player in PlayerManager.singleton.players)
 		{
-			players[i].GetComponent<PlayerStats>().Explode();
+			foreach (GameObject lift in array)
+			{
+				player.GetComponent<PlayerStats>().Explode(Vector3.Distance(lift.transform.position, player.transform.position) < 3.5f);
+			}
 		}
 	}
 

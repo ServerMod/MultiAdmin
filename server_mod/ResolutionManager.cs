@@ -12,6 +12,13 @@ public partial class ResolutionManager : MonoBehaviour
 			return;
 		}
 		ResolutionManager.presets[ResolutionManager.preset].SetResolution();
-		UnityEngine.Object.FindObjectOfType<ResolutionText>().txt.text = ResolutionManager.presets[ResolutionManager.preset].width + " × " + ResolutionManager.presets[ResolutionManager.preset].height;
-	}
+
+        try
+        {
+            UnityEngine.Object.FindObjectOfType<ResolutionText>().txt.text = ResolutionManager.presets[ResolutionManager.preset].width + " × " + ResolutionManager.presets[ResolutionManager.preset].height;
+        }
+        catch
+        {
+        }
+    }
 }
