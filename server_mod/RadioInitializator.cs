@@ -7,10 +7,8 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
-// Token: 0x020000AD RID: 173
 public partial class RadioInitializator : NetworkBehaviour
 {
-	// Token: 0x0600045E RID: 1118
 	public void LateUpdate()
 	{
 		if (base.isLocalPlayer && !base.isServer)

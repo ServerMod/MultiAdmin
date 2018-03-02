@@ -47,52 +47,115 @@ public class CharacterClassManager : NetworkBehaviour
 
 	private void Start()
 	{
-		this.lureSpj = UnityEngine.Object.FindObjectOfType<LureSubjectContainer>();
+        // Code for using translation files
+        if (CharacterClassManager.staticClasses == null || CharacterClassManager.staticClasses.Length <= 0)
+        {
+            for (int curClass = 0; curClass < this.klasy.Length; curClass++)
+            {
+                this.klasy[curClass].fullName = TranslationReader.Get("Class_Names", curClass);
+                this.klasy[curClass].description = TranslationReader.Get("Class_Descriptions", curClass);
+            }
+
+            CharacterClassManager.staticClasses = this.klasy;
+        }
+        else
+        {
+            this.klasy = CharacterClassManager.staticClasses;
+        }
+
+        this.lureSpj = UnityEngine.Object.FindObjectOfType<LureSubjectContainer>();
+
 		this.scp049 = base.GetComponent<Scp049PlayerScript>();
 		this.scp049_2 = base.GetComponent<Scp049_2PlayerScript>();
 		this.scp079 = base.GetComponent<Scp079PlayerScript>();
-		this.scp106 = base.GetComponent<Scp106PlayerScript>();
+
+        /*
+         * The script for this already exists in game, this allows for it to be loaded anyways
+         * (Prepare for future updates, am I right?)
+         */
+        this.scp096 = base.GetComponent<Scp096PlayerScript>();
+
+        this.scp106 = base.GetComponent<Scp106PlayerScript>();
 		this.scp173 = base.GetComponent<Scp173PlayerScript>();
+
 		this.forceClass = ConfigFile.GetInt("server_forced_class", -1);
-		this.smBanComputerFirstPick = (ConfigFile.GetString("NO_SCP079_FIRST", "true").ToLower() == "true");
-		this.ciPercentage = (float)ConfigFile.GetInt("ci_on_start_percent", 10);
+		this.smBanComputerFirstPick = ConfigFile.GetBool("NO_SCP079_FIRST", true);
+		this.ciPercentage = (float) ConfigFile.GetInt("ci_on_start_percent", 10);
 		this.smStartRoundTimer = ConfigFile.GetInt("START_ROUND_TIMER", 20);
 		this.smWaitForPlayers = ConfigFile.GetInt("START_ROUND_MINIMUM_PLAYERS", 2) - 1;
 		base.StartCoroutine("Init");
-		string text = ConfigFile.GetString("team_respawn_queue", "401431403144144") + "...........................";
+
+        /*
+         * Original code had unneccesary "."s
+         * 
+         * ... + "..........................." ...
+         */
+		string teamRespawnQueue = ConfigFile.GetString("team_respawn_queue", "401431403144144");
 		this.classTeamQueue.Clear();
-		for (int i = 0; i < text.Length; i++)
+
+        // Loops through each number from "teamRespawnQueue" and adds to the team respawn queue (Defaulting to team 4, NTF)
+        for (int i = 0; i < teamRespawnQueue.Length; i++)
 		{
 			int item = 4;
-			if (!int.TryParse(text[i].ToString(), out item))
+			if (!int.TryParse(teamRespawnQueue[i].ToString(), out item))
 			{
 				item = 4;
 			}
-			this.classTeamQueue.Add((Team)item);
+			this.classTeamQueue.Add((Team) item);
 		}
+
+        // While the team queue is shorter than max player count, add more NTF to spawn in
+        while (this.classTeamQueue.Count < CustomNetworkManager.singleton.maxConnections)
+        {
+            this.classTeamQueue.Add((Team) 4);
+        }
+
 		if (!base.isLocalPlayer && TutorialManager.status)
 		{
 			this.ApplyProperties();
 		}
-		this.SetMaxHP(0, "SCP173_HP", 2000);
-		this.SetMaxHP(1, "CLASSD_HP", 100);
-		this.SetMaxHP(3, "SCP106_HP", 700);
-		this.SetMaxHP(4, "NTFSCIENTIST_HP", 120);
-		this.SetMaxHP(5, "SCP049_HP", 1200);
-		this.SetMaxHP(6, "SCIENTIST_HP", 100);
-		this.SetMaxHP(7, "SCP079_HP", 100);
-		this.SetMaxHP(8, "CI_HP", 120);
-		this.SetMaxHP(9, "SCP457_HP", 700);
-		this.SetMaxHP(10, "SCP049-2_HP", 400);
-		this.SetMaxHP(11, "NTFL_HP", 120);
-		this.SetMaxHP(12, "NTFC_HP", 150);
-		this.SetMaxHP(13, "NTFG_HP", 100);
-		this.smBan049 = !ConfigFile.GetString("SCP049_DISABLE", "no").Equals("no");
-		this.smBan079 = !ConfigFile.GetString("SCP079_DISABLE", "yes").Equals("no");
-		this.smBan106 = !ConfigFile.GetString("SCP106_DISABLE", "no").Equals("no");
-		this.smBan173 = !ConfigFile.GetString("SCP173_DISABLE", "no").Equals("no");
-		this.smBan457 = !ConfigFile.GetString("SCP457_DISABLE", "no").Equals("no");
-	}
+		this.SetMaxHP(0, "SCP173_HP", this.klasy[0].maxHP);
+		this.SetMaxHP(1, "CLASSD_HP", this.klasy[1].maxHP);
+		this.SetMaxHP(3, "SCP106_HP", this.klasy[3].maxHP);
+		this.SetMaxHP(4, "NTFSCIENTIST_HP", this.klasy[4].maxHP);
+		this.SetMaxHP(5, "SCP049_HP", this.klasy[5].maxHP);
+		this.SetMaxHP(6, "SCIENTIST_HP", this.klasy[6].maxHP);
+		this.SetMaxHP(7, "SCP079_HP", this.klasy[7].maxHP);
+		this.SetMaxHP(8, "CI_HP", this.klasy[8].maxHP);
+		this.SetMaxHP(9, "SCP096_HP", this.klasy[9].maxHP); // As seen in "CharacterClassManager Class List.png", class 9 is SCP-096 for now
+        this.SetMaxHP(10, "SCP049-2_HP", this.klasy[10].maxHP);
+		this.SetMaxHP(11, "NTFL_HP", this.klasy[11].maxHP);
+		this.SetMaxHP(12, "NTFC_HP", this.klasy[12].maxHP);
+		this.SetMaxHP(13, "NTFG_HP", this.klasy[13].maxHP);
+
+		this.smBan049 = ConfigFile.GetBool("SCP049_DISABLE", false);
+        this.smBan079 = ConfigFile.GetBool("SCP079_DISABLE", true);
+        this.smBan096 = ConfigFile.GetBool("SCP096_DISABLE", true);
+        this.smBan106 = ConfigFile.GetBool("SCP106_DISABLE", false);
+		this.smBan173 = ConfigFile.GetBool("SCP173_DISABLE", false);
+        this.smBan457 = ConfigFile.GetBool("SCP457_DISABLE", true);
+
+        // This should be discouraged, this could possibly allow for classes not fully implemented yet to be spawned in
+        this.smForceSCPBans = ConfigFile.GetBool("FORCE_DISABLE_ENABLE", false);
+
+        // For debugging, set this to true to output a class list (Though this can just be done through an in-game command)
+        if (false)
+        {
+            for (int classID = 0; classID < this.klasy.Length; classID++)
+            {
+                ServerConsole.AddLog(string.Concat(new object[]
+                {
+                    "Class #",
+                    classID,
+                    ": ",
+                    this.klasy[classID].fullName,
+                    " - ",
+                    this.klasy[classID].maxHP,
+                    "HP"
+                }));
+            }
+        }
+    }
 
 	private IEnumerator Init()
 	{
@@ -102,24 +165,28 @@ public class CharacterClassManager : NetworkBehaviour
 			host = GameObject.Find("Host");
 			yield return new WaitForEndOfFrame();
 		}
-		while (this.seed == 0)
+		while (this.seed == 0) // If the seed hasn't been set, generate one
 		{
 			this.seed = host.GetComponent<RandomSeedSync>().seed;
 			UnityEngine.Object.FindObjectOfType<GameConsole.Console>().UpdateValue("seed", this.seed.ToString());
 		}
+
 		if (!base.isLocalPlayer)
 		{
 			yield break;
 		}
 		yield return new WaitForSeconds(2f);
+
 		if (base.isServer)
 		{
 			if (ServerStatic.isDedicated)
 			{
 				ServerConsole.AddLog("Waiting for players..");
 			}
+
 			CursorManager.roundStarted = true;
 			RoundStart rs = RoundStart.singleton;
+
 			if (TutorialManager.status)
 			{
 				this.ForceRoundStart();
@@ -129,26 +196,36 @@ public class CharacterClassManager : NetworkBehaviour
 				rs.ShowButton();
 				int timeLeft = this.smStartRoundTimer;
 				int maxPlayers = 1;
+
 				while (rs.info != "started")
 				{
 					if (maxPlayers > this.smWaitForPlayers)
 					{
-						int num = timeLeft;
-						timeLeft = num - 1;
+						timeLeft--;
 					}
-					int num2 = PlayerManager.singleton.players.Length;
-					if (num2 > maxPlayers)
+
+					int playerCount = PlayerManager.singleton.players.Length;
+
+					if (playerCount > maxPlayers)
 					{
-						maxPlayers = num2;
-						if (maxPlayers == NetworkManager.singleton.maxConnections)
-						{
-							timeLeft = 0;
-						}
-						else if (timeLeft % 5 > 0)
-						{
-							timeLeft = timeLeft / 5 * 5 + 5;
-						}
+						maxPlayers = playerCount;
+
+                        // If the server is full, start the game immediately
+                        if (maxPlayers == NetworkManager.singleton.maxConnections)
+                        {
+                            timeLeft = 0;
+                        }
+
+                        /*
+                         * Brings wait time to the nearest number divisible by 5
+                         */
+                        else if (timeLeft % 5 > 0)
+                        {
+                            timeLeft = timeLeft / 5 * 5 + 5;
+                        }
+
 					}
+
 					if (timeLeft > 0)
 					{
 						this.CmdUpdateStartText(timeLeft.ToString());
@@ -157,14 +234,15 @@ public class CharacterClassManager : NetworkBehaviour
 					{
 						this.ForceRoundStart();
 					}
+
 					yield return new WaitForSeconds(1f);
 				}
 			}
+
 			CursorManager.roundStarted = false;
 			this.CmdStartRound();
-			this.SetRandomRoles();
-			rs = null;
-			rs = null;
+			this.SetRandomRoles(); // Set player's roles
+
 			rs = null;
 		}
 		else
@@ -179,27 +257,29 @@ public class CharacterClassManager : NetworkBehaviour
 				this.CallCmdSuicide(default(PlayerStats.HitInfo));
 			}
 		}
+
 		int iteration = 0;
 		for (;;)
 		{
 			GameObject[] plys = PlayerManager.singleton.players;
+
 			if (iteration >= plys.Length)
 			{
 				yield return new WaitForSeconds(3f);
+
 				iteration = 0;
 			}
 			try
 			{
-				plys[iteration].GetComponent<CharacterClassManager>().InitSCPs();
+				plys[iteration].GetComponent<CharacterClassManager>().InitSCPs(); // Initialize SCPs for all connected players
 			}
 			catch
 			{
 			}
-			int num3 = iteration;
-			iteration = num3 + 1;
+
+			iteration++;
+
 			yield return new WaitForEndOfFrame();
-			plys = null;
-			plys = null;
 			plys = null;
 		}
 		yield break;
@@ -243,7 +323,8 @@ public class CharacterClassManager : NetworkBehaviour
 			this.scp049.Init(this.curClass, c);
 			this.scp049_2.Init(this.curClass, c);
 			this.scp079.Init(this.curClass, c);
-			this.scp106.Init(this.curClass, c);
+            this.scp096.Init(this.curClass, c); // Preparing for future SCP
+            this.scp106.Init(this.curClass, c);
 			this.scp173.Init(this.curClass, c);
 		}
 	}
@@ -256,19 +337,21 @@ public class CharacterClassManager : NetworkBehaviour
 	[Command(channel = 2)]
 	private void CmdRegisterEscape(GameObject sender)
 	{
-		CharacterClassManager component = sender.GetComponent<CharacterClassManager>();
-		if (Vector3.Distance(sender.transform.position, base.GetComponent<Escape>().worldPosition) < (float)(base.GetComponent<Escape>().radius * 2))
+		CharacterClassManager escapeeClassManager = sender.GetComponent<CharacterClassManager>();
+
+		if (Vector3.Distance(sender.transform.position, base.GetComponent<Escape>().worldPosition) < (float) (base.GetComponent<Escape>().radius * 2))
 		{
-			RoundSummary component2 = GameObject.Find("Host").GetComponent<RoundSummary>();
-			if (this.klasy[component.curClass].team == Team.CDP)
+			RoundSummary roundSummary = GameObject.Find("Host").GetComponent<RoundSummary>();
+
+			if (this.klasy[escapeeClassManager.curClass].team == Team.CDP)
 			{
-				component2.summary.classD_escaped++;
+				roundSummary.summary.classD_escaped++;
 				this.SetClassID(8);
 				base.GetComponent<PlayerStats>().SetHPAmount(this.klasy[8].maxHP);
 			}
-			if (this.klasy[component.curClass].team == Team.RSC)
+			if (this.klasy[escapeeClassManager.curClass].team == Team.RSC)
 			{
-				component2.summary.scientists_escaped++;
+				roundSummary.summary.scientists_escaped++;
 				this.SetClassID(4);
 				base.GetComponent<PlayerStats>().SetHPAmount(this.klasy[4].maxHP);
 			}
@@ -280,8 +363,16 @@ public class CharacterClassManager : NetworkBehaviour
 		Class @class = this.klasy[this.curClass];
 		this.InitSCPs();
 		Inventory component = base.GetComponent<Inventory>();
-		base.GetComponent<FootstepSync>().SetLoundness(@class.team);
-		if (base.isLocalPlayer)
+
+        try
+        {
+            base.GetComponent<FootstepSync>().SetLoundness(@class.team);
+        }
+        catch
+        {
+        }
+
+        if (base.isLocalPlayer)
 		{
 			base.GetComponent<Radio>().UpdateClass();
 			base.GetComponent<Handcuffs>().CallCmdTarget(null);
@@ -358,7 +449,7 @@ public class CharacterClassManager : NetworkBehaviour
 					base.GetComponent<WeaponManager>().SetRecoil(@class.classRecoil);
 					int maxHP = @class.maxHP;
 					component3.maxHP = maxHP;
-					UnityEngine.Object.FindObjectOfType<UserMainInterface>().lerpedHP = (float)maxHP;
+					UnityEngine.Object.FindObjectOfType<UserMainInterface>().lerpedHP = (float) maxHP;
 				}
 				else
 				{
@@ -450,90 +541,114 @@ public class CharacterClassManager : NetworkBehaviour
 
 	public void SetRandomRoles()
 	{
-		MTFRespawn component = base.GetComponent<MTFRespawn>();
+		MTFRespawn mtfRespawn = base.GetComponent<MTFRespawn>();
+
 		if (base.isLocalPlayer && base.isServer)
 		{
-			List<GameObject> list = new List<GameObject>();
-			List<GameObject> list2 = new List<GameObject>();
+			List<GameObject> playerList = new List<GameObject>();
+			List<GameObject> shuffledPlayerList = new List<GameObject>();
+
 			foreach (GameObject item in PlayerManager.singleton.players)
 			{
-				list.Add(item);
+				playerList.Add(item);
 			}
-			while (list.Count > 0)
+
+			while (playerList.Count > 0)
 			{
-				int index = UnityEngine.Random.Range(0, list.Count);
-				list2.Add(list[index]);
-				list.RemoveAt(index);
+				int index = UnityEngine.Random.Range(0, playerList.Count);
+				shuffledPlayerList.Add(playerList[index]);
+				playerList.RemoveAt(index);
 			}
-			GameObject[] array = list2.ToArray();
-			RoundSummary component2 = base.GetComponent<RoundSummary>();
-			bool flag = false;
-			if ((float)UnityEngine.Random.Range(0, 100) < this.ciPercentage)
+
+			GameObject[] shuffledPlyrs = shuffledPlayerList.ToArray();
+
+			RoundSummary roundSummary = base.GetComponent<RoundSummary>();
+
+			bool spawnChaos = false;
+
+			if ((float) UnityEngine.Random.Range(0, 100) < this.ciPercentage)
 			{
-				flag = true;
+				spawnChaos = true;
 			}
-			if (this.smBanComputerFirstPick || this.smBan079)
+
+            // SCP-173
+            this.klasy[0].banClass = this.smForceSCPBans ? this.smBan173 : (this.smBan173 ? true : this.klasy[0].banClass);
+
+            // SCP-106
+            this.klasy[3].banClass = this.smForceSCPBans ? this.smBan106 : (this.smBan106 ? true : this.klasy[3].banClass);
+
+            // SCP-049
+            this.klasy[5].banClass = this.smForceSCPBans ? this.smBan049 : (this.smBan049 ? true : this.klasy[5].banClass);
+
+            // SCP-079
+            this.klasy[7].banClass = this.smForceSCPBans ? (this.smBanComputerFirstPick ? true : this.smBan079) : (this.smBanComputerFirstPick || this.smBan079 ? true : this.klasy[7].banClass);
+
+            // SCP-096
+            this.klasy[9].banClass = this.smForceSCPBans ? this.smBan096 : (this.smBan096 ? true : this.klasy[9].banClass);
+
+            // Debug thing for if the classes are banned
+            if (false)
+            {
+                ServerConsole.AddLog();
+            }
+
+            /*
+             * Unreleased SCP, not implemented yet
+             * 
+             * // SCP-457
+             * this.klasy[9].banClass = this.smForceSCPBans ? this.smBan457 : (this.smBan457 ? true : this.klasy[9].banClass);
+             */
+
+            this.smFirstPick = true;
+
+			for (int curPlayer = 0; curPlayer < shuffledPlyrs.Length; curPlayer++)
 			{
-				this.klasy[7].banClass = true;
-			}
-			if (this.smBan049)
-			{
-				this.klasy[5].banClass = true;
-			}
-			if (this.smBan173)
-			{
-				this.klasy[0].banClass = true;
-			}
-			if (this.smBan457)
-			{
-				this.klasy[9].banClass = true;
-			}
-			if (this.smBan106)
-			{
-				this.klasy[3].banClass = true;
-			}
-			this.smFirstPick = true;
-			for (int j = 0; j < array.Length; j++)
-			{
-				int num = (this.forceClass != -1) ? this.forceClass : this.Find_Random_ID_Using_Defined_Team(this.classTeamQueue[j]);
-				if (this.klasy[num].team == Team.CDP)
+				int randomClass = (this.forceClass != -1) ? this.forceClass : this.Find_Random_ID_Using_Defined_Team(this.classTeamQueue[curPlayer]);
+
+				if (this.klasy[randomClass].team == Team.CDP)
 				{
-					component2.summary.classD_start++;
+					roundSummary.summary.classD_start++;
 				}
-				if (this.klasy[num].team == Team.RSC)
+
+				if (this.klasy[randomClass].team == Team.RSC)
 				{
-					component2.summary.scientists_start++;
+					roundSummary.summary.scientists_start++;
 				}
-				if (this.klasy[num].team == Team.SCP)
+
+				if (this.klasy[randomClass].team == Team.SCP)
 				{
 					if (this.smBanComputerFirstPick && this.smFirstPick && !this.smBan079)
 					{
 						this.klasy[7].banClass = false;
 					}
 					this.smFirstPick = false;
-					component2.summary.scp_start++;
+
+					roundSummary.summary.scp_start++;
 				}
-				if (num == 4)
+
+				if (randomClass == 4)
 				{
-					if (flag)
+					if (spawnChaos)
 					{
-						num = 8;
+						randomClass = 8; // Number 8 is Chaos' class number
 					}
 					else
 					{
-						component.playersToNTF.Add(array[j]);
+						mtfRespawn.playersToNTF.Add(shuffledPlyrs[curPlayer]);
 					}
 				}
+
 				if (TutorialManager.status)
 				{
 					this.SetPlayersClass(14, base.gameObject);
 				}
-				else if (num != 4)
+				else if (randomClass != 4)
 				{
-					this.SetPlayersClass(num, array[j]);
+					this.SetPlayersClass(randomClass, shuffledPlyrs[curPlayer]);
 				}
 			}
-			component.SummonNTF();
+
+			mtfRespawn.SummonNTF();
 		}
 	}
 
@@ -553,7 +668,7 @@ public class CharacterClassManager : NetworkBehaviour
 		{
 			try
 			{
-				GameObject.Find("MeshDoor173").GetComponentInChildren<Door>().ForceCooldown(25f);
+				GameObject.Find("MeshDoor173").GetComponentInChildren<Door>().ForceCooldown((float) ConfigFile.GetInt("173_door_starting_cooldown", 25));
 				UnityEngine.Object.FindObjectOfType<ChopperAutostart>().SetState(false);
 			}
 			catch
@@ -868,7 +983,7 @@ public class CharacterClassManager : NetworkBehaviour
 
 	public void SetMaxHP(int id, string config_key, int defaultHp)
 	{
-		this.klasy[id].maxHP = ConfigFile.GetInt(config_key, defaultHp);
+        this.klasy[id].maxHP = ConfigFile.GetInt(config_key, defaultHp);
 	}
 
 	[SyncVar(hook = "SetUnit")]
@@ -915,13 +1030,17 @@ public class CharacterClassManager : NetworkBehaviour
 
 	private Scp079PlayerScript scp079;
 
-	private Scp106PlayerScript scp106;
+    private Scp096PlayerScript scp096; // Preparing for future SCP
+
+    private Scp106PlayerScript scp106;
 
 	private Scp173PlayerScript scp173;
 
-	private LureSubjectContainer lureSpj;
+    private LureSubjectContainer lureSpj;
 
-	private float aliveTime;
+    private static Class[] staticClasses;
+
+    private float aliveTime;
 
 	private int prevId = -1;
 
@@ -933,15 +1052,19 @@ public class CharacterClassManager : NetworkBehaviour
 
 	public bool smBan049;
 
-	public bool smBan079;
+    public bool smBan079;
 
-	public bool smBan106;
+    public bool smBan096;
+
+    public bool smBan106;
 
 	public bool smBan173;
 
 	public bool smBan457;
 
-	public bool smFirstPick;
+    public bool smForceSCPBans;
+
+    public bool smFirstPick;
 
 	private int smStartRoundTimer;
 

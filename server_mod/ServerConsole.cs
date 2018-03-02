@@ -9,42 +9,45 @@ public partial class ServerConsole : MonoBehaviour
 	{
 		for (;;)
 		{
-			WWWForm wwwform = new WWWForm();
-			wwwform.AddField("update", 0);
-			wwwform.AddField("ip", ServerConsole.ip);
-			wwwform.AddField("passcode", ServerConsole.password);
-			int num = 0;
+			WWWForm form = new WWWForm();
+			form.AddField("update", 0);
+			form.AddField("ip", ServerConsole.ip);
+			form.AddField("passcode", ServerConsole.password);
+			int plys = 0;
 			try
 			{
-				num = GameObject.FindGameObjectsWithTag("Player").Length - 1;
+				plys = GameObject.FindGameObjectsWithTag("Player").Length - 1;
 			}
 			catch
 			{
 			}
-			wwwform.AddField("players", num);
-			wwwform.AddField("port", base.GetComponent<CustomNetworkManager>().networkPort);
+			form.AddField("players", plys);
+			form.AddField("port", base.GetComponent<CustomNetworkManager>().networkPort);
 			float timeBefore = Time.realtimeSinceStartup;
-			WWW www = new WWW("https://hubertmoszka.pl/authenticator.php", wwwform);
+			WWW www = new WWW("https://hubertmoszka.pl/authenticator.php", form);
 			yield return www;
 			if (!string.IsNullOrEmpty(www.error) || !www.text.Contains("YES"))
 			{
 				ServerConsole.AddLog("Could not update the session - " + www.error + www.text + "LOGTYPE-8");
 			}
-			wwwform.AddField("update", 1);
-			wwwform.AddField("ip", ServerConsole.ip);
-			wwwform.AddField("passcode", ServerConsole.password);
-			wwwform.AddField("info", this.smParseName(ConfigFile.GetString("server_name", "Unnamed server"), num));
-			wwwform.AddField("players", num);
-			wwwform.AddField("port", base.GetComponent<CustomNetworkManager>().networkPort);
+			form.AddField("update", 1);
+			form.AddField("ip", ServerConsole.ip);
+			form.AddField("passcode", ServerConsole.password);
+			form.AddField("info", this.smParseName(ConfigFile.GetString("server_name", "Unnamed server"), plys));
+			form.AddField("players", plys);
+			form.AddField("port", base.GetComponent<CustomNetworkManager>().networkPort);
 			timeBefore = Time.realtimeSinceStartup;
-			www = new WWW("https://hubertmoszka.pl/authenticator.php", wwwform);
+			www = new WWW("https://hubertmoszka.pl/authenticator.php", form);
 			yield return www;
 			if (!string.IsNullOrEmpty(www.error) || !www.text.Contains("YES"))
 			{
 				ServerConsole.AddLog("Could not update the session - " + www.error + www.text + "LOGTYPE-8");
 			}
 			yield return new WaitForSeconds(5f - (Time.realtimeSinceStartup - timeBefore));
-		}
+
+            form = null;
+            www = null;
+        }
 		yield break;
 	}
 

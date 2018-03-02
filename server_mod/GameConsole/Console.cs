@@ -9,21 +9,17 @@ using UnityEngine.UI;
 
 namespace GameConsole
 {
-	// Token: 0x02000016 RID: 22
 	public class Console : MonoBehaviour
 	{
-		// Token: 0x06000063 RID: 99
 		public Console()
 		{
 		}
 
-		// Token: 0x06000064 RID: 100
 		public List<Console.Log> GetAllLogs()
 		{
 			return this.logs;
 		}
 
-		// Token: 0x06000065 RID: 101
 		public void UpdateValue(string key, string value)
 		{
 			bool flag = false;
@@ -42,7 +38,6 @@ namespace GameConsole
 			}
 		}
 
-		// Token: 0x06000066 RID: 102
 		public void Awake()
 		{
 			UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
@@ -54,7 +49,6 @@ namespace GameConsole
 			UnityEngine.Object.DestroyImmediate(base.gameObject);
 		}
 
-		// Token: 0x06000067 RID: 103
 		public void Start()
 		{
 			this.AddLog("Hi there! Initializing console...", new Color32(0, byte.MaxValue, 0, byte.MaxValue), false);
@@ -63,7 +57,6 @@ namespace GameConsole
 			this.RefreshConsoleScreen();
 		}
 
-		// Token: 0x06000068 RID: 104
 		public void RefreshConsoleScreen()
 		{
 			bool flag = false;
@@ -113,7 +106,6 @@ namespace GameConsole
 			}
 		}
 
-		// Token: 0x06000069 RID: 105
 		public void AddLog(string text, Color32 c, bool nospace = false)
 		{
 			this.response = this.response + text + Environment.NewLine;
@@ -126,14 +118,12 @@ namespace GameConsole
 			this.RefreshConsoleScreen();
 		}
 
-		// Token: 0x0600006A RID: 106
 		public string ColorToHex(Color32 color)
 		{
 			string str = color.r.ToString("X2") + color.g.ToString("X2") + color.b.ToString("X2");
 			return "#" + str;
 		}
 
-		// Token: 0x0600006B RID: 107
 		public static GameObject FindConnectedRoot(NetworkConnection conn)
 		{
 			try
@@ -152,7 +142,6 @@ namespace GameConsole
 			return null;
 		}
 
-		// Token: 0x0600006C RID: 108
 		public string TypeCommand(string cmd)
 		{
 			try
@@ -221,7 +210,194 @@ namespace GameConsole
 					this.AddLog("Second argument has to be a number!", new Color32(byte.MaxValue, 180, 0, byte.MaxValue), false);
 				}
 			}
-			else if (cmd == "ITEMLIST")
+            else if (cmd == "GIVEALL")
+            {
+                int num2 = 0;
+                if (array.Length >= 2 && int.TryParse(array[1], out num2))
+                {
+                    string a2 = "offline";
+                    foreach (GameObject gameObject2 in PlayerManager.singleton.players)
+                    {
+                        a2 = "online";
+                        CharacterClassManager component2 = gameObject2.GetComponent<CharacterClassManager>();
+                        if (component2 != null && component2.klasy[component2.NetworkcurClass].team != Team.SCP)
+                        {
+                            Inventory component3 = gameObject2.GetComponent<Inventory>();
+                            if (component3 != null)
+                            {
+                                if (component3.availableItems.Length > num2)
+                                {
+                                    Searching component4 = gameObject2.GetComponent<Searching>();
+                                    if (component4 != null)
+                                    {
+                                        Locker locker = UnityEngine.Object.FindObjectOfType<Locker>();
+                                        if (locker != null)
+                                        {
+                                            if (component3.smNetFreeSlots > 0)
+                                            {
+                                                int[] ids = locker.ids;
+                                                locker.ids = new int[]
+                                                {
+                                                    num2
+                                                };
+                                                component4.CallCmdPickupItem(locker.gameObject, gameObject2);
+                                                locker.SetTaken(false);
+                                                locker.ids = ids;
+                                            }
+                                            else
+                                            {
+                                                component4.CallCmdPickupItem(locker.gameObject, gameObject2);
+                                                locker.SetTaken(false);
+                                                component3.CallCmdSetPickup(num2, -4.65664672E+11f, component3.transform.position, component3.transform.rotation, component3.transform.localRotation);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            this.AddLog("Failed to add ITEM#" + num2.ToString("000") + " - There are no lockers, silently dropping instead...", new Color32(byte.MaxValue, 180, 0, byte.MaxValue), false);
+                                            component3.CallCmdSetPickup(num2, -4.65664672E+11f, component3.transform.position, component3.transform.rotation, component3.transform.localRotation);
+                                            component3.smNetFreeSlots--;
+                                        }
+                                    }
+                                    a2 = "none";
+                                }
+                                else
+                                {
+                                    this.AddLog("Failed to add ITEM#" + num2.ToString("000") + " - item does not exist!", new Color32(byte.MaxValue, 180, 0, byte.MaxValue), false);
+                                }
+                            }
+                            else
+                            {
+                                this.AddLog("Failed to add ITEM#" + num2.ToString("000") + " - Player has no inventory!", new Color32(byte.MaxValue, 180, 0, byte.MaxValue), false);
+                            }
+                        }
+                        else
+                        {
+                            this.AddLog("Failed to add ITEM#" + num2.ToString("000") + " - Player is an SCP!", new Color32(byte.MaxValue, 180, 0, byte.MaxValue), false);
+                            a2 = "none";
+                        }
+                    }
+                    if (a2 == "offline" || a2 == "online")
+                    {
+                        this.AddLog((!(a2 == "offline")) ? "Player inventory script couldn't be find!" : "You cannot use that command if you are not playing on any server!", new Color32(byte.MaxValue, 180, 0, byte.MaxValue), false);
+                    }
+                    else
+                    {
+                        this.AddLog("ITEM#" + num2.ToString("000") + " has been added!", new Color32(0, byte.MaxValue, 0, byte.MaxValue), false);
+                    }
+                }
+                else
+                {
+                    this.AddLog("Second argument has to be a number!", new Color32(byte.MaxValue, 180, 0, byte.MaxValue), false);
+                }
+            }
+            else if (cmd == "GIVEPLAYER")
+            {
+                int num3 = 0;
+                if (array.Length >= 3 && int.TryParse(array[2], out num3))
+                {
+                    string text = array[1];
+                    string a3 = "offline";
+                    foreach (GameObject gameObject3 in PlayerManager.singleton.players)
+                    {
+                        a3 = "online";
+                        CharacterClassManager component5 = gameObject3.GetComponent<CharacterClassManager>();
+                        NicknameSync component6 = gameObject3.GetComponent<NicknameSync>();
+                        if (component5 != null && component5.klasy[component5.NetworkcurClass].team != Team.SCP)
+                        {
+                            if (component6 != null)
+                            {
+                                if (component6.NetworkmyNick.ToLower().Contains(text.ToLower()))
+                                {
+                                    Inventory component7 = gameObject3.GetComponent<Inventory>();
+                                    if (component7 != null)
+                                    {
+                                        if (component7.availableItems.Length > num3)
+                                        {
+                                            Searching component8 = gameObject3.GetComponent<Searching>();
+                                            if (component8 != null)
+                                            {
+                                                Locker locker2 = UnityEngine.Object.FindObjectOfType<Locker>();
+                                                if (locker2 != null)
+                                                {
+                                                    if (component7.smNetFreeSlots > 0)
+                                                    {
+                                                        int[] ids2 = locker2.ids;
+                                                        locker2.ids = new int[]
+                                                        {
+                                                            num3
+                                                        };
+                                                        component8.CallCmdPickupItem(locker2.gameObject, gameObject3);
+                                                        locker2.SetTaken(false);
+                                                        locker2.ids = ids2;
+                                                    }
+                                                    else
+                                                    {
+                                                        component8.CallCmdPickupItem(locker2.gameObject, gameObject3);
+                                                        locker2.SetTaken(false);
+                                                        component7.CallCmdSetPickup(num3, -4.65664672E+11f, component7.transform.position, component7.transform.rotation, component7.transform.localRotation);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    this.AddLog("Failed to add ITEM#" + num3.ToString("000") + " - There are no lockers, silently dropping instead...", new Color32(byte.MaxValue, 180, 0, byte.MaxValue), false);
+                                                    component7.CallCmdSetPickup(num3, -4.65664672E+11f, component7.transform.position, component7.transform.rotation, component7.transform.localRotation);
+                                                    component7.smNetFreeSlots--;
+                                                }
+                                            }
+                                            a3 = "none";
+                                        }
+                                        else
+                                        {
+                                            this.AddLog("Failed to add ITEM#" + num3.ToString("000") + " - item does not exist!", new Color32(byte.MaxValue, 180, 0, byte.MaxValue), false);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        this.AddLog("Failed to add ITEM#" + num3.ToString("000") + " - Player has no inventory!", new Color32(byte.MaxValue, 180, 0, byte.MaxValue), false);
+                                    }
+                                }
+                                else
+                                {
+                                    this.AddLog(string.Concat(new string[]
+                                    {
+                                        "Failed to add ITEM#",
+                                        num3.ToString("000"),
+                                        " - Username doesn't match! (\"",
+                                        component6.NetworkmyNick,
+                                        "\" against \"",
+                                        text,
+                                        "\")"
+                                    }), new Color32(byte.MaxValue, 180, 0, byte.MaxValue), false);
+                                    a3 = "none";
+                                }
+                            }
+                            else
+                            {
+                                this.AddLog("Failed to add ITEM#" + num3.ToString("000") + " - Player has no nickname!", new Color32(byte.MaxValue, 180, 0, byte.MaxValue), false);
+                                a3 = "none";
+                            }
+                        }
+                        else
+                        {
+                            this.AddLog("Failed to add ITEM#" + num3.ToString("000") + " - Player is an SCP!", new Color32(byte.MaxValue, 180, 0, byte.MaxValue), false);
+                            a3 = "none";
+                        }
+                    }
+                    if (a3 == "offline" || a3 == "online")
+                    {
+                        this.AddLog((!(a3 == "offline")) ? "Player inventory script couldn't be find!" : "You cannot use that command if you are not playing on any server!", new Color32(byte.MaxValue, 180, 0, byte.MaxValue), false);
+                    }
+                    else
+                    {
+                        this.AddLog("ITEM#" + num3.ToString("000") + " has been added!", new Color32(0, byte.MaxValue, 0, byte.MaxValue), false);
+                    }
+                }
+                else
+                {
+                    this.AddLog("Third argument has to be a number!", new Color32(byte.MaxValue, 180, 0, byte.MaxValue), false);
+                }
+            }
+            else if (cmd == "ITEMLIST")
 			{
 				string a2 = "offline";
 				foreach (GameObject gameObject2 in GameObject.FindGameObjectsWithTag("Player"))
@@ -560,7 +736,6 @@ namespace GameConsole
 						}
 						else if (ConfigFile.singleton.ReloadConfig())
 						{
-							((CustomNetworkManager)NetworkManager.singleton).UpdateMotd(0);
 							this.AddLog("Configuration file <b>successfully reloaded</b>. New settings will be applied on <b>your</b> server in <b>next</b> round.", new Color32(0, byte.MaxValue, 0, byte.MaxValue), false);
 						}
 						else
@@ -649,7 +824,6 @@ namespace GameConsole
 			return this.response;
 		}
 
-		// Token: 0x0600006D RID: 109
 		public void ProceedButton()
 		{
 			if (this.cmdField.text != string.Empty)
@@ -660,7 +834,6 @@ namespace GameConsole
 			EventSystem.current.SetSelectedGameObject(this.cmdField.gameObject);
 		}
 
-		// Token: 0x0600006E RID: 110
 		public void LateUpdate()
 		{
 			if (Input.GetKeyDown(KeyCode.Return))
@@ -705,7 +878,6 @@ namespace GameConsole
 			}
 		}
 
-		// Token: 0x0600006F RID: 111
 		public void ToggleConsole()
 		{
 			CursorManager.consoleOpen = !this.console.activeSelf;
@@ -731,13 +903,11 @@ namespace GameConsole
 			}
 		}
 
-		// Token: 0x06000070 RID: 112
 		public void QuitGame()
 		{
 			Application.Quit();
 		}
 
-		// Token: 0x06000071 RID: 113
 		public void DumpGameObjStats()
 		{
 			GameObject[] array = UnityEngine.Object.FindObjectsOfType<GameObject>();
@@ -762,7 +932,6 @@ namespace GameConsole
 			ServerConsole.AddLog("Scene dumped to " + text);
 		}
 
-		// Token: 0x06000072 RID: 114
 		public void GetStats(string parent, Component obj, Dictionary<string, int> dictionary)
 		{
 			string key = parent + "_" + obj.GetType().Name;
@@ -771,7 +940,6 @@ namespace GameConsole
 			dictionary.Add(parent + obj.tag, num++);
 		}
 
-		// Token: 0x06000073 RID: 115
 		public void GetStats(string parent, GameObject obj, Dictionary<string, int> dictionary, HashSet<int> done)
 		{
 			if (done.Contains(obj.GetInstanceID()))
@@ -792,85 +960,62 @@ namespace GameConsole
 			}
 		}
 
-		// Token: 0x04000069 RID: 105
 		public bool allwaysRefreshing;
 
-		// Token: 0x0400006A RID: 106
 		public List<Console.Log> logs = new List<Console.Log>();
 
-		// Token: 0x0400006B RID: 107
 		public List<Console.Value> values = new List<Console.Value>();
 
-		// Token: 0x0400006C RID: 108
 		public Console.CommandHint[] hints;
 
-		// Token: 0x0400006D RID: 109
 		public Text txt;
 
-		// Token: 0x0400006E RID: 110
 		public InputField cmdField;
 
-		// Token: 0x0400006F RID: 111
 		public GameObject console;
 
-		// Token: 0x04000070 RID: 112
 		public static Console singleton;
 
-		// Token: 0x04000071 RID: 113
 		public int scrollup;
 
-		// Token: 0x04000072 RID: 114
 		public int previous_scrlup;
 
-		// Token: 0x04000073 RID: 115
 		public string loadedLevel;
 
-		// Token: 0x04000074 RID: 116
 		public string response = string.Empty;
 
-		// Token: 0x02000017 RID: 23
 		[Serializable]
 		public class CommandHint
 		{
-			// Token: 0x06000074 RID: 116
 			public CommandHint()
 			{
 			}
 
-			// Token: 0x04000075 RID: 117
 			public string name;
 
-			// Token: 0x04000076 RID: 118
 			public string shortDesc;
 
-			// Token: 0x04000077 RID: 119
 			[Multiline]
 			public string fullDesc;
 		}
 
-		// Token: 0x02000018 RID: 24
 		[Serializable]
 		public class Value
 		{
-			// Token: 0x06000075 RID: 117
 			public Value(string k, string v)
 			{
 				this.key = k;
 				this.value = v;
 			}
 
-			// Token: 0x04000078 RID: 120
 			public string key;
 
-			// Token: 0x04000079 RID: 121
 			public string value;
 		}
 
-		// Token: 0x02000019 RID: 25
 		[Serializable]
 		public class Log
 		{
-			// Token: 0x06000076 RID: 118
 			public Log(string t, Color32 c, bool b)
 			{
 				this.text = t;
@@ -878,13 +1023,10 @@ namespace GameConsole
 				this.nospace = b;
 			}
 
-			// Token: 0x0400007A RID: 122
 			public string text;
 
-			// Token: 0x0400007B RID: 123
 			public Color32 color;
 
-			// Token: 0x0400007C RID: 124
 			public bool nospace;
 		}
 	}

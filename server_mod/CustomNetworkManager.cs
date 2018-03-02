@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.IO;
+using Dissonance.Integrations.UNet_HLAPI;
 using GameConsole;
 using Steamworks;
 using TMPro;
@@ -9,22 +10,26 @@ using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-// Token: 0x020000E6 RID: 230
 public class CustomNetworkManager : NetworkManager
 {
-	// Token: 0x0600064F RID: 1615
-	public override void OnClientDisconnect(NetworkConnection conn)
+    private void Update()
+    {
+        if (this.popup.activeSelf && Input.GetKey(KeyCode.Escape))
+        {
+            this.ClickButton();
+        }
+    }
+
+    public override void OnClientDisconnect(NetworkConnection conn)
 	{
-		this.ShowLog((int)conn.lastError);
+		this.ShowLog((int) conn.lastError);
 	}
 
-	// Token: 0x06000650 RID: 1616
 	public override void OnClientError(NetworkConnection conn, int errorCode)
 	{
 		this.ShowLog(errorCode);
 	}
 
-	// Token: 0x06000651 RID: 1617
 	public override void OnServerConnect(NetworkConnection conn)
 	{
 		foreach (BanPlayer.Ban ban in BanPlayer.bans)
@@ -41,16 +46,15 @@ public class CustomNetworkManager : NetworkManager
 		}
 	}
 
-	// Token: 0x06000652 RID: 1618
 	public override void OnServerDisconnect(NetworkConnection conn)
 	{
-		base.OnServerDisconnect(conn);
+        HlapiServer.OnServerDisconnect(conn);
+        base.OnServerDisconnect(conn);
 		ServerConsole.AddLog("Player disconnect:");
 		conn.Disconnect();
 		conn.Dispose();
 	}
 
-	// Token: 0x06000653 RID: 1619
 	public void OnLevelWasLoaded(int level)
 	{
 		if (this.reconnect)
@@ -60,7 +64,6 @@ public class CustomNetworkManager : NetworkManager
 		}
 	}
 
-	// Token: 0x06000654 RID: 1620
 	public override void OnClientSceneChanged(NetworkConnection conn)
 	{
 		base.OnClientSceneChanged(conn);
@@ -70,7 +73,6 @@ public class CustomNetworkManager : NetworkManager
 		}
 	}
 
-	// Token: 0x06000655 RID: 1621
 	private void Reconnect()
 	{
 		if (this.reconnect)
@@ -80,25 +82,19 @@ public class CustomNetworkManager : NetworkManager
 		}
 	}
 
-	// Token: 0x06000656 RID: 1622
 	public void StopReconnecting()
 	{
 		this.reconnect = false;
 	}
 
-	// Token: 0x06000657 RID: 1623
 	public void ShowLog(int id)
 	{
-		this.curLogID = id;
-		bool flag = PlayerPrefs.GetString("langver", "en") == "pl";
-		this.popup.SetActive(true);
-		this.contSize.sizeDelta = ((!flag) ? this.logs[id].msgSize_en : this.logs[id].msgSize_pl);
-		this.content.text = ((!flag) ? this.logs[id].msg_en : this.logs[id].msg_pl);
-		this.button.GetComponentInChildren<Text>().text = ((!flag) ? this.logs[id].button.content_en : this.logs[id].button.content_pl);
-		this.button.GetComponent<RectTransform>().sizeDelta = new Vector2((!flag) ? this.logs[id].button.size_en : this.logs[id].button.size_pl, 80f);
-	}
+        this.curLogID = id;
+        this.popup.SetActive(true);
+        this.content.text = TranslationReader.Get("Connection_Errors", id);
+        this.content.rectTransform.sizeDelta = Vector3.zero;
+    }
 
-	// Token: 0x06000658 RID: 1624
 	public void ClickButton()
 	{
 		ConnInfoButton[] actions = this.logs[this.curLogID].button.actions;
@@ -108,7 +104,6 @@ public class CustomNetworkManager : NetworkManager
 		}
 	}
 
-	// Token: 0x06000659 RID: 1625
 	private void Start()
 	{
 		this.console = GameConsole.Console.singleton;
@@ -118,11 +113,9 @@ public class CustomNetworkManager : NetworkManager
 		}
 	}
 
-	// Token: 0x0600065A RID: 1626
 	public void CreateMatch()
 	{
-		ServerConsole.AddLog("ServerMod - Version 1.2");
-		base.maxConnections = ConfigFile.GetInt("max_players", 20);
+		ServerConsole.AddLog("ServerMod - Version 1.5");
 		this.ShowLog(13);
 		this.createpop.SetActive(false);
 		NetworkServer.Reset();
@@ -135,11 +128,12 @@ public class CustomNetworkManager : NetworkManager
 		this.NonsteamHost();
 	}
 
-	// Token: 0x0600065B RID: 1627
 	private IEnumerator CreateLobby()
 	{
 		yield return new WaitForEndOfFrame();
-		string ip = string.Empty;
+        base.maxConnections = ConfigFile.GetInt("max_players", 20);
+
+        string ip = string.Empty;
 		if (ConfigFile.GetString("server_ip", "auto") != "auto")
 		{
 			ip = ConfigFile.GetString("server_ip", "auto");
@@ -158,8 +152,6 @@ public class CustomNetworkManager : NetworkManager
 			ip = www.text.Remove(www.text.Length - 1);
 			ServerConsole.AddLog("Done, your game-server IP will be " + ip);
 			www = null;
-			www = null;
-			www = null;
 		}
 		ServerConsole.AddLog("Initializing game-server...");
 		this.StartHost();
@@ -168,14 +160,24 @@ public class CustomNetworkManager : NetworkManager
 			yield return new WaitForEndOfFrame();
 		}
 		ServerConsole.AddLog("Level loaded. Creating match...");
-		string info = UnityEngine.Object.FindObjectOfType<ServerConsole>().smParseName(ConfigFile.GetString("server_name", "Unnamed server"), 0);
-		ServerConsole.ip = ip;
+
+        string info = string.Concat(new string[]
+        {
+            UnityEngine.Object.FindObjectOfType<ServerConsole>().smParseName(ConfigFile.GetString("server_name", "Unnamed server"), 0),
+            ":[:BREAK:]:",
+            ConfigFile.GetString("serverinfo_pastebin_id", "7wV681fT"),
+            ":[:BREAK:]:",
+            this.versionstring
+        });
+
+        ServerConsole.ip = ip;
 		WWWForm form = new WWWForm();
 		form.AddField("update", 1);
 		form.AddField("ip", ip);
 		form.AddField("info", info);
 		form.AddField("port", base.networkPort);
 		form.AddField("players", 0);
+
 		bool codeNotGenerated = false;
 		string pth = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/SCP Secret Laboratory/verkey.txt";
 		if (File.Exists(pth))
@@ -254,7 +256,6 @@ public class CustomNetworkManager : NetworkManager
 		yield break;
 	}
 
-	// Token: 0x0600065C RID: 1628
 	private void NonsteamHost()
 	{
 		base.onlineScene = "Facility";
@@ -262,14 +263,12 @@ public class CustomNetworkManager : NetworkManager
 		this.StartHostWithPort();
 	}
 
-	// Token: 0x0600065D RID: 1629
 	public void StartHostWithPort()
 	{
 		ServerConsole.AddLog("Server starting at port " + base.networkPort);
 		this.StartHost();
 	}
 
-	// Token: 0x0600065E RID: 1630
 	public int GetFreePort()
 	{
 		string @string = ConfigFile.GetString("port_queue", "7777,7778,7779,7780,7781,7782,7783,7784");
@@ -295,10 +294,14 @@ public class CustomNetworkManager : NetworkManager
 			if (array.Length == 0)
 			{
 				q = "Failed to detect ports.";
-			}
-			for (int i = 0; i < array.Length; i++)
+                throw new Exception();
+            }
+            ServerConsole.AddLog("Port queue loaded: " + @string);
+
+            for (int i = 0; i < array.Length; i++)
 			{
-				q = "Failed to convert [" + array[i] + "]  into integer number!";
+                ServerConsole.AddLog("Trying to init port: " + array[i] + "...");
+                q = "Failed to convert [" + array[i] + "]  into integer number!";
 				base.networkPort = int.Parse(array[i]);
 				if (NetworkServer.Listen(base.networkPort))
 				{
@@ -315,10 +318,19 @@ public class CustomNetworkManager : NetworkManager
 						q = "Failed to read config file: " + text;
 						ConfigFile.path = text;
 						ConfigFile.singleton.ReloadConfig();
-					}
-					return base.networkPort;
+                        ServerConsole.AddLog("Custom config detected, using " + text);
+                    }
+                    else
+                    {
+                        ServerConsole.AddLog("No custom config detected, using config.txt");
+                    }
+                    ServerConsole.AddLog("Done!LOGTYPE-10");
+
+                    return base.networkPort;
 				}
-			}
+
+                ServerConsole.AddLog("...failed.LOGTYPE-6");
+            }
 		}
 		catch
 		{
@@ -327,79 +339,39 @@ public class CustomNetworkManager : NetworkManager
 		return 7777;
 	}
 
-	// Token: 0x04000597 RID: 1431
 	public GameObject popup;
 
-	// Token: 0x04000598 RID: 1432
 	public GameObject createpop;
 
-	// Token: 0x04000599 RID: 1433
 	public RectTransform contSize;
 
-	// Token: 0x0400059A RID: 1434
-	public TextMeshProUGUI content;
+	public Text content;
 
-	// Token: 0x0400059B RID: 1435
-	public Button button;
-
-	// Token: 0x0400059C RID: 1436
 	public CustomNetworkManager.DisconnectLog[] logs;
 
-	// Token: 0x0400059D RID: 1437
 	private int curLogID;
 
-	// Token: 0x0400059E RID: 1438
 	public bool reconnect;
 
-	// Token: 0x0400059F RID: 1439
 	[Space(20f)]
 	public string versionstring;
 
-	// Token: 0x040005A0 RID: 1440
 	private GameConsole.Console console;
 
-	// Token: 0x020000E7 RID: 231
 	[Serializable]
 	public class DisconnectLog
 	{
-		// Token: 0x040005A1 RID: 1441
 		[Multiline]
 		public string msg_en;
 
-		// Token: 0x040005A2 RID: 1442
-		[Multiline]
-		public string msg_pl;
-
-		// Token: 0x040005A3 RID: 1443
-		public Vector2 msgSize_en;
-
-		// Token: 0x040005A4 RID: 1444
-		public Vector2 msgSize_pl;
-
-		// Token: 0x040005A5 RID: 1445
 		public CustomNetworkManager.DisconnectLog.LogButton button;
 
-		// Token: 0x040005A6 RID: 1446
 		public bool autoHideOnSceneLoad;
 
-		// Token: 0x020000E8 RID: 232
 		[Serializable]
 		public class LogButton
 		{
-			// Token: 0x040005A7 RID: 1447
 			public ConnInfoButton[] actions;
-
-			// Token: 0x040005A8 RID: 1448
-			public string content_en;
-
-			// Token: 0x040005A9 RID: 1449
-			public string content_pl;
-
-			// Token: 0x040005AA RID: 1450
-			public float size_en;
-
-			// Token: 0x040005AB RID: 1451
-			public float size_pl;
 		}
 	}
 }

@@ -9,7 +9,7 @@ map_seed = -1; (-1 = random)
 intercom_cooldown = 120;
 intercom_max_speech_time = 20;
 auto_round_restart_time = 10;
-friendly_fire = true;
+friendly_fire = false;
 
 ///////////////////////////////////
 
@@ -26,14 +26,16 @@ NO_SCP079_FIRST = true;
 SCP049_HP = 1200;
 SCP049-2_HP = 400;
 SCP079_HP = 100;
+SCP096_HP = 2000;
 SCP106_HP = 700;
-SCP457_HP = 700;
 SCP173_HP = 2000;
-max_players = 30;
-
+SCP457_HP = 700;
+max_players = 25;
 
 // server_name can stuff up the cfg reader depending on its contents, so keep it down the bottom.
 server_ip = auto;
-administrator_password = pwd;
-server_name = servername;
-
+server_name = [nick]'s game;
+ban_database_folder = [appdata]/SCP Secret Laboratory/Bans;
+administrator_password = none;
+port_queue = 7777,7778,7779,7780,7781,7782,7783,7784;
+serverinfo_pastebin_id = 7wV681fT;
