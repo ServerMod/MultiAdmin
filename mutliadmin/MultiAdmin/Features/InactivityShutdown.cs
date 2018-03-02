@@ -50,7 +50,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 
         public void OnTick()
         {
-            if (waitFor > 0)
+            if (waitFor > 0 && waiting)
             {
                 long elapsed = Utils.GetUnixTime() - roundEndTime;
 

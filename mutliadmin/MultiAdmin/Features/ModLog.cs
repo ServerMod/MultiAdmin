@@ -32,11 +32,14 @@ namespace MultiAdmin.MultiAdmin.Features
 		{
 			if (logToOwnFile)
 			{
-				using (StreamWriter sw = File.AppendText(this.modLogLocation))
+				lock (this)
 				{
-					DateTime now = DateTime.Now;
-					string date = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
-					sw.WriteLine(date + message);
+					using (StreamWriter sw = File.AppendText(this.modLogLocation))
+					{
+						DateTime now = DateTime.Now;
+						string date = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
+						sw.WriteLine(date + message);
+					}
 				}
 			}
 		}

@@ -192,7 +192,7 @@ namespace MultiAdmin
                     if (display) server.Write(gameMessage.Trim(), colour);
                 }
 
-                Thread.Sleep(300);
+                Thread.Sleep(10);
             }
 
         }

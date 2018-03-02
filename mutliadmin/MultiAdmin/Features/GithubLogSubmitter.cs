@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading;
 
 namespace MultiAdmin.MultiAdmin.Features
@@ -59,7 +58,8 @@ namespace MultiAdmin.MultiAdmin.Features
 
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.Message);
+					Server.Write("Failed to open log for github error submission, the SCPSL exe for that session is still shutting down.");
+                    //Console.WriteLine(e.Message);
                     // not a big deal if we dont get the exception logged.
                 }
 

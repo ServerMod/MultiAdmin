@@ -10,7 +10,7 @@ namespace MultiAdmin.MultiAdmin
 {
     public class Server
     {
-        public static readonly string MA_VERSION = "1.3";
+        public static readonly string MA_VERSION = "1.3.1";
 
         public Boolean HasServerMod { get; set; }
         public String ServerModVersion { get; set; }
@@ -197,12 +197,16 @@ namespace MultiAdmin.MultiAdmin
 
         public void Log(String message)
         {
-            using (StreamWriter sw = File.AppendText(this.maLogLocation))
-            {
-                DateTime now = DateTime.Now;
-                string date = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
-                sw.WriteLine(date + message);
-            }
+			lock(this)
+			{
+				using (StreamWriter sw = File.AppendText(this.maLogLocation))
+				{
+					DateTime now = DateTime.Now;
+					string date = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
+					sw.WriteLine(date + message);
+				}
+			}
+
         }
 
 		public void SoftRestartServer()
@@ -244,7 +248,12 @@ namespace MultiAdmin.MultiAdmin
 				return false;
 			}
 
-			return major >= verMajor && minor >= verMinor && fix >= verFix;
+			if (major == 0 && minor == 0 && verFix == 0)
+			{
+				return false;
+			}
+
+			return verMajor >= major && verMinor >= minor && verFix >= fix;
 
 		}
 
