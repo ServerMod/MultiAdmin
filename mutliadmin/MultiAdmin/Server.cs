@@ -132,6 +132,7 @@ namespace MultiAdmin.MultiAdmin
                             ((IEventCrash)f).OnCrash();
                         }
                     }
+
                     Write("Game engine exited/crashed/closed/restarting", ConsoleColor.Red);
                     Write("Cleaning Session", ConsoleColor.Red);
                     CleanSession();

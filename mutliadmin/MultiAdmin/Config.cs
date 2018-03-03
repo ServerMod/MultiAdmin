@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace MultiAdmin
 {
@@ -47,7 +45,16 @@ namespace MultiAdmin
                         current_value = line.Substring(line.IndexOf("=") + 1);
                         if (current_value.EndsWith(";"))
                         {
-                            values.Add(current_key, current_value.Substring(0, current_value.Length - 1).Trim());
+							String value = current_value.Substring(0, current_value.Length - 1).Trim();
+							if (!values.ContainsKey(current_key))
+							{
+								values.Add(current_key, current_value.Substring(0, current_value.Length - 1).Trim());
+							}
+							else
+							{
+								Console.WriteLine("Found duplicate setting for " + current_key + " with value " + current_value + " using the existing setting. The game may not do it this way, please correct the issue");
+							}
+                            
                         }
                         else
                         {
@@ -89,19 +96,49 @@ namespace MultiAdmin
 
         public Boolean GetBoolean(String key, bool def)
         {
-            String result = GetValue(key, def.ToString());
-            if (result.ToLower().Equals("yes") || result.ToLower().Equals("y") || result.ToLower().Equals("t") || result.ToLower().Equals("true") || result.ToLower().Equals("1"))
-            {
-                return true;
-            }
+            String configValue = GetValue(key, def.ToString());
 
-            if (result.ToLower().Equals("n") || result.ToLower().Equals("no") || result.ToLower().Equals("f") || result.ToLower().Equals("false") || result.ToLower().Equals("f"))
-            {
-                return true;
-            }
+			// Why did I make it so you can use these words? Because I can.
+			string[] trueWords = new string[]
+			{
+			"true",
+			"t",
+			"y",
+			"yes",
+			"sure",
+			"yeah",
+			"yea",
+			"affirmative",
+			"aye",
+			"1"
+			};
 
-            Console.WriteLine("WARNING: config setting " + key + " is suppose to be a boolean value, but it is set to" + result + " usign default value.");
-            return def;
-        }
+			string[] falseWords = new string[]
+			{
+			"false",
+			"f",
+			"n",
+			"no",
+			"nope",
+			"nah",
+			"negative",
+			"nay",
+			"0"
+			};
+
+			foreach (string word in trueWords)
+			{
+				if (configValue.Equals(word.ToLower()))
+					return true;
+			}
+
+			foreach (string word in falseWords)
+			{
+				if (configValue.Equals(word.ToLower()))
+					return false;
+			}
+
+			return def;
+		}
     }
 }

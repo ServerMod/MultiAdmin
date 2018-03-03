@@ -30,7 +30,7 @@ namespace MultiAdmin
                     int attempts = 0;
                     Boolean read = false;
 
-                    while (attempts < 5 && !read && !server.IsStopping())
+                    while (attempts < 100 && !read && !server.IsStopping())
                     {
                         try
                         {
@@ -45,8 +45,11 @@ namespace MultiAdmin
                         catch
                         {
                             attempts++;
-                            server.Write("Message printer warning: Could not " + fileCommand + " file " + path + ". Make sure that MultiAdmin.exe has all necessary read-write permissions.", ConsoleColor.Yellow);
-                            server.Write("Retrying.", ConsoleColor.DarkGray);
+							if (attempts >= 100)
+							{
+								server.Write("Message printer warning: Could not " + fileCommand + " file " + path + ". Make sure that MultiAdmin.exe has all necessary read-write permissions.", ConsoleColor.Yellow);
+								server.Write("skipping");
+							}
                         }
                         Thread.Sleep(300);
                     }
