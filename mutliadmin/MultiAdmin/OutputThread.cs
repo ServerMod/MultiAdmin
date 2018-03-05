@@ -12,13 +12,21 @@ namespace MultiAdmin
             while (!server.IsStopping())
             {
                 string[] strArray = null;
-                try
+				String dir = "SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" + Path.DirectorySeparatorChar + server.GetSessionId();
+
+				try
                 {
-                    strArray = Directory.GetFiles("SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" + Path.DirectorySeparatorChar + server.GetSessionId(), "sl*.mapi", SearchOption.TopDirectoryOnly);
+					if (Directory.Exists(dir))
+					{
+						strArray = Directory.GetFiles(dir, "sl*.mapi", SearchOption.TopDirectoryOnly);
+					}
                 }
                 catch
                 {
-                    server.Write("Message printer warning: 'SCPSL_Data/Dedicated' directory not found.", ConsoleColor.Yellow);
+					if (!server.IsStopping())
+					{
+						server.Write("Message printer warning: 'SCPSL_Data/Dedicated' directory not found.", ConsoleColor.Yellow);
+					}                    
                 }
 
                 if (strArray == null) continue;
@@ -102,31 +110,64 @@ namespace MultiAdmin
                         server.ServerModVersion = gameMessage.Replace("ServerMod - Version", "").Trim();
                     }
 
-                    if (gameMessage.Contains("Waiting for players"))
-                    {
-                        if (!server.InitialRoundStarted)
-                        {
-                            server.InitialRoundStarted = true;
-                            foreach (Feature f in server.Features)
-                            {
-                                if (f is IEventRoundStart)
-                                {
-                                    ((IEventRoundStart)f).OnRoundStart();
-                                }
-                            }
-                        }
-                        else
-                        {
-                            foreach (Feature f in server.Features)
-                            {
-                                if (f is IEventRoundEnd)
-                                {
-                                    ((IEventRoundEnd)f).OnRoundEnd();
-                                }
-                            }
-                        }
+					if (server.ServerModCheck(1, 7, 2))
+					{
+						if (gameMessage.Contains("Round restarting"))
+						{
+							foreach (Feature f in server.Features)
+							{
+								if (f is IEventRoundEnd)
+								{
+									((IEventRoundEnd)f).OnRoundEnd();
+								}
+							}
+						}
 
-                    }
+						if (gameMessage.Contains("Waiting for players"))
+						{
+							if (!server.InitialRoundStarted)
+							{
+								server.InitialRoundStarted = true;
+								foreach (Feature f in server.Features)
+								{
+									if (f is IEventRoundStart)
+									{
+										((IEventRoundStart)f).OnRoundStart();
+									}
+								}
+							}
+						}
+					}
+					else
+					{
+						if (gameMessage.Contains("Waiting for players"))
+						{
+							if (!server.InitialRoundStarted)
+							{
+								server.InitialRoundStarted = true;
+								foreach (Feature f in server.Features)
+								{
+									if (f is IEventRoundStart)
+									{
+										((IEventRoundStart)f).OnRoundStart();
+									}
+								}
+							}
+							else
+							{
+								foreach (Feature f in server.Features)
+								{
+									if (f is IEventRoundEnd)
+									{
+										((IEventRoundEnd)f).OnRoundEnd();
+									}
+								}
+							}
+
+						}
+					}
+
+
 
                     if (gameMessage.Contains("New round has been started"))
                     {

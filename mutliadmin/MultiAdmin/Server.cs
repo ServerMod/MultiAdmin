@@ -10,7 +10,7 @@ namespace MultiAdmin.MultiAdmin
 {
     public class Server
     {
-        public static readonly string MA_VERSION = "1.3.1";
+        public static readonly string MA_VERSION = "1.3.2";
 
         public Boolean HasServerMod { get; set; }
         public String ServerModVersion { get; set; }
@@ -135,8 +135,9 @@ namespace MultiAdmin.MultiAdmin
 
                     Write("Game engine exited/crashed/closed/restarting", ConsoleColor.Red);
                     Write("Cleaning Session", ConsoleColor.Red);
-                    CleanSession();
-                    Write("Restarting game with same session id");
+                    DeleteSession();
+					session_id = Utils.GetUnixTime().ToString();
+					Write("Restarting game with new session id");
                     StartServer();
                     InitFeatures();
 
@@ -215,6 +216,7 @@ namespace MultiAdmin.MultiAdmin
 			if (ServerModCheck(1, 5, 0))
 			{
 				SendMessage("RECONNECTRS");
+				session_id = Utils.GetUnixTime().ToString();
 			}
 			else
 			{
@@ -237,7 +239,7 @@ namespace MultiAdmin.MultiAdmin
 			{
 				Int32.TryParse(parts[0], out verMajor);
 				Int32.TryParse(parts[1], out verMinor);
-				Int32.TryParse(parts[1], out verFix);
+				Int32.TryParse(parts[2], out verFix);
 			}
 			else if (parts.Length == 2)
 			{
@@ -356,16 +358,22 @@ namespace MultiAdmin.MultiAdmin
 
         private void CleanSession()
         {
-            foreach (String file in Directory.GetFiles("SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" + Path.DirectorySeparatorChar + session_id))
-            {
-                File.Delete(file);
-            }
+			String path = "SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" + Path.DirectorySeparatorChar + session_id;
+			if (Directory.Exists(path))
+			{
+				foreach (String file in Directory.GetFiles(path))
+				{
+					File.Delete(file);
+				}
+			}
+
         }
 
         private void DeleteSession()
         {
             CleanSession();
-            Directory.Delete("SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" + Path.DirectorySeparatorChar + session_id);
+			string path = "SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" + Path.DirectorySeparatorChar + session_id;
+			if (Directory.Exists(path)) Directory.Delete(path);
         }
 
 
