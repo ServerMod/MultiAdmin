@@ -104,7 +104,7 @@ Config Option | Value Type | Default Value | Description
 max_players | Integer | 20 | The max amount of players per server
 no_scp079_first | Boolean | True | Computer (SCP-079) will never be the first scp in a game
 nuke_disable_cooldown | Seconds | 0 | Stop the nuke from being spammed, this will stop the nuke arm switch from being disabled until this has elapsed
-173_door_starting_cooldown | Seconds | The time before SCP-173's door can be opened
+173_door_starting_cooldown | Seconds | 25 | The time before SCP-173's door can be opened
 SCP106_cleanup | Boolean | False | Stops items and ragdolls from spawning in the pocket dimension
 force_disable_enable | Boolean | False | Overrides game's default ban value with chosen values (**USE OF THIS IS NOT RECOMMENDED**)
 item_cleanup | Seconds | -1 | Cleans up items after the specified amount of time
