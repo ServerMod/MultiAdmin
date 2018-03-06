@@ -117,12 +117,12 @@ Example:
 - NTFL_HP use this to set the starting HP for the class. Default = 120
 - NTFC_HP use this to set the starting HP for the class. Default = 150
 - NTFG_HP use this to set the starting HP for the class. Default = 100
-- SCP049_DISABLE disable this scp, default: no
-- SCP079_DISABLE disable this scp, default: yes
-- SCP096_DISABLE disable this scp, default: yes
-- SCP106_DISABLE disable this scp, default: no
-- SCP173_DISABLE disable this scp, default: no
-- SCP457_DISABLE disable this scp, default: yes
+- SCP049_DISABLE disable this scp, default: false
+- SCP079_DISABLE disable this scp, default: true
+- SCP096_DISABLE disable this scp, default: false
+- SCP106_DISABLE disable this scp, default: false
+- SCP173_DISABLE disable this scp, default: false
+- SCP457_DISABLE disable this scp, default: true
 - FORCE_DISABLE_ENABLE overrides game's default ban value with chosen values (USE OF THIS IS NOT RECOMMENDED)
 - SCP049_AMOUNT max amount of this scp that can be spawned in randomly, default: 1
 - SCP079_AMOUNT max amount of this scp that can be spawned in randomly, default: 1
@@ -130,6 +130,23 @@ Example:
 - SCP106_AMOUNT max amount of this scp that can be spawned in randomly, default: 1
 - SCP173_AMOUNT max amount of this scp that can be spawned in randomly, default: 1
 - SCP457_AMOUNT max amount of this scp that can be spawned in randomly, default: 1
+- ITEM_CLEANUP cleans up items after a certain amount of time, default: -1 (Seconds)
+- SHOW_ON_SERVERLIST if your server is verified, this shows it on the server list, default: true
+- SMART_CLASS_PICKER enables/disables Smart Class Picker, default: false
+- SMART_CLASS_PICKER_STARTING_WEIGHT the weight a class starts out with, default: 5
+- SMART_CLASS_PICKER_WEIGHT_LIMIT the maximum weight a class can have, default: 10
+- SMART_CLASS_PICKER_CLASS_<Class #>_WEIGHT_DECREASE the amount a weight goes down when a player plays the specified class, the default value is dynamic based on which team and class the player is (integer)
+- SMART_CLASS_PICKER_CLASS_<Class #>_WEIGHT_INCREASE the amount a weight goes up when the player isn't the specified class, the default value is dynamic based on which team and class the player is (integer)
+- server_frame_rate the framerate that a server runs at, default: 60
+- allow_incompatible allow the server to run an incompatible version of ServerMod, default: false
+- SM_DEBUG print more verbose debug messages for debugging, default: false
+- sm_server_name server name in a separate option, defaults to the value of server_name (You'd use this if you don't want variables showing up in your server name when ServerMod isn't working)
+- SM_TRACKING appends the ServerMod version to your server name, this is for tracking how many servers are running ServerMod, default: true
+- allow_project_manager_remote_admin allow SCP: SL project managers to use Remote Admin, default: false
+- allow_scpsl_staff_to_use_remoteadmin allow SCP: SL staff to use Remote Admin, default: false
+- allow_scpsl_beta_tester_to_use_remoteadmin allow SCP: SL beta testers to use Remote Admin, default: false
+- allow_scpsl_patreon_to_use_remoteadmin allow SCP: SL patrons to use Remote Admin, default: false
+- afk_kick kicks players who haven't moved in a specified amount of time, default: -1
 ##
 
 Place any suggestions/problems in issues!
