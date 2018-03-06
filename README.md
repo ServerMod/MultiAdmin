@@ -98,55 +98,64 @@ Example:
 ![player count](https://user-images.githubusercontent.com/1520101/36029888-04689b5c-0de0-11e8-81cd-b1d458caf7e9.png)
 
 ## Config Additions
-- max_players (default 20, max amount of players per server)
-- no_scp079_first (default true, computer will never be the first scp in a game)
-- nuke_disable_cooldown stop the nuke from being spammed, will stop the nuke arm switch from being disabled until this has elapsed. Default = 0
-- 173_door_starting_cooldown time (in seconds) before SCP-173's door can be opened
-- SCP106_cleanup use this to stop ragdolls spawning in the pocket dimension [currently items still spawn]
-- SCP049_HP use this to set the starting HP for the class. Default = 1200
-- SCP049-2_HP use this to set the starting HP for the class. Default = 400
-- SCP079_HP use this to set the starting HP for the class. Default = 100
-- SCP096_HP use this to set the starting HP for the class. Default = 2000
-- SCP106_HP use this to set the starting HP for the class. Default = 700
-- SCP173_HP use this to set the starting HP for the class. Default = 2000
-- SCP457_HP use this to set the starting HP for the class. Default = 700
-- CLASSD_HP use this to set the starting HP for the class. Default = 100
-- NTFSCIENTIST_HP use this to set the starting HP for the class. Default = 120
-- SCIENTIST_HP use this to set the starting HP for the class. Default = 100
-- CI_HP use this to set the starting HP for the class. Default = 120
-- NTFL_HP use this to set the starting HP for the class. Default = 120
-- NTFC_HP use this to set the starting HP for the class. Default = 150
-- NTFG_HP use this to set the starting HP for the class. Default = 100
-- SCP049_DISABLE disable this scp, default: false
-- SCP079_DISABLE disable this scp, default: true
-- SCP096_DISABLE disable this scp, default: false
-- SCP106_DISABLE disable this scp, default: false
-- SCP173_DISABLE disable this scp, default: false
-- SCP457_DISABLE disable this scp, default: true
-- FORCE_DISABLE_ENABLE overrides game's default ban value with chosen values (USE OF THIS IS NOT RECOMMENDED)
-- SCP049_AMOUNT max amount of this scp that can be spawned in randomly, default: 1
-- SCP079_AMOUNT max amount of this scp that can be spawned in randomly, default: 1
-- SCP096_AMOUNT max amount of this scp that can be spawned in randomly, default: 1
-- SCP106_AMOUNT max amount of this scp that can be spawned in randomly, default: 1
-- SCP173_AMOUNT max amount of this scp that can be spawned in randomly, default: 1
-- SCP457_AMOUNT max amount of this scp that can be spawned in randomly, default: 1
-- ITEM_CLEANUP cleans up items after a certain amount of time, default: -1 (Seconds)
-- SHOW_ON_SERVERLIST if your server is verified, this shows it on the server list, default: true
-- SMART_CLASS_PICKER enables/disables Smart Class Picker, default: false
-- SMART_CLASS_PICKER_STARTING_WEIGHT the weight a class starts out with, default: 5
-- SMART_CLASS_PICKER_WEIGHT_LIMIT the maximum weight a class can have, default: 10
-- SMART_CLASS_PICKER_CLASS_<Class #>_WEIGHT_DECREASE the amount a weight goes down when a player plays the specified class, the default value is dynamic based on which team and class the player is (integer)
-- SMART_CLASS_PICKER_CLASS_<Class #>_WEIGHT_INCREASE the amount a weight goes up when the player isn't the specified class, the default value is dynamic based on which team and class the player is (integer)
-- server_frame_rate the framerate that a server runs at, default: 60
-- allow_incompatible allow the server to run an incompatible version of ServerMod, default: false
-- SM_DEBUG print more verbose debug messages for debugging, default: false
-- sm_server_name server name in a separate option, defaults to the value of server_name (You'd use this if you don't want variables showing up in your server name when ServerMod isn't working)
-- SM_TRACKING appends the ServerMod version to your server name, this is for tracking how many servers are running ServerMod, default: true
-- allow_project_manager_remote_admin allow SCP: SL project managers to use Remote Admin, default: false
-- allow_scpsl_staff_to_use_remoteadmin allow SCP: SL staff to use Remote Admin, default: false
-- allow_scpsl_beta_tester_to_use_remoteadmin allow SCP: SL beta testers to use Remote Admin, default: false
-- allow_scpsl_patreon_to_use_remoteadmin allow SCP: SL patrons to use Remote Admin, default: false
-- afk_kick kicks players who haven't moved in a specified amount of time, default: -1
+### General
+Config Option | Value Type | Default Value | Description
+--- | --- | --- | ---
+max_players | Integer | 20 | The max amount of players per server
+no_scp079_first | Boolean | True | Computer (SCP-079) will never be the first scp in a game
+nuke_disable_cooldown | Seconds | 0 | Stop the nuke from being spammed, this will stop the nuke arm switch from being disabled until this has elapsed
+173_door_starting_cooldown | Seconds | The time before SCP-173's door can be opened
+SCP106_cleanup | Boolean | False | Stops items and ragdolls from spawning in the pocket dimension
+force_disable_enable | Boolean | False | Overrides game's default ban value with chosen values (**USE OF THIS IS NOT RECOMMENDED**)
+item_cleanup | Seconds | -1 | Cleans up items after the specified amount of time
+show_on_serverlist | Boolean | True | If your server is verified, this shows it on the server list
+smart_class_picker | Boolean | False | Enables/Disables Smart Class Picker (Currently very buggy)
+smart_class_picker_starting_weight | Integer | 5 | The weight a class starts out with
+smart_class_picker_weight_limit | Integer | 10 | The maximum weight a class can have
+smart_class_picker_class_<Class #>_weight_decrease | Integer | <Dynamic> | The amount a weight goes down when a player plays the specified class, the default value is dynamic based on which team and class the player is
+smart_class_picker_class_<Class #>_weight_increase | Integer | <Dynamic> | The amount a weight goes up when the player isn't the specified class, the default value is dynamic based on which team and class the player is
+server_frame_rate | Integer | 60 | The framerate that a server runs at
+allow_incompatible | Boolean | False | Allow the server to run an incompatible version of ServerMod
+sm_debug | Boolean | False | Print more verbose debug messages for debugging
+sm_server_name | String | <Dynamic> | server name in a separate option, defaults to the value of server_name (You'd use this if you don't want variables showing up in your server name when ServerMod isn't working)
+sm_tracking | Boolean | True | Appends the ServerMod version to your server name, this is for tracking how many servers are running ServerMod
+allow_project_manager_remote_admin | Boolean | False | Allow SCP: SL project managers to use Remote Admin
+allow_scpsl_staff_to_use_remoteadmin | Boolean | False | Allow SCP: SL staff to use Remote Admin
+allow_scpsl_beta_tester_to_use_remoteadmin | Boolean | False | Allow SCP: SL beta testers to use Remote Admin
+allow_scpsl_patreon_to_use_remoteadmin | Boolean | False | Allow SCP: SL patrons to use Remote Admin
+afk_kick | Seconds | -1 | Kicks players who haven't moved in a specified amount of time
+
+
+
+### Class Based
+Config Option | Value Type | Default Value | Description
+--- | --- | --- | ---
+SCP049_HP | Integer | 1200 | Sets the starting HP for SCP-049
+SCP049-2_HP | Integer | 400 | Sets the starting HP for SCP-049-2
+SCP079_HP | Integer | 100 | Sets the starting HP for SCP-079
+SCP096_HP | Integer | 2000 | Sets the starting HP for SCP-096
+SCP106_HP | Integer | 700 | Sets the starting HP for SCP-106
+SCP173_HP | Integer | 2000 | Sets the starting HP for SCP-173
+SCP457_HP | Integer | 700 | Sets the starting HP for SCP-457
+CLASSD_HP | Integer | 100 | Sets the starting HP for Class Ds
+SCIENTIST_HP | Integer | 100 | Sets the starting HP for Scientists
+CI_HP | Integer | 100 | Sets the starting HP for Chaos Insurgency
+NTFG_HP | Integer | 100 | Sets the starting HP for NTF Guards
+NTFSCIENTIST_HP | Integer | 120 | Sets the starting HP for NTF Scientists
+NTFL_HP | Integer | 120 | Sets the starting HP for NTF Lieutenants
+NTFC_HP | Integer | 150 | Sets the starting HP for NTF Commanders
+SCP049_DISABLE | Boolean | False | Disables SCP-049
+SCP079_DISABLE | Boolean | True | Disables SCP-079
+SCP096_DISABLE | Boolean | False | Disables SCP-096
+SCP106_DISABLE | Boolean | False | Disables SCP-106
+SCP173_DISABLE | Boolean | False | Disables SCP-173
+SCP457_DISABLE | Boolean | True | Disables SCP-457
+SCP049_AMOUNT | Integer | 1 | Max amount of SCP-049 that can be spawned in randomly
+SCP079_AMOUNT | Integer | 1 | Max amount of SCP-079 that can be spawned in randomly
+SCP096_AMOUNT | Integer | 1 | Max amount of SCP-096 that can be spawned in randomly
+SCP106_AMOUNT | Integer | 1 | Max amount of SCP-106 that can be spawned in randomly
+SCP173_AMOUNT | Integer | 1 | Max amount of SCP-173 that can be spawned in randomly
+SCP457_AMOUNT | Integer | 1 | Max amount of SCP-457 that can be spawned in randomly
 ##
 
 Place any suggestions/problems in issues!
