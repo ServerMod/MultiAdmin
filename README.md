@@ -112,12 +112,12 @@ show_on_serverlist | Boolean | True | If your server is verified, this shows it 
 smart_class_picker | Boolean | False | Enables/Disables Smart Class Picker (Currently very buggy)
 smart_class_picker_starting_weight | Integer | 5 | The weight a class starts out with
 smart_class_picker_weight_limit | Integer | 10 | The maximum weight a class can have
-smart_class_picker_class_<Class #>_weight_decrease | Integer | <Dynamic> | The amount a weight goes down when a player plays the specified class, the default value is dynamic based on which team and class the player is
-smart_class_picker_class_<Class #>_weight_increase | Integer | <Dynamic> | The amount a weight goes up when the player isn't the specified class, the default value is dynamic based on which team and class the player is
+smart_class_picker_class_<Class #>_weight_decrease | Integer | **Dynamic** | The amount a weight goes down when a player plays the specified class, the default value is dynamic based on which team and class the player is
+smart_class_picker_class_<Class #>_weight_increase | Integer | **Dynamic** | The amount a weight goes up when the player isn't the specified class, the default value is dynamic based on which team and class the player is
 server_frame_rate | Integer | 60 | The framerate that a server runs at
 allow_incompatible | Boolean | False | Allow the server to run an incompatible version of ServerMod
 sm_debug | Boolean | False | Print more verbose debug messages for debugging
-sm_server_name | String | <Dynamic> | server name in a separate option, defaults to the value of server_name (You'd use this if you don't want variables showing up in your server name when ServerMod isn't working)
+sm_server_name | String | **Dynamic** | server name in a separate option, defaults to the value of server_name (You'd use this if you don't want variables showing up in your server name when ServerMod isn't working)
 sm_tracking | Boolean | True | Appends the ServerMod version to your server name, this is for tracking how many servers are running ServerMod
 allow_project_manager_remote_admin | Boolean | False | Allow SCP: SL project managers to use Remote Admin
 allow_scpsl_staff_to_use_remoteadmin | Boolean | False | Allow SCP: SL staff to use Remote Admin
