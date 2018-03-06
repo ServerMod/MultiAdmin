@@ -100,7 +100,7 @@ Example:
 ## Config Additions
 ### General
 Config Option | Value Type | Default Value | Description
---- | --- | --- | ---
+--- | :---: | :---: | ---
 max_players | Integer | 20 | The max amount of players per server
 no_scp079_first | Boolean | True | Computer (SCP-079) will never be the first scp in a game
 nuke_disable_cooldown | Seconds | 0 | Stop the nuke from being spammed, this will stop the nuke arm switch from being disabled until this has elapsed
@@ -129,7 +129,7 @@ afk_kick | Seconds | -1 | Kicks players who haven't moved in a specified amount 
 
 ### Class Based
 Config Option | Value Type | Default Value | Description
---- | --- | --- | ---
+--- | :---: | :---: | ---
 SCP049_HP | Integer | 1200 | Sets the starting HP for SCP-049
 SCP049-2_HP | Integer | 400 | Sets the starting HP for SCP-049-2
 SCP079_HP | Integer | 100 | Sets the starting HP for SCP-079
