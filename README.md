@@ -98,16 +98,19 @@ Example:
 ![player count](https://user-images.githubusercontent.com/1520101/36029888-04689b5c-0de0-11e8-81cd-b1d458caf7e9.png)
 
 ## Config Additions
+Type Info:
+- Boolean: True or False value
+- Integer: A number without decimals
+- List: A list with items separated by ","
+- Seconds: Time in seconds, usually a value of -1 disables the feature
+
 ### General
 Config Option | Value Type | Default Value | Description
 --- | :---: | :---: | ---
 max_players | Integer | 20 | The max amount of players per server
-no_scp079_first | Boolean | True | Computer (SCP-079) will never be the first scp in a game
-nuke_disable_cooldown | Seconds | 0 | Stop the nuke from being spammed, this will stop the nuke arm switch from being disabled until this has elapsed
-173_door_starting_cooldown | Seconds | 25 | The time before SCP-173's door can be opened
-SCP106_cleanup | Boolean | False | Stops items and ragdolls from spawning in the pocket dimension
 force_disable_enable | Boolean | False | Overrides game's default ban value with chosen values (**USE OF THIS IS NOT RECOMMENDED**)
 item_cleanup | Seconds | -1 | Cleans up items after the specified amount of time
+nickname_filter | List | **Empty** | Automatically kicks anyone who's nickname contains anything in this list
 show_on_serverlist | Boolean | True | If your server is verified, this shows it on the server list
 server_frame_rate | Integer | 60 | The framerate that a server runs at
 allow_incompatible | Boolean | False | Allow the server to run an incompatible version of ServerMod
@@ -120,11 +123,21 @@ allow_scpsl_beta_tester_to_use_remoteadmin | Boolean | False | Allow SCP: SL bet
 allow_scpsl_patreon_to_use_remoteadmin | Boolean | False | Allow SCP: SL patrons to use Remote Admin
 afk_kick | Seconds | -1 | Kicks players who haven't moved in a specified amount of time
 
-
+### Warhead Options
+Config Option | Value Type | Default Value | Description
+--- | :---: | :---: | ---
+nuke_disable_cooldown | Seconds | 0 | Stop the nuke from being spammed, this will stop the nuke arm switch from being disabled until this has elapsed
+auto_warhead_start | Seconds | -1 | Automatically activated the nuke after the specified amount of time has elapsed (-1 disables this feature)
+auto_warhead_start_lock | Boolean | False | Automatically prevents the warhead detonation from being cancelled when it's automatically started
+unlock_nuke_door_on_detonate | Boolean | True | Makes all doors openable without a keycard after the nuke has detonated
 
 ### Class Based
 Config Option | Value Type | Default Value | Description
 --- | :---: | :---: | ---
+no_scp079_first | Boolean | True | Computer (SCP-079) will never be the first scp in a game
+173_door_starting_cooldown | Seconds | 25 | The time before SCP-173's door can be opened
+SCP106_cleanup | Boolean | False | Stops items and ragdolls from spawning in the pocket dimension
+maximum_MTF_respawn_amount | Integer | 15 | The maximum amount of MTF that can be respawned in a single respawn wave
 SCP049_HP | Integer | 1200 | Sets the starting HP for SCP-049
 SCP049-2_HP | Integer | 400 | Sets the starting HP for SCP-049-2
 SCP079_HP | Integer | 100 | Sets the starting HP for SCP-079
@@ -155,7 +168,7 @@ SCP457_AMOUNT | Integer | 1 | Max amount of SCP-457 that can be spawned in rando
 ### Smart Class Picker
 Config Option | Value Type | Default Value | Description
 --- | :---: | :---: | ---
-smart_class_picker | Boolean | False | Enables/Disables Smart Class Picker (Currently very buggy)
+smart_class_picker | Boolean | False | Enables/Disables Smart Class Picker
 smart_class_picker_starting_weight | Integer | 5 | The weight a class starts out with
 smart_class_picker_weight_limit | Integer | 10 | The maximum weight a class can have
 smart_class_picker_class_<Class #>_weight_decrease | Integer | **Dynamic** | The amount a weight goes down when a player plays the specified class, the default value is dynamic based on which team and class the player is
