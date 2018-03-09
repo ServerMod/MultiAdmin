@@ -55,7 +55,7 @@ ServerMod is an additional tool i have developed to add more configuration setti
 The latest release can be found here: [Release link](https://github.com/Grover-c13/MultiAdmin/releases/latest)
 
 ## Features:
-- Fixes as many null reference errors as i can find, making your log files smaller.
+- Fixes as many null reference errors as I can find, making your log files smaller.
 - Dynamic server names with player count etc.
 - Increasing the player count.
 - Disabling of SCPs
@@ -109,11 +109,6 @@ SCP106_cleanup | Boolean | False | Stops items and ragdolls from spawning in the
 force_disable_enable | Boolean | False | Overrides game's default ban value with chosen values (**USE OF THIS IS NOT RECOMMENDED**)
 item_cleanup | Seconds | -1 | Cleans up items after the specified amount of time
 show_on_serverlist | Boolean | True | If your server is verified, this shows it on the server list
-smart_class_picker | Boolean | False | Enables/Disables Smart Class Picker (Currently very buggy)
-smart_class_picker_starting_weight | Integer | 5 | The weight a class starts out with
-smart_class_picker_weight_limit | Integer | 10 | The maximum weight a class can have
-smart_class_picker_class_<Class #>_weight_decrease | Integer | **Dynamic** | The amount a weight goes down when a player plays the specified class, the default value is dynamic based on which team and class the player is
-smart_class_picker_class_<Class #>_weight_increase | Integer | **Dynamic** | The amount a weight goes up when the player isn't the specified class, the default value is dynamic based on which team and class the player is
 server_frame_rate | Integer | 60 | The framerate that a server runs at
 allow_incompatible | Boolean | False | Allow the server to run an incompatible version of ServerMod
 sm_debug | Boolean | False | Print more verbose debug messages for debugging
@@ -156,6 +151,22 @@ SCP096_AMOUNT | Integer | 1 | Max amount of SCP-096 that can be spawned in rando
 SCP106_AMOUNT | Integer | 1 | Max amount of SCP-106 that can be spawned in randomly
 SCP173_AMOUNT | Integer | 1 | Max amount of SCP-173 that can be spawned in randomly
 SCP457_AMOUNT | Integer | 1 | Max amount of SCP-457 that can be spawned in randomly
+
+### Smart Class Picker
+Config Option | Value Type | Default Value | Description
+--- | :---: | :---: | ---
+smart_class_picker | Boolean | False | Enables/Disables Smart Class Picker (Currently very buggy)
+smart_class_picker_starting_weight | Integer | 5 | The weight a class starts out with
+smart_class_picker_weight_limit | Integer | 10 | The maximum weight a class can have
+smart_class_picker_class_<Class #>_weight_decrease | Integer | **Dynamic** | The amount a weight goes down when a player plays the specified class, the default value is dynamic based on which team and class the player is
+smart_class_picker_class_<Class #>_weight_increase | Integer | **Dynamic** | The amount a weight goes up when the player isn't the specified class, the default value is dynamic based on which team and class the player is
+
+#### Default Functionality
+- Every class gets +1 weight except for the class the player is chosen to be or the chosen class is NTF
+- If the player is chosen to be NTF, the chosen class gets -4 weight and every other NTF class gets -2 weight
+- If the player is chosen to be Class D, Class D gets -3 weight
+- If the player is chosen to be any other class, the chosen class gets -2 weight
+
 ##
 
 Place any suggestions/problems in issues!
