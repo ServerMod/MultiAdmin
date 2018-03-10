@@ -18,12 +18,15 @@ namespace MutliAdmin
 
         public static void Write(String message, ConsoleColor color = ConsoleColor.DarkYellow)
         {
-            Console.ForegroundColor = color;
-            DateTime now = DateTime.Now;
-            string str = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
-            Console.WriteLine(message == "" ? "" : str + message);
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.BackgroundColor = ConsoleColor.Black;
+			if (Process.GetCurrentProcess().MainWindowHandle != IntPtr.Zero)
+			{
+				Console.ForegroundColor = color;
+				DateTime now = DateTime.Now;
+				string str = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
+				Console.WriteLine(message == "" ? "" : str + message);
+				Console.ForegroundColor = ConsoleColor.White;
+				Console.BackgroundColor = ConsoleColor.Black;
+			}
         }
 
 

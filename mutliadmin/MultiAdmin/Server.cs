@@ -187,14 +187,17 @@ namespace MultiAdmin.MultiAdmin
         public void Write(String message, ConsoleColor color = ConsoleColor.Yellow, int height = 0)
         {
             Log(message);
-            Thread.Sleep(50);
-            Console.CursorTop += height;
-            Console.ForegroundColor = color;
-            DateTime now = DateTime.Now;
-            string str = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
-            Console.WriteLine(message == "" ? "" : str + message);
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.BackgroundColor = ConsoleColor.Black;
+			if (Process.GetCurrentProcess().MainWindowHandle != IntPtr.Zero)
+			{
+				Console.CursorTop += height;
+				Console.ForegroundColor = color;
+				DateTime now = DateTime.Now;
+				string str = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
+				Console.WriteLine(message == "" ? "" : str + message);
+				Console.ForegroundColor = ConsoleColor.White;
+				Console.BackgroundColor = ConsoleColor.Black;
+			}
+
         }
 
         public void Log(String message)

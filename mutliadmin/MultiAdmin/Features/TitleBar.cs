@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -56,15 +57,18 @@ namespace MultiAdmin.MultiAdmin.Commands
 
         public void UpdateTitlebar()
         {
-            var smod = "";
-            if (Server.HasServerMod)
-            {
-                smod = "SMod " + Server.ServerModVersion;
-            }
-            var displayPlayerCount = playerCount;
-            if (playerCount == -1) displayPlayerCount = 0;
-            string proccessId = (Server.GetGameProccess() == null) ? "" : Server.GetGameProccess().Id.ToString();
-            Console.Title = "MultiAdmin " + Server.MA_VERSION + " | Config: " + Server.ConfigKey + " | Session:" + Server.GetSessionId() + " PID: " + proccessId+ " | " + displayPlayerCount + "/" + maxPlayers + " | " + smod;
+			if (Process.GetCurrentProcess().MainWindowHandle != IntPtr.Zero)
+			{
+				var smod = "";
+				if (Server.HasServerMod)
+				{
+					smod = "SMod " + Server.ServerModVersion;
+				}
+				var displayPlayerCount = playerCount;
+				if (playerCount == -1) displayPlayerCount = 0;
+				string proccessId = (Server.GetGameProccess() == null) ? "" : Server.GetGameProccess().Id.ToString();
+				Console.Title = "MultiAdmin " + Server.MA_VERSION + " | Config: " + Server.ConfigKey + " | Session:" + Server.GetSessionId() + " PID: " + proccessId + " | " + displayPlayerCount + "/" + maxPlayers + " | " + smod;
+			}
         }
     }
 }
