@@ -56,7 +56,7 @@ namespace MultiAdmin.MultiAdmin.Features
        
                     }
 
-                catch (Exception e)
+                catch
                 {
 					Server.Write("Failed to open log for github error submission, the SCPSL exe for that session is still shutting down.");
                     //Console.WriteLine(e.Message);

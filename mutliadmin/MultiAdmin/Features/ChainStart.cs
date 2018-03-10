@@ -8,7 +8,6 @@ namespace MultiAdmin.MultiAdmin.Commands
 {
     class ChainStart : Feature, IEventServerStart
     {
-        private String config;
         private Boolean dontstart;
 
         public ChainStart(Server server) : base(server)

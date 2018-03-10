@@ -8,8 +8,6 @@ namespace MultiAdmin.MultiAdmin.Commands
 {
     class MultiAdminInfo : Feature, IEventServerPreStart, ICommand
     {
-        private String config;
-
         public MultiAdminInfo(Server server) : base(server)
         {
         }
