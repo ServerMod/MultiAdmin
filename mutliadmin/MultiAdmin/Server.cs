@@ -44,6 +44,7 @@ namespace MultiAdmin.MultiAdmin
         private String maLogLocation;
 		public String StartDateTime { get; }
         public String LogFolder { get; }
+        public Boolean fixBuggedPlayers;
 
         public Server(String serverDir, String configKey, Config multiAdminCfg, String mainConfigLocation, String configChain)
         {

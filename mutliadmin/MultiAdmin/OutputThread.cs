@@ -125,7 +125,7 @@ namespace MultiAdmin
 
 						if (gameMessage.Contains("Waiting for players"))
 						{
-							if (!server.InitialRoundStarted)
+                            if (!server.InitialRoundStarted)
 							{
 								server.InitialRoundStarted = true;
 								foreach (Feature f in server.Features)
@@ -136,7 +136,13 @@ namespace MultiAdmin
 									}
 								}
 							}
-						}
+
+                            if (server.ServerModCheck(1, 5, 0) && server.fixBuggedPlayers)
+                            {
+                                server.SendMessage("ROUNDRESTART");
+                                server.fixBuggedPlayers = false;
+                            }
+                        }
 					}
 					else
 					{
@@ -164,7 +170,12 @@ namespace MultiAdmin
 								}
 							}
 
-						}
+                            if (server.ServerModCheck(1, 5, 0) && server.fixBuggedPlayers)
+                            {
+                                server.SendMessage("ROUNDRESTART");
+                                server.fixBuggedPlayers = false;
+                            }
+                        }
 					}
 
 
@@ -230,6 +241,14 @@ namespace MultiAdmin
                                 String name = gameMessage.Substring(gameMessage.IndexOf(":"));
                                 ((IEventPlayerDisconnect)f).OnPlayerDisconnect(name);
                             }
+                        }
+                    }
+
+                    if (gameMessage.Contains("Player has connected before load is complete"))
+                    {
+                        if (server.ServerModCheck(1, 5, 0))
+                        {
+                            server.fixBuggedPlayers = true;
                         }
                     }
 
