@@ -260,9 +260,9 @@ namespace MultiAdmin.MultiAdmin
 				return false;
 			}
 
-			return verMajor >= major && verMinor >= minor && verFix >= fix;
+            return (verMajor > major) || (verMajor >= major && verMinor > minor) || (verMajor >= major && verMinor >= minor && verFix >= fix);
 
-		}
+        }
 
         public void RestartServer()
         {
