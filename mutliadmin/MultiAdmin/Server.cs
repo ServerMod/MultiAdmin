@@ -46,6 +46,8 @@ namespace MultiAdmin.MultiAdmin
         public String LogFolder { get; }
         public Boolean fixBuggedPlayers;
 
+		private String currentLine = "";
+
         public Server(String serverDir, String configKey, Config multiAdminCfg, String mainConfigLocation, String configChain)
         {
             MainConfigLocation = mainConfigLocation;
@@ -200,6 +202,28 @@ namespace MultiAdmin.MultiAdmin
 			}
 
         }
+
+		public void WritePart(String part, ConsoleColor color = ConsoleColor.Yellow, int height = 0, bool date = false, bool lineEnd = false)
+		{
+			String datepart = "";
+			if (date)
+			{
+				DateTime now = DateTime.Now;
+				datepart = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
+			}
+			Console.CursorTop += height;
+			Console.ForegroundColor = color;
+			if (lineEnd)
+			{
+				Console.Write(datepart + part + Environment.NewLine);
+				Log(currentLine);
+				currentLine = "";
+			}
+			else
+			{
+				Console.Write(datepart +  part);
+			}
+		}
 
         public void Log(String message)
         {

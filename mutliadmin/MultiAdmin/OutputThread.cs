@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using MultiAdmin.MultiAdmin;
 
@@ -7,7 +9,9 @@ namespace MultiAdmin
 {
     class OutputThread
     {
-        public static void Read(Server server)
+		public static readonly Regex smodRegex = new Regex(@"(\[.*?\]) (\[.*?\]) (.*)");
+
+		public static void Read(Server server)
         {
             while (!server.IsStopping())
             {
@@ -18,7 +22,7 @@ namespace MultiAdmin
                 {
 					if (Directory.Exists(dir))
 					{
-						strArray = Directory.GetFiles(dir, "sl*.mapi", SearchOption.TopDirectoryOnly);
+						strArray = Directory.GetFiles(dir, "sl*.mapi", SearchOption.TopDirectoryOnly).OrderBy(f => f).ToArray<String>();
 					}
                 }
                 catch
@@ -92,6 +96,46 @@ namespace MultiAdmin
                         }
                        
                     }
+
+					// Smod2 loggers pretty printing
+
+
+					var match = smodRegex.Match(gameMessage);
+					if (match.Success)
+					{
+						if (match.Groups.Count >= 2)
+						{
+							ConsoleColor levelColour = ConsoleColor.Cyan;
+							ConsoleColor tagColour = ConsoleColor.Yellow;
+							ConsoleColor msgColour = ConsoleColor.White;
+							switch (match.Groups[1].Value.Trim())
+							{
+								case "[DEBUG]":
+									levelColour = ConsoleColor.Gray;
+									break;
+								case "[INFO]":
+									levelColour = ConsoleColor.Green;
+									break;
+								case "[WARN]":
+									levelColour = ConsoleColor.DarkYellow;
+									break;
+								case "[ERROR]":
+									levelColour = ConsoleColor.Red;
+									msgColour = ConsoleColor.Red;
+									break;
+								default:
+									colour = ConsoleColor.Cyan;
+									break;
+							}
+							server.WritePart("", ConsoleColor.Cyan, 0, true, false);
+							server.WritePart(match.Groups[1].Value + " ", levelColour, 0, false, false);
+							server.WritePart(match.Groups[2].Value + " ", tagColour, 0, false, false);
+							server.WritePart(match.Groups[3].Value, msgColour, 0, false, true);
+							display = false;
+						}
+
+					}
+
 
 					if (gameMessage.Contains("Mod Log:"))
 					{
