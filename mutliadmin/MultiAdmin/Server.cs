@@ -190,7 +190,7 @@ namespace MultiAdmin.MultiAdmin
         public void Write(String message, ConsoleColor color = ConsoleColor.Yellow, int height = 0)
         {
             Log(message);
-			if (Process.GetCurrentProcess().MainWindowHandle != IntPtr.Zero)
+            if (Server.SkipProcessHandle() || Process.GetCurrentProcess().MainWindowHandle != IntPtr.Zero)
 			{
 				Console.CursorTop += height;
 				Console.ForegroundColor = color;
@@ -201,6 +201,12 @@ namespace MultiAdmin.MultiAdmin
 				Console.BackgroundColor = ConsoleColor.Black;
 			}
 
+        }
+
+        public static bool SkipProcessHandle()
+        {
+            int p = (int)Environment.OSVersion.Platform;
+            return (p == 4) || (p == 6) || (p == 128); // Outputs true for Unix
         }
 
 		public void WritePart(String part, ConsoleColor color = ConsoleColor.Yellow, int height = 0, bool date = false, bool lineEnd = false)
