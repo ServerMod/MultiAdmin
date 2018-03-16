@@ -18,7 +18,7 @@ namespace MutliAdmin
 
         public static void Write(String message, ConsoleColor color = ConsoleColor.DarkYellow)
         {
-			if (Process.GetCurrentProcess().MainWindowHandle != IntPtr.Zero)
+			if (Server.SkipProcessHandle() || Process.GetCurrentProcess().MainWindowHandle != IntPtr.Zero)
 			{
 				Console.ForegroundColor = color;
 				DateTime now = DateTime.Now;

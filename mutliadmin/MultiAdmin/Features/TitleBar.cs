@@ -57,7 +57,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 
         public void UpdateTitlebar()
         {
-			if (Process.GetCurrentProcess().MainWindowHandle != IntPtr.Zero)
+			if (Server.SkipProcessHandle() || Process.GetCurrentProcess().MainWindowHandle != IntPtr.Zero)
 			{
 				var smod = "";
 				if (Server.HasServerMod)
