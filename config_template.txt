@@ -21,18 +21,6 @@ start_config_on_full=server_two_config_folder;
 shutdown_once_empty=-1;
 restart_every_num_rounds=15;
 
-SERVERMOD SETTINGS:
-NO_SCP079_FIRST = true;
-SCP049_HP = 1200;
-SCP049-2_HP = 400;
-SCP079_HP = 100;
-SCP096_HP = 2000;
-SCP106_HP = 700;
-SCP173_HP = 2000;
-SCP457_HP = 700;
-max_players = 25;
-
-// server_name can stuff up the cfg reader depending on its contents, so keep it down the bottom.
 server_ip = auto;
 server_name = [nick]'s game;
 ban_database_folder = [appdata]/SCP Secret Laboratory/Bans;
