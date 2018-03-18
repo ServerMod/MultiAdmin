@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-
+using System.Text.RegularExpressions;
+using MutliAdmin;
 
 namespace MultiAdmin
 {
@@ -18,53 +19,44 @@ namespace MultiAdmin
         public void Reload()
         {
             values = new Dictionary<string, string>();
-            var multi_line_value = false;
-            var current_key = "";
-            var current_value = "";
-            if (File.Exists(config_file))
-            {
-                var lines = File.ReadAllLines(config_file);
-                foreach (String line in lines)
-                {
-                    if (line.Trim().Length == 0) continue;
-                    if (line.StartsWith("/")) continue;
-                    if (line.EndsWith(":")) continue;
 
-                    if (multi_line_value)
-                    {
-                        current_value += line;
-                        if (line.EndsWith(";"))
-                        {
-                            values.Add(current_key, current_value.Substring(0, current_value.Length - 1).Trim());
-                            multi_line_value = false;
-                        }
-                    }
-                    else
-                    {
-                        current_key = line.Substring(0, line.IndexOf("=")).ToLower().Trim();
-                        current_value = line.Substring(line.IndexOf("=") + 1);
-                        if (current_value.EndsWith(";"))
-                        {
-							String value = current_value.Substring(0, current_value.Length - 1).Trim();
-							if (!values.ContainsKey(current_key))
-							{
-								values.Add(current_key, current_value.Substring(0, current_value.Length - 1).Trim());
-							}
-							else
-							{
-								Console.WriteLine("Found duplicate setting for " + current_key + " with value " + current_value + " using the existing setting. The game may not do it this way, please correct the issue");
-							}
-                            
-                        }
-                        else
-                        {
-                            multi_line_value = true;
-                        }
-                    }
-                }
-            }
+			if (File.Exists(config_file))
+			{
+				StreamReader streamReader = new StreamReader(config_file);
+				string content = streamReader.ReadToEnd();
+				streamReader.Close();
+				Regex rgx = new Regex("^[^;\\/:\\n\\r\\s=]+\\s*=[^;]+;(?=)", RegexOptions.Multiline | RegexOptions.IgnoreCase);
 
-        }
+				MatchCollection matches = rgx.Matches(content);
+
+				foreach (Match match in matches)
+				{
+					String[] parts = match.Value.Split(new char[] { '=' }, 2);
+
+					String key = parts[0].Trim().ToLower();
+					String value = parts[1].Trim();
+
+					if (value.Length > 0)
+					{
+						value = value.Substring(0, value.Length - 1); // Removes ";" from the end
+
+						if (!values.ContainsKey(key))
+						{
+							values.Add(key, value);
+						}
+						else
+						{
+							Program.Write("Duplicate value found in config file:" + key + " using the first");
+						}
+					}
+					else
+					{
+						Program.Write("Error: Config value is missing!");
+					}
+				}
+			}
+
+		}
 
 
         public String GetValue(String key, String def="")

@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using MultiAdmin.MultiAdmin;
 
 namespace MutliAdmin
@@ -14,9 +13,9 @@ namespace MutliAdmin
         private static string configChain;
         private static MultiAdmin.Config multiadminConfig;
         private static Server server;
+		private static bool multiMode = false;
 
-
-        public static void Write(String message, ConsoleColor color = ConsoleColor.DarkYellow)
+		public static void Write(String message, ConsoleColor color = ConsoleColor.DarkYellow)
         {
 			if (Server.SkipProcessHandle() || Process.GetCurrentProcess().MainWindowHandle != IntPtr.Zero)
 			{
@@ -28,8 +27,6 @@ namespace MutliAdmin
 				Console.BackgroundColor = ConsoleColor.Black;
 			}
         }
-
-
 
         public static bool FindConfig()
         {
@@ -63,9 +60,7 @@ namespace MutliAdmin
 			return true;
         }
 
-
-
-        public static Boolean StartHandleConfigs(string[] args)
+        public static bool StartHandleConfigs(string[] args)
         {
             Boolean hasServerToStart = false;
             if (args.Length > 0)
@@ -80,60 +75,20 @@ namespace MutliAdmin
             }
             else
             {
-                // start all servers, the first server will be this one
-                bool first = true;
                 if (!Directory.Exists(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers"))
                 {
-                    Write("Server directory not found, please make a new directory in the following format:", ConsoleColor.DarkYellow);
-                    Write(Directory.GetCurrentDirectory() + "servers\\<Server id>\\config.txt", ConsoleColor.Cyan);
-                    Write("Once corrected please restart this exe.", ConsoleColor.DarkYellow);
-                    return false;
+					multiMode = false;
+					hasServerToStart = true;
+					Write("Using default server mode", ConsoleColor.Green);
+					Write("Server directory not found, if you want to use multiple server mode, please make a new directory in the following format:", ConsoleColor.Green);
+                    Write(Directory.GetCurrentDirectory() + "servers\\<Server id>\\config.txt", ConsoleColor.Green);
                 }
-
-                String[] dirs = Directory.GetDirectories(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar);
-                foreach (string file in dirs)
-                {
-                    String name = new DirectoryInfo(file).Name;
-                    if (first)
-                    {
-                        multiadminConfig = new MultiAdmin.Config(file + Path.DirectorySeparatorChar + "config.txt");
-                        Program.Write(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + name + Path.DirectorySeparatorChar + "config.txt");
-                        if (multiadminConfig.GetValue("MANUAL_START", "false").Equals("true"))
-                        {
-                            Write("Skipping auto start for: " + name, ConsoleColor.DarkYellow);
-                        }
-                        else
-                        {
-                            hasServerToStart = true;
-                            configKey = name;
-                            Write("Starting this instance with config directory: " + name, ConsoleColor.DarkYellow);
-                            first = false;
-                        }
-
-                    }
-                    else
-                    {
-                        var other_config = new MultiAdmin.Config(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + name + Path.DirectorySeparatorChar + "config.txt");
-                        Write(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + name + Path.DirectorySeparatorChar + "config.txt");
-                        if (other_config.GetValue("MANUAL_START", "false").Equals("true"))
-                        {
-                            Write("Skipping auto start for: " + name, ConsoleColor.DarkYellow);
-                        }
-                        else
-                        {
-                            configChain += "\"" + name + "\" ";
-                        }
-
-                    }
-
-                    // make log folder
-
-                    if (!Directory.Exists(file + Path.DirectorySeparatorChar + "logs"))
-                    {
-                        Directory.CreateDirectory(file + Path.DirectorySeparatorChar + "logs");
-                    }
-                }
-
+				else
+				{
+					Write("Using multiple server mode", ConsoleColor.Green);
+					multiMode = true;
+					hasServerToStart = LoadserverFolders();
+				}
             }
 
             if (!hasServerToStart)
@@ -141,11 +96,52 @@ namespace MutliAdmin
                 Write("All servers are set to manual start! you should have at least one config that auto starts", ConsoleColor.Red);
             }
 
-            return hasServerToStart;
+			return hasServerToStart;
         }
 
+		public static bool LoadserverFolders()
+		{
+			bool hasServerToStart = false;
+			bool first = true;
+			String[] dirs = Directory.GetDirectories(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar);
+			foreach (string file in dirs)
+			{
+				String name = new DirectoryInfo(file).Name;
+				if (first)
+				{
+					multiadminConfig = new MultiAdmin.Config(file + Path.DirectorySeparatorChar + "config.txt");
+					Program.Write(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + name + Path.DirectorySeparatorChar + "config.txt");
+					if (multiadminConfig.GetValue("MANUAL_START", "false").Equals("true"))
+					{
+						Write("Skipping auto start for: " + name, ConsoleColor.DarkYellow);
+					}
+					else
+					{
+						hasServerToStart = true;
+						configKey = name;
+						Write("Starting this instance with config directory: " + name, ConsoleColor.DarkYellow);
+						first = false;
+					}
 
+				}
+				else
+				{
+					var other_config = new MultiAdmin.Config(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + name + Path.DirectorySeparatorChar + "config.txt");
+					Write(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + name + Path.DirectorySeparatorChar + "config.txt");
+					if (other_config.GetValue("MANUAL_START", "false").Equals("true"))
+					{
+						Write("Skipping auto start for: " + name, ConsoleColor.DarkYellow);
+					}
+					else
+					{
+						configChain += "\"" + name + "\" ";
+					}
 
+				}
+			}
+
+			return hasServerToStart;
+		}
 
         public static String GetServerDirectory()
         {
@@ -182,14 +178,15 @@ namespace MutliAdmin
 			}
 
             configChain = "";
-            if (StartHandleConfigs(args))
-            {
-                server = new Server(GetServerDirectory(), configKey, multiadminConfig, configLocation, configChain);
-            }
-            else
-            {
-                Console.ReadKey();
-            }
-        }
+			if (StartHandleConfigs(args))
+			{
+				server = new Server(GetServerDirectory(), configKey, multiadminConfig, configLocation, configChain, multiMode);
+			}
+			else
+			{
+				Console.ReadKey();
+			}
+
+		}
     }
 }

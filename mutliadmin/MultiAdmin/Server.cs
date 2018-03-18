@@ -10,7 +10,7 @@ namespace MultiAdmin.MultiAdmin
 {
     public class Server
     {
-        public static readonly string MA_VERSION = "1.3.2";
+        public static readonly string MA_VERSION = "1.4.0";
 
         public Boolean HasServerMod { get; set; }
         public String ServerModVersion { get; set; }
@@ -42,14 +42,37 @@ namespace MultiAdmin.MultiAdmin
         private Boolean stopping;
         private String session_id;
         private String maLogLocation;
+		private bool multiMode;
 		public String StartDateTime { get; }
-        public String LogFolder { get; }
+        public String LogFolder
+		{
+			get
+			{
+				string loc;
+				if (multiMode)
+				{
+					loc = "servers" + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "logs" + Path.DirectorySeparatorChar;
+				}
+				else
+				{
+					loc = "logs" + Path.DirectorySeparatorChar;
+				}
+
+				if (!Directory.Exists(loc))
+				{
+					Directory.CreateDirectory(loc);
+				}
+
+				return loc;
+			}
+		}
         public Boolean fixBuggedPlayers;
 
 		private String currentLine = "";
 
-        public Server(String serverDir, String configKey, Config multiAdminCfg, String mainConfigLocation, String configChain)
+        public Server(String serverDir, String configKey, Config multiAdminCfg, String mainConfigLocation, String configChain, bool multiMode)
         {
+			this.multiMode = multiMode;
             MainConfigLocation = mainConfigLocation;
             ConfigKey = configKey;
             ConfigChain = configChain;
@@ -59,7 +82,6 @@ namespace MultiAdmin.MultiAdmin
             Features = new List<Feature>();
             tick = new List<IEventTick>();
             MultiAdminCfg = multiAdminCfg;
-            LogFolder = "servers" + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "logs" + Path.DirectorySeparatorChar;
 			StartDateTime = Utils.GetDate();
 			maLogLocation = LogFolder + StartDateTime + "_MA_output_log.txt";
             stopping = false;
@@ -192,7 +214,7 @@ namespace MultiAdmin.MultiAdmin
             Log(message);
             if (Server.SkipProcessHandle() || Process.GetCurrentProcess().MainWindowHandle != IntPtr.Zero)
 			{
-				Console.CursorTop += height;
+				Console.CursorTop += (Console.CursorTop <= 0 && height < 0) ? 0 : height;
 				Console.ForegroundColor = color;
 				DateTime now = DateTime.Now;
 				string str = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
@@ -222,12 +244,14 @@ namespace MultiAdmin.MultiAdmin
 			if (lineEnd)
 			{
 				Console.Write(datepart + part + Environment.NewLine);
+				currentLine += datepart + part;
 				Log(currentLine);
 				currentLine = "";
 			}
 			else
 			{
 				Console.Write(datepart +  part);
+				currentLine += datepart + part;
 			}
 		}
 
@@ -322,6 +346,8 @@ namespace MultiAdmin.MultiAdmin
         }
 
 
+
+
         public Boolean StartServer()
         {
             Boolean started = false;
@@ -335,7 +361,9 @@ namespace MultiAdmin.MultiAdmin
                 string args = "-batchmode -nographics -key" + session_id  + " -silent-crashes -id" + (object)Process.GetCurrentProcess().Id + " -logFile \"" + LogFolder + Utils.GetDate() + "_SCP_output_log.txt" + "\"";
                 Write("Starting server with the following parameters");
                 Write(files[0] + " " + args);
-                gameProcess = Process.Start(files[0], args);
+				ProcessStartInfo startInfo = new ProcessStartInfo(files[0]);
+				startInfo.Arguments = args;
+				gameProcess = Process.Start(startInfo);
                 CreateRunFile();
                 started = true;
                 foreach (Feature f in Features)
@@ -366,28 +394,30 @@ namespace MultiAdmin.MultiAdmin
 
         public void SwapConfigs()
         {
-            if (File.Exists("servers" + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "config.txt"))
-            {
-                var contents = File.ReadAllText(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "config.txt");
-                File.WriteAllText(MainConfigLocation, contents);
-                Write("Config file swapped", ConsoleColor.DarkYellow);
-            }
-            else
-            {
-                Write("Config file for server " + ConfigKey + " does not exist! expected location:" + "servers\\" + ConfigKey + "\\config.txt", ConsoleColor.DarkYellow);
-                throw new FileNotFoundException("config file not found");
-            }
-
+			if (multiMode)
+			{
+				if (File.Exists("servers" + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "config.txt"))
+				{
+					var contents = File.ReadAllText(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "config.txt");
+					File.WriteAllText(MainConfigLocation, contents);
+					Write("Config file swapped", ConsoleColor.DarkYellow);
+				}
+				else
+				{
+					Write("Config file for server " + ConfigKey + " does not exist! expected location:" + "servers\\" + ConfigKey + "\\config.txt", ConsoleColor.DarkYellow);
+					throw new FileNotFoundException("config file not found");
+				}
+			}
         }
 
         private void RemoveRunFile()
         {
-            File.Delete(ServerDir + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "running");
+			if (multiMode) File.Delete(ServerDir + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "running");
         }
 
         private void CreateRunFile()
         {
-            File.Create(ServerDir + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "running").Close();
+			if (multiMode) File.Create(ServerDir + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "running").Close();
         }
 
         private void CleanSession()
