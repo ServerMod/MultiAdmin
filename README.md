@@ -50,7 +50,7 @@ This does not include ServerMod or ingame commands, for a full list type HELP in
 
 ## Config settings
 - manual_start (wether of not to start the server automatically when launching multiadmin, default = true)
-- start_config_on_full (start server with config this config folder when the server becomes full) [requires servermod]
+- start_config_on_full (start server with this config folder when the server becomes full) [requires servermod]
 - shutdown_once_empty_for (shutdown the server once a round hasnt started in x seconds)
 - restart_every_num_rounds (restart the server every x rounds)
 - restart_low_memory (restart if the games memory falls below this, default = 400)
