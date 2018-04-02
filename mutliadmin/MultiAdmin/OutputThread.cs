@@ -9,7 +9,7 @@ namespace MultiAdmin
 {
     class OutputThread
     {
-		public static readonly Regex smodRegex = new Regex(@"(\[.*?\]) (\[.*?\]) (.*)");
+		public static readonly Regex smodRegex = new Regex(@"\[(DEBUG|INFO|WARN|ERROR)\] (\[.*?\]) (.*)", RegexOptions.Compiled);
 
 		public static void Read(Server server)
         {
@@ -42,7 +42,7 @@ namespace MultiAdmin
                     int attempts = 0;
                     Boolean read = false;
 
-                    while (attempts < 100 && !read && !server.IsStopping())
+                    while (attempts < (server.runOptimized ? 10 : 100) && !read && !server.IsStopping())
                     {
                         try
                         {
@@ -57,13 +57,13 @@ namespace MultiAdmin
                         catch
                         {
                             attempts++;
-							if (attempts >= 100)
+							if (attempts >= (server.runOptimized ? 10 : 100))
 							{
 								server.Write("Message printer warning: Could not " + fileCommand + " file " + path + ". Make sure that MultiAdmin.exe has all necessary read-write permissions.", ConsoleColor.Yellow);
 								server.Write("skipping");
 							}
                         }
-                        Thread.Sleep(300);
+                        Thread.Sleep(server.runOptimized ? 150 : 300);
                     }
 
                     if (server.IsStopping()) break;
@@ -128,7 +128,7 @@ namespace MultiAdmin
 									break;
 							}
 							server.WritePart("", ConsoleColor.Cyan, 0, true, false);
-							server.WritePart(match.Groups[1].Value + " ", levelColour, 0, false, false);
+							server.WritePart("[" + match.Groups[1].Value + "] ", levelColour, 0, false, false);
 							server.WritePart(match.Groups[2].Value + " ", tagColour, 0, false, false);
 							server.WritePart(match.Groups[3].Value, msgColour, 0, false, true);
 							display = false;
@@ -299,7 +299,7 @@ namespace MultiAdmin
                     if (display) server.Write(gameMessage.Trim(), colour);
                 }
 
-                Thread.Sleep(10);
+                Thread.Sleep(server.runOptimized ? 5 : 10);
             }
 
         }

@@ -19,7 +19,7 @@ namespace MultiAdmin.MultiAdmin
                     {
                         return;
                     }
-                    Thread.Sleep(300);
+                    Thread.Sleep(server.runOptimized ? 500 : 300);
                 }
                 string message = Console.ReadLine();
                 int cursorTop = Console.CursorTop;
