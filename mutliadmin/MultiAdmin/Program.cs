@@ -67,6 +67,7 @@ namespace MutliAdmin
             {
                 configKey = args[0];
                 hasServerToStart = true;
+				multiMode = true;
                 multiadminConfig = new MultiAdmin.Config(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + configKey + Path.DirectorySeparatorChar + "config.txt");
                 Write("Starting this instance with config directory:" + configKey, ConsoleColor.DarkYellow);
                 // chain the rest
