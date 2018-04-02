@@ -15,8 +15,9 @@ namespace MultiAdmin
             this.config_file = config_file;
             Reload();
         }
+        private readonly Regex rgx = new Regex("^[^;\\/:\\n\\r\\s=]+\\s*=[^;\\n\\r]+;", RegexOptions.Multiline | RegexOptions.Compiled);
 
-        public void Reload()
+		public void Reload()
         {
             values = new Dictionary<string, string>();
 
@@ -25,7 +26,6 @@ namespace MultiAdmin
 				StreamReader streamReader = new StreamReader(config_file);
 				string content = streamReader.ReadToEnd();
 				streamReader.Close();
-				Regex rgx = new Regex("^[^;\\/:\\n\\r\\s=]+\\s*=[^;]+;(?=)", RegexOptions.Multiline | RegexOptions.IgnoreCase);
 
 				MatchCollection matches = rgx.Matches(content);
 
