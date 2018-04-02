@@ -67,6 +67,7 @@ namespace MultiAdmin.MultiAdmin
 			}
 		}
         public Boolean fixBuggedPlayers;
+		public Boolean runOptimized = true;
 
 		private String currentLine = "";
 
@@ -93,8 +94,10 @@ namespace MultiAdmin.MultiAdmin
             RegisterFeatures();
             // Load config 
             serverConfig = new Config(ServerDir + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "config.txt");
-            // Init features
-            InitFeatures();
+			// Enable / Disable MultiAdmin Optimizations
+			runOptimized = serverConfig.GetBoolean("enable_multiadmin_optimizations", true);
+			// Init features
+			InitFeatures();
             // Start the server and threads
             if (StartServer())
             {

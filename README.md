@@ -1,7 +1,14 @@
+# Looking for ServerMod?
+ServerMod is on its own repo now: https://github.com/Grover-c13/Smod2/
+
 # MultiAdmin
 MultiAdmin is a replacement server tool for SCP: Secret Labratories, which was built to help enable servers to have multiple configurations per server instance.
 
 The latest release can be found here: [Release link](https://github.com/Grover-c13/MultiAdmin/releases/latest)
+
+## Discord
+You can join our discord here: https://discord.gg/8nvmMTr
+
 
 ## Features
 - Autoscale: Auto-starts a new server once this one becomes full. (Requires servermod to function fully)
@@ -43,7 +50,7 @@ This does not include ServerMod or ingame commands, for a full list type HELP in
 
 ## Config settings
 - manual_start (wether of not to start the server automatically when launching multiadmin, default = true)
-- start_config_on_full (start server with config this config folder when the server becomes full) [requires servermod]
+- start_config_on_full (start server with this config folder when the server becomes full) [requires servermod]
 - shutdown_once_empty_for (shutdown the server once a round hasnt started in x seconds)
 - restart_every_num_rounds (restart the server every x rounds)
 - restart_low_memory (restart if the games memory falls below this, default = 400)
