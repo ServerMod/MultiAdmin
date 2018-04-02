@@ -30,7 +30,7 @@ namespace MutliAdmin
 
         public static bool FindConfig()
         {
-			var defaultLoc = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/SCP Secret Laboratory/config.txt";
+			var defaultLoc = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + Path.DirectorySeparatorChar + "SCP Secret Laboratory" + Path.DirectorySeparatorChar + "config.txt";
 			var path = Program.multiadminConfig.GetValue("cfg_loc", defaultLoc);
             var backup = path.Replace(".txt", "_backup.txt");
 
@@ -112,7 +112,7 @@ namespace MutliAdmin
 				{
 					multiadminConfig = new MultiAdmin.Config(file + Path.DirectorySeparatorChar + "config.txt");
 					Program.Write(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + name + Path.DirectorySeparatorChar + "config.txt");
-					if (multiadminConfig.GetValue("MANUAL_START", "false").Equals("true"))
+					if (multiadminConfig.GetBoolean("MANUAL_START", false))
 					{
 						Write("Skipping auto start for: " + name, ConsoleColor.DarkYellow);
 					}
@@ -129,7 +129,7 @@ namespace MutliAdmin
 				{
 					var other_config = new MultiAdmin.Config(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + name + Path.DirectorySeparatorChar + "config.txt");
 					Write(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + name + Path.DirectorySeparatorChar + "config.txt");
-					if (other_config.GetValue("MANUAL_START", "false").Equals("true"))
+					if (other_config.GetBoolean("MANUAL_START", false))
 					{
 						Write("Skipping auto start for: " + name, ConsoleColor.DarkYellow);
 					}
