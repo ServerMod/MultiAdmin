@@ -15,7 +15,7 @@ namespace MultiAdmin
             this.config_file = config_file;
             Reload();
         }
-        private readonly Regex rgx = new Regex("^[^;\\/:\\n\\r\\s=]+\\s*=[^;\\n\\r]+;", RegexOptions.Multiline | RegexOptions.Compiled);
+        private readonly Regex rgx = new Regex("^[^;\\/:\\n\\r\\s=]+\\s*=[^;]+;", RegexOptions.Multiline | RegexOptions.Compiled);
 
 		public void Reload()
         {
