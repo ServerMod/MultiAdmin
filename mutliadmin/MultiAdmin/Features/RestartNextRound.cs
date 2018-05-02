@@ -6,68 +6,68 @@ using System.Threading.Tasks;
 
 namespace MultiAdmin.MultiAdmin.Commands
 {
-    class RestartNextRound : Feature, ICommand, IEventRoundEnd
-    {
-        private Boolean restart;
+	class RestartNextRound : Feature, ICommand, IEventRoundEnd
+	{
+		private Boolean restart;
 
-        public RestartNextRound(Server server) : base(server)
-        {
-        }
+		public RestartNextRound(Server server) : base(server)
+		{
+		}
 
-        public override void Init()
-        {
-            restart = false;
-        }
+		public override void Init()
+		{
+			restart = false;
+		}
 
-        public string GetCommandDescription()
-        {
-            return "Restarts the server at the end of this round";
-        }
+		public string GetCommandDescription()
+		{
+			return "Restarts the server at the end of this round";
+		}
 
 
-        public void OnCall(string[] args)
-        {
-            Server.Write("Server will restart next round");
-            restart = true;
-        }
+		public void OnCall(string[] args)
+		{
+			Server.Write("Server will restart next round");
+			restart = true;
+		}
 
-        public void OnRoundEnd()
-        {
-            if (restart) base.Server.SoftRestartServer();
-        }
+		public void OnRoundEnd()
+		{
+			if (restart) base.Server.SoftRestartServer();
+		}
 
-        public bool PassToGame()
-        {
-            return false;
-        }
+		public bool PassToGame()
+		{
+			return false;
+		}
 
-        public bool RequiresServerMod()
-        {
-            return false;
-        }
+		public bool RequiresServerMod()
+		{
+			return false;
+		}
 
-        public override string GetFeatureDescription()
-        {
-            return "Restarts the server after the current round ends.";
-        }
+		public override string GetFeatureDescription()
+		{
+			return "Restarts the server after the current round ends.";
+		}
 
-        public override string GetFeatureName()
-        {
-            return "Restart Next Round";
-        }
+		public override string GetFeatureName()
+		{
+			return "Restart Next Round";
+		}
 
-        public string GetCommand()
-        {
-            return "RESTARTNEXTROUND";
-        }
+		public string GetCommand()
+		{
+			return "RESTARTNEXTROUND";
+		}
 
-        public string GetUsage()
-        {
-            return "";
-        }
+		public string GetUsage()
+		{
+			return "";
+		}
 
-        public override void OnConfigReload()
-        {
-        }
-    }
+		public override void OnConfigReload()
+		{
+		}
+	}
 }

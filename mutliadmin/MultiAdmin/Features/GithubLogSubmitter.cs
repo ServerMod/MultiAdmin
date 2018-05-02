@@ -7,165 +7,165 @@ using System.Threading;
 
 namespace MultiAdmin.MultiAdmin.Features
 {
-    class GithubLogSubmitter : Feature
-    {
-        private Thread submitThread;
-        public GithubLogSubmitter(Server server) : base(server)
-        {
-        }
+	class GithubLogSubmitter : Feature
+	{
+		private Thread submitThread;
+		public GithubLogSubmitter(Server server) : base(server)
+		{
+		}
 
-        public override string GetFeatureDescription()
-        {
-            return "Goes through the last log file and submits any stacktraces";
-        }
+		public override string GetFeatureDescription()
+		{
+			return "Goes through the last log file and submits any stacktraces";
+		}
 
-        public override string GetFeatureName()
-        {
-            return "GitHub log submitted";
-        }
+		public override string GetFeatureName()
+		{
+			return "GitHub log submitted";
+		}
 
-        public override void Init()
-        {
-            if (Server.MultiAdminCfg.GetBoolean("submit_errors", true))
-            {
-                // init happens befoe game start, so take the directory and find the latest SPC log
-                var files = Directory.GetFiles(Server.LogFolder, "*SCP*").ToList();
+		public override void Init()
+		{
+			if (Server.MultiAdminCfg.GetBoolean("submit_errors", true))
+			{
+				// init happens befoe game start, so take the directory and find the latest SPC log
+				var files = Directory.GetFiles(Server.LogFolder, "*SCP*").ToList();
 
 				files.Sort();
-                files.Reverse();
+				files.Reverse();
 
-                if (files.Count == 0) return;
-                String lastGameLog = files[0];
+				if (files.Count == 0) return;
+				String lastGameLog = files[0];
 
-                try
-                {
-                    IEnumerable<String> lines = File.ReadLines(lastGameLog);
-                    List<ExceptionDetails> details = GetExceptions(lines);
-                    String submitted = lines.Last();
+				try
+				{
+					IEnumerable<String> lines = File.ReadLines(lastGameLog);
+					List<ExceptionDetails> details = GetExceptions(lines);
+					String submitted = lines.Last();
 
-                    if (!submitted.Equals("STACKTRACK SUBMITTED"))
-                    {
-                            Server.Write("Submitting " + details.Count + " game exceptions/errors to MultiAdmin github");
-                            submitThread = new Thread(new ThreadStart(() => SubmitIssues(details)));
-                            submitThread.Start();
-                            using (StreamWriter sw = File.AppendText(lastGameLog))
-                            {
-                                sw.WriteLine("STACKTRACK SUBMITTED");
-                            }
-                        }
-       
-                    }
+					if (!submitted.Equals("STACKTRACK SUBMITTED"))
+					{
+						Server.Write("Submitting " + details.Count + " game exceptions/errors to MultiAdmin github");
+						submitThread = new Thread(new ThreadStart(() => SubmitIssues(details)));
+						submitThread.Start();
+						using (StreamWriter sw = File.AppendText(lastGameLog))
+						{
+							sw.WriteLine("STACKTRACK SUBMITTED");
+						}
+					}
 
-                catch
-                {
+				}
+
+				catch
+				{
 					Server.Write("Failed to open log for github error submission, the SCPSL exe for that session is still shutting down.");
-                    //Console.WriteLine(e.Message);
-                    // not a big deal if we dont get the exception logged.
-                }
+					//Console.WriteLine(e.Message);
+					// not a big deal if we dont get the exception logged.
+				}
 
 
 
 
-            }
-        }
+			}
+		}
 
-        private void SubmitIssues(List<ExceptionDetails> details)
-        {
-            try
-            {
-                foreach (ExceptionDetails detail in details)
-                {
+		private void SubmitIssues(List<ExceptionDetails> details)
+		{
+			try
+			{
+				foreach (ExceptionDetails detail in details)
+				{
 
-                    var postData = "identifier={0}&stacktrace={1}&seen={2}&labels={3}";
-                    var query = String.Format(postData, WebUtility.UrlEncode(detail.id), WebUtility.UrlEncode(detail.stacktrace), detail.seen.ToString(), String.Join(",", detail.tags));
-                    var url = "http://stracktrack.may.mx:8000/exception?" + query;
-                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-                    request.Method = "POST";
-                    request.Proxy = null;
-                    var response = request.GetResponse();
-                }
-            }
-            catch
-            {
-            }
-
-
-
-        }
+					var postData = "identifier={0}&stacktrace={1}&seen={2}&labels={3}";
+					var query = String.Format(postData, WebUtility.UrlEncode(detail.id), WebUtility.UrlEncode(detail.stacktrace), detail.seen.ToString(), String.Join(",", detail.tags));
+					var url = "http://stracktrack.may.mx:8000/exception?" + query;
+					HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+					request.Method = "POST";
+					request.Proxy = null;
+					var response = request.GetResponse();
+				}
+			}
+			catch
+			{
+			}
 
 
-        private List<ExceptionDetails> GetExceptions(IEnumerable<String> lines)
-        {
-            List<ExceptionDetails> excps = new List<ExceptionDetails>();
-            ExceptionDetails details = null;
-            Boolean firstExpLine = false;
-            foreach(String line in lines)
-            {
-                if (line.Contains("Exception"))
-                {
-                    if (details != null)
-                    {
-                        AddException(excps, details);
-                    }
-                    details = new ExceptionDetails();
-                    details.id += line;
-                    firstExpLine = true;
-                    details.tags.Add("Autosubmission");
-                    details.tags.Add("Gameissue");
-                }
 
-                if (details != null)
-                {
-                    details.stacktrace += line + "\n";
-                    if (firstExpLine)
-                    {
-                        details.id += line;
-                        firstExpLine = false;
-                    }
-
-                    if (line.Equals(" "))
-                    {
-                        details.stacktrace.Trim();
-                        AddException(excps, details);
-                        details = null;
-                    }
-                }
-            }
-
-            return excps;
-        }
+		}
 
 
-        private void AddException(List<ExceptionDetails> list, ExceptionDetails details)
-        {
-            Boolean add = true;
-            foreach (ExceptionDetails existing in list)
-            {
-                if (existing.stacktrace.Equals(details.stacktrace))
-                {
-                    existing.seen += 1;
-                    add = false;
-                }
-            }
+		private List<ExceptionDetails> GetExceptions(IEnumerable<String> lines)
+		{
+			List<ExceptionDetails> excps = new List<ExceptionDetails>();
+			ExceptionDetails details = null;
+			Boolean firstExpLine = false;
+			foreach (String line in lines)
+			{
+				if (line.Contains("Exception"))
+				{
+					if (details != null)
+					{
+						AddException(excps, details);
+					}
+					details = new ExceptionDetails();
+					details.id += line;
+					firstExpLine = true;
+					details.tags.Add("Autosubmission");
+					details.tags.Add("Gameissue");
+				}
 
-            if (add)
-            {
-                list.Add(details);
-                details.seen = 1;
-            }
+				if (details != null)
+				{
+					details.stacktrace += line + "\n";
+					if (firstExpLine)
+					{
+						details.id += line;
+						firstExpLine = false;
+					}
 
-        }
+					if (line.Equals(" "))
+					{
+						details.stacktrace.Trim();
+						AddException(excps, details);
+						details = null;
+					}
+				}
+			}
 
-        public override void OnConfigReload()
-        {
-        }
+			return excps;
+		}
 
-        internal class ExceptionDetails
-        {
-            public String id = "";
-            public String stacktrace = "";
-            public int seen = 0;
-            public List<String> tags = new List<String>();
-        }
-    }
+
+		private void AddException(List<ExceptionDetails> list, ExceptionDetails details)
+		{
+			Boolean add = true;
+			foreach (ExceptionDetails existing in list)
+			{
+				if (existing.stacktrace.Equals(details.stacktrace))
+				{
+					existing.seen += 1;
+					add = false;
+				}
+			}
+
+			if (add)
+			{
+				list.Add(details);
+				details.seen = 1;
+			}
+
+		}
+
+		public override void OnConfigReload()
+		{
+		}
+
+		internal class ExceptionDetails
+		{
+			public String id = "";
+			public String stacktrace = "";
+			public int seen = 0;
+			public List<String> tags = new List<String>();
+		}
+	}
 }

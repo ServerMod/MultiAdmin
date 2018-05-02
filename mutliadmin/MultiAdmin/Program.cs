@@ -6,17 +6,17 @@ using MultiAdmin.MultiAdmin;
 
 namespace MutliAdmin
 {
-    public static class Program
-    {
-        private static string configKey;
-        private static string configLocation;
-        private static string configChain;
-        private static MultiAdmin.Config multiadminConfig;
-        private static Server server;
+	public static class Program
+	{
+		private static string configKey;
+		private static string configLocation;
+		private static string configChain;
+		private static MultiAdmin.Config multiadminConfig;
+		private static Server server;
 		private static bool multiMode = false;
 
 		public static void Write(String message, ConsoleColor color = ConsoleColor.DarkYellow)
-        {
+		{
 			if (Server.SkipProcessHandle() || Process.GetCurrentProcess().MainWindowHandle != IntPtr.Zero)
 			{
 				Console.ForegroundColor = color;
@@ -26,13 +26,13 @@ namespace MutliAdmin
 				Console.ForegroundColor = ConsoleColor.White;
 				Console.BackgroundColor = ConsoleColor.Black;
 			}
-        }
+		}
 
-        public static bool FindConfig()
-        {
+		public static bool FindConfig()
+		{
 			var defaultLoc = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + Path.DirectorySeparatorChar + "SCP Secret Laboratory" + Path.DirectorySeparatorChar + "config.txt";
 			var path = Program.multiadminConfig.GetValue("cfg_loc", defaultLoc);
-            var backup = path.Replace(".txt", "_backup.txt");
+			var backup = path.Replace(".txt", "_backup.txt");
 
 			if (!File.Exists(path))
 			{
@@ -40,65 +40,65 @@ namespace MutliAdmin
 				File.Copy("config_template.txt", path);
 			}
 
-            if (File.Exists(path))
-            {
-                configLocation = path;
-                Program.Write("Config file located at: " + path, ConsoleColor.DarkYellow);
+			if (File.Exists(path))
+			{
+				configLocation = path;
+				Program.Write("Config file located at: " + path, ConsoleColor.DarkYellow);
 
-                if (!File.Exists(backup))
-                {
-                    Program.Write("Config file has not been backed up, creating backup copy under: " + backup, ConsoleColor.DarkYellow);
-                    File.Copy(path, backup);
-                }
-            }
-            else
-            {
+				if (!File.Exists(backup))
+				{
+					Program.Write("Config file has not been backed up, creating backup copy under: " + backup, ConsoleColor.DarkYellow);
+					File.Copy(path, backup);
+				}
+			}
+			else
+			{
 				// should never happen
 				throw new FileNotFoundException("Config.txt file not found! something has gone wrong with initial setup, try running LocalAdmin.exe first");
-            }
+			}
 
 			return true;
-        }
+		}
 
-        public static bool StartHandleConfigs(string[] args)
-        {
-            Boolean hasServerToStart = false;
-            if (args.Length > 0)
-            {
-                configKey = args[0];
-                hasServerToStart = true;
+		public static bool StartHandleConfigs(string[] args)
+		{
+			Boolean hasServerToStart = false;
+			if (args.Length > 0)
+			{
+				configKey = args[0];
+				hasServerToStart = true;
 				multiMode = true;
-                multiadminConfig = new MultiAdmin.Config(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + configKey + Path.DirectorySeparatorChar + "config.txt");
-                Write("Starting this instance with config directory:" + configKey, ConsoleColor.DarkYellow);
-                // chain the rest
-                string[] newArgs = args.Skip(1).Take(args.Length - 1).ToArray();
-                configChain = "\"" + string.Join("\" \"", newArgs).Trim() + "\"";
-            }
-            else
-            {
-                if (!Directory.Exists(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers"))
-                {
+				multiadminConfig = new MultiAdmin.Config(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + configKey + Path.DirectorySeparatorChar + "config.txt");
+				Write("Starting this instance with config directory:" + configKey, ConsoleColor.DarkYellow);
+				// chain the rest
+				string[] newArgs = args.Skip(1).Take(args.Length - 1).ToArray();
+				configChain = "\"" + string.Join("\" \"", newArgs).Trim() + "\"";
+			}
+			else
+			{
+				if (!Directory.Exists(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers"))
+				{
 					multiMode = false;
 					hasServerToStart = true;
 					Write("Using default server mode", ConsoleColor.Green);
 					Write("Server directory not found, if you want to use multiple server mode, please make a new directory in the following format:", ConsoleColor.Green);
-                    Write(Directory.GetCurrentDirectory() + "servers\\<Server id>\\config.txt", ConsoleColor.Green);
-                }
+					Write(Directory.GetCurrentDirectory() + "servers\\<Server id>\\config.txt", ConsoleColor.Green);
+				}
 				else
 				{
 					Write("Using multiple server mode", ConsoleColor.Green);
 					multiMode = true;
 					hasServerToStart = LoadserverFolders();
 				}
-            }
+			}
 
-            if (!hasServerToStart)
-            {
-                Write("All servers are set to manual start! you should have at least one config that auto starts", ConsoleColor.Red);
-            }
+			if (!hasServerToStart)
+			{
+				Write("All servers are set to manual start! you should have at least one config that auto starts", ConsoleColor.Red);
+			}
 
 			return hasServerToStart;
-        }
+		}
 
 		public static bool LoadserverFolders()
 		{
@@ -144,17 +144,17 @@ namespace MutliAdmin
 			return hasServerToStart;
 		}
 
-        public static String GetServerDirectory()
-        {
-            return Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers";
-        }
+		public static String GetServerDirectory()
+		{
+			return Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers";
+		}
 
-        static void OnExit(object sender, EventArgs e)
-        {
-            Console.WriteLine("exit");
-            Debug.Write("exit");
-            Console.ReadKey();
-        }
+		static void OnExit(object sender, EventArgs e)
+		{
+			Console.WriteLine("exit");
+			Debug.Write("exit");
+			Console.ReadKey();
+		}
 
 		private static void FixTypo()
 		{
@@ -167,18 +167,18 @@ namespace MutliAdmin
 			}
 		}
 
-        public static void Main(string[] args)
-        {
-            AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnExit);
+		public static void Main(string[] args)
+		{
+			AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnExit);
 			FixTypo();
-            multiadminConfig = new MultiAdmin.Config("scp_multiadmin.cfg");
-            if (!FindConfig())
+			multiadminConfig = new MultiAdmin.Config("scp_multiadmin.cfg");
+			if (!FindConfig())
 			{
 				Console.ReadKey();
 				return;
 			}
 
-            configChain = "";
+			configChain = "";
 			if (StartHandleConfigs(args))
 			{
 				server = new Server(GetServerDirectory(), configKey, multiadminConfig, configLocation, configChain, multiMode);
@@ -189,5 +189,5 @@ namespace MutliAdmin
 			}
 
 		}
-    }
+	}
 }

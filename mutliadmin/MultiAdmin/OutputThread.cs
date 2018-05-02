@@ -7,95 +7,95 @@ using MultiAdmin.MultiAdmin;
 
 namespace MultiAdmin
 {
-    class OutputThread
-    {
+	class OutputThread
+	{
 		public static readonly Regex smodRegex = new Regex(@"\[(DEBUG|INFO|WARN|ERROR)\] (\[.*?\]) (.*)", RegexOptions.Compiled);
 
 		public static void Read(Server server)
-        {
-            while (!server.IsStopping())
-            {
-                string[] strArray = null;
+		{
+			while (!server.IsStopping())
+			{
+				string[] strArray = null;
 				String dir = "SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" + Path.DirectorySeparatorChar + server.GetSessionId();
 
 				try
-                {
+				{
 					if (Directory.Exists(dir))
 					{
 						strArray = Directory.GetFiles(dir, "sl*.mapi", SearchOption.TopDirectoryOnly).OrderBy(f => f).ToArray<String>();
 					}
-                }
-                catch
-                {
+				}
+				catch
+				{
 					if (!server.IsStopping())
 					{
 						server.Write("Message printer warning: 'SCPSL_Data/Dedicated' directory not found.", ConsoleColor.Yellow);
-					}                    
-                }
+					}
+				}
 
-                if (strArray == null) continue;
-                foreach (string path in strArray)
-                {
+				if (strArray == null) continue;
+				foreach (string path in strArray)
+				{
 
-                    string gameMessage = "";
-                    string fileCommand = "open";
-                    int attempts = 0;
-                    Boolean read = false;
+					string gameMessage = "";
+					string fileCommand = "open";
+					int attempts = 0;
+					Boolean read = false;
 
-                    while (attempts < (server.runOptimized ? 10 : 100) && !read && !server.IsStopping())
-                    {
-                        try
-                        {
-                            StreamReader streamReader = new StreamReader(path);
-                            gameMessage = streamReader.ReadToEnd();
-                            fileCommand = "close";
-                            streamReader.Close();
-                            fileCommand = "delete";
-                            File.Delete(path);
-                            read = true;
-                        }
-                        catch
-                        {
-                            attempts++;
+					while (attempts < (server.runOptimized ? 10 : 100) && !read && !server.IsStopping())
+					{
+						try
+						{
+							StreamReader streamReader = new StreamReader(path);
+							gameMessage = streamReader.ReadToEnd();
+							fileCommand = "close";
+							streamReader.Close();
+							fileCommand = "delete";
+							File.Delete(path);
+							read = true;
+						}
+						catch
+						{
+							attempts++;
 							if (attempts >= (server.runOptimized ? 10 : 100))
 							{
 								server.Write("Message printer warning: Could not " + fileCommand + " file " + path + ". Make sure that MultiAdmin.exe has all necessary read-write permissions.", ConsoleColor.Yellow);
 								server.Write("skipping");
 							}
-                        }
-                        Thread.Sleep(server.runOptimized ? 150 : 300);
-                    }
+						}
+						Thread.Sleep(server.printSpeed);
+					}
 
-                    if (server.IsStopping()) break;
+					if (server.IsStopping()) break;
 
-                    Boolean display = true;
-                    ConsoleColor colour = ConsoleColor.Cyan;
+					Boolean display = true;
+					ConsoleColor colour = ConsoleColor.Cyan;
 
-                    if (!string.IsNullOrEmpty(gameMessage.Trim()))
-                    {
-                        if (gameMessage.Contains("LOGTYPE"))
-                        {
-                            String type = gameMessage.Substring(gameMessage.IndexOf("LOGTYPE")).Trim();
-                            gameMessage = gameMessage.Substring(0, gameMessage.IndexOf("LOGTYPE")).Trim();
+					if (!string.IsNullOrEmpty(gameMessage.Trim()))
+					{
+						if (gameMessage.Contains("LOGTYPE"))
+						{
+							String type = gameMessage.Substring(gameMessage.IndexOf("LOGTYPE")).Trim();
+							gameMessage = gameMessage.Substring(0, gameMessage.IndexOf("LOGTYPE")).Trim();
 
-                            switch(type)
-                            {
-                                case "LOGTYPE02":
-                                    colour = ConsoleColor.Green;
-                                    break;
-                                case "LOGTYPE-8":
-                                    colour = ConsoleColor.DarkRed;
-                                    break;
-                                case "LOGTYPE14":
+							switch (type)
+							{
+								case "LOGTYPE02":
+									colour = ConsoleColor.Green;
+									break;
+								case "LOGTYPE-8":
+									colour = ConsoleColor.DarkRed;
+									break;
+								case "LOGTYPE14":
 									colour = ConsoleColor.Magenta;
-                                    break;
-                                default:
-                                    colour = ConsoleColor.Cyan;
-                                    break;
-                            }
-                        }
-                       
-                    }
+									break;
+								default:
+									colour = ConsoleColor.Cyan;
+									break;
+							}
+						}
+
+					}
 
 					// Smod2 loggers pretty printing
 
@@ -148,11 +148,11 @@ namespace MultiAdmin
 						}
 					}
 
-                    if (gameMessage.Contains("ServerMod"))
-                    {
-                        server.HasServerMod = true;
-                        server.ServerModVersion = gameMessage.Replace("ServerMod - Version", "").Trim();
-                    }
+					if (gameMessage.Contains("ServerMod"))
+					{
+						server.HasServerMod = true;
+						server.ServerModVersion = gameMessage.Replace("ServerMod - Version", "").Trim();
+					}
 
 					if (server.ServerModCheck(1, 7, 2))
 					{
@@ -169,7 +169,7 @@ namespace MultiAdmin
 
 						if (gameMessage.Contains("Waiting for players"))
 						{
-                            if (!server.InitialRoundStarted)
+							if (!server.InitialRoundStarted)
 							{
 								server.InitialRoundStarted = true;
 								foreach (Feature f in server.Features)
@@ -181,12 +181,12 @@ namespace MultiAdmin
 								}
 							}
 
-                            if (server.ServerModCheck(1, 5, 0) && server.fixBuggedPlayers)
-                            {
-                                server.SendMessage("ROUNDRESTART");
-                                server.fixBuggedPlayers = false;
-                            }
-                        }
+							if (server.ServerModCheck(1, 5, 0) && server.fixBuggedPlayers)
+							{
+								server.SendMessage("ROUNDRESTART");
+								server.fixBuggedPlayers = false;
+							}
+						}
 					}
 					else
 					{
@@ -214,94 +214,94 @@ namespace MultiAdmin
 								}
 							}
 
-                            if (server.ServerModCheck(1, 5, 0) && server.fixBuggedPlayers)
-                            {
-                                server.SendMessage("ROUNDRESTART");
-                                server.fixBuggedPlayers = false;
-                            }
-                        }
+							if (server.ServerModCheck(1, 5, 0) && server.fixBuggedPlayers)
+							{
+								server.SendMessage("ROUNDRESTART");
+								server.fixBuggedPlayers = false;
+							}
+						}
 					}
 
 
 
-                    if (gameMessage.Contains("New round has been started"))
-                    {
+					if (gameMessage.Contains("New round has been started"))
+					{
 
-                        foreach (Feature f in server.Features)
-                        {
-                            if (f is IEventRoundStart)
-                            {
-                                ((IEventRoundStart)f).OnRoundStart();
-                            }
-                        }
-                    }
+						foreach (Feature f in server.Features)
+						{
+							if (f is IEventRoundStart)
+							{
+								((IEventRoundStart)f).OnRoundStart();
+							}
+						}
+					}
 
-                    if (gameMessage.Contains("Level loaded. Creating match..."))
-                    {
-                        foreach (Feature f in server.Features)
-                        {
-                            if (f is IEventServerStart)
-                            {
-                                ((IEventServerStart)f).OnServerStart();
-                            }
-                        }
-                    }
-
-
-                    if (gameMessage.Contains("Server full"))
-                    {
-                        foreach (Feature f in server.Features)
-                        {
-                            if (f is IEventServerFull)
-                            {
-                                ((IEventServerFull)f).OnServerFull();
-                            }
-                        }
-                    }
+					if (gameMessage.Contains("Level loaded. Creating match..."))
+					{
+						foreach (Feature f in server.Features)
+						{
+							if (f is IEventServerStart)
+							{
+								((IEventServerStart)f).OnServerStart();
+							}
+						}
+					}
 
 
-                    if (gameMessage.Contains("Player connect"))
-                    {
-                        display = false;
-                        server.Log("Player connect event");
-                        foreach (Feature f in server.Features)
-                        {
-                            if (f is IEventPlayerConnect)
-                            {
-                                String name = gameMessage.Substring(gameMessage.IndexOf(":"));
-                                ((IEventPlayerConnect)f).OnPlayerConnect(name);
-                            }
-                        }
-                    }
+					if (gameMessage.Contains("Server full"))
+					{
+						foreach (Feature f in server.Features)
+						{
+							if (f is IEventServerFull)
+							{
+								((IEventServerFull)f).OnServerFull();
+							}
+						}
+					}
 
-                    if (gameMessage.Contains("Player disconnect"))
-                    {
-                        display = false;
-                        server.Log("Player disconnect event");
-                        foreach (Feature f in server.Features)
-                        {
-                            if (f is IEventPlayerDisconnect)
-                            {
-                                String name = gameMessage.Substring(gameMessage.IndexOf(":"));
-                                ((IEventPlayerDisconnect)f).OnPlayerDisconnect(name);
-                            }
-                        }
-                    }
 
-                    if (gameMessage.Contains("Player has connected before load is complete"))
-                    {
-                        if (server.ServerModCheck(1, 5, 0))
-                        {
-                            server.fixBuggedPlayers = true;
-                        }
-                    }
+					if (gameMessage.Contains("Player connect"))
+					{
+						display = false;
+						server.Log("Player connect event");
+						foreach (Feature f in server.Features)
+						{
+							if (f is IEventPlayerConnect)
+							{
+								String name = gameMessage.Substring(gameMessage.IndexOf(":"));
+								((IEventPlayerConnect)f).OnPlayerConnect(name);
+							}
+						}
+					}
 
-                    if (display) server.Write(gameMessage.Trim(), colour);
-                }
+					if (gameMessage.Contains("Player disconnect"))
+					{
+						display = false;
+						server.Log("Player disconnect event");
+						foreach (Feature f in server.Features)
+						{
+							if (f is IEventPlayerDisconnect)
+							{
+								String name = gameMessage.Substring(gameMessage.IndexOf(":"));
+								((IEventPlayerDisconnect)f).OnPlayerDisconnect(name);
+							}
+						}
+					}
 
-                Thread.Sleep(server.runOptimized ? 5 : 10);
-            }
+					if (gameMessage.Contains("Player has connected before load is complete"))
+					{
+						if (server.ServerModCheck(1, 5, 0))
+						{
+							server.fixBuggedPlayers = true;
+						}
+					}
 
-        }
-    }
+					if (display) server.Write(gameMessage.Trim(), colour);
+				}
+
+				Thread.Sleep(server.runOptimized ? 5 : 10);
+			}
+
+		}
+	}
 }

@@ -6,56 +6,56 @@ using System.Threading.Tasks;
 
 namespace MultiAdmin.MultiAdmin.Features
 {
-    class ExitCommand : Feature, ICommand
-    {
-        Boolean pass;
+	class ExitCommand : Feature, ICommand
+	{
+		Boolean pass;
 
-        public ExitCommand(Server server) : base(server)
-        {
-        }
+		public ExitCommand(Server server) : base(server)
+		{
+		}
 
-        public string GetCommand()
-        {
-            return "EXIT";
-        }
+		public string GetCommand()
+		{
+			return "EXIT";
+		}
 
-        public override void OnConfigReload()
-        {
-        }
+		public override void OnConfigReload()
+		{
+		}
 
-        public string GetCommandDescription()
-        {
-            return "Exits the server";
-        }
+		public string GetCommandDescription()
+		{
+			return "Exits the server";
+		}
 
-        public override string GetFeatureDescription()
-        {
-            return "Adds a graceful exit command.";
-        }
+		public override string GetFeatureDescription()
+		{
+			return "Adds a graceful exit command.";
+		}
 
-        public override string GetFeatureName()
-        {
-            return "Exit command";
-        }
+		public override string GetFeatureName()
+		{
+			return "Exit command";
+		}
 
-        public string GetUsage()
-        {
-            return "";
-        }
+		public string GetUsage()
+		{
+			return "";
+		}
 
-        public override void Init()
-        {
-            pass = true;
-        }
+		public override void Init()
+		{
+			pass = true;
+		}
 
-        public void OnCall(string[] args)
-        {
-            Server.StopServer(false);
-        }
+		public void OnCall(string[] args)
+		{
+			Server.StopServer(false);
+		}
 
-        public bool PassToGame()
-        {
-            return pass;
-        }
-    }
+		public bool PassToGame()
+		{
+			return pass;
+		}
+	}
 }
