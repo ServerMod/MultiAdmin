@@ -9,6 +9,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 	class MemoryCheckerSoft : Feature, IEventTick, IEventRoundEnd
 	{
 		private int lowMb;
+		private int maxMb;
 		private int tickCount;
 		private Boolean restart;
 		private Boolean warn;
@@ -37,7 +38,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 		{
 			Server.GetGameProccess().Refresh();
 			long workingMemory = Server.GetGameProccess().WorkingSet64 / 1048576L; // process memory in MB
-			long memoryLeft = 2048 - workingMemory; // 32 bit limited to 2GB
+			long memoryLeft = maxMb - workingMemory;
 
 			if (memoryLeft < lowMb)
 			{
@@ -62,6 +63,10 @@ namespace MultiAdmin.MultiAdmin.Commands
 		public override void OnConfigReload()
 		{
 			lowMb = Server.ServerConfig.GetIntValue("RESTART_LOW_MEMORY_ROUNDEND", 450);
+			lowMb = (lowMb > 0 ? lowMb : 450); // Prevent negative values
+
+			maxMb = Server.ServerConfig.GetIntValue("MAX_MEMORY", 2048); // 32 bit limited to 2GB
+			maxMb = (maxMb > 0 ? maxMb : 2048); // Prevent negative values
 		}
 
 		public void OnRoundEnd()
