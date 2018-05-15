@@ -248,8 +248,16 @@ namespace MultiAdmin.MultiAdmin
 			Console.ForegroundColor = color;
 			if (lineEnd)
 			{
-				Console.Write(datepart + part + Environment.NewLine);
-				currentLine += datepart + part;
+                if (part.EndsWith(Environment.NewLine))
+                {
+                    //this.Write("This ends in a newline, not adding anymore!");
+                    Console.Write(datepart + part);
+                }
+                else
+                {
+                    Console.Write(datepart + part + Environment.NewLine);
+                }
+                currentLine += datepart + part;
 				Log(currentLine);
 				currentLine = "";
 			}
