@@ -130,14 +130,14 @@ namespace MultiAdmin
 							server.WritePart("", ConsoleColor.Cyan, 0, true, false);
 							server.WritePart("[" + match.Groups[1].Value + "] ", levelColour, 0, false, false);
 							server.WritePart(match.Groups[2].Value + " ", tagColour, 0, false, false);
-                            // OLD: server.WritePart(match.Groups[3].Value, msgColour, 0, false, true);
-                            // The regex.Match was trimming out the new lines and that is why no new lines were created.
-                            // To be sure this will not happen again:
-                            server.WritePart(gameMessage.Split(new char[] { ']' }, 3)[2], msgColour, 0, false, true);
-                            // This way, it outputs the whole message.
-                            // P.S. the format is [Info] [courtney.exampleplugin] Something intresting happened
-                            // That was just an example
-                            display = false;
+							// OLD: server.WritePart(match.Groups[3].Value, msgColour, 0, false, true);
+							// The regex.Match was trimming out the new lines and that is why no new lines were created.
+							// To be sure this will not happen again:
+							server.WritePart(gameMessage.Split(new char[] { ']' }, 3)[2], msgColour, 0, false, true);
+							// This way, it outputs the whole message.
+							// P.S. the format is [Info] [courtney.exampleplugin] Something intresting happened
+							// That was just an example
+							display = false;
 						}
 
 					}
