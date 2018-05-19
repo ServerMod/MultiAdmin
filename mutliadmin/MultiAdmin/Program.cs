@@ -76,21 +76,34 @@ namespace MutliAdmin
 			}
 			else
 			{
-				if (!Directory.Exists(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers"))
-				{
-					multiMode = false;
-					hasServerToStart = true;
-					Write("Using default server mode", ConsoleColor.Green);
-					Write("Server directory not found, if you want to use multiple server mode, please make a new directory in the following format:", ConsoleColor.Green);
-					Write(Directory.GetCurrentDirectory() + "servers\\<Server id>\\config.txt", ConsoleColor.Green);
-				}
-				else
-				{
-					Write("Using multiple server mode", ConsoleColor.Green);
-					multiMode = true;
-					hasServerToStart = LoadserverFolders();
-				}
-			}
+                if (Directory.Exists(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers"))
+                {
+                    // I would but an && but if the directory doesn't exists it will most likely throw an error so I have to do it the long way around
+                    if (HasSubdirs(Directory.GetDirectories(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers")))
+                    {
+                        Write("Using multiple server mode", ConsoleColor.Green);
+                        multiMode = true;
+                        hasServerToStart = LoadserverFolders();
+                    }
+                    else
+                    {
+                        multiMode = false;
+                        hasServerToStart = true;
+                        Write("Found the servers directory but it is empty!", ConsoleColor.DarkRed);
+                        Write("Using default server mode", ConsoleColor.Green);
+                        Write("Server directory not found, if you want to use multiple server mode, please make a new directory in the following format:", ConsoleColor.Green);
+                        Write(Directory.GetCurrentDirectory() + "servers\\<Server id>\\config.txt", ConsoleColor.Green);
+                    }
+                }
+                else
+                {
+                    multiMode = false;
+                    hasServerToStart = true;
+                    Write("Using default server mode", ConsoleColor.Green);
+                    Write("Server directory not found, if you want to use multiple server mode, please make a new directory in the following format:", ConsoleColor.Green);
+                    Write(Directory.GetCurrentDirectory() + "servers\\<Server id>\\config.txt", ConsoleColor.Green);
+                }
+            }
 
 			if (!hasServerToStart)
 			{
@@ -99,6 +112,18 @@ namespace MutliAdmin
 
 			return hasServerToStart;
 		}
+
+        public static bool HasSubdirs(string[] dirs)
+        {
+            if(dirs.Length == 0)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
 
 		public static bool LoadserverFolders()
 		{
