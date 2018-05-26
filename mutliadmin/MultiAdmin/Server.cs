@@ -218,19 +218,21 @@ namespace MultiAdmin.MultiAdmin
 		{
 			Log(message);
 			if (Server.SkipProcessHandle() || Process.GetCurrentProcess().MainWindowHandle != IntPtr.Zero)
-            {
-                DateTime now = DateTime.Now;
-                string str = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
-                try
-                {
-                    Console.CursorTop += (Console.CursorTop <= 0 && height < 0) ? 0 : height;
-                    Console.ForegroundColor = color;
-                    Console.WriteLine(message == "" ? "" : str + message);
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.BackgroundColor = ConsoleColor.Black;
-                } catch (System.ArgumentOutOfRangeException e) {
-                    Console.Write(str + e.Message);
-                }
+			{
+				DateTime now = DateTime.Now;
+				string str = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
+				try
+				{
+					Console.CursorTop += (Console.CursorTop <= 0 && height < 0) ? 0 : height;
+					Console.ForegroundColor = color;
+					Console.WriteLine(message == "" ? "" : str + message);
+					Console.ForegroundColor = ConsoleColor.White;
+					Console.BackgroundColor = ConsoleColor.Black;
+				}
+				catch (System.ArgumentOutOfRangeException e)
+				{
+					Console.Write(str + e.Message);
+				}
 			}
 
 		}
