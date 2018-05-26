@@ -76,21 +76,25 @@ namespace MutliAdmin
 			}
 			else
 			{
-				if (!Directory.Exists(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers"))
-				{
-					multiMode = false;
-					hasServerToStart = true;
-					Write("Using default server mode", ConsoleColor.Green);
-					Write("Server directory not found, if you want to use multiple server mode, please make a new directory in the following format:", ConsoleColor.Green);
-					Write(Directory.GetCurrentDirectory() + "servers\\<Server id>\\config.txt", ConsoleColor.Green);
-				}
-				else
-				{
-					Write("Using multiple server mode", ConsoleColor.Green);
-					multiMode = true;
-					hasServerToStart = LoadserverFolders();
-				}
-			}
+                // The first check sees if the "servers" directory exists, and if it does, 
+                //  the second check will see if it is empty.
+                if (Directory.Exists(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers") &&
+                    HasSubdirs(Directory.GetDirectories(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers")))
+                {
+                    Write("Using multiple server mode", ConsoleColor.Green);
+                    multiMode = true;
+                    hasServerToStart = LoadserverFolders();
+                }
+                else
+                {
+                    // Either there is no "servers" folder or it is empty, and starting a normal server
+                    multiMode = false;
+                    hasServerToStart = true;
+                    Write("Using default server mode", ConsoleColor.Green);
+                    Write("Server directory not found or it is empty, if you want to use multiple server mode, please make a new directory in the following format:", ConsoleColor.Yellow);
+                    Write(Directory.GetCurrentDirectory() + "\\servers\\<Server id>\\config.txt", ConsoleColor.Yellow);
+                }
+            }
 
 			if (!hasServerToStart)
 			{
@@ -99,6 +103,9 @@ namespace MutliAdmin
 
 			return hasServerToStart;
 		}
+
+        public static bool HasSubdirs(string[] dirs) => dirs.Length > 0;
+
 
 		public static bool LoadserverFolders()
 		{
