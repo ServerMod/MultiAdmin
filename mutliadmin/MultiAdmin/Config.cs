@@ -1,21 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text.RegularExpressions;
-using MutliAdmin;
+using YamlDotNet.RepresentationModel;
 
 namespace MultiAdmin
 {
+	public class OldConfigException : Exception
+	{
+		public OldConfigException(string message) : base(message)
+		{
+		}
+	}
+
+
 	public class Config
 	{
 		public Dictionary<String, String> values;
 		private String config_file;
+
 		public Config(String config_file)
 		{
 			this.config_file = config_file;
 			Reload();
 		}
-		private readonly Regex rgx = new Regex("^[^;\\/:\\n\\r\\s=]+\\s*=[^;]+;", RegexOptions.Multiline | RegexOptions.Compiled);
 
 		public void Reload()
 		{
@@ -24,38 +31,24 @@ namespace MultiAdmin
 			if (File.Exists(config_file))
 			{
 				StreamReader streamReader = new StreamReader(config_file);
-				string content = streamReader.ReadToEnd();
+
+				var yaml = new YamlStream();
+				yaml.Load(streamReader);
 				streamReader.Close();
 
-				MatchCollection matches = rgx.Matches(content);
-
-				foreach (Match match in matches)
+				if (yaml.Documents.Count == 0)
 				{
-					String[] parts = match.Value.Split(new char[] { '=' }, 2);
+					throw new OldConfigException("Could not load YAML config, have you updated your configs to be YAML?");
+				}
 
-					String key = parts[0].Trim().ToLower();
-					String value = parts[1].Trim();
-
-					if (value.Length > 0)
-					{
-						value = value.Substring(0, value.Length - 1); // Removes ";" from the end
-
-						if (!values.ContainsKey(key))
-						{
-							values.Add(key, value);
-						}
-						else
-						{
-							Program.Write("Duplicate value found in config file:" + key + " using the first");
-						}
-					}
-					else
-					{
-						Program.Write("Error: Config value is missing!");
-					}
+				var mapping = (YamlMappingNode)yaml.Documents[0].RootNode;
+				// TODO: We dont need to put it in a dict, MA should just read from the YAML tree directly. This is just a quick fix
+				foreach (var entry in mapping.Children)
+				{
+					Console.WriteLine(entry);
+					values.Add((String) entry.Key, (String) entry.Value);
 				}
 			}
-
 		}
 
 

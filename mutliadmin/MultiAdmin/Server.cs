@@ -10,11 +10,11 @@ namespace MultiAdmin.MultiAdmin
 {
 	public class Server
 	{
-		public static readonly string MA_VERSION = "1.4.4";
+		public static readonly string MA_VERSION = "2.0.0";
 
 		public Boolean HasServerMod { get; set; }
 		public String ServerModVersion { get; set; }
-		public Config MultiAdminCfg { get; }
+		public OldConfig MultiAdminCfg { get; }
 		public Config ServerConfig
 		{
 			get
@@ -72,7 +72,7 @@ namespace MultiAdmin.MultiAdmin
 
 		private String currentLine = "";
 
-		public Server(String serverDir, String configKey, Config multiAdminCfg, String mainConfigLocation, String configChain, bool multiMode)
+		public Server(String serverDir, String configKey, OldConfig multiAdminCfg, String mainConfigLocation, String configChain, bool multiMode)
 		{
 			this.multiMode = multiMode;
 			MainConfigLocation = mainConfigLocation;

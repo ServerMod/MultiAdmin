@@ -2,7 +2,9 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using MultiAdmin;
 using MultiAdmin.MultiAdmin;
+using YamlDotNet.Serialization;
 
 namespace MutliAdmin
 {
@@ -11,7 +13,7 @@ namespace MutliAdmin
 		private static string configKey;
 		private static string configLocation;
 		private static string configChain;
-		private static MultiAdmin.Config multiadminConfig;
+		private static OldConfig multiadminConfig;
 		private static Server server;
 		private static bool multiMode = false;
 
@@ -30,15 +32,16 @@ namespace MutliAdmin
 
 		public static bool FindConfig()
 		{
-			var defaultLoc = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + Path.DirectorySeparatorChar + "SCP Secret Laboratory" + Path.DirectorySeparatorChar + "config.txt";
+			var defaultLoc = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + Path.DirectorySeparatorChar + "SCP Secret Laboratory" + Path.DirectorySeparatorChar + "config_gameplay.txt";
 			var path = Program.multiadminConfig.GetValue("cfg_loc", defaultLoc);
 			var backup = path.Replace(".txt", "_backup.txt");
 
-			if (!File.Exists(path))
-			{
-				Write("Default config file not in expected location (" + path + "), copying config_template.txt");
-				File.Copy("config_template.txt", path);
-			}
+			// no more template it seems
+			//if (!File.Exists(path))
+			//{
+				//Write("Default config file not in expected location (" + path + "), copying config_template.txt");
+				//File.Copy("config_template.txt", path);
+			//}
 
 			if (File.Exists(path))
 			{
@@ -53,8 +56,8 @@ namespace MutliAdmin
 			}
 			else
 			{
-				// should never happen
-				throw new FileNotFoundException("Config.txt file not found! something has gone wrong with initial setup, try running LocalAdmin.exe first");
+				Write("No default config found, no backup needed.");
+				//throw new FileNotFoundException("Config.txt file not found! something has gone wrong with initial setup, try running LocalAdmin.exe first");
 			}
 
 			return true;
@@ -68,7 +71,8 @@ namespace MutliAdmin
 				configKey = args[0];
 				hasServerToStart = true;
 				multiMode = true;
-				multiadminConfig = new MultiAdmin.Config(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + configKey + Path.DirectorySeparatorChar + "config.txt");
+				// This shouldnt be the server specific config, it should be the global one scp_config?
+				//multiadminConfig = new MultiAdmin.OldConfig(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + configKey + Path.DirectorySeparatorChar + "config.txt");
 				Write("Starting this instance with config directory:" + configKey, ConsoleColor.DarkYellow);
 				// chain the rest
 				string[] newArgs = args.Skip(1).Take(args.Length - 1).ToArray();
@@ -117,9 +121,9 @@ namespace MutliAdmin
 				String name = new DirectoryInfo(file).Name;
 				if (first)
 				{
-					multiadminConfig = new MultiAdmin.Config(file + Path.DirectorySeparatorChar + "config.txt");
+					var serverConfig = new MultiAdmin.Config(file + Path.DirectorySeparatorChar + "config.txt");
 					Program.Write(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + name + Path.DirectorySeparatorChar + "config.txt");
-					if (multiadminConfig.GetBoolean("MANUAL_START", false))
+					if (serverConfig.GetBoolean("MANUAL_START", false))
 					{
 						Write("Skipping auto start for: " + name, ConsoleColor.DarkYellow);
 					}
@@ -134,7 +138,7 @@ namespace MutliAdmin
 				}
 				else
 				{
-					var other_config = new MultiAdmin.Config(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + name + Path.DirectorySeparatorChar + "config.txt");
+					var other_config = new Config(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + name + Path.DirectorySeparatorChar + "config.txt");
 					Write(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + name + Path.DirectorySeparatorChar + "config.txt");
 					if (other_config.GetBoolean("MANUAL_START", false))
 					{
@@ -151,6 +155,23 @@ namespace MutliAdmin
 			return hasServerToStart;
 		}
 
+		public static void ConvertConfigs()
+		{
+			String[] dirs = Directory.GetDirectories(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar);
+			foreach (string file in dirs)
+			{
+				var name = file + Path.DirectorySeparatorChar + "config.txt";
+				var backup = file + Path.DirectorySeparatorChar + "config.backup";
+				Write("Converting old config to yaml:" + file, ConsoleColor.Green);
+				OldConfig config = new OldConfig(file + Path.DirectorySeparatorChar + "config.txt");
+				var serializer = new SerializerBuilder().Build();
+				var yaml = serializer.Serialize(config.values);
+				Write(yaml, ConsoleColor.White);
+				File.Copy(name, backup);
+				File.WriteAllText(name, yaml);
+			}
+		}
+
 		public static String GetServerDirectory()
 		{
 			return Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers";
@@ -163,27 +184,26 @@ namespace MutliAdmin
 			Console.ReadKey();
 		}
 
-		private static void FixTypo()
-		{
-			// some idiot (courtney) accidently made the config file spc_multiadmin.cfg instead of scp_multiadmin.cfg
-			// this method fixes it
-			if (File.Exists("spc_multiadmin.cfg"))
-			{
-				Write("Renaming spc_multiadmin.cfg to scp_multiadmin.cfg");
-				File.Move("spc_multiadmin.cfg", "scp_multiadmin.cfg");
-			}
-		}
-
 		public static void Main(string[] args)
 		{
 			AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnExit);
-			FixTypo();
-			multiadminConfig = new MultiAdmin.Config("scp_multiadmin.cfg");
+			// TODO: this should be yaml config in future or removed
+			multiadminConfig = new OldConfig("scp_multiadmin.cfg");
 			if (!FindConfig())
 			{
 				Console.ReadKey();
 				return;
 			}
+			if (args.Length == 1)
+			{
+				if (args[0].Equals("--convert-config"))
+				{
+					ConvertConfigs();
+					Console.ReadKey();
+					return;
+				}
+			}
+
 
 			configChain = "";
 			if (StartHandleConfigs(args))
