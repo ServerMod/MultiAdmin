@@ -18,6 +18,27 @@ namespace MultiAdmin
         }
         private readonly Regex rgx = new Regex("^[^;\\/:\\n\\r\\s=]+\\s*=[^;\\n\\r]+;", RegexOptions.Multiline | RegexOptions.Compiled);
 
+		public string[] GetRaw()
+		{
+			if (File.Exists(config_file))
+			{
+				StreamReader streamReader = new StreamReader(config_file);
+				List<string> content = new List<string>();
+
+				string line;
+				while ((line = streamReader.ReadLine()) != null)
+				{
+					content.Add(line);
+				}
+
+				streamReader.Close();
+
+				return content.ToArray();
+			}
+
+			return new string[] { };
+		}
+
 		public void Reload()
         {
             values = new Dictionary<string, string>();

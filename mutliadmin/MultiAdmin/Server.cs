@@ -10,11 +10,11 @@ namespace MultiAdmin.MultiAdmin
 {
 	public class Server
 	{
-		public static readonly string MA_VERSION = "2.0.0";
+		public static readonly string MA_VERSION = "2.0.1";
 
 		public Boolean HasServerMod { get; set; }
 		public String ServerModVersion { get; set; }
-		public OldConfig MultiAdminCfg { get; }
+		public Config MultiAdminCfg { get; }
 		public Config ServerConfig
 		{
 			get
@@ -72,7 +72,7 @@ namespace MultiAdmin.MultiAdmin
 
 		private String currentLine = "";
 
-		public Server(String serverDir, String configKey, OldConfig multiAdminCfg, String mainConfigLocation, String configChain, bool multiMode)
+		public Server(String serverDir, String configKey, Config multiAdminCfg, String mainConfigLocation, String configChain, bool multiMode)
 		{
 			this.multiMode = multiMode;
 			MainConfigLocation = mainConfigLocation;
@@ -90,14 +90,14 @@ namespace MultiAdmin.MultiAdmin
 			InitialRoundStarted = false;
 			readerThread = new Thread(new ThreadStart(() => InputThread.Write(this)));
 			printerThread = new Thread(new ThreadStart(() => OutputThread.Read(this)));
+			// Enable / Disable MultiAdmin Optimizations
+			runOptimized = multiAdminCfg.config.GetBool("enable_multiadmin_optimizations", true);
+			printSpeed = multiAdminCfg.config.GetInt("multiadmin_print_speed", 150);
 
 			// Register all features 
 			RegisterFeatures();
 			// Load config 
 			serverConfig = (multiMode ? new Config(ServerDir + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "config.txt") : new Config(mainConfigLocation));
-			// Enable / Disable MultiAdmin Optimizations
-			runOptimized = serverConfig.GetBoolean("enable_multiadmin_optimizations", true);
-			printSpeed = serverConfig.GetIntValue("multiadmin_print_speed", 150);
 			// Init features
 			InitFeatures();
 			// Start the server and threads

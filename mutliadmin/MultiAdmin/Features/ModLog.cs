@@ -46,7 +46,7 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public override void OnConfigReload()
 		{
-			logToOwnFile = Server.ServerConfig.GetBoolean("log_mod_actions_to_own_file", false);
+			logToOwnFile = Server.ServerConfig.config.GetBool("log_mod_actions_to_own_file", false);
 		}
 	}
 }

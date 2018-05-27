@@ -62,10 +62,10 @@ namespace MultiAdmin.MultiAdmin.Commands
 
 		public override void OnConfigReload()
 		{
-			lowMb = Server.ServerConfig.GetIntValue("RESTART_LOW_MEMORY_ROUNDEND", 450);
+			lowMb = Server.ServerConfig.config.GetInt("restart_low_memory_roundend", 450);
 			lowMb = (lowMb > 0 ? lowMb : 450); // Prevent negative values
 
-			maxMb = Server.ServerConfig.GetIntValue("MAX_MEMORY", 2048); // 32 bit limited to 2GB
+			maxMb = Server.ServerConfig.config.GetInt("max_memory", 2048); // 32 bit limited to 2GB
 			maxMb = (maxMb > 0 ? maxMb : 2048); // Prevent negative values
 		}
 

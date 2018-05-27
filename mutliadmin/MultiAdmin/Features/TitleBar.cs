@@ -29,7 +29,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 
 		public override void Init()
 		{
-			maxPlayers = Server.ServerConfig.GetIntValue("MAX_PLAYERS", 20);
+			maxPlayers = Server.ServerConfig.config.GetInt("max_players", 20);
 			playerCount = -1; // -1 for the "server" player, once the server starts this will increase to 0.
 			UpdateTitlebar();
 		}

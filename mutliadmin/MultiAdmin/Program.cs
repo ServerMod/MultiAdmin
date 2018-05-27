@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using MultiAdmin;
 using MultiAdmin.MultiAdmin;
-using YamlDotNet.Serialization;
+//using YamlDotNet.Serialization;
 
 namespace MutliAdmin
 {
@@ -13,7 +13,7 @@ namespace MutliAdmin
 		private static string configKey;
 		private static string configLocation;
 		private static string configChain;
-		private static OldConfig multiadminConfig;
+		private static Config multiadminConfig;
 		private static Server server;
 		private static bool multiMode = false;
 
@@ -32,16 +32,28 @@ namespace MutliAdmin
 
 		public static bool FindConfig()
 		{
-			var defaultLoc = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + Path.DirectorySeparatorChar + "SCP Secret Laboratory" + Path.DirectorySeparatorChar + "config_gameplay.txt";
-			var path = Program.multiadminConfig.GetValue("cfg_loc", defaultLoc);
+			var defaultLoc = FileManager.AppFolder + "config_gameplay.txt";
+			var path = Program.multiadminConfig.config.GetString("cfg_loc", defaultLoc);
 			var backup = path.Replace(".txt", "_backup.txt");
 
-			// no more template it seems
-			//if (!File.Exists(path))
-			//{
-				//Write("Default config file not in expected location (" + path + "), copying config_template.txt");
-				//File.Copy("config_template.txt", path);
-			//}
+			// Copy config template
+			if (!Directory.Exists(FileManager.AppFolder))
+			{
+				Directory.CreateDirectory(FileManager.AppFolder);
+			}
+			if (!File.Exists(path))
+			{
+				try
+				{
+					Write("Default config file not in expected location (" + path + "), copying \"MiscData/gameconfig_template.txt\"...");
+					File.Copy("MiscData/gameconfig_template.txt", path);
+					Write("Copied default config!");
+				}
+				catch
+				{
+					Write("Error copying template file \"MiscData/gameconfig_template.txt\"!");
+				}
+			}
 
 			if (File.Exists(path))
 			{
@@ -72,7 +84,7 @@ namespace MutliAdmin
 				hasServerToStart = true;
 				multiMode = true;
 				// This shouldnt be the server specific config, it should be the global one scp_config?
-				//multiadminConfig = new MultiAdmin.OldConfig(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + configKey + Path.DirectorySeparatorChar + "config.txt");
+				//multiadminConfig = new MultiAdmin.Config(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + configKey + Path.DirectorySeparatorChar + "config.txt");
 				Write("Starting this instance with config directory:" + configKey, ConsoleColor.DarkYellow);
 				// chain the rest
 				string[] newArgs = args.Skip(1).Take(args.Length - 1).ToArray();
@@ -123,7 +135,7 @@ namespace MutliAdmin
 				{
 					var serverConfig = new MultiAdmin.Config(file + Path.DirectorySeparatorChar + "config.txt");
 					Program.Write(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + name + Path.DirectorySeparatorChar + "config.txt");
-					if (serverConfig.GetBoolean("MANUAL_START", false))
+					if (serverConfig.config.GetBool("manual_start", false))
 					{
 						Write("Skipping auto start for: " + name, ConsoleColor.DarkYellow);
 					}
@@ -140,7 +152,7 @@ namespace MutliAdmin
 				{
 					var other_config = new Config(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + name + Path.DirectorySeparatorChar + "config.txt");
 					Write(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + name + Path.DirectorySeparatorChar + "config.txt");
-					if (other_config.GetBoolean("MANUAL_START", false))
+					if (other_config.config.GetBool("manual_start", false))
 					{
 						Write("Skipping auto start for: " + name, ConsoleColor.DarkYellow);
 					}
@@ -162,13 +174,69 @@ namespace MutliAdmin
 			{
 				var name = file + Path.DirectorySeparatorChar + "config.txt";
 				var backup = file + Path.DirectorySeparatorChar + "config.backup";
-				Write("Converting old config to yaml:" + file, ConsoleColor.Green);
+				Write("Converting old config to YAML: " + file, ConsoleColor.Green);
 				OldConfig config = new OldConfig(file + Path.DirectorySeparatorChar + "config.txt");
-				var serializer = new SerializerBuilder().Build();
-				var yaml = serializer.Serialize(config.values);
-				Write(yaml, ConsoleColor.White);
+				//var serializer = new SerializerBuilder().Build();
+				//var yaml = serializer.Serialize(config.values);
+				//Write(yaml, ConsoleColor.White);
+
+				string yaml = "";
+
+				foreach (string line in config.GetRaw())
+				{
+					try
+					{
+						string commentText = "//"; // Dunno if everyone uses that comment style, whatever
+
+						if (line.Contains("=") && line.Contains(";") && line.IndexOf("=") < line.IndexOf(";")) // Matches format "key = value; //comment"
+						{
+							string keyandEquals = line.Substring(0, line.IndexOf("=")).Trim(); // "key " -> "key"
+							string value = line.Substring(line.IndexOf("=") + 1, line.IndexOf(";") - (line.IndexOf("=") + 1)).Trim(); // " value" -> "value"
+							string followingContent = line.Substring(line.IndexOf(";") + 1, line.Length - (line.IndexOf(";") + 1)).Trim(); // " //comment" -> "//comment"
+
+							if (followingContent.StartsWith(commentText)) // "//comment" -> "comment"
+							{
+								followingContent = followingContent.Substring(commentText.Length).Trim();
+							}
+
+							string newLine = keyandEquals + ": " + value;
+
+							// Write any comments
+							if (!string.IsNullOrEmpty(followingContent))
+							{
+								yaml += (followingContent.StartsWith("#") ? "" : "#") + followingContent + Environment.NewLine;
+							}
+
+							yaml += newLine + Environment.NewLine;
+						}
+						else
+						{
+							string newLine = line.Trim();
+
+							if (newLine.StartsWith(commentText)) // "//comment" -> "comment"
+							{
+								newLine = newLine.Substring(commentText.Length).Trim();
+							}
+
+							newLine = (string.IsNullOrEmpty(newLine) ? "" : (newLine.StartsWith("#") ? "" : "#") + newLine);
+
+							yaml += newLine + Environment.NewLine;
+						}
+					}
+					catch (Exception e)
+					{
+						Write(e.Message);
+						Write(e.Source);
+						Write(e.StackTrace);
+					}
+				}
+
 				File.Copy(name, backup);
 				File.WriteAllText(name, yaml);
+
+				Write(yaml, ConsoleColor.White);
+
+				Write("Success!", ConsoleColor.Green);
 			}
 		}
 
@@ -187,8 +255,7 @@ namespace MutliAdmin
 		public static void Main(string[] args)
 		{
 			AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnExit);
-			// TODO: this should be yaml config in future or removed
-			multiadminConfig = new OldConfig("scp_multiadmin.cfg");
+			multiadminConfig = new Config("scp_multiadmin.cfg");
 			if (!FindConfig())
 			{
 				Console.ReadKey();

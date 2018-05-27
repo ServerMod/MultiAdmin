@@ -26,7 +26,7 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public override void Init()
 		{
-			if (Server.MultiAdminCfg.GetBoolean("submit_errors", true))
+			if (Server.MultiAdminCfg.config.GetBool("submit_errors", true))
 			{
 				// init happens befoe game start, so take the directory and find the latest SPC log
 				var files = Directory.GetFiles(Server.LogFolder, "*SCP*").ToList();

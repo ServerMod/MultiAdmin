@@ -35,9 +35,6 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="YamlDotNet, Version=4.3.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\YamlDotNet.4.3.1\lib\net45\YamlDotNet.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MultiAdmin\Features\ConfigReload.cs" />
@@ -61,6 +58,7 @@
     <Compile Include="MultiAdmin\Features\RestartNextRound.cs" />
     <Compile Include="MultiAdmin\Config.cs" />
     <Compile Include="MultiAdmin\Feature.cs" />
+    <Compile Include="MultiAdmin\FileManager.cs" />
     <Compile Include="MultiAdmin\InputThread.cs" />
     <Compile Include="MultiAdmin\Interfaces.cs" />
     <Compile Include="MultiAdmin\OldConfig.cs" />
@@ -68,6 +66,7 @@
     <Compile Include="MultiAdmin\Server.cs" />
     <Compile Include="MultiAdmin\OutputThread.cs" />
     <Compile Include="MultiAdmin\Utils.cs" />
+    <Compile Include="MultiAdmin\YamlConfig.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

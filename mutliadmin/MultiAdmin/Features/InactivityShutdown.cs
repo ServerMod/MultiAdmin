@@ -23,7 +23,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 
 		public override void OnConfigReload()
 		{
-			waitFor = Server.ServerConfig.GetIntValue("SHUTDOWN_ONCE_EMPTY_FOR", -1);
+			waitFor = Server.ServerConfig.config.GetInt("shutdown_once_empty_for", -1);
 		}
 
 		public void OnRoundEnd()

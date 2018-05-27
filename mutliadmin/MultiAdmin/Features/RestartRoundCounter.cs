@@ -22,7 +22,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 
 		public override void OnConfigReload()
 		{
-			restartAfter = Server.ServerConfig.GetIntValue("RESTART_EVERY_NUM_ROUNDS", -1);
+			restartAfter = Server.ServerConfig.config.GetInt("restart_every_num_rounds", -1);
 		}
 
 		public void OnRoundEnd()
