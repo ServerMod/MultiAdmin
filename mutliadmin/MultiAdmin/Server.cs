@@ -221,18 +221,18 @@ namespace MultiAdmin.MultiAdmin
 			{
 				DateTime now = DateTime.Now;
 				string str = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
-				int cursorTop = 0, oldCursorTop = 0;
+				int cursorTop = 0, bufferHeight = 0;
 				try
 				{
-					oldCursorTop = Console.CursorTop;
 					cursorTop = Console.CursorTop + height;
+					bufferHeight = Console.BufferHeight;
 					if (cursorTop < 0)
 					{
 						cursorTop = 0;
 					}
-					while (cursorTop >= Console.BufferHeight && cursorTop > 0)
+					else if (cursorTop >= Console.BufferHeight)
 					{
-						cursorTop--;
+						cursorTop = Console.BufferHeight - 1;
 					}
 					Console.CursorTop = cursorTop;
 					Console.ForegroundColor = color;
@@ -242,7 +242,7 @@ namespace MultiAdmin.MultiAdmin
 				}
 				catch (System.ArgumentOutOfRangeException e)
 				{
-					Console.WriteLine(str + e.Message + " CursorTop: " + oldCursorTop + " height: " + height + " New CursorTop: " + cursorTop);
+					Console.WriteLine(str + " Value " + cursorTop + " exceeded buffer height " + bufferHeight + ".");
 					Console.WriteLine(e.StackTrace);
 				}
 			}
