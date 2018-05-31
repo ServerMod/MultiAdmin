@@ -219,13 +219,32 @@ namespace MultiAdmin.MultiAdmin
 			Log(message);
 			if (Server.SkipProcessHandle() || Process.GetCurrentProcess().MainWindowHandle != IntPtr.Zero)
 			{
-				Console.CursorTop += (Console.CursorTop <= 0 && height < 0) ? 0 : height;
-				Console.ForegroundColor = color;
 				DateTime now = DateTime.Now;
 				string str = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
-				Console.WriteLine(message == "" ? "" : str + message);
-				Console.ForegroundColor = ConsoleColor.White;
-				Console.BackgroundColor = ConsoleColor.Black;
+				int cursorTop = 0, bufferHeight = 0;
+				try
+				{
+					cursorTop = Console.CursorTop + height;
+					bufferHeight = Console.BufferHeight;
+					if (cursorTop < 0)
+					{
+						cursorTop = 0;
+					}
+					else if (cursorTop >= Console.BufferHeight)
+					{
+						cursorTop = Console.BufferHeight - 1;
+					}
+					Console.CursorTop = cursorTop;
+					Console.ForegroundColor = color;
+					Console.WriteLine(message == "" ? "" : str + message);
+					Console.ForegroundColor = ConsoleColor.White;
+					Console.BackgroundColor = ConsoleColor.Black;
+				}
+				catch (System.ArgumentOutOfRangeException e)
+				{
+					Console.WriteLine(str + " Value " + cursorTop + " exceeded buffer height " + bufferHeight + ".");
+					Console.WriteLine(e.StackTrace);
+				}
 			}
 
 		}
