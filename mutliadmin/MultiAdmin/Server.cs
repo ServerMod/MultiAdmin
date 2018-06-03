@@ -255,7 +255,7 @@ namespace MultiAdmin.MultiAdmin
 			return (p == 4) || (p == 6) || (p == 128); // Outputs true for Unix
 		}
 
-		public void WritePart(String part, ConsoleColor color = ConsoleColor.Yellow, int height = 0, bool date = false, bool lineEnd = false)
+		public void WritePart(String part, ConsoleColor backgroundColor = ConsoleColor.Black, ConsoleColor textColor = ConsoleColor.Yellow, int height = 0, bool date = false, bool lineEnd = false)
 		{
 			String datepart = "";
 			if (date)
@@ -264,7 +264,8 @@ namespace MultiAdmin.MultiAdmin
 				datepart = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
 			}
 			Console.CursorTop += height;
-			Console.ForegroundColor = color;
+			Console.ForegroundColor = textColor;
+			Console.BackgroundColor = backgroundColor;
 			if (lineEnd)
 			{
 				if (part.EndsWith(Environment.NewLine))

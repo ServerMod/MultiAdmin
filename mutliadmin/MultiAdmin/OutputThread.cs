@@ -9,7 +9,22 @@ namespace MultiAdmin
 {
 	class OutputThread
 	{
-		public static readonly Regex smodRegex = new Regex(@"\[(DEBUG|INFO|WARN|ERROR)\] (\[.*?\]) (.*)", RegexOptions.Compiled);
+		public static readonly Regex SMOD_REGEX = new Regex(@"\[(DEBUG|INFO|WARN|ERROR)\] (\[.*?\]) (.*)", RegexOptions.Compiled);
+		public static readonly ConsoleColor DEFAULT_FOREGROUND = ConsoleColor.Cyan;
+		public static readonly ConsoleColor DEFAULT_BACKGROUND = ConsoleColor.Black;
+		
+
+		public static ConsoleColor MapConsoleColor(String color, ConsoleColor def = ConsoleColor.Cyan)
+		{
+			try
+			{
+				return (ConsoleColor)Enum.Parse(typeof(ConsoleColor), color);
+			}
+			catch
+			{
+				return def;
+			}
+		}
 
 		public static void Read(Server server)
 		{
@@ -97,10 +112,54 @@ namespace MultiAdmin
 
 					}
 
+					// Smod3 Color tags
+
+					String[] parts = gameMessage.Split("@#".ToCharArray());
+
+					if (parts.Length > 1)
+					{
+						ConsoleColor fg = DEFAULT_FOREGROUND;
+						ConsoleColor bg = DEFAULT_BACKGROUND;
+						// date
+						server.WritePart("", DEFAULT_BACKGROUND, ConsoleColor.Cyan, 0, true, false);
+						foreach (String part in parts)
+						{
+							String modifiedPart = part;
+							if (modifiedPart.Length >= 3 && modifiedPart.Contains(";")) {
+								String colorTag = modifiedPart.Substring(3, modifiedPart.IndexOf(";") - 3);
+								
+								if (modifiedPart.Substring(0, 3).Equals("fg="))
+								{
+									fg = MapConsoleColor(colorTag, DEFAULT_FOREGROUND);
+								}
+
+								if (part.Substring(0, 3).Equals("bg="))
+								{
+									bg = MapConsoleColor(colorTag, DEFAULT_BACKGROUND);
+								}
+
+								if (modifiedPart.Length == part.IndexOf(";"))
+								{
+									modifiedPart = "";
+								}
+								else
+								{
+									modifiedPart = modifiedPart.Substring(part.IndexOf(";") + 1);
+								}
+
+							}
+	
+							server.WritePart(modifiedPart, bg, fg, 0, false, false);
+						}
+						// end
+						server.WritePart("END", DEFAULT_BACKGROUND, ConsoleColor.Cyan, 0, false, true);
+						display = false;
+					}
+
 					// Smod2 loggers pretty printing
 
 
-					var match = smodRegex.Match(gameMessage);
+					var match = SMOD_REGEX.Match(gameMessage);
 					if (match.Success)
 					{
 						if (match.Groups.Count >= 2)
@@ -127,13 +186,13 @@ namespace MultiAdmin
 									colour = ConsoleColor.Cyan;
 									break;
 							}
-							server.WritePart("", ConsoleColor.Cyan, 0, true, false);
-							server.WritePart("[" + match.Groups[1].Value + "] ", levelColour, 0, false, false);
-							server.WritePart(match.Groups[2].Value + " ", tagColour, 0, false, false);
+							server.WritePart("", DEFAULT_BACKGROUND, ConsoleColor.Cyan, 0, true, false);
+							server.WritePart("[" + match.Groups[1].Value + "] ", DEFAULT_BACKGROUND, levelColour, 0, false, false);
+							server.WritePart(match.Groups[2].Value + " ", DEFAULT_BACKGROUND, tagColour, 0, false, false);
 							// OLD: server.WritePart(match.Groups[3].Value, msgColour, 0, false, true);
 							// The regex.Match was trimming out the new lines and that is why no new lines were created.
 							// To be sure this will not happen again:
-							server.WritePart(gameMessage.Split(new char[] { ']' }, 3)[2], msgColour, 0, false, true);
+							server.WritePart(gameMessage.Split(new char[] { ']' }, 3)[2], DEFAULT_BACKGROUND, msgColour, 0, false, true);
 							// This way, it outputs the whole message.
 							// P.S. the format is [Info] [courtney.exampleplugin] Something intresting happened
 							// That was just an example
