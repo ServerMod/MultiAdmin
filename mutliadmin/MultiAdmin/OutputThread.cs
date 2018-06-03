@@ -152,7 +152,7 @@ namespace MultiAdmin
 							server.WritePart(modifiedPart, bg, fg, 0, false, false);
 						}
 						// end
-						server.WritePart("END", DEFAULT_BACKGROUND, ConsoleColor.Cyan, 0, false, true);
+						server.WritePart("", DEFAULT_BACKGROUND, ConsoleColor.Cyan, 0, false, true);
 						display = false;
 					}
 
