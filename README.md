@@ -56,4 +56,4 @@ This does not include ServerMod or ingame commands, for a full list type HELP in
 - restart_every_num_rounds (restart the server every x rounds, default = 15)
 - restart_low_memory (restart if the games memory falls below this, default = 400)
 - restart_low_memory_roundend (restart if the games memory falls below this at the end of this round, default = 400)
-- max_memory (restart if the games memory is larger than this, default = 2048)
+- max_memory (used to determine if the servers memory is low, default = 2048)
