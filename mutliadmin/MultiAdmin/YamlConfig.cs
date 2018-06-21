@@ -32,7 +32,7 @@ public class YamlConfig
 	{
 		foreach (var line in RawData)
 		{
-			if (line.StartsWith(key + ": ")) return line.Substring(key.Length + 2);
+			if (line.ToLower().StartsWith(key.ToLower() + ": ")) return line.Substring(key.Length + 2);
 		}
 
 		return def;
@@ -42,7 +42,7 @@ public class YamlConfig
 	{
 		foreach (var line in RawData)
 		{
-			if (!line.StartsWith(key + ": ")) continue;
+			if (!line.ToLower().StartsWith(key.ToLower() + ": ")) continue;
 			try
 			{
 				return Convert.ToInt32(line.Substring(key.Length + 2));
@@ -69,7 +69,7 @@ public class YamlConfig
 	{
 		foreach (var line in RawData)
 		{
-			if (!line.StartsWith(key + ": ")) continue;
+			if (!line.ToLower().StartsWith(key.ToLower() + ": ")) continue;
 			return line.Substring(key.Length + 2) == "true";
 		}
 
@@ -82,7 +82,7 @@ public class YamlConfig
 		var list = new List<string>();
 		foreach (var line in RawData)
 		{
-			if (line.StartsWith(key + ":"))
+			if (line.ToLower().StartsWith(key.ToLower() + ":"))
 			{
 				read = true;
 				continue;

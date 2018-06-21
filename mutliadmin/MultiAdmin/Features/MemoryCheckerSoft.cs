@@ -36,37 +36,37 @@ namespace MultiAdmin.MultiAdmin.Commands
 
 		public void OnTick()
 		{
-			Server.GetGameProccess().Refresh();
-			long workingMemory = Server.GetGameProccess().WorkingSet64 / 1048576L; // process memory in MB
-			long memoryLeft = maxMb - workingMemory;
-
-			if (memoryLeft < lowMb)
+			if (lowMb >= 0 && maxMb >= 0)
 			{
-				if (!warn) Server.Write("Warning: program is running low on memory (" + memoryLeft + " MB left) the server will restart at the end of the round if it continues", ConsoleColor.Red);
-				warn = true;
-				tickCount++;
-			}
-			else
-			{
-				warn = false;
-				tickCount = 0;
-			}
+				Server.GetGameProccess().Refresh();
+				long workingMemory = Server.GetGameProccess().WorkingSet64 / 1048576L; // process memory in MB
+				long memoryLeft = maxMb - workingMemory;
 
-			if (tickCount == 10)
-			{
-				restart = true;
-				Server.Write("Restarting the server at end of the round due to low memory");
-			}
+				if (memoryLeft < lowMb)
+				{
+					if (!warn) Server.Write("Warning: program is running low on memory (" + memoryLeft + " MB left) the server will restart at the end of the round if it continues", ConsoleColor.Red);
+					warn = true;
+					tickCount++;
+				}
+				else
+				{
+					warn = false;
+					tickCount = 0;
+				}
 
+				if (tickCount == 10)
+				{
+					restart = true;
+					Server.Write("Restarting the server at end of the round due to low memory");
+				}
+			}
 		}
 
 		public override void OnConfigReload()
 		{
 			lowMb = Server.ServerConfig.config.GetInt("restart_low_memory_roundend", 450);
-			lowMb = (lowMb > 0 ? lowMb : 450); // Prevent negative values
 
 			maxMb = Server.ServerConfig.config.GetInt("max_memory", 2048); // 32 bit limited to 2GB
-			maxMb = (maxMb > 0 ? maxMb : 2048); // Prevent negative values
 		}
 
 		public void OnRoundEnd()
