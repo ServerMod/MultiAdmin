@@ -213,10 +213,15 @@ namespace MultiAdmin
 						}
 					}
 
-					if (gameMessage.Contains("ServerMod"))
+					if (gameMessage.Contains("ServerMod - Version"))
 					{
 						server.HasServerMod = true;
-						server.ServerModVersion = gameMessage.Replace("ServerMod - Version", "").Trim();
+
+						// This should work fine with older ServerMod versions too
+						string[] splitVer = gameMessage.Replace("ServerMod - Version", "").Split('-');
+
+						server.ServerModVersion = splitVer[0].Trim();
+						server.ServerModBuild = (splitVer.Length > 1 ? splitVer[1] : "A").Trim();
 					}
 
 					if (server.ServerModCheck(1, 7, 2))

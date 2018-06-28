@@ -14,6 +14,7 @@ namespace MultiAdmin.MultiAdmin
 
 		public Boolean HasServerMod { get; set; }
 		public String ServerModVersion { get; set; }
+		public String ServerModBuild { get; set; }
 		public Config MultiAdminCfg { get; }
 		public Config ServerConfig
 		{
