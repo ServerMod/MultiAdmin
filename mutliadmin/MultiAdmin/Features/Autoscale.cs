@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MultiAdmin.MultiAdmin.Features;
 
 namespace MultiAdmin.MultiAdmin.Commands
 {
-	class Autoscale : Feature, IEventServerFull
+    [Feature]
+    class Autoscale : Feature, IEventServerFull
 	{
 		private String config;
 

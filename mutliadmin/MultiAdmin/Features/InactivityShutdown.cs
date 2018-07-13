@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MultiAdmin.MultiAdmin.Features;
 
 namespace MultiAdmin.MultiAdmin.Commands
 {
-	class InactivityShutdown : Feature, IEventRoundStart, IEventRoundEnd, IEventTick
+    [Feature]
+    class InactivityShutdown : Feature, IEventRoundStart, IEventRoundEnd, IEventTick
 	{
 		private Boolean waiting;
 		private long roundEndTime;

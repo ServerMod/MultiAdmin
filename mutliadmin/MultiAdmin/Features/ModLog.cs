@@ -3,7 +3,8 @@ using System.IO;
 
 namespace MultiAdmin.MultiAdmin.Features
 {
-	class ModLog : Feature, IEventAdminAction
+    [Feature]
+    class ModLog : Feature, IEventAdminAction
 	{
 		private Boolean logToOwnFile;
 		private String modLogLocation;

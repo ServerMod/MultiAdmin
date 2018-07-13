@@ -4,10 +4,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MultiAdmin.MultiAdmin.Features;
 
 namespace MultiAdmin.MultiAdmin.Commands
 {
-	class Titlebar : Feature, IEventPlayerConnect, IEventPlayerDisconnect, IEventServerStart
+    [Feature]
+    class Titlebar : Feature, IEventPlayerConnect, IEventPlayerDisconnect, IEventServerStart
 	{
 		private int playerCount;
 		private int maxPlayers;

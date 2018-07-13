@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
 using MultiAdmin.MultiAdmin.Commands;
 using MultiAdmin.MultiAdmin.Features;
@@ -110,28 +112,50 @@ namespace MultiAdmin.MultiAdmin
 			}
 		}
 
+	    static IEnumerable<Type> GetTypesWithHelpAttribute(Type attribute)
+	    {
+	        foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+	        {
+	            foreach (Type type in assembly.GetTypes())
+	            {
+	                var attribs = type.GetCustomAttributes(attribute, false);
+	                if (attribs.Length > 0)
+	                {
+	                    yield return type;
+	                }
+	            }
+	        }
+        }
+        private void RegisterFeatures()
+        {
+            var assembly = GetTypesWithHelpAttribute(typeof(Feature)).ToList();
+            foreach (Type type in assembly)
+            {
+                var feature = Activator.CreateInstance(type, this) as Feature;
+                if(feature is null)
+                    continue;
 
-		private void RegisterFeatures()
-		{
-			RegisterFeature(new Autoscale(this));
-			RegisterFeature(new ChainStart(this));
-			RegisterFeature(new ConfigReload(this));
-			RegisterFeature(new ExitCommand(this));
-			//RegisterFeature(new EventTest(this));
-			RegisterFeature(new GithubGenerator(this));
-			RegisterFeature(new GithubLogSubmitter(this));
-			RegisterFeature(new HelpCommand(this));
-			RegisterFeature(new InactivityShutdown(this));
-			RegisterFeature(new MemoryChecker(this));
-			RegisterFeature(new MemoryCheckerSoft(this));
-			RegisterFeature(new ModLog(this));
-			RegisterFeature(new MultiAdminInfo(this));
-			RegisterFeature(new NewCommand(this));
-			RegisterFeature(new Restart(this));
-			RegisterFeature(new RestartNextRound(this));
-			RegisterFeature(new RestartRoundCounter(this));
-			RegisterFeature(new StopNextRound(this));
-			RegisterFeature(new Titlebar(this));
+                RegisterFeature(feature);
+            }
+			//RegisterFeature(new Autoscale(this));
+			//RegisterFeature(new ChainStart(this));
+			//RegisterFeature(new ConfigReload(this));
+			//RegisterFeature(new ExitCommand(this));
+			////RegisterFeature(new EventTest(this));
+			//RegisterFeature(new GithubGenerator(this));
+			//RegisterFeature(new GithubLogSubmitter(this));
+			//RegisterFeature(new HelpCommand(this));
+			//RegisterFeature(new InactivityShutdown(this));
+			//RegisterFeature(new MemoryChecker(this));
+			//RegisterFeature(new MemoryCheckerSoft(this));
+			//RegisterFeature(new ModLog(this));
+			//RegisterFeature(new MultiAdminInfo(this));
+			//RegisterFeature(new NewCommand(this));
+			//RegisterFeature(new Restart(this));
+			//RegisterFeature(new RestartNextRound(this));
+			//RegisterFeature(new RestartRoundCounter(this));
+			//RegisterFeature(new StopNextRound(this));
+			//RegisterFeature(new Titlebar(this));
 		}
 
 		private void InitFeatures()

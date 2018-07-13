@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MultiAdmin.MultiAdmin.Features;
 
 namespace MultiAdmin.MultiAdmin.Commands
 {
-	class MemoryCheckerSoft : Feature, IEventTick, IEventRoundEnd
+    [Feature]
+    class MemoryCheckerSoft : Feature, IEventTick, IEventRoundEnd
 	{
 		private int lowMb;
 		private int maxMb;

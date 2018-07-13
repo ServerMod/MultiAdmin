@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MultiAdmin.MultiAdmin.Features;
 
 namespace MultiAdmin.MultiAdmin.Commands
 {
-	class MultiAdminInfo : Feature, IEventServerPreStart, ICommand
+    [Feature]
+    class MultiAdminInfo : Feature, IEventServerPreStart, ICommand
 	{
 		public MultiAdminInfo(Server server) : base(server)
 		{
