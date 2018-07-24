@@ -51,8 +51,9 @@ This does not include ServerMod or ingame commands, for a full list type HELP in
 ## Config settings
 - manual_start (wether of not to start the server automatically when launching multiadmin, default = true)
 - start_config_on_full (start server with this config folder when the server becomes full) [requires servermod]
-- shutdown_once_empty_for (shutdown the server once a round hasnt started in x seconds)
-- restart_every_num_rounds (restart the server every x rounds)
+- multiadmin_print_speed (delay between outputs in the MultiAdmin console, default = 150)
+- shutdown_once_empty_for (shutdown the server once a round hasnt started in x seconds, default = -1)
+- restart_every_num_rounds (restart the server every x rounds, default = 15)
 - restart_low_memory (restart if the games memory falls below this, default = 400)
 - restart_low_memory_roundend (restart if the games memory falls below this at the end of this round, default = 400)
-
+- max_memory (used to determine if the servers memory is low, default = 2048)
