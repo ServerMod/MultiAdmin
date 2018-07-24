@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MultiAdmin.MultiAdmin.Features;
 
 namespace MultiAdmin.MultiAdmin.Commands
 {
-	class RestartRoundCounter : Feature, IEventRoundEnd
+    [Feature]
+    class RestartRoundCounter : Feature, IEventRoundEnd
 	{
 		private int count;
 		private int restartAfter;

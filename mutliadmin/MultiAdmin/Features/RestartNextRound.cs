@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MultiAdmin.MultiAdmin.Features;
 
 namespace MultiAdmin.MultiAdmin.Commands
 {
-	class RestartNextRound : Feature, ICommand, IEventRoundEnd
+    [Feature]
+    class RestartNextRound : Feature, ICommand, IEventRoundEnd
 	{
 		private Boolean restart;
 

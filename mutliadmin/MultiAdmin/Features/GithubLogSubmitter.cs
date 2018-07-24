@@ -7,7 +7,8 @@ using System.Threading;
 
 namespace MultiAdmin.MultiAdmin.Features
 {
-	class GithubLogSubmitter : Feature
+    [Feature]
+    class GithubLogSubmitter : Feature
 	{
 		private Thread submitThread;
 		public GithubLogSubmitter(Server server) : base(server)

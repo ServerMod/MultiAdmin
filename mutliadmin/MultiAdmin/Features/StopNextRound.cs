@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MultiAdmin.MultiAdmin.Features;
 
 namespace MultiAdmin.MultiAdmin.Commands
 {
-	class StopNextRound : Feature, ICommand, IEventRoundEnd
+    [Feature]
+    class StopNextRound : Feature, ICommand, IEventRoundEnd
 	{
 		private Boolean stop;
 

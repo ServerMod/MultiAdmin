@@ -39,6 +39,7 @@
   <ItemGroup>
     <Compile Include="MultiAdmin\Features\ConfigReload.cs" />
     <Compile Include="MultiAdmin\Features\ExitCommand.cs" />
+    <Compile Include="MultiAdmin\Features\Attributes\FeatureAttribute.cs" />
     <Compile Include="MultiAdmin\Features\GithubGenerator.cs" />
     <Compile Include="MultiAdmin\Features\GithubLogSubmitter.cs" />
     <Compile Include="MultiAdmin\Features\HelpCommand.cs" />
