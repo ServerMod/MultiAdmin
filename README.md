@@ -29,7 +29,7 @@ You can join our discord here: https://discord.gg/8nvmMTr
 
 ## Installation Instructions:
 1. Place MultiAdmin.exe next to your LocalAdmin.exe
-2. Create a new folder called servers within the same folder as LocalAdmin/MultiServer
+2. Create a new folder called servers within the same folder as LocalAdmin/MultiAdmin
 3. For each instance with a unique config, create a new directory in the servers directory and place each config.txt in there, so for example for two unique configs:
 * servers/FirstServer/config.txt
 * servers/SecondServer/config.txt
