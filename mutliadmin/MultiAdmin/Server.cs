@@ -128,8 +128,9 @@ namespace MultiAdmin.MultiAdmin
         }
         private void RegisterFeatures()
         {
-            var assembly = GetTypesWithHelpAttribute(typeof(Feature)).ToList();
-            foreach (Type type in assembly)
+			/*
+			var assembly = GetTypesWithHelpAttribute(typeof(Feature)).ToList();
+			foreach (Type type in assembly)
             {
                 var feature = Activator.CreateInstance(type, this) as Feature;
                 if(feature is null)
@@ -137,25 +138,26 @@ namespace MultiAdmin.MultiAdmin
 
                 RegisterFeature(feature);
             }
-			//RegisterFeature(new Autoscale(this));
-			//RegisterFeature(new ChainStart(this));
-			//RegisterFeature(new ConfigReload(this));
-			//RegisterFeature(new ExitCommand(this));
-			////RegisterFeature(new EventTest(this));
-			//RegisterFeature(new GithubGenerator(this));
-			//RegisterFeature(new GithubLogSubmitter(this));
-			//RegisterFeature(new HelpCommand(this));
-			//RegisterFeature(new InactivityShutdown(this));
-			//RegisterFeature(new MemoryChecker(this));
-			//RegisterFeature(new MemoryCheckerSoft(this));
-			//RegisterFeature(new ModLog(this));
-			//RegisterFeature(new MultiAdminInfo(this));
-			//RegisterFeature(new NewCommand(this));
-			//RegisterFeature(new Restart(this));
-			//RegisterFeature(new RestartNextRound(this));
-			//RegisterFeature(new RestartRoundCounter(this));
-			//RegisterFeature(new StopNextRound(this));
-			//RegisterFeature(new Titlebar(this));
+			*/
+			RegisterFeature(new Autoscale(this));
+			RegisterFeature(new ChainStart(this));
+			RegisterFeature(new ConfigReload(this));
+			RegisterFeature(new ExitCommand(this));
+			//RegisterFeature(new EventTest(this));
+			RegisterFeature(new GithubGenerator(this));
+			RegisterFeature(new GithubLogSubmitter(this));
+			RegisterFeature(new HelpCommand(this));
+			RegisterFeature(new InactivityShutdown(this));
+			RegisterFeature(new MemoryChecker(this));
+			RegisterFeature(new MemoryCheckerSoft(this));
+			RegisterFeature(new ModLog(this));
+			RegisterFeature(new MultiAdminInfo(this));
+			RegisterFeature(new NewCommand(this));
+			RegisterFeature(new Restart(this));
+			RegisterFeature(new RestartNextRound(this));
+			RegisterFeature(new RestartRoundCounter(this));
+			RegisterFeature(new StopNextRound(this));
+			RegisterFeature(new Titlebar(this));
 		}
 
 		private void InitFeatures()
@@ -458,7 +460,21 @@ namespace MultiAdmin.MultiAdmin
 				{
 					var contents = File.ReadAllText(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "config.txt");
 					File.WriteAllText(MainConfigLocation, contents);
-					Write("Config file swapped", ConsoleColor.DarkYellow);
+
+					string confignames = "config.txt";
+
+					DirectoryInfo dir = new DirectoryInfo(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar);
+					foreach (FileInfo file in dir.GetFiles())
+					{
+						if (file.Name.Contains("sm_config_"))
+						{
+							contents = File.ReadAllText(file.FullName);
+							File.WriteAllText(MainConfigLocation.Replace("config_gameplay.txt", file.Name), contents);
+							confignames += ", " + file.Name;
+						}
+					}
+
+					Write("Config file swapped: " + confignames, ConsoleColor.DarkYellow);
 				}
 				else
 				{
