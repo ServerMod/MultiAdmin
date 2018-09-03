@@ -466,7 +466,7 @@ namespace MultiAdmin.MultiAdmin
 					DirectoryInfo dir = new DirectoryInfo(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar);
 					foreach (FileInfo file in dir.GetFiles())
 					{
-						if (file.Name.Contains("sm_config_"))
+						if (file.Name.Contains("config_"))
 						{
 							contents = File.ReadAllText(file.FullName);
 							File.WriteAllText(MainConfigLocation.Replace("config_gameplay.txt", file.Name), contents);
