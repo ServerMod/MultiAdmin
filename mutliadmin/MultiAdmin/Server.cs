@@ -71,7 +71,7 @@ namespace MultiAdmin.MultiAdmin
 		}
 		public Boolean fixBuggedPlayers;
 		public Boolean runOptimized = true;
-		public Boolean nolog = true;
+		public Boolean nolog = false;
 		public int printSpeed = 150;
 
 		private String currentLine = "";
@@ -97,7 +97,7 @@ namespace MultiAdmin.MultiAdmin
 			// Enable / Disable MultiAdmin Optimizations
 			runOptimized = multiAdminCfg.config.GetBool("enable_multiadmin_optimizations", true);
 			printSpeed = multiAdminCfg.config.GetInt("multiadmin_print_speed", 150);
-			nolog = MultiAdminCfg.config.GetBool("multiadmin_nolog", true);
+			nolog = MultiAdminCfg.config.GetBool("multiadmin_nolog", false);
 
 			// Register all features 
 			RegisterFeatures();
