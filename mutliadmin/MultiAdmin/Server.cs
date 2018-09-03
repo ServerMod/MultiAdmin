@@ -12,7 +12,7 @@ namespace MultiAdmin.MultiAdmin
 {
 	public class Server
 	{
-		public static readonly string MA_VERSION = "2.1.1";
+		public static readonly string MA_VERSION = "2.1.2";
 
 		public Boolean HasServerMod { get; set; }
 		public String ServerModVersion { get; set; }
@@ -71,6 +71,7 @@ namespace MultiAdmin.MultiAdmin
 		}
 		public Boolean fixBuggedPlayers;
 		public Boolean runOptimized = true;
+		public Boolean nolog = true;
 		public int printSpeed = 150;
 
 		private String currentLine = "";
@@ -96,6 +97,7 @@ namespace MultiAdmin.MultiAdmin
 			// Enable / Disable MultiAdmin Optimizations
 			runOptimized = multiAdminCfg.config.GetBool("enable_multiadmin_optimizations", true);
 			printSpeed = multiAdminCfg.config.GetInt("multiadmin_print_speed", 150);
+			nolog = MultiAdminCfg.config.GetBool("multiadmin_nolog", true);
 
 			// Register all features 
 			RegisterFeatures();
@@ -418,7 +420,11 @@ namespace MultiAdmin.MultiAdmin
 				string[] files = Directory.GetFiles(Directory.GetCurrentDirectory(), "SCPSL.*", SearchOption.TopDirectoryOnly);
 				Write("Executing: " + files[0], ConsoleColor.DarkGreen);
 				SwapConfigs();
-				string args = "-batchmode -nographics -key" + session_id + " -silent-crashes -id" + (object)Process.GetCurrentProcess().Id + " -logFile \"" + LogFolder + Utils.GetDate() + "_SCP_output_log.txt" + "\"";
+				string args;
+				if (nolog)
+					args = "-batchmode -nographics -key" + session_id + " -silent-crashes -id" + (object)Process.GetCurrentProcess().Id + " -nolog";
+				else
+					args = "-batchmode -nographics -key" + session_id + " -silent-crashes -id" + (object)Process.GetCurrentProcess().Id + " -logFile \"" + LogFolder + Utils.GetDate() + "_SCP_output_log.txt" + "\"";
 				Write("Starting server with the following parameters");
 				Write(files[0] + " " + args);
 				ProcessStartInfo startInfo = new ProcessStartInfo(files[0]);
