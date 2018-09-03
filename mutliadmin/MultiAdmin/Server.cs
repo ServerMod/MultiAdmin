@@ -97,7 +97,7 @@ namespace MultiAdmin.MultiAdmin
 			// Enable / Disable MultiAdmin Optimizations
 			runOptimized = multiAdminCfg.config.GetBool("enable_multiadmin_optimizations", true);
 			printSpeed = multiAdminCfg.config.GetInt("multiadmin_print_speed", 150);
-			nolog = MultiAdminCfg.config.GetBool("multiadmin_nolog", false);
+			nolog = multiAdminCfg.config.GetBool("multiadmin_nolog", false);
 
 			// Register all features 
 			RegisterFeatures();
