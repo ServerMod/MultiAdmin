@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace MultiAdmin.MultiAdmin.Features
 {
-    [Feature]
-    class ConfigReload : Feature, ICommand
+	[Feature]
+	class ConfigReload : Feature, ICommand
 	{
 		Boolean pass;
 

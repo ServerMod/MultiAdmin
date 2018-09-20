@@ -7,8 +7,8 @@ using MultiAdmin.MultiAdmin.Features;
 
 namespace MultiAdmin.MultiAdmin.Commands
 {
-    [Feature]
-    class NewCommand : Feature, ICommand
+	[Feature]
+	class NewCommand : Feature, ICommand
 	{
 		private String config;
 

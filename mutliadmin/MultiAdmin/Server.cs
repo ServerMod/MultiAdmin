@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using MultiAdmin.MultiAdmin.Commands;
 using MultiAdmin.MultiAdmin.Features;
@@ -52,8 +51,8 @@ namespace MultiAdmin.MultiAdmin
 		{
 			get
 			{
-           			string loc = Assembly.GetExecutingAssembly().Location;
-           			loc = ExecutingDir.Remove(ExecutingDir.LastIndexOf(Path.DirectorySeparatorChar)) + Path.DirectorySeparatorChar;
+				string loc = Assembly.GetExecutingAssembly().Location;
+				loc = loc.Remove(loc.LastIndexOf(Path.DirectorySeparatorChar)) + Path.DirectorySeparatorChar;
 				if (multiMode)
 				{
 					loc += "servers" + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "logs" + Path.DirectorySeparatorChar;
@@ -116,22 +115,22 @@ namespace MultiAdmin.MultiAdmin
 			}
 		}
 
-	    static IEnumerable<Type> GetTypesWithHelpAttribute(Type attribute)
-	    {
-	        foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-	        {
-	            foreach (Type type in assembly.GetTypes())
-	            {
-	                var attribs = type.GetCustomAttributes(attribute, false);
-	                if (attribs.Length > 0)
-	                {
-	                    yield return type;
-	                }
-	            }
-	        }
-        }
-        private void RegisterFeatures()
-        {
+		static IEnumerable<Type> GetTypesWithHelpAttribute(Type attribute)
+		{
+			foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+			{
+				foreach (Type type in assembly.GetTypes())
+				{
+					var attribs = type.GetCustomAttributes(attribute, false);
+					if (attribs.Length > 0)
+					{
+						yield return type;
+					}
+				}
+			}
+		}
+		private void RegisterFeatures()
+		{
 			/*
 			var assembly = GetTypesWithHelpAttribute(typeof(Feature)).ToList();
 			foreach (Type type in assembly)
