@@ -52,16 +52,15 @@ namespace MultiAdmin.MultiAdmin
 		{
 			get
 			{
-           			string ExecutingDir = Assembly.GetExecutingAssembly().Location;
-           			ExecutingDir = ExecutingDir.Remove(ExecutingDir.LastIndexOf(Path.DirectorySeparatorChar)) + Path.DirectorySeparatorChar;
-				string loc;
+           			string loc = Assembly.GetExecutingAssembly().Location;
+           			loc = ExecutingDir.Remove(ExecutingDir.LastIndexOf(Path.DirectorySeparatorChar)) + Path.DirectorySeparatorChar;
 				if (multiMode)
 				{
-					loc = "servers" + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "logs" + Path.DirectorySeparatorChar;
+					loc += "servers" + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "logs" + Path.DirectorySeparatorChar;
 				}
 				else
 				{
-					loc = "logs" + Path.DirectorySeparatorChar;
+					loc += "logs" + Path.DirectorySeparatorChar;
 				}
 
 				if (!Directory.Exists(loc))
@@ -69,7 +68,7 @@ namespace MultiAdmin.MultiAdmin
 					Directory.CreateDirectory(loc);
 				}
 
-				return ExecutingDir + loc;
+				return loc;
 			}
 		}
 		public Boolean fixBuggedPlayers;
