@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -51,6 +52,8 @@ namespace MultiAdmin.MultiAdmin
 		{
 			get
 			{
+           			string ExecutingDir = Assembly.GetExecutingAssembly().Location;
+           			ExecutingDir = ExecutingDir.Remove(ExecutingDir.LastIndexOf(Path.DirectorySeparatorChar)) + Path.DirectorySeparatorChar;
 				string loc;
 				if (multiMode)
 				{
@@ -66,7 +69,7 @@ namespace MultiAdmin.MultiAdmin
 					Directory.CreateDirectory(loc);
 				}
 
-				return loc;
+				return ExecutingDir + loc;
 			}
 		}
 		public Boolean fixBuggedPlayers;
