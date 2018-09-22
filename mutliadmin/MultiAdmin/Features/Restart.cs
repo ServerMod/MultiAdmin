@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace MultiAdmin.MultiAdmin.Features
 {
-    [Feature]
-    class Restart : Feature, ICommand
+	[Feature]
+	class Restart : Feature, ICommand
 	{
 		public Restart(Server server) : base(server)
 		{

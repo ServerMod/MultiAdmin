@@ -6,17 +6,17 @@ using MutliAdmin;
 
 namespace MultiAdmin
 {
-    public class OldConfig
-    {
-        public Dictionary<String, String> values;
-        private String config_file;
+	public class OldConfig
+	{
+		public Dictionary<String, String> values;
+		private String config_file;
 
-        public OldConfig(String config_file)
-        {
-            this.config_file = config_file;
-            Reload();
-        }
-        private readonly Regex rgx = new Regex("^[^;\\/:\\n\\r\\s=]+\\s*=[^;\\n\\r]+;", RegexOptions.Multiline | RegexOptions.Compiled);
+		public OldConfig(String config_file)
+		{
+			this.config_file = config_file;
+			Reload();
+		}
+		private readonly Regex rgx = new Regex("^[^;\\/:\\n\\r\\s=]+\\s*=[^;\\n\\r]+;", RegexOptions.Multiline | RegexOptions.Compiled);
 
 		public string[] GetRaw()
 		{
@@ -40,8 +40,8 @@ namespace MultiAdmin
 		}
 
 		public void Reload()
-        {
-            values = new Dictionary<string, string>();
+		{
+			values = new Dictionary<string, string>();
 
 			if (File.Exists(config_file))
 			{
@@ -81,36 +81,36 @@ namespace MultiAdmin
 		}
 
 
-        public String GetValue(String key, String def="")
-        {
-            String val = null;
-            if (!values.TryGetValue(key.ToLower(), out val))
-            {
-                val = def;
-            }
+		public String GetValue(String key, String def = "")
+		{
+			String val = null;
+			if (!values.TryGetValue(key.ToLower(), out val))
+			{
+				val = def;
+			}
 
-            return val;
-        }
+			return val;
+		}
 
-        public int GetIntValue(String key, int def)
-        {
-            int result;
-            bool successful = int.TryParse(GetValue(key, def.ToString()), out result);
+		public int GetIntValue(String key, int def)
+		{
+			int result;
+			bool successful = int.TryParse(GetValue(key, def.ToString()), out result);
 
-            if (successful)
-            {
-                return result;
-            }
-            else
-            {
-                Console.WriteLine("WARNING: failed to parse integer value for config setting:" + key + " using default value.");
-                return def;
-            }
-        }
+			if (successful)
+			{
+				return result;
+			}
+			else
+			{
+				Console.WriteLine("WARNING: failed to parse integer value for config setting:" + key + " using default value.");
+				return def;
+			}
+		}
 
-        public Boolean GetBoolean(String key, bool def)
-        {
-            String configValue = GetValue(key, def.ToString());
+		public Boolean GetBoolean(String key, bool def)
+		{
+			String configValue = GetValue(key, def.ToString());
 
 			// Why did I make it so you can use these words? Because I can.
 			string[] trueWords = new string[]
@@ -154,5 +154,5 @@ namespace MultiAdmin
 
 			return def;
 		}
-    }
+	}
 }

@@ -7,8 +7,8 @@ using MultiAdmin.MultiAdmin.Features;
 
 namespace MultiAdmin.MultiAdmin.Commands
 {
-    [Feature]
-    class InactivityShutdown : Feature, IEventRoundStart, IEventRoundEnd, IEventTick
+	[Feature]
+	class InactivityShutdown : Feature, IEventRoundStart, IEventRoundEnd, IEventTick
 	{
 		private Boolean waiting;
 		private long roundEndTime;

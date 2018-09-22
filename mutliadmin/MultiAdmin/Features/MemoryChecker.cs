@@ -7,8 +7,8 @@ using MultiAdmin.MultiAdmin.Features;
 
 namespace MultiAdmin.MultiAdmin.Commands
 {
-    [Feature]
-    class MemoryChecker : Feature, IEventTick
+	[Feature]
+	class MemoryChecker : Feature, IEventTick
 	{
 		private int lowMb;
 		private int maxMb;

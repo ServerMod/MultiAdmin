@@ -7,8 +7,8 @@ using MultiAdmin.MultiAdmin.Features;
 
 namespace MultiAdmin.MultiAdmin.Commands
 {
-    [Feature]
-    class ChainStart : Feature, IEventServerStart
+	[Feature]
+	class ChainStart : Feature, IEventServerStart
 	{
 		private Boolean dontstart;
 

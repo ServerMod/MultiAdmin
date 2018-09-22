@@ -12,7 +12,7 @@ namespace MultiAdmin
 		public static readonly Regex SMOD_REGEX = new Regex(@"\[(DEBUG|INFO|WARN|ERROR)\] (\[.*?\]) (.*)", RegexOptions.Compiled);
 		public static readonly ConsoleColor DEFAULT_FOREGROUND = ConsoleColor.Cyan;
 		public static readonly ConsoleColor DEFAULT_BACKGROUND = ConsoleColor.Black;
-		
+
 
 		public static ConsoleColor MapConsoleColor(String color, ConsoleColor def = ConsoleColor.Cyan)
 		{
@@ -125,9 +125,10 @@ namespace MultiAdmin
 						foreach (String part in parts)
 						{
 							String modifiedPart = part;
-							if (modifiedPart.Length >= 3 && modifiedPart.Contains(";")) {
+							if (modifiedPart.Length >= 3 && modifiedPart.Contains(";"))
+							{
 								String colorTag = modifiedPart.Substring(3, modifiedPart.IndexOf(";") - 3);
-								
+
 								if (modifiedPart.Substring(0, 3).Equals("fg="))
 								{
 									fg = MapConsoleColor(colorTag, DEFAULT_FOREGROUND);
@@ -148,7 +149,7 @@ namespace MultiAdmin
 								}
 
 							}
-	
+
 							server.WritePart(modifiedPart, bg, fg, 0, false, false);
 						}
 						// end
