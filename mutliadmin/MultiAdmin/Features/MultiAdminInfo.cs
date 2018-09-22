@@ -7,8 +7,8 @@ using MultiAdmin.MultiAdmin.Features;
 
 namespace MultiAdmin.MultiAdmin.Commands
 {
-	[Feature]
-	class MultiAdminInfo : Feature, IEventServerPreStart, ICommand
+    [Feature]
+    class MultiAdminInfo : Feature, IEventServerPreStart, ICommand
 	{
 		public MultiAdminInfo(Server server) : base(server)
 		{

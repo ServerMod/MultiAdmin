@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace MultiAdmin.MultiAdmin.Features
 {
-	[Feature]
-	class GithubGenerator : Feature, ICommand
+    [Feature]
+    class GithubGenerator : Feature, ICommand
 	{
 		public GithubGenerator(Server server) : base(server)
 		{

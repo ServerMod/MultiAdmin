@@ -8,8 +8,8 @@ using MultiAdmin.MultiAdmin.Features;
 
 namespace MultiAdmin.MultiAdmin.Commands
 {
-	[Feature]
-	class Titlebar : Feature, IEventPlayerConnect, IEventPlayerDisconnect, IEventServerStart
+    [Feature]
+    class Titlebar : Feature, IEventPlayerConnect, IEventPlayerDisconnect, IEventServerStart
 	{
 		private int playerCount;
 		private int maxPlayers;

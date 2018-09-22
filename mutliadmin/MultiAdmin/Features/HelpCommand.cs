@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace MultiAdmin.MultiAdmin.Features
 {
-	[Feature]
-	public class HelpCommand : Feature, ICommand
+    [Feature]
+    public class HelpCommand : Feature, ICommand
 	{
 		public HelpCommand(Server server) : base(server)
 		{

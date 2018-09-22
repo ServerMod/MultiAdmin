@@ -116,7 +116,7 @@ namespace MutliAdmin
 			{
 				Write("All servers are set to manual start! you should have at least one config that auto starts", ConsoleColor.Red);
 			}
-
+			
 			return hasServerToStart;
 		}
 

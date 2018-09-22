@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace MultiAdmin.MultiAdmin.Features
 {
-	[Feature]
-	class ExitCommand : Feature, ICommand
+    [Feature]
+    class ExitCommand : Feature, ICommand
 	{
 		Boolean pass;
 

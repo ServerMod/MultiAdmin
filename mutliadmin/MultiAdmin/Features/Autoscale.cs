@@ -7,8 +7,8 @@ using MultiAdmin.MultiAdmin.Features;
 
 namespace MultiAdmin.MultiAdmin.Commands
 {
-	[Feature]
-	class Autoscale : Feature, IEventServerFull
+    [Feature]
+    class Autoscale : Feature, IEventServerFull
 	{
 		private String config;
 

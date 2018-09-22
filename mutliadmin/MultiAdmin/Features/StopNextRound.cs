@@ -7,8 +7,8 @@ using MultiAdmin.MultiAdmin.Features;
 
 namespace MultiAdmin.MultiAdmin.Commands
 {
-	[Feature]
-	class StopNextRound : Feature, ICommand, IEventRoundEnd
+    [Feature]
+    class StopNextRound : Feature, ICommand, IEventRoundEnd
 	{
 		private Boolean stop;
 
