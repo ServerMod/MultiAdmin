@@ -547,7 +547,8 @@ namespace MultiAdmin.MultiAdmin
 
 		public string Timestamp(string message)
 		{
-			if (message == "") return message;
+			bool empty = String.IsNullOrEmpty(message);
+			if (empty) return String.Empty;
 			DateTime now = DateTime.Now;
 			message = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] " + message;
 			return message;
