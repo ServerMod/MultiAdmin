@@ -78,7 +78,7 @@ namespace MultiAdmin.MultiAdmin.Features
 				{
 
 					var postData = "identifier={0}&stacktrace={1}&seen={2}&labels={3}";
-					var query = string.Format(postData, WebUtility.UrlEncode(detail.id), WebUtility.UrlEncode(detail.stacktrace), detail.seen.ToString(), String.Join(",", detail.tags));
+					var query = string.Format(postData, WebUtility.UrlEncode(detail.id), WebUtility.UrlEncode(detail.stacktrace), detail.seen.ToString(), string.Join(",", detail.tags));
 					var url = "http://stracktrack.may.mx:8000/exception?" + query;
 					HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
 					request.Method = "POST";
@@ -163,8 +163,8 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		internal class ExceptionDetails
 		{
-			public string id = String.Empty;
-			public string stacktrace = String.Empty;
+			public string id = string.Empty;
+			public string stacktrace = string.Empty;
 			public int seen = 0;
 			public List<string> tags = new List<string>();
 		}
