@@ -10,7 +10,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 	[Feature]
 	class NewCommand : Feature, ICommand
 	{
-		private String config;
+		private string config;
 
 		public NewCommand(Server server) : base(server)
 		{
