@@ -10,7 +10,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 	[Feature]
 	class ChainStart : Feature, IEventServerStart
 	{
-		private Boolean dontstart;
+		private bool dontstart;
 
 		public ChainStart(Server server) : base(server)
 		{
