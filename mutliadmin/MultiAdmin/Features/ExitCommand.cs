@@ -9,7 +9,7 @@ namespace MultiAdmin.MultiAdmin.Features
 	[Feature]
 	class ExitCommand : Feature, ICommand
 	{
-		Boolean pass;
+		bool pass;
 
 		public ExitCommand(Server server) : base(server)
 		{
@@ -41,7 +41,7 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public string GetUsage()
 		{
-			return "";
+			return String.Empty;
 		}
 
 		public override void Init()
