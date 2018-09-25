@@ -180,7 +180,7 @@ namespace MutliAdmin
 				//var yaml = serializer.Serialize(config.values);
 				//Write(yaml, ConsoleColor.White);
 
-				string yaml = String.Empty;
+				string yaml = string.Empty;
 
 				foreach (string line in config.GetRaw())
 				{
@@ -204,7 +204,7 @@ namespace MutliAdmin
 							// Write any comments
 							if (!string.IsNullOrEmpty(followingContent))
 							{
-								yaml += (followingContent.StartsWith("#") ? String.Empty : "#") + followingContent + Environment.NewLine;
+								yaml += (followingContent.StartsWith("#") ? string.Empty : "#") + followingContent + Environment.NewLine;
 							}
 
 							yaml += newLine + Environment.NewLine;
@@ -218,7 +218,7 @@ namespace MutliAdmin
 								newLine = newLine.Substring(commentText.Length).Trim();
 							}
 
-							newLine = (string.IsNullOrEmpty(newLine) ? String.Empty : (newLine.StartsWith("#") ? String.Empty : "#") + newLine);
+							newLine = (string.IsNullOrEmpty(newLine) ? string.Empty : (newLine.StartsWith("#") ? string.Empty : "#") + newLine);
 
 							yaml += newLine + Environment.NewLine;
 						}
@@ -272,7 +272,7 @@ namespace MutliAdmin
 			}
 
 
-			configChain = String.Empty;
+			configChain = string.Empty;
 			if (StartHandleConfigs(args))
 			{
 				server = new Server(GetServerDirectory(), configKey, multiadminConfig, configLocation, configChain, multiMode);
