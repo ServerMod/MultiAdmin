@@ -9,7 +9,7 @@ namespace MultiAdmin.MultiAdmin.Features
 	[Feature]
 	class ConfigReload : Feature, ICommand
 	{
-		Boolean pass;
+		bool pass;
 
 		public ConfigReload(Server server) : base(server)
 		{
