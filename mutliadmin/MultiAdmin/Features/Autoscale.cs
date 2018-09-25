@@ -10,7 +10,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 	[Feature]
 	class Autoscale : Feature, IEventServerFull
 	{
-		private String config;
+		private string config;
 
 		public Autoscale(Server server) : base(server)
 		{
