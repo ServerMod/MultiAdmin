@@ -37,7 +37,7 @@ namespace MultiAdmin
 				{
 					if (Directory.Exists(dedicatedDir))
 					{
-						activeDir = Directory.GetFiles(dedicatedDir, "sl*.mapi", SearchOption.TopDirectoryOnly).OrderBy(f => f).ToArray<String>();
+						activeDir = Directory.GetFiles(dedicatedDir, "sl*.mapi", SearchOption.TopDirectoryOnly).OrderBy(f => f).ToArray<string>();
 					}
 				}
 				catch
@@ -52,7 +52,7 @@ namespace MultiAdmin
 				
 				foreach (string file in activeDir)
 				{
-					string stream = String.Empty;
+					string stream = string.Empty;
 					string command = "open";
 					int attempts = 0;
 					bool read = false;
@@ -121,7 +121,7 @@ namespace MultiAdmin
 						ConsoleColor fg = DEFAULT_FOREGROUND;
 						ConsoleColor bg = DEFAULT_BACKGROUND;
 						// date
-						server.WritePart(String.Empty, DEFAULT_BACKGROUND, ConsoleColor.Cyan, 0, true, false);
+						server.WritePart(string.Empty, DEFAULT_BACKGROUND, ConsoleColor.Cyan, 0, true, false);
 
 						foreach (string line in streamSplit)
 						{
@@ -142,7 +142,7 @@ namespace MultiAdmin
 
 								if (part.Length == line.IndexOf(";"))
 								{
-									part = String.Empty;
+									part = string.Empty;
 								}
 								else
 								{
@@ -154,7 +154,7 @@ namespace MultiAdmin
 							server.WritePart(part, bg, fg, 0, false, false);
 						}
 						// end
-						server.WritePart(String.Empty, DEFAULT_BACKGROUND, ConsoleColor.Cyan, 0, false, true);
+						server.WritePart(string.Empty, DEFAULT_BACKGROUND, ConsoleColor.Cyan, 0, false, true);
 						display = false;
 					}
 
@@ -187,7 +187,7 @@ namespace MultiAdmin
 									color = ConsoleColor.Cyan;
 									break;
 							}
-							server.WritePart(String.Empty, DEFAULT_BACKGROUND, ConsoleColor.Cyan, 0, true, false);
+							server.WritePart(string.Empty, DEFAULT_BACKGROUND, ConsoleColor.Cyan, 0, true, false);
 							server.WritePart("[" + match.Groups[1].Value + "] ", DEFAULT_BACKGROUND, levelColor, 0, false, false);
 							server.WritePart(match.Groups[2].Value + " ", DEFAULT_BACKGROUND, tagColor, 0, false, false);
 							// OLD: server.WritePart(match.Groups[3].Value, msgColor, 0, false, true);
@@ -210,7 +210,7 @@ namespace MultiAdmin
 						{
 							if (f is IEventAdminAction)
 							{
-								((IEventAdminAction)f).OnAdminAction(stream.Replace("Mod log:", String.Empty));
+								((IEventAdminAction)f).OnAdminAction(stream.Replace("Mod log:", string.Empty));
 							}
 						}
 					}
@@ -219,7 +219,7 @@ namespace MultiAdmin
 					{
 						server.HasServerMod = true;
 						// This should work fine with older ServerMod versions too
-						streamSplit = stream.Replace("ServerMod - Version", String.Empty).Split('-');
+						streamSplit = stream.Replace("ServerMod - Version", string.Empty).Split('-');
 						server.ServerModVersion = streamSplit[0].Trim();
 						server.ServerModBuild = (streamSplit.Length > 1 ? streamSplit[1] : "A").Trim();
 					}
