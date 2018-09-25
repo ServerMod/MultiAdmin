@@ -36,13 +36,13 @@ namespace MultiAdmin.MultiAdmin.Features
 				files.Reverse();
 
 				if (files.Count == 0) return;
-				String lastGameLog = files[0];
+				string lastGameLog = files[0];
 
 				try
 				{
-					IEnumerable<String> lines = File.ReadLines(lastGameLog);
+					IEnumerable<string> lines = File.ReadLines(lastGameLog);
 					List<ExceptionDetails> details = GetExceptions(lines);
-					String submitted = lines.Last();
+					string submitted = lines.Last();
 
 					if (!submitted.Equals("STACKTRACK SUBMITTED"))
 					{
@@ -78,7 +78,7 @@ namespace MultiAdmin.MultiAdmin.Features
 				{
 
 					var postData = "identifier={0}&stacktrace={1}&seen={2}&labels={3}";
-					var query = String.Format(postData, WebUtility.UrlEncode(detail.id), WebUtility.UrlEncode(detail.stacktrace), detail.seen.ToString(), String.Join(",", detail.tags));
+					var query = string.Format(postData, WebUtility.UrlEncode(detail.id), WebUtility.UrlEncode(detail.stacktrace), detail.seen.ToString(), String.Join(",", detail.tags));
 					var url = "http://stracktrack.may.mx:8000/exception?" + query;
 					HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
 					request.Method = "POST";
@@ -95,12 +95,12 @@ namespace MultiAdmin.MultiAdmin.Features
 		}
 
 
-		private List<ExceptionDetails> GetExceptions(IEnumerable<String> lines)
+		private List<ExceptionDetails> GetExceptions(IEnumerable<string> lines)
 		{
 			List<ExceptionDetails> excps = new List<ExceptionDetails>();
 			ExceptionDetails details = null;
-			Boolean firstExpLine = false;
-			foreach (String line in lines)
+			bool firstExpLine = false;
+			foreach (string line in lines)
 			{
 				if (line.Contains("Exception"))
 				{
@@ -139,7 +139,7 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		private void AddException(List<ExceptionDetails> list, ExceptionDetails details)
 		{
-			Boolean add = true;
+			bool add = true;
 			foreach (ExceptionDetails existing in list)
 			{
 				if (existing.stacktrace.Equals(details.stacktrace))
@@ -163,10 +163,10 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		internal class ExceptionDetails
 		{
-			public String id = "";
-			public String stacktrace = "";
+			public string id = String.Empty;
+			public string stacktrace = String.Empty;
 			public int seen = 0;
-			public List<String> tags = new List<String>();
+			public List<string> tags = new List<string>();
 		}
 	}
 }
