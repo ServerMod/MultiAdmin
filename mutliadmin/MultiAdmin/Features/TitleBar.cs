@@ -61,14 +61,14 @@ namespace MultiAdmin.MultiAdmin.Commands
 		{
 			if (Server.SkipProcessHandle() || Process.GetCurrentProcess().MainWindowHandle != IntPtr.Zero)
 			{
-				var smod = String.Empty;
+				var smod = string.Empty;
 				if (Server.HasServerMod)
 				{
 					smod = "SMod " + Server.ServerModVersion;
 				}
 				var displayPlayerCount = playerCount;
 				if (playerCount == -1) displayPlayerCount = 0;
-				string proccessId = (Server.GetGameProccess() == null) ? String.Empty : Server.GetGameProccess().Id.ToString();
+				string proccessId = (Server.GetGameProccess() == null) ? string.Empty : Server.GetGameProccess().Id.ToString();
 				Console.Title = "MultiAdmin " + Server.MA_VERSION + " | Config: " + Server.ConfigKey + " | Session:" + Server.GetSessionId() + " PID: " + proccessId + " | " + displayPlayerCount + "/" + maxPlayers + " | " + smod;
 			}
 		}
