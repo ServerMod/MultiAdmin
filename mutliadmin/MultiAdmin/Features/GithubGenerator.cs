@@ -54,11 +54,11 @@ namespace MultiAdmin.MultiAdmin.Features
 				Server.Write("You must specify the location of the file.");
 				return;
 			}
-			var dir = String.Join(" ", args);
+			var dir = string.Join(" ", args);
 
 			List<String> lines = new List<String>();
 			lines.Add("# MultiAdmin");
-			lines.Add(String.Empty);
+			lines.Add(string.Empty);
 			lines.Add("## Features");
 
 			foreach (Feature feature in Server.Features)
@@ -68,7 +68,7 @@ namespace MultiAdmin.MultiAdmin.Features
 			}
 			lines.Add("## MultiAdmin Commands");
 			lines.Add("This does not include ServerMod or ingame commands, for a full list type HELP in multiadmin which will produce all commands.");
-			lines.Add(String.Empty);
+			lines.Add(string.Empty);
 			foreach (ICommand comm in Server.Commands.Values)
 			{
 				var commandString = (comm.GetCommand() + " " + comm.GetUsage()).Trim();
