@@ -70,7 +70,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 
 		public string GetUsage()
 		{
-			return String.Empty;
+			return string.Empty;
 		}
 	}
 }
