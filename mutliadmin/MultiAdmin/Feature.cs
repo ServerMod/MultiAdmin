@@ -14,9 +14,9 @@ namespace MultiAdmin.MultiAdmin
 			this.Server = server;
 		}
 
-		public abstract String GetFeatureDescription();
+		public abstract string GetFeatureDescription();
 		public abstract void OnConfigReload();
-		public abstract String GetFeatureName();
+		public abstract string GetFeatureName();
 		public abstract void Init();
 
 
