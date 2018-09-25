@@ -126,7 +126,7 @@ namespace MultiAdmin
 						foreach (string line in streamSplit)
 						{
 							string part = line;
-							if (part.Length >= 3 && subpart.Contains(";"))
+							if (part.Length >= 3 && part.Contains(";"))
 							{
 								string colorTag = part.Substring(3, part.IndexOf(";") - 3);
 
