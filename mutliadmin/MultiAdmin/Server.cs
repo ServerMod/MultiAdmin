@@ -270,7 +270,7 @@ namespace MultiAdmin.MultiAdmin
 				}
 				catch (System.ArgumentOutOfRangeException e)
 				{
-					Console.WriteLine(str + " Value " + cursorTop + " exceeded buffer height " + bufferHeight + ".");
+					Console.WriteLine(Server.Timestamp("Value " + cursorTop + " exceeded buffer height " + bufferHeight + "."));
 					Console.WriteLine(e.StackTrace);
 				}
 			}
@@ -545,7 +545,7 @@ namespace MultiAdmin.MultiAdmin
 			Write("Sending request to SCP: Secret Laboratory...", ConsoleColor.White);
 		}
 
-		public string Timestamp(string message)
+		public static string Timestamp(string message)
 		{
 			bool empty = String.IsNullOrEmpty(message);
 			if (empty) return String.Empty;
