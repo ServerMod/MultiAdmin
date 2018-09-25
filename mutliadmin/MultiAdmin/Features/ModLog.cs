@@ -37,9 +37,8 @@ namespace MultiAdmin.MultiAdmin.Features
 				{
 					using (StreamWriter sw = File.AppendText(this.modLogLocation))
 					{
-						DateTime now = DateTime.Now;
-						string date = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
-						sw.WriteLine(date + message);
+						message = Server.Timestamp(message);
+						sw.WriteLine(message);
 					}
 				}
 			}

@@ -248,8 +248,6 @@ namespace MultiAdmin.MultiAdmin
 			Log(message);
 			if (Server.SkipProcessHandle() || Process.GetCurrentProcess().MainWindowHandle != IntPtr.Zero)
 			{
-				DateTime now = DateTime.Now;
-				string str = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
 				int cursorTop = 0, bufferHeight = 0;
 				try
 				{
@@ -265,13 +263,14 @@ namespace MultiAdmin.MultiAdmin
 					}
 					Console.CursorTop = cursorTop;
 					Console.ForegroundColor = color;
-					Console.WriteLine(message == "" ? "" : str + message);
+					message = Server.Timestamp(message);
+					Console.WriteLine(message);
 					Console.ForegroundColor = ConsoleColor.White;
 					Console.BackgroundColor = ConsoleColor.Black;
 				}
 				catch (System.ArgumentOutOfRangeException e)
 				{
-					Console.WriteLine(str + " Value " + cursorTop + " exceeded buffer height " + bufferHeight + ".");
+					Console.WriteLine(Server.Timestamp("Value " + cursorTop + " exceeded buffer height " + bufferHeight + "."));
 					Console.WriteLine(e.StackTrace);
 				}
 			}
@@ -323,9 +322,8 @@ namespace MultiAdmin.MultiAdmin
 			{
 				using (StreamWriter sw = File.AppendText(this.maLogLocation))
 				{
-					DateTime now = DateTime.Now;
-					string date = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
-					sw.WriteLine(date + message);
+					message = Server.Timestamp(message);
+					sw.WriteLine(message);
 				}
 			}
 
@@ -547,5 +545,13 @@ namespace MultiAdmin.MultiAdmin
 			Write("Sending request to SCP: Secret Laboratory...", ConsoleColor.White);
 		}
 
+		public static string Timestamp(string message)
+		{
+			bool empty = String.IsNullOrEmpty(message);
+			if (empty) return String.Empty;
+			DateTime now = DateTime.Now;
+			message = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] " + message;
+			return message;
+		}
 	}
 }
