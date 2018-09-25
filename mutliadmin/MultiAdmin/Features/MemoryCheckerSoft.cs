@@ -13,8 +13,8 @@ namespace MultiAdmin.MultiAdmin.Commands
 		private int lowMb;
 		private int maxMb;
 		private int tickCount;
-		private Boolean restart;
-		private Boolean warn;
+		private bool restart;
+		private bool warn;
 		public MemoryCheckerSoft(Server server) : base(server)
 		{
 		}
