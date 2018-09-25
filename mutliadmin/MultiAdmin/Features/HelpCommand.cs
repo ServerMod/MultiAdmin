@@ -49,7 +49,7 @@ namespace MultiAdmin.MultiAdmin.Features
 			{
 				string usage = command.Value.GetUsage();
 				if (usage.Length > 0) usage = " " + usage;
-				string output = String.Format("{0}{1}: {2}", command.Key.ToUpper(), usage, command.Value.GetCommandDescription());
+				string output = string.Format("{0}{1}: {2}", command.Key.ToUpper(), usage, command.Value.GetCommandDescription());
 				helpOutput.Add(output);
 			}
 
@@ -70,7 +70,7 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public string GetUsage()
 		{
-			return String.Empty;
+			return string.Empty;
 		}
 	}
 }
