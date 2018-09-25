@@ -61,6 +61,4 @@ start_config_on_full: server_two_config_folder
 shutdown_once_empty: -1
 restart_every_num_rounds: 15
 
-server_ip: auto
-server_name: [nick]'s game
 ban_database_folder: [appdata]/SCP Secret Laboratory/Bans
