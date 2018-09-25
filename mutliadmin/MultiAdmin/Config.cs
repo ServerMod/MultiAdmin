@@ -16,11 +16,11 @@ namespace MultiAdmin
 	public class Config
 	{
 		public YamlConfig config;
-		private String config_file;
+		private string configFile;
 
-		public Config(String config_file)
+		public Config(string configFile)
 		{
-			this.config_file = config_file;
+			this.configFile = configFile;
 			Reload();
 		}
 
@@ -31,7 +31,7 @@ namespace MultiAdmin
 				Directory.CreateDirectory(FileManager.AppFolder);
 			}
 
-			config = new YamlConfig(config_file);
+			config = new YamlConfig(configFile);
 		}
 	}
 }
