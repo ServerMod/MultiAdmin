@@ -41,7 +41,7 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public string GetUsage()
 		{
-			return String.Empty;
+			return string.Empty;
 		}
 
 		public override void Init()
