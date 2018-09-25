@@ -31,7 +31,7 @@ namespace MultiAdmin
 			while (!server.IsStopping())
 			{
 				string dedicatedDir = "SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" + Path.DirectorySeparatorChar + server.GetSessionId();
-				string[] activeDir = null;
+				string[] activeDir = new string[] {};
 
 				try
 				{
@@ -48,7 +48,7 @@ namespace MultiAdmin
 					}
 				}
 
-				if (activeDir == null) continue;
+				if (string.IsNullOrEmpty(activeDir)) continue;
 				
 				foreach (string file in activeDir)
 				{
