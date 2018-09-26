@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System;//why is a bullet here?
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -14,7 +14,7 @@ namespace MultiAdmin
 		public static readonly ConsoleColor DEFAULT_BACKGROUND = ConsoleColor.Black;
 
 
-		public static ConsoleColor MapConsoleColor(String color, ConsoleColor def = ConsoleColor.Cyan)
+		public static ConsoleColor MapConsoleColor(string color, ConsoleColor def = ConsoleColor.Cyan)
 		{
 			try
 			{
@@ -30,14 +30,14 @@ namespace MultiAdmin
 		{
 			while (!server.IsStopping())
 			{
-				string[] strArray = null;
-				String dir = "SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" + Path.DirectorySeparatorChar + server.GetSessionId();
+				string dedicatedDir = "SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" + Path.DirectorySeparatorChar + server.GetSessionId();
+				string[] activeDir = new string[] {};
 
 				try
 				{
-					if (Directory.Exists(dir))
+					if (Directory.Exists(dedicatedDir))
 					{
-						strArray = Directory.GetFiles(dir, "sl*.mapi", SearchOption.TopDirectoryOnly).OrderBy(f => f).ToArray<String>();
+						activeDir = Directory.GetFiles(dedicatedDir, "sl*.mapi", SearchOption.TopDirectoryOnly).OrderBy(f => f).ToArray<string>();
 					}
 				}
 				catch
@@ -48,25 +48,25 @@ namespace MultiAdmin
 					}
 				}
 
-				if (strArray == null) continue;
-				foreach (string path in strArray)
+				if (string.IsNullOrEmpty(activeDir)) continue;
+				
+				foreach (string file in activeDir)
 				{
-
-					string gameMessage = "";
-					string fileCommand = "open";
+					string stream = string.Empty;
+					string command = "open";
 					int attempts = 0;
-					Boolean read = false;
+					bool read = false;
 
 					while (attempts < (server.runOptimized ? 10 : 100) && !read && !server.IsStopping())
 					{
 						try
 						{
-							StreamReader streamReader = new StreamReader(path);
-							gameMessage = streamReader.ReadToEnd();
-							fileCommand = "close";
-							streamReader.Close();
-							fileCommand = "delete";
-							File.Delete(path);
+							StreamReader sr = new StreamReader(file);
+							stream = sr.ReadToEnd();
+							command = "close";
+							sr.Close();
+							command = "delete";
+							File.Delete(file);
 							read = true;
 						}
 						catch
@@ -74,7 +74,7 @@ namespace MultiAdmin
 							attempts++;
 							if (attempts >= (server.runOptimized ? 10 : 100))
 							{
-								server.Write("Message printer warning: Could not " + fileCommand + " file " + path + ". Make sure that MultiAdmin.exe has all necessary read-write permissions.", ConsoleColor.Yellow);
+								server.Write("Message printer warning: Could not " + command + " " + file + ". Make sure that MultiAdmin.exe has all necessary read-write permissions.", ConsoleColor.Yellow);
 								server.Write("skipping");
 							}
 						}
@@ -83,29 +83,29 @@ namespace MultiAdmin
 
 					if (server.IsStopping()) break;
 
-					Boolean display = true;
-					ConsoleColor colour = ConsoleColor.Cyan;
+					bool display = true;
+					ConsoleColor color = ConsoleColor.Cyan;
 
-					if (!string.IsNullOrEmpty(gameMessage.Trim()))
+					if (!string.IsNullOrEmpty(stream.Trim()))
 					{
-						if (gameMessage.Contains("LOGTYPE"))
+						if (stream.Contains("LOGTYPE"))
 						{
-							String type = gameMessage.Substring(gameMessage.IndexOf("LOGTYPE")).Trim();
-							gameMessage = gameMessage.Substring(0, gameMessage.IndexOf("LOGTYPE")).Trim();
+							string type = stream.Substring(stream.IndexOf("LOGTYPE")).Trim();
+							stream = stream.Substring(0, stream.IndexOf("LOGTYPE")).Trim();
 
 							switch (type)
 							{
 								case "LOGTYPE02":
-									colour = ConsoleColor.Green;
+									color = ConsoleColor.Green;
 									break;
 								case "LOGTYPE-8":
-									colour = ConsoleColor.DarkRed;
+									color = ConsoleColor.DarkRed;
 									break;
 								case "LOGTYPE14":
-									colour = ConsoleColor.Magenta;
+									color = ConsoleColor.Magenta;
 									break;
 								default:
-									colour = ConsoleColor.Cyan;
+									color = ConsoleColor.Cyan;
 									break;
 							}
 						}
@@ -114,86 +114,87 @@ namespace MultiAdmin
 
 					// Smod3 Color tags
 
-					String[] parts = gameMessage.Split("@#".ToCharArray());
+					string[] streamSplit = stream.Split("@#".ToCharArray());
 
-					if (parts.Length > 1)
+					if (streamSplit.Length > 1)
 					{
 						ConsoleColor fg = DEFAULT_FOREGROUND;
 						ConsoleColor bg = DEFAULT_BACKGROUND;
 						// date
-						server.WritePart("", DEFAULT_BACKGROUND, ConsoleColor.Cyan, 0, true, false);
-						foreach (String part in parts)
-						{
-							String modifiedPart = part;
-							if (modifiedPart.Length >= 3 && modifiedPart.Contains(";"))
-							{
-								String colorTag = modifiedPart.Substring(3, modifiedPart.IndexOf(";") - 3);
+						server.WritePart(string.Empty, DEFAULT_BACKGROUND, ConsoleColor.Cyan, 0, true, false);
 
-								if (modifiedPart.Substring(0, 3).Equals("fg="))
+						foreach (string line in streamSplit)
+						{
+							string part = line;
+							if (part.Length >= 3 && part.Contains(";"))
+							{
+								string colorTag = part.Substring(3, part.IndexOf(";") - 3);
+
+								if (part.Substring(0, 3).Equals("fg="))
 								{
 									fg = MapConsoleColor(colorTag, DEFAULT_FOREGROUND);
 								}
 
-								if (part.Substring(0, 3).Equals("bg="))
+								if (line.Substring(0, 3).Equals("bg="))
 								{
 									bg = MapConsoleColor(colorTag, DEFAULT_BACKGROUND);
 								}
 
-								if (modifiedPart.Length == part.IndexOf(";"))
+								if (part.Length == line.IndexOf(";"))
 								{
-									modifiedPart = "";
+									part = string.Empty;
 								}
 								else
 								{
-									modifiedPart = modifiedPart.Substring(part.IndexOf(";") + 1);
+									part = part.Substring(line.IndexOf(";") + 1);
 								}
 
 							}
 
-							server.WritePart(modifiedPart, bg, fg, 0, false, false);
+							server.WritePart(part, bg, fg, 0, false, false);
 						}
 						// end
-						server.WritePart("", DEFAULT_BACKGROUND, ConsoleColor.Cyan, 0, false, true);
+						server.WritePart(string.Empty, DEFAULT_BACKGROUND, ConsoleColor.Cyan, 0, false, true);
 						display = false;
 					}
 
 					// Smod2 loggers pretty printing
 
-
-					var match = SMOD_REGEX.Match(gameMessage);
+					var match = SMOD_REGEX.Match(stream);
 					if (match.Success)
 					{
 						if (match.Groups.Count >= 2)
 						{
-							ConsoleColor levelColour = ConsoleColor.Cyan;
-							ConsoleColor tagColour = ConsoleColor.Yellow;
-							ConsoleColor msgColour = ConsoleColor.White;
+							ConsoleColor levelColor = ConsoleColor.Cyan;
+							ConsoleColor tagColor = ConsoleColor.Yellow;
+							ConsoleColor msgColor = ConsoleColor.White;
 							switch (match.Groups[1].Value.Trim())
 							{
 								case "[DEBUG]":
-									levelColour = ConsoleColor.Gray;
+									levelColor = ConsoleColor.Gray;
 									break;
 								case "[INFO]":
-									levelColour = ConsoleColor.Green;
+									levelColor = ConsoleColor.Green;
 									break;
 								case "[WARN]":
-									levelColour = ConsoleColor.DarkYellow;
+									levelColor = ConsoleColor.DarkYellow;
 									break;
 								case "[ERROR]":
-									levelColour = ConsoleColor.Red;
-									msgColour = ConsoleColor.Red;
+									levelColor = ConsoleColor.Red;
+									msgColor = ConsoleColor.Red;
 									break;
 								default:
-									colour = ConsoleColor.Cyan;
+									color = ConsoleColor.Cyan;
 									break;
 							}
-							server.WritePart("", DEFAULT_BACKGROUND, ConsoleColor.Cyan, 0, true, false);
-							server.WritePart("[" + match.Groups[1].Value + "] ", DEFAULT_BACKGROUND, levelColour, 0, false, false);
-							server.WritePart(match.Groups[2].Value + " ", DEFAULT_BACKGROUND, tagColour, 0, false, false);
-							// OLD: server.WritePart(match.Groups[3].Value, msgColour, 0, false, true);
+							server.WritePart(string.Empty, DEFAULT_BACKGROUND, ConsoleColor.Cyan, 0, true, false);
+							server.WritePart("[" + match.Groups[1].Value + "] ", DEFAULT_BACKGROUND, levelColor, 0, false, false);
+							server.WritePart(match.Groups[2].Value + " ", DEFAULT_BACKGROUND, tagColor, 0, false, false);
+							// OLD: server.WritePart(match.Groups[3].Value, msgColor, 0, false, true);
 							// The regex.Match was trimming out the new lines and that is why no new lines were created.
 							// To be sure this will not happen again:
-							server.WritePart(gameMessage.Split(new char[] { ']' }, 3)[2], DEFAULT_BACKGROUND, msgColour, 0, false, true);
+							streamSplit = stream.Split(new char[] { ']' }, 3)[2];
+							server.WritePart(streamSplit, DEFAULT_BACKGROUND, msgColor, 0, false, true);
 							// This way, it outputs the whole message.
 							// P.S. the format is [Info] [courtney.exampleplugin] Something intresting happened
 							// That was just an example
@@ -203,31 +204,29 @@ namespace MultiAdmin
 					}
 
 
-					if (gameMessage.Contains("Mod Log:"))
+					if (stream.Contains("Mod Log:"))
 					{
 						foreach (Feature f in server.Features)
 						{
 							if (f is IEventAdminAction)
 							{
-								((IEventAdminAction)f).OnAdminAction(gameMessage.Replace("Mod log:", ""));
+								((IEventAdminAction)f).OnAdminAction(stream.Replace("Mod log:", string.Empty));
 							}
 						}
 					}
 
-					if (gameMessage.Contains("ServerMod - Version"))
+					if (stream.Contains("ServerMod - Version"))
 					{
 						server.HasServerMod = true;
-
 						// This should work fine with older ServerMod versions too
-						string[] splitVer = gameMessage.Replace("ServerMod - Version", "").Split('-');
-
-						server.ServerModVersion = splitVer[0].Trim();
-						server.ServerModBuild = (splitVer.Length > 1 ? splitVer[1] : "A").Trim();
+						streamSplit = stream.Replace("ServerMod - Version", string.Empty).Split('-');
+						server.ServerModVersion = streamSplit[0].Trim();
+						server.ServerModBuild = (streamSplit.Length > 1 ? streamSplit[1] : "A").Trim();
 					}
 
 					if (server.ServerModCheck(1, 7, 2))
 					{
-						if (gameMessage.Contains("Round restarting"))
+						if (stream.Contains("Round restarting"))
 						{
 							foreach (Feature f in server.Features)
 							{
@@ -238,7 +237,7 @@ namespace MultiAdmin
 							}
 						}
 
-						if (gameMessage.Contains("Waiting for players"))
+						if (stream.Contains("Waiting for players"))
 						{
 							if (!server.InitialRoundStarted)
 							{
@@ -261,7 +260,7 @@ namespace MultiAdmin
 					}
 					else
 					{
-						if (gameMessage.Contains("Waiting for players"))
+						if (stream.Contains("Waiting for players"))
 						{
 							if (!server.InitialRoundStarted)
 							{
@@ -295,7 +294,7 @@ namespace MultiAdmin
 
 
 
-					if (gameMessage.Contains("New round has been started"))
+					if (stream.Contains("New round has been started"))
 					{
 
 						foreach (Feature f in server.Features)
@@ -307,7 +306,7 @@ namespace MultiAdmin
 						}
 					}
 
-					if (gameMessage.Contains("Level loaded. Creating match..."))
+					if (stream.Contains("Level loaded. Creating match..."))
 					{
 						foreach (Feature f in server.Features)
 						{
@@ -319,7 +318,7 @@ namespace MultiAdmin
 					}
 
 
-					if (gameMessage.Contains("Server full"))
+					if (stream.Contains("Server full"))
 					{
 						foreach (Feature f in server.Features)
 						{
@@ -331,7 +330,7 @@ namespace MultiAdmin
 					}
 
 
-					if (gameMessage.Contains("Player connect"))
+					if (stream.Contains("Player connect"))
 					{
 						display = false;
 						server.Log("Player connect event");
@@ -339,13 +338,13 @@ namespace MultiAdmin
 						{
 							if (f is IEventPlayerConnect)
 							{
-								String name = gameMessage.Substring(gameMessage.IndexOf(":"));
+								string name = stream.Substring(stream.IndexOf(":"));
 								((IEventPlayerConnect)f).OnPlayerConnect(name);
 							}
 						}
 					}
 
-					if (gameMessage.Contains("Player disconnect"))
+					if (stream.Contains("Player disconnect"))
 					{
 						display = false;
 						server.Log("Player disconnect event");
@@ -353,13 +352,13 @@ namespace MultiAdmin
 						{
 							if (f is IEventPlayerDisconnect)
 							{
-								String name = gameMessage.Substring(gameMessage.IndexOf(":"));
+								string name = stream.Substring(stream.IndexOf(":"));
 								((IEventPlayerDisconnect)f).OnPlayerDisconnect(name);
 							}
 						}
 					}
 
-					if (gameMessage.Contains("Player has connected before load is complete"))
+					if (stream.Contains("Player has connected before load is complete"))
 					{
 						if (server.ServerModCheck(1, 5, 0))
 						{
@@ -367,7 +366,7 @@ namespace MultiAdmin
 						}
 					}
 
-					if (display) server.Write(gameMessage.Trim(), colour);
+					if (display) server.Write(stream.Trim(), color);
 				}
 
 				Thread.Sleep(server.runOptimized ? 5 : 10);

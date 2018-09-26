@@ -6,8 +6,8 @@ namespace MultiAdmin.MultiAdmin.Features
 	[Feature]
 	class ModLog : Feature, IEventAdminAction
 	{
-		private Boolean logToOwnFile;
-		private String modLogLocation;
+		private bool logToOwnFile;
+		private string modLogLocation;
 
 		public ModLog(Server server) : base(server)
 		{

@@ -17,7 +17,7 @@ namespace MutliAdmin
 		private static Server server;
 		private static bool multiMode = false;
 
-		public static void Write(String message, ConsoleColor color = ConsoleColor.DarkYellow)
+		public static void Write(string message, ConsoleColor color = ConsoleColor.DarkYellow)
 		{
 			if (Server.SkipProcessHandle() || Process.GetCurrentProcess().MainWindowHandle != IntPtr.Zero)
 			{
@@ -76,7 +76,7 @@ namespace MutliAdmin
 
 		public static bool StartHandleConfigs(string[] args)
 		{
-			Boolean hasServerToStart = false;
+			bool hasServerToStart = false;
 			if (args.Length > 0)
 			{
 				configKey = args[0];
@@ -126,10 +126,10 @@ namespace MutliAdmin
 		{
 			bool hasServerToStart = false;
 			bool first = true;
-			String[] dirs = Directory.GetDirectories(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar);
+			string[] dirs = Directory.GetDirectories(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar);
 			foreach (string file in dirs)
 			{
-				String name = new DirectoryInfo(file).Name;
+				string name = new DirectoryInfo(file).Name;
 				if (first)
 				{
 					var serverConfig = new MultiAdmin.Config(file + Path.DirectorySeparatorChar + "config.txt");
@@ -168,7 +168,7 @@ namespace MutliAdmin
 
 		public static void ConvertConfigs()
 		{
-			String[] dirs = Directory.GetDirectories(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar);
+			string[] dirs = Directory.GetDirectories(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar);
 			foreach (string file in dirs)
 			{
 				var name = file + Path.DirectorySeparatorChar + "config.txt";
@@ -179,7 +179,7 @@ namespace MutliAdmin
 				//var yaml = serializer.Serialize(config.values);
 				//Write(yaml, ConsoleColor.White);
 
-				string yaml = "";
+				string yaml = string.Empty;
 
 				foreach (string line in config.GetRaw())
 				{
@@ -203,7 +203,7 @@ namespace MutliAdmin
 							// Write any comments
 							if (!string.IsNullOrEmpty(followingContent))
 							{
-								yaml += (followingContent.StartsWith("#") ? "" : "#") + followingContent + Environment.NewLine;
+								yaml += (followingContent.StartsWith("#") ? string.Empty : "#") + followingContent + Environment.NewLine;
 							}
 
 							yaml += newLine + Environment.NewLine;
@@ -217,7 +217,7 @@ namespace MutliAdmin
 								newLine = newLine.Substring(commentText.Length).Trim();
 							}
 
-							newLine = (string.IsNullOrEmpty(newLine) ? "" : (newLine.StartsWith("#") ? "" : "#") + newLine);
+							newLine = (string.IsNullOrEmpty(newLine) ? string.Empty : (newLine.StartsWith("#") ? string.Empty : "#") + newLine);
 
 							yaml += newLine + Environment.NewLine;
 						}
@@ -239,7 +239,7 @@ namespace MutliAdmin
 			}
 		}
 
-		public static String GetServerDirectory()
+		public static string GetServerDirectory()
 		{
 			return Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers";
 		}
@@ -271,7 +271,7 @@ namespace MutliAdmin
 			}
 
 
-			configChain = "";
+			configChain = string.Empty;
 			if (StartHandleConfigs(args))
 			{
 				server = new Server(GetServerDirectory(), configKey, multiadminConfig, configLocation, configChain, multiMode);

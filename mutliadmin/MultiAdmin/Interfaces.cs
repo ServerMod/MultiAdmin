@@ -53,17 +53,17 @@ namespace MultiAdmin.MultiAdmin
 
 	public interface IEventPlayerConnect : IServerMod
 	{
-		void OnPlayerConnect(String name);
+		void OnPlayerConnect(string name);
 	}
 
 	public interface IEventPlayerDisconnect : IServerMod
 	{
-		void OnPlayerDisconnect(String name);
+		void OnPlayerDisconnect(string name);
 	}
 
 	public interface IEventAdminAction : IServerMod
 	{
-		void OnAdminAction(String message);
+		void OnAdminAction(string message);
 	}
 
 	public interface IServerMod
@@ -73,10 +73,10 @@ namespace MultiAdmin.MultiAdmin
 
 	public interface ICommand
 	{
-		void OnCall(String[] args);
-		String GetCommand();
-		String GetUsage();
-		Boolean PassToGame();
-		String GetCommandDescription();
+		void OnCall(string[] args);
+		string GetCommand();
+		string GetUsage();
+		bool PassToGame();
+		string GetCommandDescription();
 	}
 }

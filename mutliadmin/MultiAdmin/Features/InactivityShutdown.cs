@@ -10,7 +10,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 	[Feature]
 	class InactivityShutdown : Feature, IEventRoundStart, IEventRoundEnd, IEventTick
 	{
-		private Boolean waiting;
+		private bool waiting;
 		private long roundEndTime;
 		private int waitFor;
 
