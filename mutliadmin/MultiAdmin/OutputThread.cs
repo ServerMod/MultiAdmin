@@ -61,6 +61,13 @@ namespace MultiAdmin
 					{
 						try
 						{
+							if (!File.Exists(file))
+							{
+								server.Write("Message printer warning: Could not " + command + " " + file + ". File does not exist!", ConsoleColor.Yellow);
+								server.Write("skipping");
+								break;
+							}
+
 							StreamReader sr = new StreamReader(file);
 							stream = sr.ReadToEnd();
 							command = "close";
