@@ -28,7 +28,7 @@ public class YamlConfig
 		RawData = FileManager.ReadAllLines(path);
 	}
 
-	public string GetString(string key, string def = string.Empty)
+	public string GetString(string key, string def = "")
 	{
 		foreach (var line in RawData)
 		{

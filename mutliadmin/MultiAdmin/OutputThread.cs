@@ -48,7 +48,10 @@ namespace MultiAdmin
 					}
 				}
 
-				if (string.IsNullOrEmpty(activeDir)) continue;
+				if (activeDir.Length == 0)
+				{
+					continue;
+				}
 				
 				foreach (string file in activeDir)
 				{
@@ -193,8 +196,8 @@ namespace MultiAdmin
 							// OLD: server.WritePart(match.Groups[3].Value, msgColor, 0, false, true);
 							// The regex.Match was trimming out the new lines and that is why no new lines were created.
 							// To be sure this will not happen again:
-							streamSplit = stream.Split(new char[] { ']' }, 3)[2];
-							server.WritePart(streamSplit, DEFAULT_BACKGROUND, msgColor, 0, false, true);
+							streamSplit = stream.Split(new char[] { ']' }, 3);
+							server.WritePart(streamSplit[2], DEFAULT_BACKGROUND, msgColor, 0, false, true);
 							// This way, it outputs the whole message.
 							// P.S. the format is [Info] [courtney.exampleplugin] Something intresting happened
 							// That was just an example
