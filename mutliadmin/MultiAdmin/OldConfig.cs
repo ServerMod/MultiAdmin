@@ -20,7 +20,7 @@ namespace MultiAdmin
 
 		public string[] GetRaw()
 		{
-			if (File.Exists(config_file))
+			if (File.Exists(configFile))
 			{
 				StreamReader streamReader = new StreamReader(configFile);
 				List<string> content = new List<string>();
@@ -81,7 +81,7 @@ namespace MultiAdmin
 		}
 
 
-		public string GetValue(string key, string def = string.Empty)
+		public string GetValue(string key, string def = "")
 		{
 			string val = null;
 			if (!values.TryGetValue(key.ToLower(), out val))
