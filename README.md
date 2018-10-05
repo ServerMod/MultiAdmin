@@ -59,6 +59,5 @@ This does not include ServerMod or ingame commands, for a full list type HELP in
 - max_memory (used to determine if the servers memory is low, default = 2048)
 - enable_multiadmin_optimizations (various timing optimizations around IO operations, default = true)
 - multiadmin_nolog (disable logging to file, default = false)
-- submit_errors (submit errors to MultiAdmin, currently out of order, default = false)
 - log_mod_actions_to_own_file (logs admin messages to seperate file, default = false)
 - cfg_loc (requested config files location, default = '%AppData%/SCP Secret Laboratory/config_gameplay.txt' on Windows and '~/.config/SCP Secret Laboratory/config_gameplay.txt' on Linux)
