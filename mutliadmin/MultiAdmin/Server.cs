@@ -537,7 +537,15 @@ namespace MultiAdmin.MultiAdmin
 
 		public void SendMessage(string message)
 		{
-			StreamWriter streamWriter = new StreamWriter("SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" + Path.DirectorySeparatorChar + session_id + Path.DirectorySeparatorChar + "cs" + logID + ".mapi");
+			string file = "SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" + Path.DirectorySeparatorChar + session_id + Path.DirectorySeparatorChar + "cs" + logID + ".mapi";
+			if (!File.Exists(file))
+			{
+				this.Write("Send Message error: sending " + message + " failed. " + file + " does not exist!", ConsoleColor.Yellow);
+				this.Write("skipping");
+				return;
+			}
+
+			StreamWriter streamWriter = new StreamWriter(file);
 			logID++;
 			streamWriter.WriteLine(message + "terminator");
 			streamWriter.Close();
