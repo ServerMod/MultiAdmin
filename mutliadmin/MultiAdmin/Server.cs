@@ -537,11 +537,20 @@ namespace MultiAdmin.MultiAdmin
 
 		public void SendMessage(string message)
 		{
-			string file = "SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" + Path.DirectorySeparatorChar + session_id + Path.DirectorySeparatorChar + "cs" + logID + ".mapi";
-			if (!File.Exists(file))
+			string sessionDirectory = "SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" + Path.DirectorySeparatorChar + session_id;
+			if (!Directory.Exists(sessionDirectory))
 			{
-				this.Write("Send Message error: sending " + message + " failed. " + file + " does not exist!", ConsoleColor.Yellow);
+				this.Write("Send Message error: sending " + message + " failed. " + sessionDirectory + " does not exist!", ConsoleColor.Yellow);
 				this.Write("skipping");
+				return;
+			}
+
+			string file = sessionDirectory + Path.DirectorySeparatorChar + "cs" + logID + ".mapi";
+			if (File.Exists(file))
+			{
+				this.Write("Send Message error: sending " + message + " failed. " + file + " already exists!", ConsoleColor.Yellow);
+				this.Write("skipping");
+				logID++;
 				return;
 			}
 
