@@ -282,7 +282,7 @@ namespace MultiAdmin.MultiAdmin
 			return (p == 4) || (p == 6) || (p == 128); // Outputs true for Unix
 		}
 
-		public void WritePart(String part, ConsoleColor backgroundColor = ConsoleColor.Black, ConsoleColor textColor = ConsoleColor.Yellow, int height = 0, bool date = false, bool lineEnd = false)
+		public void WritePart(String part, ConsoleColor backgroundColor = ConsoleColor.Black, ConsoleColor textColor = ConsoleColor.Yellow, bool date = false, bool lineEnd = false)
 		{
 			String datepart = "";
 			if (date)
@@ -290,7 +290,6 @@ namespace MultiAdmin.MultiAdmin
 				DateTime now = DateTime.Now;
 				datepart = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
 			}
-			Console.CursorTop += height;
 			Console.ForegroundColor = textColor;
 			Console.BackgroundColor = backgroundColor;
 			if (lineEnd)
@@ -537,7 +536,15 @@ namespace MultiAdmin.MultiAdmin
 
 		public void SendMessage(string message)
 		{
-			StreamWriter streamWriter = new StreamWriter("SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" + Path.DirectorySeparatorChar + session_id + Path.DirectorySeparatorChar + "cs" + logID + ".mapi");
+			string file = "SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" + Path.DirectorySeparatorChar + session_id + Path.DirectorySeparatorChar + "cs" + logID + ".mapi";
+			if (!File.Exists(file))
+			{
+				this.Write("Send Message error: sending " + message + " failed. " + file + " does not exist!", ConsoleColor.Yellow);
+				this.Write("skipping");
+				return;
+			}
+
+			StreamWriter streamWriter = new StreamWriter(file);
 			logID++;
 			streamWriter.WriteLine(message + "terminator");
 			streamWriter.Close();
