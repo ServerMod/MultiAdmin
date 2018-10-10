@@ -31,7 +31,9 @@ namespace MultiAdmin
 			string dedicatedDir = "SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated";
 			FileSystemWatcher watcher = new FileSystemWatcher();
 			watcher.Path = dedicatedDir;
-			watcher.Changed += new FileSystemEventHandler((sender, eventArgs) => OnSessionDirectionChanged(sender, eventArgs, server));
+			watcher.IncludeSubdirectories = true;
+			watcher.Created += new FileSystemEventHandler((sender, eventArgs) => OnMapiCreated(sender, eventArgs, server));
+			watcher.Filter = "sl*.mapi";
 			watcher.EnableRaisingEvents = true;
 			while (true)
 			{
@@ -39,18 +41,10 @@ namespace MultiAdmin
 			}
 		}
 
-		private static void OnSessionDirectionChanged(object source, FileSystemEventArgs e, Server server)
+		private static void OnMapiCreated(object source, FileSystemEventArgs e, Server server)
 		{
-			string[] mapiFiles = Directory.GetFiles(e.FullPath, "sl*.mapi", SearchOption.TopDirectoryOnly);
-			if (mapiFiles.Length == 0)
-			{
-				return;
-			}
-
-			foreach (string file in mapiFiles.OrderBy(file => Int32.Parse(Path.GetFileNameWithoutExtension(file).Substring(2))))
-			{
-				OutputThread.ProcessFile(server, file);
-			}
+			Thread.Sleep(15);
+			OutputThread.ProcessFile(server, e.FullPath);
 		}
 
 		private static void ProcessFile(Server server, string file)
