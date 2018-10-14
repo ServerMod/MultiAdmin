@@ -14,9 +14,9 @@ namespace MultiAdmin.MultiAdmin
 	{
 		public static readonly string MA_VERSION = "2.1.2";
 
-		public Boolean HasServerMod { get; set; }
-		public String ServerModVersion { get; set; }
-		public String ServerModBuild { get; set; }
+		public bool HasServerMod { get; set; }
+		public string ServerModVersion { get; set; }
+		public string ServerModBuild { get; set; }
 		public Config MultiAdminCfg { get; }
 		public Config ServerConfig
 		{
@@ -25,16 +25,16 @@ namespace MultiAdmin.MultiAdmin
 				return serverConfig;
 			}
 		}
-		public String ConfigKey { get; }
-		public String MainConfigLocation { get; }
-		public String ConfigChain { get; }
-		public String ServerDir { get; }
+		public string ConfigKey { get; }
+		public string MainConfigLocation { get; }
+		public string ConfigChain { get; }
+		public string ServerDir { get; }
 
 		private Config serverConfig;
-		public Boolean InitialRoundStarted { get; set; }
+		public bool InitialRoundStarted { get; set; }
 
 		public List<Feature> Features { get; }
-		public Dictionary<String, ICommand> Commands { get; }
+		public Dictionary<string, ICommand> Commands { get; }
 		private List<IEventTick> tick; // we want a tick only list since its the only event that happens constantly, all the rest can be in a single list
 
 		private Thread readerThread;
@@ -42,16 +42,16 @@ namespace MultiAdmin.MultiAdmin
 
 		private int logID;
 		private Process gameProcess;
-		private Boolean stopping;
-		private String session_id;
-		private String maLogLocation;
+		private bool stopping;
+		private string session_id;
+		private string maLogLocation;
 		private bool multiMode;
-		public String StartDateTime { get; }
-		public String LogFolder
+		public string StartDateTime { get; }
+		public string LogFolder
 		{
 			get
 			{
-				string loc;
+				string loc = String.Empty;
 				if (multiMode)
 				{
 					loc = "servers" + Path.DirectorySeparatorChar + ConfigKey + Path.DirectorySeparatorChar + "logs" + Path.DirectorySeparatorChar;
@@ -69,14 +69,14 @@ namespace MultiAdmin.MultiAdmin
 				return loc;
 			}
 		}
-		public Boolean fixBuggedPlayers;
-		public Boolean runOptimized = true;
+		public bool fixBuggedPlayers;
+		public bool runOptimized = true;
 		public Boolean nolog = false;
 		public int printSpeed = 150;
 
-		private String currentLine = "";
+		private string currentLine = "";
 
-		public Server(String serverDir, String configKey, Config multiAdminCfg, String mainConfigLocation, String configChain, bool multiMode)
+		public Server(string serverDir, string configKey, Config multiAdminCfg, string mainConfigLocation, string configChain, bool multiMode)
 		{
 			this.multiMode = multiMode;
 			MainConfigLocation = mainConfigLocation;
@@ -208,7 +208,7 @@ namespace MultiAdmin.MultiAdmin
 			CleanUp();
 		}
 
-		public Boolean IsStopping()
+		public bool IsStopping()
 		{
 			return stopping;
 		}
@@ -316,7 +316,7 @@ namespace MultiAdmin.MultiAdmin
 			}
 		}
 
-		public void Log(String message)
+		public void Log(string message)
 		{
 			lock (this)
 			{
@@ -342,14 +342,14 @@ namespace MultiAdmin.MultiAdmin
 			}
 		}
 
-		public Boolean ServerModCheck(int major, int minor, int fix)
+		public bool ServerModCheck(int major, int minor, int fix)
 		{
 			if (this.ServerModVersion == null)
 			{
 				return false;
 			}
 
-			String[] parts = ServerModVersion.Split('.');
+			string[] parts = ServerModVersion.Split('.');
 			int verMajor = 0;
 			int verMinor = 0;
 			int verFix = 0;
@@ -408,9 +408,9 @@ namespace MultiAdmin.MultiAdmin
 
 
 
-		public Boolean StartServer()
+		public bool StartServer()
 		{
-			Boolean started = false;
+			bool started = false;
 			InitialRoundStarted = false;
 			try
 			{
@@ -500,10 +500,10 @@ namespace MultiAdmin.MultiAdmin
 
 		private void CleanSession()
 		{
-			String path = "SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" + Path.DirectorySeparatorChar + session_id;
+			string path = "SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" + Path.DirectorySeparatorChar + session_id;
 			if (Directory.Exists(path))
 			{
-				foreach (String file in Directory.GetFiles(path))
+				foreach (string file in Directory.GetFiles(path))
 				{
 					File.Delete(file);
 				}
@@ -519,19 +519,19 @@ namespace MultiAdmin.MultiAdmin
 		}
 
 
-		public String GetSessionId()
+		public string GetSessionId()
 		{
 			return session_id;
 		}
 
-		public Boolean IsConfigRunning(String config)
+		public bool IsConfigRunning(string config)
 		{
 			return File.Exists(ServerDir + Path.DirectorySeparatorChar + config + Path.DirectorySeparatorChar + "running");
 		}
 
-		public void NewInstance(String configChain)
+		public void NewInstance(string configChain)
 		{
-			String file = Directory.GetFiles(Directory.GetCurrentDirectory(), "MultiAdmin.*")[0];
+			string file = Directory.GetFiles(Directory.GetCurrentDirectory(), "MultiAdmin.*")[0];
 			ProcessStartInfo psi = new ProcessStartInfo(file, configChain);
 			Process.Start(psi);
 		}
@@ -547,8 +547,8 @@ namespace MultiAdmin.MultiAdmin
 
 		public static string Timestamp(string message)
 		{
-			bool empty = String.IsNullOrEmpty(message);
-			if (empty) return String.Empty;
+			if (string.IsNullOrEmpty(message))
+				return string.Empty;
 			DateTime now = DateTime.Now;
 			message = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] " + message;
 			return message;

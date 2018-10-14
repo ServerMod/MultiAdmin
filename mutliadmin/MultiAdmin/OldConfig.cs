@@ -8,12 +8,12 @@ namespace MultiAdmin
 {
 	public class OldConfig
 	{
-		public Dictionary<String, String> values;
-		private String config_file;
+		public Dictionary<string, string> values;
+		private string configFile;
 
-		public OldConfig(String config_file)
+		public OldConfig(string configFile)
 		{
-			this.config_file = config_file;
+			this.configFile = configFile;
 			Reload();
 		}
 		private readonly Regex rgx = new Regex("^[^;\\/:\\n\\r\\s=]+\\s*=[^;\\n\\r]+;", RegexOptions.Multiline | RegexOptions.Compiled);
@@ -22,7 +22,7 @@ namespace MultiAdmin
 		{
 			if (File.Exists(config_file))
 			{
-				StreamReader streamReader = new StreamReader(config_file);
+				StreamReader streamReader = new StreamReader(configFile);
 				List<string> content = new List<string>();
 
 				string line;
@@ -43,9 +43,9 @@ namespace MultiAdmin
 		{
 			values = new Dictionary<string, string>();
 
-			if (File.Exists(config_file))
+			if (File.Exists(configFile))
 			{
-				StreamReader streamReader = new StreamReader(config_file);
+				StreamReader streamReader = new StreamReader(configFile);
 				string content = streamReader.ReadToEnd();
 				streamReader.Close();
 
@@ -53,10 +53,10 @@ namespace MultiAdmin
 
 				foreach (Match match in matches)
 				{
-					String[] parts = match.Value.Split(new char[] { '=' }, 2);
+					string[] parts = match.Value.Split(new char[] { '=' }, 2);
 
-					String key = parts[0].Trim().ToLower();
-					String value = parts[1].Trim();
+					string key = parts[0].Trim().ToLower();
+					string value = parts[1].Trim();
 
 					if (value.Length > 0)
 					{
@@ -81,9 +81,9 @@ namespace MultiAdmin
 		}
 
 
-		public String GetValue(String key, String def = "")
+		public string GetValue(string key, string def = string.Empty)
 		{
-			String val = null;
+			string val = null;
 			if (!values.TryGetValue(key.ToLower(), out val))
 			{
 				val = def;
@@ -92,7 +92,7 @@ namespace MultiAdmin
 			return val;
 		}
 
-		public int GetIntValue(String key, int def)
+		public int GetIntValue(string key, int def)
 		{
 			int result;
 			bool successful = int.TryParse(GetValue(key, def.ToString()), out result);
@@ -108,9 +108,9 @@ namespace MultiAdmin
 			}
 		}
 
-		public Boolean GetBoolean(String key, bool def)
+		public bool GetBoolean(string key, bool def)
 		{
-			String configValue = GetValue(key, def.ToString());
+			string configValue = GetValue(key, def.ToString());
 
 			// Why did I make it so you can use these words? Because I can.
 			string[] trueWords = new string[]

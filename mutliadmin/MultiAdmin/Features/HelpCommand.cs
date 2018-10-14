@@ -44,17 +44,18 @@ namespace MultiAdmin.MultiAdmin.Features
 		public void OnCall(string[] args)
 		{
 			Server.Write("Commands from MultiAdmin:");
-			List<String> helpOutput = new List<String>();
-			foreach (KeyValuePair<String, ICommand> command in base.Server.Commands)
+			List<string> helpOutput = new List<string>();
+			foreach (KeyValuePair<string, ICommand> command in base.Server.Commands)
 			{
-				String usage = command.Value.GetUsage();
+				string usage = command.Value.GetUsage();
 				if (usage.Length > 0) usage = " " + usage;
-				helpOutput.Add(String.Format("{0}{1}: {2}", command.Key.ToUpper(), usage, command.Value.GetCommandDescription()));
+				string output = string.Format("{0}{1}: {2}", command.Key.ToUpper(), usage, command.Value.GetCommandDescription());
+				helpOutput.Add(output);
 			}
 
 			helpOutput.Sort();
 
-			foreach (String line in helpOutput)
+			foreach (string line in helpOutput)
 			{
 				Server.Write(line, ConsoleColor.Green);
 			}
@@ -69,7 +70,7 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public string GetUsage()
 		{
-			return "";
+			return string.Empty;
 		}
 	}
 }

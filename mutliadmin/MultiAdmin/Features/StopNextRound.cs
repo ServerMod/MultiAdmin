@@ -10,7 +10,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 	[Feature]
 	class StopNextRound : Feature, ICommand, IEventRoundEnd
 	{
-		private Boolean stop;
+		private bool stop;
 
 		public StopNextRound(Server server) : base(server)
 		{
@@ -70,7 +70,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 
 		public string GetUsage()
 		{
-			return "";
+			return string.Empty;
 		}
 	}
 }

@@ -28,7 +28,7 @@ public class YamlConfig
 		RawData = FileManager.ReadAllLines(path);
 	}
 
-	public string GetString(string key, string def = "")
+	public string GetString(string key, string def = string.Empty)
 	{
 		foreach (var line in RawData)
 		{
@@ -59,7 +59,7 @@ public class YamlConfig
 	public float GetFloat(string key, float def = 0)
 	{
 		var ky = GetString(key);
-		if (ky == "") return def;
+		if (ky == string.Empty) return def;
 		ky = ky.Replace(',', '.');
 		float result;
 		return float.TryParse(ky, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out result) ? result : def;

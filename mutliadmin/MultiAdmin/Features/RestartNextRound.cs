@@ -10,7 +10,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 	[Feature]
 	class RestartNextRound : Feature, ICommand, IEventRoundEnd
 	{
-		private Boolean restart;
+		private bool restart;
 
 		public RestartNextRound(Server server) : base(server)
 		{
@@ -65,7 +65,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 
 		public string GetUsage()
 		{
-			return "";
+			return string.Empty;
 		}
 
 		public override void OnConfigReload()
