@@ -35,6 +35,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ServiceModel.Web" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MultiAdmin\Features\ConfigReload.cs" />
@@ -49,6 +50,7 @@
     <Compile Include="MultiAdmin\Features\NewCommand.cs" />
     <Compile Include="MultiAdmin\Features\ChainStart.cs" />
     <Compile Include="MultiAdmin\Features\EventTest.cs" />
+    <Compile Include="MultiAdmin\Features\PluginAutoUpdate.cs" />
     <Compile Include="MultiAdmin\Features\Restart.cs" />
     <Compile Include="MultiAdmin\Features\TitleBar.cs" />
     <Compile Include="MultiAdmin\Features\Autoscale.cs" />

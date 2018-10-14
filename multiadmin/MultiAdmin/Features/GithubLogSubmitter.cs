@@ -46,7 +46,7 @@ namespace MultiAdmin.MultiAdmin.Features
 
 					if (!submitted.Equals("STACKTRACK SUBMITTED"))
 					{
-						Server.Write("Submitting " + details.Count + " game exceptions/errors to MultiAdmin github");
+						//Server.Write("Submitting " + details.Count + " game exceptions/errors to MultiAdmin github");
 						submitThread = new Thread(new ThreadStart(() => SubmitIssues(details)));
 						submitThread.Start();
 						using (StreamWriter sw = File.AppendText(lastGameLog))
@@ -84,10 +84,12 @@ namespace MultiAdmin.MultiAdmin.Features
 					request.Method = "POST";
 					request.Proxy = null;
 					var response = request.GetResponse();
+					Server.Write($"Submitted {details.Count} game exceptions/errors to the MultiAdmin github");
 				}
 			}
-			catch
+			catch(Exception e)
 			{
+				Server.Write($"Github error submission failed: {e.Message}");
 			}
 
 
