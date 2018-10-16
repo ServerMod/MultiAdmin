@@ -43,6 +43,11 @@ namespace MultiAdmin
 
 		private static void OnMapiCreated(object source, FileSystemEventArgs e, Server server)
 		{
+			if (!e.FullPath.Contains(server.GetSessionId()))
+			{
+				return;
+			}
+
 			Thread.Sleep(15);
 			OutputThread.ProcessFile(server, e.FullPath);
 		}
