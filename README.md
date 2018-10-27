@@ -49,7 +49,7 @@ This does not include ServerMod or ingame commands, for a full list type HELP in
 - STOPNEXTROUND: Stops the server at the end of this round
 
 ## Config settings
-- manual_start (wether of not to start the server automatically when launching multiadmin, default = true)
+- manual_start (wether of not to start the server automatically when launching multiadmin, default = False)
 - start_config_on_full (start server with this config folder when the server becomes full) [requires servermod]
 - multiadmin_print_speed (delay between outputs in the MultiAdmin console, default = 150)
 - shutdown_once_empty_for (shutdown the server once a round hasnt started in x seconds, default = -1)
