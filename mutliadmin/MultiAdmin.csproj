@@ -35,8 +35,10 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+	<Reference Include="System.ServiceModel.Web" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MultiAdmin\Features\PluginAutoUpdate.cs" />
     <Compile Include="MultiAdmin\Features\ConfigReload.cs" />
     <Compile Include="MultiAdmin\Features\ExitCommand.cs" />
     <Compile Include="MultiAdmin\Features\Attributes\FeatureAttribute.cs" />

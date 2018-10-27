@@ -81,7 +81,7 @@ namespace MultiAdmin
 		}
 
 
-		public string GetValue(string key, string def = "")
+		public string GetValue(string key, string def = null)
 		{
 			string val = null;
 			if (!values.TryGetValue(key.ToLower(), out val))
