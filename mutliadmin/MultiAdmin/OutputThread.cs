@@ -205,7 +205,7 @@ namespace MultiAdmin
 							// To be sure this will not happen again:
 
 							streamSplit = stream.Split(new char[] { ']' }, 3);
-							server.WritePart(streamSplit[2], DEFAULT_BACKGROUND, msgColor, 0, false, true);
+							server.WritePart(streamSplit[2], DEFAULT_BACKGROUND, msgColor, false, true);
 
 							// This way, it outputs the whole message.
 							// P.S. the format is [Info] [courtney.exampleplugin] Something intresting happened

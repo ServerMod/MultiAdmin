@@ -1,30 +1,8 @@
-## GAME SETTINGS:
-minimum_MTF_time_to_spawn: 280
-maximum_MTF_time_to_spawn: 350
-ci_respawn_percent: 35
-ci_on_start_percent: 10
-team_respawn_queue: 40143140314414041340
-
-# -1 is random for next two settings
-server_forced_class: -1
-map_seed: -1
-
-intercom_cooldown: 120
-intercom_max_speech_time: 20
-auto_round_restart_time: 10
-friendly_fire: false
-
-## THESE SETTINGS REQUIRES THE GAME TO RESTART:
-# MUTLIADMIN SETTINGS:
-manual_start: true
-start_config_on_full: server_two_config_folder
-shutdown_once_empty: -1
-restart_every_num_rounds: 15
-
+# Server main settings
+server_name: My Server Name
+serverinfo_pastebin_id: 7wV681fT
 server_ip: auto
-server_name: [nick]'s game
-ban_database_folder: [appdata]/SCP Secret Laboratory/Bans
-administrator_password: none
+max_players: 20
 port_queue:
  - 7777
  - 7778
@@ -35,4 +13,52 @@ port_queue:
  - 7783
  - 7784
 
-serverinfo_pastebin_id: 7wV681fT
+# Spawn settings
+minimum_MTF_time_to_spawn: 280
+maximum_MTF_time_to_spawn: 350
+ci_respawn_percent: 35
+ci_on_start_percent: 10
+team_respawn_queue: 40143140314414041340
+
+# Random-stuff settings (-1: random)
+server_forced_class: -1
+map_seed: -1
+
+# Misc gameplay settings
+intercom_cooldown: 120
+intercom_max_speech_time: 20
+auto_round_restart_time: 10
+friendly_fire: false
+warhead_tminus_start_duration: 90
+human_grenade_multiplier: 0.7
+scp_grenade_multiplier: 1
+lock_gates_on_countdown: true
+
+# Pocket Dimension settings
+pd_exit_count: 2
+# Leaving the exit blank makes it 106's containment room
+pd_random_exit_rids:
+pd_random_exit_rids_after_decontamination:
+pd_refresh_exit: false
+
+# Security & AntiCheat (default settings are good enough in most cases)
+online_mode: true
+ip_banning: true
+enable_whitelist: false
+hide_from_public_list: false
+noclip_v2_protection_disabled: false
+forward_ports: true
+enable_query: false
+query_port_shift: 0
+query_use_IPv6: true
+administrator_query_password: none
+
+## THESE SETTINGS REQUIRES THE SERVER TO RESTART:
+# MULTIADMIN SETTINGS:
+manual_start: true
+start_config_on_full: server_two_config_folder
+shutdown_once_empty: -1
+restart_every_num_rounds: 15
+
+# Possibly deprecated
+ban_database_folder: [appdata]/SCP Secret Laboratory/Bans
