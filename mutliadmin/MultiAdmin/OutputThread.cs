@@ -131,7 +131,7 @@ namespace MultiAdmin
 						ConsoleColor fg = DEFAULT_FOREGROUND;
 						ConsoleColor bg = DEFAULT_BACKGROUND;
 						// date
-						server.WritePart(string.Empty, DEFAULT_BACKGROUND, ConsoleColor.Cyan, 0, true, false);
+						server.WritePart(string.Empty, DEFAULT_BACKGROUND, ConsoleColor.Cyan, true, false);
 
 						foreach (string line in streamSplit)
 						{
@@ -161,10 +161,10 @@ namespace MultiAdmin
 
 							}
 
-							server.WritePart(part, bg, fg, 0, false, false);
+							server.WritePart(part, bg, fg, false, false);
 						}
 						// end
-						server.WritePart(string.Empty, DEFAULT_BACKGROUND, ConsoleColor.Cyan, 0, false, true);
+						server.WritePart(string.Empty, DEFAULT_BACKGROUND, ConsoleColor.Cyan, false, true);
 						display = false;
 					}
 
@@ -197,14 +197,16 @@ namespace MultiAdmin
 									color = ConsoleColor.Cyan;
 									break;
 							}
-							server.WritePart(string.Empty, DEFAULT_BACKGROUND, ConsoleColor.Cyan, 0, true, false);
-							server.WritePart("[" + match.Groups[1].Value + "] ", DEFAULT_BACKGROUND, levelColor, 0, false, false);
-							server.WritePart(match.Groups[2].Value + " ", DEFAULT_BACKGROUND, tagColor, 0, false, false);
+							server.WritePart(string.Empty, DEFAULT_BACKGROUND, ConsoleColor.Cyan, true, false);
+							server.WritePart("[" + match.Groups[1].Value + "] ", DEFAULT_BACKGROUND, levelColor, false, false);
+							server.WritePart(match.Groups[2].Value + " ", DEFAULT_BACKGROUND, tagColor, false, false);
 							// OLD: server.WritePart(match.Groups[3].Value, msgColor, 0, false, true);
 							// The regex.Match was trimming out the new lines and that is why no new lines were created.
 							// To be sure this will not happen again:
+
 							streamSplit = stream.Split(new char[] { ']' }, 3);
 							server.WritePart(streamSplit[2], DEFAULT_BACKGROUND, msgColor, 0, false, true);
+
 							// This way, it outputs the whole message.
 							// P.S. the format is [Info] [courtney.exampleplugin] Something intresting happened
 							// That was just an example
