@@ -147,7 +147,6 @@ namespace MultiAdmin.MultiAdmin
 			RegisterFeature(new ExitCommand(this));
 			//RegisterFeature(new EventTest(this));
 			RegisterFeature(new GithubGenerator(this));
-			RegisterFeature(new GithubLogSubmitter(this));
 			RegisterFeature(new HelpCommand(this));
 			RegisterFeature(new InactivityShutdown(this));
 			RegisterFeature(new MemoryChecker(this));
