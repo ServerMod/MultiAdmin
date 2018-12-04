@@ -13,7 +13,6 @@ namespace MultiAdmin
 		public static readonly ConsoleColor DEFAULT_FOREGROUND = ConsoleColor.Cyan;
 		public static readonly ConsoleColor DEFAULT_BACKGROUND = ConsoleColor.Black;
 
-
 		public static ConsoleColor MapConsoleColor(string color, ConsoleColor def = ConsoleColor.Cyan)
 		{
 			try
@@ -32,12 +31,51 @@ namespace MultiAdmin
 			FileSystemWatcher watcher = new FileSystemWatcher();
 			watcher.Path = dedicatedDir;
 			watcher.IncludeSubdirectories = true;
+
+			if (isLinux())
+			{
+				ReadLinux(server, watcher);
+				return;
+			}
+
+			ReadWindows(server, watcher);
+		}
+
+		public static Boolean isLinux()
+		{
+			int p = (int)Environment.OSVersion.Platform;
+			return (p == 4) || (p == 6) || (p == 128);
+		}
+
+		public static void ReadWindows(Server server, FileSystemWatcher watcher)
+		{
+			watcher.Changed += new FileSystemEventHandler((sender, eventArgs) => OnDirectoryChanged(sender, eventArgs, server));
+			watcher.EnableRaisingEvents = true;
+		}
+
+		public static void ReadLinux(Server server, FileSystemWatcher watcher)
+		{
 			watcher.Created += new FileSystemEventHandler((sender, eventArgs) => OnMapiCreated(sender, eventArgs, server));
 			watcher.Filter = "sl*.mapi";
 			watcher.EnableRaisingEvents = true;
-			while (true)
+		}
+
+		private static void OnDirectoryChanged(object source, FileSystemEventArgs e, Server server)
+		{
+			if (!Directory.Exists(e.FullPath))
 			{
-				Thread.Sleep(1000);
+				return;
+			}
+
+			if (!e.FullPath.Contains(server.GetSessionId()))
+			{
+				return;
+			}
+
+			string[] files = Directory.GetFiles(e.FullPath, "sl*.mapi", SearchOption.TopDirectoryOnly).OrderBy(f => f).ToArray<string>();
+			foreach (string file in files)
+			{
+				OutputThread.ProcessFile(server, file);
 			}
 		}
 
@@ -65,9 +103,11 @@ namespace MultiAdmin
 				{
 					if (!File.Exists(file))
 					{
-						server.Write("Message printer warning: Could not " + command + " " + file + ". File does not exist!", ConsoleColor.Yellow);
-						server.Write("skipping");
-						break;
+						// The file definetelly existed at the moment Change event was raised by OS
+						// If the file is not here after 15 ms that means that
+						// (a) either it was already processed
+						// (b) it was deleted by some other application
+						return;
 					}
 
 					StreamReader sr = new StreamReader(file);
@@ -208,8 +248,10 @@ namespace MultiAdmin
 					// P.S. the format is [Info] [courtney.exampleplugin] Something intresting happened
 					// That was just an example
 					display = false;
-				}
 
+					// This return should be here
+					return;
+				}
 			}
 
 
