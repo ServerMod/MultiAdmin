@@ -103,7 +103,7 @@ namespace MultiAdmin
 				{
 					if (!File.Exists(file))
 					{
-						// The file definetelly existed at the moment Change event was raised by OS
+						// The file definitely existed at the moment Change event was raised by OS
 						// If the file is not here after 15 ms that means that
 						// (a) either it was already processed
 						// (b) it was deleted by some other application
