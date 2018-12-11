@@ -12,7 +12,7 @@ namespace MultiAdmin.MultiAdmin
 {
 	public class Server
 	{
-		public static readonly string MA_VERSION = "2.1.2";
+		public static readonly string MA_VERSION = "2.1.3.1";
 
 		public bool HasServerMod { get; set; }
 		public string ServerModVersion { get; set; }
