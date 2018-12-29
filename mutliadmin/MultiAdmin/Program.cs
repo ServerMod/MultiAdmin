@@ -2,10 +2,8 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using MultiAdmin;
-using MultiAdmin.MultiAdmin;
 
-namespace MutliAdmin
+namespace MultiAdmin.MultiAdmin
 {
 	public static class Program
 	{
@@ -14,7 +12,7 @@ namespace MutliAdmin
 		private static string configChain;
 		private static Config multiadminConfig;
 		private static Server server;
-		private static bool multiMode = false;
+		private static bool multiMode;
 
 		public static void Write(string message, ConsoleColor color = ConsoleColor.DarkYellow)
 		{
@@ -30,20 +28,17 @@ namespace MutliAdmin
 
 		public static bool FindConfig()
 		{
-			var defaultLoc = FileManager.AppFolder + "config_gameplay.txt";
-			var path = Program.multiadminConfig.config.GetString("cfg_loc", defaultLoc);
-			var backup = path.Replace(".txt", "_backup.txt");
+			string defaultLoc = FileManager.AppFolder + "config_gameplay.txt";
+			string path = multiadminConfig.config.GetString("cfg_loc", defaultLoc);
+			string backup = path.Replace(".txt", "_backup.txt");
 
 			// Copy config template
-			if (!Directory.Exists(FileManager.AppFolder))
-			{
-				Directory.CreateDirectory(FileManager.AppFolder);
-			}
+			if (!Directory.Exists(FileManager.AppFolder)) Directory.CreateDirectory(FileManager.AppFolder);
 			if (!File.Exists(path))
-			{
 				try
 				{
-					Write("Default config file not in expected location (" + path + "), copying \"MiscData/gameconfig_template.txt\"...");
+					Write("Default config file not in expected location (" + path +
+					      "), copying \"MiscData/gameconfig_template.txt\"...");
 					File.Copy("MiscData/gameconfig_template.txt", path);
 					Write("Copied default config!");
 				}
@@ -51,16 +46,16 @@ namespace MutliAdmin
 				{
 					Write("Error copying template file \"MiscData/gameconfig_template.txt\"!");
 				}
-			}
 
 			if (File.Exists(path))
 			{
 				configLocation = path;
-				Program.Write("Config file located at: " + path, ConsoleColor.DarkYellow);
+				Write("Config file located at: " + path, ConsoleColor.DarkYellow);
 
 				if (!File.Exists(backup))
 				{
-					Program.Write("Config file has not been backed up, creating backup copy under: " + backup, ConsoleColor.DarkYellow);
+					Write("Config file has not been backed up, creating backup copy under: " + backup,
+						ConsoleColor.DarkYellow);
 					File.Copy(path, backup);
 				}
 			}
@@ -93,7 +88,8 @@ namespace MutliAdmin
 				// The first check sees if the "servers" directory exists, and if it does, 
 				//  the second check will see if it is empty.
 				if (Directory.Exists(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers") &&
-					HasSubdirs(Directory.GetDirectories(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers")))
+				    HasSubdirs(Directory.GetDirectories(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar +
+				                                        "servers")))
 				{
 					Write("Using multiple server mode", ConsoleColor.Green);
 					multiMode = true;
@@ -105,34 +101,40 @@ namespace MutliAdmin
 					multiMode = false;
 					hasServerToStart = true;
 					Write("Using default server mode", ConsoleColor.Green);
-					Write("Server directory not found or it is empty, if you want to use multiple server mode, please make a new directory in the following format:", ConsoleColor.Yellow);
+					Write(
+						"Server directory not found or it is empty, if you want to use multiple server mode, please make a new directory in the following format:",
+						ConsoleColor.Yellow);
 					Write(Directory.GetCurrentDirectory() + "\\servers\\<Server id>\\config.txt", ConsoleColor.Yellow);
 				}
 			}
 
 			if (!hasServerToStart)
-			{
-				Write("All servers are set to manual start! you should have at least one config that auto starts", ConsoleColor.Red);
-			}
+				Write("All servers are set to manual start! you should have at least one config that auto starts",
+					ConsoleColor.Red);
 
 			return hasServerToStart;
 		}
 
-		public static bool HasSubdirs(string[] dirs) => dirs.Length > 0;
+		public static bool HasSubdirs(string[] dirs)
+		{
+			return dirs.Length > 0;
+		}
 
 
 		public static bool LoadserverFolders()
 		{
 			bool hasServerToStart = false;
 			bool first = true;
-			string[] dirs = Directory.GetDirectories(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar);
+			string[] dirs = Directory.GetDirectories(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar +
+			                                         "servers" + Path.DirectorySeparatorChar);
 			foreach (string file in dirs)
 			{
 				string name = new DirectoryInfo(file).Name;
 				if (first)
 				{
-					var serverConfig = new MultiAdmin.Config(file + Path.DirectorySeparatorChar + "config.txt");
-					Program.Write(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + name + Path.DirectorySeparatorChar + "config.txt");
+					Config serverConfig = new Config(file + Path.DirectorySeparatorChar + "config.txt");
+					Write(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" +
+					      Path.DirectorySeparatorChar + name + Path.DirectorySeparatorChar + "config.txt");
 					if (serverConfig.config.GetBool("manual_start", false))
 					{
 						Write("Skipping auto start for: " + name, ConsoleColor.DarkYellow);
@@ -144,21 +146,18 @@ namespace MutliAdmin
 						Write("Starting this instance with config directory: " + name, ConsoleColor.DarkYellow);
 						first = false;
 					}
-
 				}
 				else
 				{
-					var other_config = new Config(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + name + Path.DirectorySeparatorChar + "config.txt");
-					Write(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar + name + Path.DirectorySeparatorChar + "config.txt");
+					Config other_config = new Config(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar +
+					                                 "servers" + Path.DirectorySeparatorChar + name +
+					                                 Path.DirectorySeparatorChar + "config.txt");
+					Write(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" +
+					      Path.DirectorySeparatorChar + name + Path.DirectorySeparatorChar + "config.txt");
 					if (other_config.config.GetBool("manual_start", false))
-					{
 						Write("Skipping auto start for: " + name, ConsoleColor.DarkYellow);
-					}
 					else
-					{
 						configChain += "\"" + name + "\" ";
-					}
-
 				}
 			}
 
@@ -170,7 +169,7 @@ namespace MutliAdmin
 			return Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers";
 		}
 
-		static void OnExit(object sender, EventArgs e)
+		private static void OnExit(object sender, EventArgs e)
 		{
 			Console.WriteLine("exit");
 			Debug.Write("exit");
@@ -179,7 +178,7 @@ namespace MutliAdmin
 
 		public static void Main(string[] args)
 		{
-			AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnExit);
+			AppDomain.CurrentDomain.ProcessExit += OnExit;
 			multiadminConfig = new Config("scp_multiadmin.cfg");
 			if (!FindConfig())
 			{
@@ -189,14 +188,10 @@ namespace MutliAdmin
 
 			configChain = string.Empty;
 			if (StartHandleConfigs(args))
-			{
-				server = new Server(GetServerDirectory(), configKey, multiadminConfig, configLocation, configChain, multiMode);
-			}
+				server = new Server(GetServerDirectory(), configKey, multiadminConfig, configLocation, configChain,
+					multiMode);
 			else
-			{
 				Console.ReadKey();
-			}
-
 		}
 	}
 }

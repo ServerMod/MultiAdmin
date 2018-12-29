@@ -1,16 +1,26 @@
-﻿using System;
-using MultiAdmin.MultiAdmin.Features;
+﻿using MultiAdmin.MultiAdmin.Features.Attributes;
 
-namespace MultiAdmin.MultiAdmin.Commands
+namespace MultiAdmin.MultiAdmin.Features
 {
 	[Feature]
-	class ChainStart : Feature, IEventServerStart
+	internal class ChainStart : Feature, IEventServerStart
 	{
 		private bool once;
 
 		public ChainStart(Server server) : base(server)
 		{
-			this.once = true;
+			once = true;
+		}
+
+
+		public void OnServerStart()
+		{
+			if (string.IsNullOrWhiteSpace(Server.ConfigChain) || Server.ConfigChain.Trim().Equals("\"\"") ||
+			    !once) return;
+
+			once = false;
+			Server.Write("Starting next with chained config:" + Server.ConfigChain);
+			Server.NewInstance(Server.ConfigChain);
 		}
 
 		public override void Init()
@@ -29,18 +39,6 @@ namespace MultiAdmin.MultiAdmin.Commands
 
 		public override void OnConfigReload()
 		{
-		}
-
-
-		public void OnServerStart()
-		{
-			if (String.IsNullOrWhiteSpace(Server.ConfigChain) || Server.ConfigChain.Trim().Equals("\"\"") || !this.once) {
-				return;
-			}
-
-			this.once = false;
-			Server.Write("Starting next with chained config:" + Server.ConfigChain);
-			Server.NewInstance(Server.ConfigChain);
 		}
 	}
 }

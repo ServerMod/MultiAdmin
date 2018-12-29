@@ -1,24 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MultiAdmin.MultiAdmin.Features;
+﻿using MultiAdmin.MultiAdmin.Features.Attributes;
 
-namespace MultiAdmin.MultiAdmin.Commands
+namespace MultiAdmin.MultiAdmin.Features
 {
 	[Feature]
-	class RestartNextRound : Feature, ICommand, IEventRoundEnd
+	internal class RestartNextRound : Feature, ICommand, IEventRoundEnd
 	{
 		private bool restart;
 
 		public RestartNextRound(Server server) : base(server)
 		{
-		}
-
-		public override void Init()
-		{
-			restart = false;
 		}
 
 		public string GetCommandDescription()
@@ -33,14 +23,29 @@ namespace MultiAdmin.MultiAdmin.Commands
 			restart = true;
 		}
 
-		public void OnRoundEnd()
-		{
-			if (restart) base.Server.SoftRestartServer();
-		}
-
 		public bool PassToGame()
 		{
 			return false;
+		}
+
+		public string GetCommand()
+		{
+			return "RESTARTNEXTROUND";
+		}
+
+		public string GetUsage()
+		{
+			return string.Empty;
+		}
+
+		public void OnRoundEnd()
+		{
+			if (restart) Server.SoftRestartServer();
+		}
+
+		public override void Init()
+		{
+			restart = false;
 		}
 
 		public bool RequiresServerMod()
@@ -56,16 +61,6 @@ namespace MultiAdmin.MultiAdmin.Commands
 		public override string GetFeatureName()
 		{
 			return "Restart Next Round";
-		}
-
-		public string GetCommand()
-		{
-			return "RESTARTNEXTROUND";
-		}
-
-		public string GetUsage()
-		{
-			return string.Empty;
 		}
 
 		public override void OnConfigReload()

@@ -1,51 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MultiAdmin.MultiAdmin.Features;
+using MultiAdmin.MultiAdmin.Features.Attributes;
 
-namespace MultiAdmin.MultiAdmin.Commands
+namespace MultiAdmin.MultiAdmin.Features
 {
 	[Feature]
-	class MultiAdminInfo : Feature, IEventServerPreStart, ICommand
+	internal class MultiAdminInfo : Feature, IEventServerPreStart, ICommand
 	{
 		public MultiAdminInfo(Server server) : base(server)
 		{
-		}
-
-		public override void Init()
-		{
-		}
-
-		public override void OnConfigReload()
-		{
-		}
-
-		public void PrintInfo()
-		{
-			Server.Write("MultiAdmin for SCP: Secret Laboratory made by Courtney (Grover_c13) & Dankrushen.", ConsoleColor.DarkMagenta);
-			Server.Write("Contributors: PatPeter, SecondFry, ShingekiNoRex and SlenderPlays.", ConsoleColor.DarkMagenta);
-			Server.Write("Heavily modified but based off LocalAdmin by Hubert Moszka.", ConsoleColor.DarkMagenta);
-			Server.Write("You can request LocalAdmin source code at moszka.hubert@gmail.com.", ConsoleColor.DarkMagenta);
-			Server.Write("You can find MultiAdmin source code at https://github.com/Grover-c13/MultiAdmin/.", ConsoleColor.DarkMagenta);
-			Server.Write("Released under CC-BY-SA 4.0", ConsoleColor.DarkMagenta);
-		}
-
-		public override string GetFeatureDescription()
-		{
-			return "Prints the license/author information";
-		}
-
-		public override string GetFeatureName()
-		{
-			return "MutliAdminInfo";
-		}
-
-
-		public void OnServerPreStart()
-		{
-			PrintInfo();
 		}
 
 		public void OnCall(string[] args)
@@ -65,13 +27,41 @@ namespace MultiAdmin.MultiAdmin.Commands
 
 		public string GetCommandDescription()
 		{
-			return "Prints license and author information.";
+			return GetFeatureDescription();
 		}
-
 
 		public string GetUsage()
 		{
 			return string.Empty;
+		}
+
+		public void OnServerPreStart()
+		{
+			PrintInfo();
+		}
+
+		public override void Init()
+		{
+		}
+
+		public override void OnConfigReload()
+		{
+		}
+
+		public void PrintInfo()
+		{
+			Server.Write("MultiAdmin (https://github.com/Grover-c13/MultiAdmin/)", ConsoleColor.DarkMagenta);
+			Server.Write("Released under CC-BY-SA 4.0", ConsoleColor.DarkMagenta);
+		}
+
+		public override string GetFeatureDescription()
+		{
+			return "Prints MultiAdmin license information";
+		}
+
+		public override string GetFeatureName()
+		{
+			return "MultiAdminInfo";
 		}
 	}
 }

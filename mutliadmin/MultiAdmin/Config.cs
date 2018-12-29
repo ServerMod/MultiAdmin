@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-//using YamlDotNet.RepresentationModel;
 
-namespace MultiAdmin
+namespace MultiAdmin.MultiAdmin
 {
 	public class OldConfigException : Exception
 	{
@@ -15,8 +13,8 @@ namespace MultiAdmin
 
 	public class Config
 	{
-		public YamlConfig config;
 		private readonly string configFile;
+		public YamlConfig config;
 
 		public Config(string configFile)
 		{
@@ -26,10 +24,7 @@ namespace MultiAdmin
 
 		public void Reload()
 		{
-			if (!Directory.Exists(FileManager.AppFolder))
-			{
-				Directory.CreateDirectory(FileManager.AppFolder);
-			}
+			if (!Directory.Exists(FileManager.AppFolder)) Directory.CreateDirectory(FileManager.AppFolder);
 
 			config = new YamlConfig(configFile);
 		}

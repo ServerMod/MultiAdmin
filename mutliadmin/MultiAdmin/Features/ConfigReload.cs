@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MultiAdmin.MultiAdmin.Features.Attributes;
 
 namespace MultiAdmin.MultiAdmin.Features
 {
 	[Feature]
-	class ConfigReload : Feature, ICommand
+	internal class ConfigReload : Feature, ICommand
 	{
-		bool pass;
+		private bool pass;
 
 		public ConfigReload(Server server) : base(server)
 		{
@@ -25,24 +21,9 @@ namespace MultiAdmin.MultiAdmin.Features
 			return "Handles reloading the config";
 		}
 
-		public override string GetFeatureDescription()
-		{
-			return "Config reload will swap configs";
-		}
-
-		public override string GetFeatureName()
-		{
-			return "Config reload";
-		}
-
 		public string GetUsage()
 		{
 			return "<reload>";
-		}
-
-		public override void Init()
-		{
-			pass = true;
 		}
 
 		public void OnCall(string[] args)
@@ -55,21 +36,32 @@ namespace MultiAdmin.MultiAdmin.Features
 				Server.Write("Reloading config");
 				Server.Write("if the config opens in notepad, dont worry, thats just the game. It should be reloaded.");
 				Server.ServerConfig.Reload();
-				foreach (Feature feature in Server.Features)
-				{
-					feature.OnConfigReload();
-				}
+				foreach (Feature feature in Server.Features) feature.OnConfigReload();
 			}
-
-		}
-
-		public override void OnConfigReload()
-		{
 		}
 
 		public bool PassToGame()
 		{
 			return pass;
+		}
+
+		public override string GetFeatureDescription()
+		{
+			return "Config reload will swap configs";
+		}
+
+		public override string GetFeatureName()
+		{
+			return "Config reload";
+		}
+
+		public override void Init()
+		{
+			pass = true;
+		}
+
+		public override void OnConfigReload()
+		{
 		}
 	}
 }

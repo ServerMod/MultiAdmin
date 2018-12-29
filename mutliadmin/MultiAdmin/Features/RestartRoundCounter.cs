@@ -1,20 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MultiAdmin.MultiAdmin.Features;
+﻿using MultiAdmin.MultiAdmin.Features.Attributes;
 
-namespace MultiAdmin.MultiAdmin.Commands
+namespace MultiAdmin.MultiAdmin.Features
 {
 	[Feature]
-	class RestartRoundCounter : Feature, IEventRoundEnd
+	internal class RestartRoundCounter : Feature, IEventRoundEnd
 	{
 		private int count;
 		private int restartAfter;
 
 		public RestartRoundCounter(Server server) : base(server)
 		{
+		}
+
+		public void OnRoundEnd()
+		{
+			if (restartAfter < 0) return;
+			count++;
+			if (count > restartAfter) Server.SoftRestartServer();
 		}
 
 		public override void Init()
@@ -27,13 +29,6 @@ namespace MultiAdmin.MultiAdmin.Commands
 			restartAfter = Server.ServerConfig.config.GetInt("restart_every_num_rounds", -1);
 		}
 
-		public void OnRoundEnd()
-		{
-			if (restartAfter < 0) return;
-			count++;
-			if (count > restartAfter) base.Server.SoftRestartServer();
-		}
-
 
 		public override string GetFeatureDescription()
 		{
@@ -44,7 +39,5 @@ namespace MultiAdmin.MultiAdmin.Commands
 		{
 			return "Restart After X Rounds";
 		}
-
-
 	}
 }

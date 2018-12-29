@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace MultiAdmin.MultiAdmin.Features
+namespace MultiAdmin.MultiAdmin.Features.Attributes
 {
-	[System.AttributeUsage(System.AttributeTargets.Class)
+	[AttributeUsage(AttributeTargets.Class)
 	]
-	public class FeatureAttribute : System.Attribute
+	public class FeatureAttribute : Attribute
 	{
 	}
 }

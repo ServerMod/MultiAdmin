@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace MultiAdmin.MultiAdmin
 {
-	class InputThread
+	internal class InputThread
 	{
 		public static void Write(Server server)
 		{
@@ -15,12 +12,10 @@ namespace MultiAdmin.MultiAdmin
 			{
 				while (!Console.KeyAvailable)
 				{
-					if (server.IsStopping())
-					{
-						return;
-					}
+					if (server.IsStopping()) return;
 					Thread.Sleep(server.runOptimized ? 500 : 300);
 				}
+
 				string message = Console.ReadLine();
 				int cursorTop = Console.CursorTop;
 				Console.SetCursorPosition(0, Console.CursorTop - 1);
@@ -31,7 +26,7 @@ namespace MultiAdmin.MultiAdmin
 				if (messageSplit.Length > 0)
 				{
 					ICommand command;
-					Boolean callServer = true;
+					bool callServer = true;
 					server.Commands.TryGetValue(messageSplit[0].ToLower().Trim(), out command);
 					if (command != null)
 					{

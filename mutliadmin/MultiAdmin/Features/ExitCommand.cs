@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MultiAdmin.MultiAdmin.Features.Attributes;
 
 namespace MultiAdmin.MultiAdmin.Features
 {
 	[Feature]
-	class ExitCommand : Feature, ICommand
+	internal class ExitCommand : Feature, ICommand
 	{
-		bool pass;
+		private bool pass;
 
 		public ExitCommand(Server server) : base(server)
 		{
@@ -20,13 +16,28 @@ namespace MultiAdmin.MultiAdmin.Features
 			return "EXIT";
 		}
 
-		public override void OnConfigReload()
-		{
-		}
-
 		public string GetCommandDescription()
 		{
 			return "Exits the server";
+		}
+
+		public string GetUsage()
+		{
+			return string.Empty;
+		}
+
+		public void OnCall(string[] args)
+		{
+			Server.StopServer(false);
+		}
+
+		public bool PassToGame()
+		{
+			return pass;
+		}
+
+		public override void OnConfigReload()
+		{
 		}
 
 		public override string GetFeatureDescription()
@@ -39,24 +50,9 @@ namespace MultiAdmin.MultiAdmin.Features
 			return "Exit command";
 		}
 
-		public string GetUsage()
-		{
-			return string.Empty;
-		}
-
 		public override void Init()
 		{
 			pass = true;
-		}
-
-		public void OnCall(string[] args)
-		{
-			Server.StopServer(false);
-		}
-
-		public bool PassToGame()
-		{
-			return pass;
 		}
 	}
 }

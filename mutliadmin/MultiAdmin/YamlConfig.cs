@@ -1,128 +1,121 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
-public class YamlConfig
+namespace MultiAdmin.MultiAdmin
 {
-	public string[] rawData;
-
-	public YamlConfig()
+	public class YamlConfig
 	{
-	}
+		public string[] rawData;
 
-	public YamlConfig(string path)
-	{
-		if (File.Exists(path))
+		public YamlConfig(string path)
 		{
-			LoadConfigFile(path);
-		}
-		else
-		{
-			rawData = new string[] { };
-		}
-	}
-
-	public void LoadConfigFile(string path)
-	{
-		if (File.Exists(path))
-		{
-			rawData = FileManager.ReadAllLines(path);
-		}
-		else
-		{
-			rawData = new string[] { };
-		}
-	}
-
-	public string GetString(string key, string def = null)
-	{
-		foreach (var line in rawData)
-		{
-			if (line.ToLower().StartsWith(key.ToLower() + ": ")) return line.Substring(key.Length + 2);
+			if (File.Exists(path))
+				LoadConfigFile(path);
+			else
+				rawData = new string[] { };
 		}
 
-		return def;
-	}
-
-	public int GetInt(string key, int def = 0)
-	{
-		foreach (var line in rawData)
+		public void LoadConfigFile(string path)
 		{
-			if (!line.ToLower().StartsWith(key.ToLower() + ": ")) continue;
-			try
+			rawData = File.Exists(path) ? FileManager.ReadAllLines(path) : new string[] { };
+		}
+
+		public string GetString(string key, string def = null)
+		{
+			foreach (string line in rawData)
+				if (line.ToLower().StartsWith(key.ToLower() + ": "))
+					return line.Substring(key.Length + 2);
+
+			return def;
+		}
+
+		public int GetInt(string key, int def = 0)
+		{
+			foreach (string line in rawData)
 			{
-				return Convert.ToInt32(line.Substring(key.Length + 2));
+				if (!line.ToLower().StartsWith(key.ToLower() + ": ")) continue;
+				try
+				{
+					return Convert.ToInt32(line.Substring(key.Length + 2));
+				}
+				catch
+				{
+					return 0;
+				}
 			}
-			catch
+
+			return def;
+		}
+
+		public float GetFloat(string key, float def = 0)
+		{
+			string ky = GetString(key);
+			if (ky == string.Empty) return def;
+			ky = ky.Replace(',', '.');
+			return float.TryParse(ky, NumberStyles.Any,
+				CultureInfo.InvariantCulture, out float result)
+				? result
+				: def;
+		}
+
+		public bool GetBool(string key, bool def = false)
+		{
+			foreach (string line in rawData)
 			{
-				return 0;
+				if (!line.ToLower().StartsWith(key.ToLower() + ": ")) continue;
+				return line.Substring(key.Length + 2) == "true";
 			}
+
+			return def;
 		}
 
-		return def;
-	}
-
-	public float GetFloat(string key, float def = 0)
-	{
-		var ky = GetString(key);
-		if (ky == string.Empty) return def;
-		ky = ky.Replace(',', '.');
-		return float.TryParse(ky, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out float result) ? result : def;
-	}
-
-	public bool GetBool(string key, bool def = false)
-	{
-		foreach (var line in rawData)
+		public List<string> GetStringList(string key)
 		{
-			if (!line.ToLower().StartsWith(key.ToLower() + ": ")) continue;
-			return line.Substring(key.Length + 2) == "true";
-		}
-
-		return def;
-	}
-
-	public List<string> GetStringList(string key)
-	{
-		var read = false;
-		var list = new List<string>();
-		foreach (var line in rawData)
-		{
-			if (line.ToLower().StartsWith(key.ToLower() + ":"))
+			bool read = false;
+			List<string> list = new List<string>();
+			foreach (string line in rawData)
 			{
-				read = true;
-				continue;
+				if (line.ToLower().StartsWith(key.ToLower() + ":"))
+				{
+					read = true;
+					continue;
+				}
+
+				if (!read) continue;
+				if (line.StartsWith(" - ")) list.Add(line.Substring(3));
+				else if (!line.StartsWith("#")) break;
 			}
-			if (!read) continue;
-			if (line.StartsWith(" - ")) list.Add(line.Substring(3));
-			else if (!line.StartsWith("#")) break;
+
+			return list;
 		}
-		return list;
-	}
 
-	public List<int> GetIntList(string key)
-	{
-		var list = GetStringList(key);
-		return list.Select(x => Convert.ToInt32(x)).ToList();
-	}
-
-	public Dictionary<string, string> GetStringDictionary(string key)
-	{
-		var list = GetStringList(key);
-		var dict = new Dictionary<string, string>();
-		foreach (var item in list)
+		public List<int> GetIntList(string key)
 		{
-			var i = item.IndexOf(": ", StringComparison.Ordinal);
-			dict.Add(item.Substring(0, i), item.Substring(i + 2));
+			List<string> list = GetStringList(key);
+			return list.Select(x => Convert.ToInt32(x)).ToList();
 		}
 
-		return dict;
-	}
+		public Dictionary<string, string> GetStringDictionary(string key)
+		{
+			List<string> list = GetStringList(key);
+			Dictionary<string, string> dict = new Dictionary<string, string>();
+			foreach (string item in list)
+			{
+				int i = item.IndexOf(": ", StringComparison.Ordinal);
+				dict.Add(item.Substring(0, i), item.Substring(i + 2));
+			}
 
-	public static string[] ParseCommaSeparatedString(string data)
-	{
-		if (!data.StartsWith("[") || !data.EndsWith("]")) return null;
-		data = data.Substring(1, data.Length - 2);
-		return data.Split(new string[] { ", " }, StringSplitOptions.None);
+			return dict;
+		}
+
+		public static string[] ParseCommaSeparatedString(string data)
+		{
+			if (!data.StartsWith("[") || !data.EndsWith("]")) return null;
+			data = data.Substring(1, data.Length - 2);
+			return data.Split(new[] {", "}, StringSplitOptions.None);
+		}
 	}
 }

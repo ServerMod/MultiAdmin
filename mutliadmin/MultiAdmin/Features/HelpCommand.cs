@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using MultiAdmin.MultiAdmin.Features.Attributes;
 
 namespace MultiAdmin.MultiAdmin.Features
 {
@@ -18,13 +16,43 @@ namespace MultiAdmin.MultiAdmin.Features
 			return "HELP";
 		}
 
-		public override void OnConfigReload()
-		{
-		}
-
 		public string GetCommandDescription()
 		{
 			return "Prints out available commands and their function.";
+		}
+
+		public void OnCall(string[] args)
+		{
+			Server.Write("Commands from MultiAdmin:");
+			List<string> helpOutput = new List<string>();
+			foreach (KeyValuePair<string, ICommand> command in Server.Commands)
+			{
+				string usage = command.Value.GetUsage();
+				if (usage.Length > 0) usage = " " + usage;
+				string output = string.Format("{0}{1}: {2}", command.Key.ToUpper(), usage,
+					command.Value.GetCommandDescription());
+				helpOutput.Add(output);
+			}
+
+			helpOutput.Sort();
+
+			foreach (string line in helpOutput) Server.Write(line, ConsoleColor.Green);
+
+			Server.Write("Commands from game:");
+		}
+
+		public bool PassToGame()
+		{
+			return true;
+		}
+
+		public string GetUsage()
+		{
+			return string.Empty;
+		}
+
+		public override void OnConfigReload()
+		{
 		}
 
 		public override string GetFeatureDescription()
@@ -39,38 +67,6 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public override void Init()
 		{
-		}
-
-		public void OnCall(string[] args)
-		{
-			Server.Write("Commands from MultiAdmin:");
-			List<string> helpOutput = new List<string>();
-			foreach (KeyValuePair<string, ICommand> command in base.Server.Commands)
-			{
-				string usage = command.Value.GetUsage();
-				if (usage.Length > 0) usage = " " + usage;
-				string output = string.Format("{0}{1}: {2}", command.Key.ToUpper(), usage, command.Value.GetCommandDescription());
-				helpOutput.Add(output);
-			}
-
-			helpOutput.Sort();
-
-			foreach (string line in helpOutput)
-			{
-				Server.Write(line, ConsoleColor.Green);
-			}
-
-			Server.Write("Commands from game:");
-		}
-
-		public bool PassToGame()
-		{
-			return true;
-		}
-
-		public string GetUsage()
-		{
-			return string.Empty;
 		}
 	}
 }

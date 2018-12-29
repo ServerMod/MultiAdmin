@@ -52,7 +52,6 @@
     <Reference Include="System.ServiceModel.Web" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MultiAdmin\Features\PluginAutoUpdate.cs" />
     <Compile Include="MultiAdmin\Features\ConfigReload.cs" />
     <Compile Include="MultiAdmin\Features\ExitCommand.cs" />
     <Compile Include="MultiAdmin\Features\Attributes\FeatureAttribute.cs" />
@@ -66,7 +65,7 @@
     <Compile Include="MultiAdmin\Features\EventTest.cs" />
     <Compile Include="MultiAdmin\Features\Restart.cs" />
     <Compile Include="MultiAdmin\Features\TitleBar.cs" />
-    <Compile Include="MultiAdmin\Features\Autoscale.cs" />
+    <Compile Include="MultiAdmin\Features\AutoScale.cs" />
     <Compile Include="MultiAdmin\Features\MemoryChecker.cs" />
     <Compile Include="MultiAdmin\Features\InactivityShutdown.cs" />
     <Compile Include="MultiAdmin\Features\RestartRoundCounter.cs" />

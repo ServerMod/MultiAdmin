@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MultiAdmin.MultiAdmin.Features;
+﻿using MultiAdmin.MultiAdmin.Features.Attributes;
 
-namespace MultiAdmin.MultiAdmin.Commands
+namespace MultiAdmin.MultiAdmin.Features
 {
 	[Feature]
-	class StopNextRound : Feature, ICommand, IEventRoundEnd
+	internal class StopNextRound : Feature, ICommand, IEventRoundEnd
 	{
 		private bool stop;
 
@@ -22,6 +17,32 @@ namespace MultiAdmin.MultiAdmin.Commands
 			return "Stops the server at the end of this round";
 		}
 
+		public void OnCall(string[] args)
+		{
+			Server.Write("Server will stop next round");
+			stop = true;
+		}
+
+		public bool PassToGame()
+		{
+			return false;
+		}
+
+		public string GetCommand()
+		{
+			return "STOPNEXTROUND";
+		}
+
+		public string GetUsage()
+		{
+			return string.Empty;
+		}
+
+		public void OnRoundEnd()
+		{
+			if (stop) Server.StopServer();
+		}
+
 		public override void Init()
 		{
 			stop = false;
@@ -30,22 +51,6 @@ namespace MultiAdmin.MultiAdmin.Commands
 
 		public override void OnConfigReload()
 		{
-		}
-
-		public void OnCall(string[] args)
-		{
-			Server.Write("Server will stop next round");
-			stop = true;
-		}
-
-		public void OnRoundEnd()
-		{
-			if (stop) base.Server.StopServer();
-		}
-
-		public bool PassToGame()
-		{
-			return false;
 		}
 
 		public bool RequiresServerMod()
@@ -61,16 +66,6 @@ namespace MultiAdmin.MultiAdmin.Commands
 		public override string GetFeatureName()
 		{
 			return "Stop Next Round";
-		}
-
-		public string GetCommand()
-		{
-			return "STOPNEXTROUND";
-		}
-
-		public string GetUsage()
-		{
-			return string.Empty;
 		}
 	}
 }

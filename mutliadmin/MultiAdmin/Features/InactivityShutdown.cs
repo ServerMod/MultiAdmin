@@ -1,48 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MultiAdmin.MultiAdmin.Features;
+using MultiAdmin.MultiAdmin.Features.Attributes;
 
-namespace MultiAdmin.MultiAdmin.Commands
+namespace MultiAdmin.MultiAdmin.Features
 {
 	[Feature]
-	class InactivityShutdown : Feature, IEventRoundStart, IEventRoundEnd, IEventTick
+	internal class InactivityShutdown : Feature, IEventRoundStart, IEventRoundEnd, IEventTick
 	{
-		private bool waiting;
 		private long roundEndTime;
 		private int waitFor;
+		private bool waiting;
 
 		public InactivityShutdown(Server server) : base(server)
 		{
 		}
 
-		public override void Init()
-		{
-			roundEndTime = Utils.GetUnixTime();
-		}
-
-		public override void OnConfigReload()
-		{
-			waitFor = Server.ServerConfig.config.GetInt("shutdown_once_empty_for", -1);
-		}
-
 		public void OnRoundEnd()
 		{
-			roundEndTime = Utils.GetUnixTime();
+			roundEndTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 			waiting = true;
-		}
-
-
-		public override string GetFeatureDescription()
-		{
-			return "Stops the server after a period inactivity.";
-		}
-
-		public override string GetFeatureName()
-		{
-			return "Stop Server once Inactive";
 		}
 
 		public void OnRoundStart()
@@ -54,7 +29,7 @@ namespace MultiAdmin.MultiAdmin.Commands
 		{
 			if (waitFor > 0 && waiting)
 			{
-				long elapsed = Utils.GetUnixTime() - roundEndTime;
+				long elapsed = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - roundEndTime;
 
 				if (elapsed >= waitFor)
 				{
@@ -62,6 +37,27 @@ namespace MultiAdmin.MultiAdmin.Commands
 					Server.StopServer();
 				}
 			}
+		}
+
+		public override void Init()
+		{
+			roundEndTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+		}
+
+		public override void OnConfigReload()
+		{
+			waitFor = Server.ServerConfig.config.GetInt("shutdown_once_empty_for", -1);
+		}
+
+
+		public override string GetFeatureDescription()
+		{
+			return "Stops the server after a period inactivity.";
+		}
+
+		public override string GetFeatureName()
+		{
+			return "Stop Server once Inactive";
 		}
 	}
 }

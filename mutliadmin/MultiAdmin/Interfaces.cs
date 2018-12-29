@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MultiAdmin.MultiAdmin
+﻿namespace MultiAdmin.MultiAdmin
 {
 	public interface IEventServerPreStart
 	{
@@ -69,7 +63,6 @@ namespace MultiAdmin.MultiAdmin
 	public interface IServerMod
 	{
 	}
-
 
 	public interface ICommand
 	{

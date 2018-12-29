@@ -1,39 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MultiAdmin.MultiAdmin.Commands
+﻿namespace MultiAdmin.MultiAdmin.Features
 {
-	class EventTest : Feature, IEventCrash, IEventMatchStart, IEventPlayerConnect, IEventPlayerDisconnect, IEventRoundEnd, IEventRoundStart, IEventServerFull, IEventServerPreStart, IEventServerStart, IEventServerStop
+	internal class EventTest : Feature, IEventCrash, IEventMatchStart, IEventPlayerConnect, IEventPlayerDisconnect,
+		IEventRoundEnd, IEventRoundStart, IEventServerFull, IEventServerPreStart, IEventServerStart, IEventServerStop
 	{
-
 		public EventTest(Server server) : base(server)
 		{
-		}
-
-		public override void Init()
-		{
-		}
-
-		public override void OnConfigReload()
-		{
-		}
-
-		public override string GetFeatureDescription()
-		{
-			return "Tests the events";
-		}
-
-		public override string GetFeatureName()
-		{
-			return "Test";
-		}
-
-		public void OnServerFull()
-		{
-			Server.Write("EVENTTEST Server full event");
 		}
 
 		public void OnCrash()
@@ -66,6 +37,11 @@ namespace MultiAdmin.MultiAdmin.Commands
 			Server.Write("EVENTTEST on round start");
 		}
 
+		public void OnServerFull()
+		{
+			Server.Write("EVENTTEST Server full event");
+		}
+
 		public void OnServerPreStart()
 		{
 			Server.Write("EVENTTEST on prestart");
@@ -79,6 +55,24 @@ namespace MultiAdmin.MultiAdmin.Commands
 		public void OnServerStop()
 		{
 			Server.Write("EVENTTEST on stop");
+		}
+
+		public override void Init()
+		{
+		}
+
+		public override void OnConfigReload()
+		{
+		}
+
+		public override string GetFeatureDescription()
+		{
+			return "Tests the events";
+		}
+
+		public override string GetFeatureName()
+		{
+			return "Test";
 		}
 	}
 }

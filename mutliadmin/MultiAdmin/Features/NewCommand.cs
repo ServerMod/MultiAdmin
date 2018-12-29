@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MultiAdmin.MultiAdmin.Features;
+using MultiAdmin.MultiAdmin.Features.Attributes;
 
-namespace MultiAdmin.MultiAdmin.Commands
+namespace MultiAdmin.MultiAdmin.Features
 {
 	[Feature]
-	class NewCommand : Feature, ICommand
+	internal class NewCommand : Feature, ICommand
 	{
 		private string config;
 
@@ -16,37 +12,13 @@ namespace MultiAdmin.MultiAdmin.Commands
 		{
 		}
 
-		public override void Init()
-		{
-		}
-
-		public override void OnConfigReload()
-		{
-			config = Server.ServerConfig.config.GetString("start_config_on_full", "disabled");
-		}
-
-		public override string GetFeatureDescription()
-		{
-			return "Adds a command to start a new server given a config folder.";
-		}
-
-		public override string GetFeatureName()
-		{
-			return "New";
-		}
-
 
 		public void OnCall(string[] args)
 		{
 			if (args.Length == 0)
-			{
 				Server.Write("Must provide a config ID", ConsoleColor.Magenta);
-			}
 			else
-			{
-				// maybe check if the config exists?
 				Server.NewInstance(args[0].ToLower());
-			}
 		}
 
 		public string GetCommand()
@@ -68,6 +40,25 @@ namespace MultiAdmin.MultiAdmin.Commands
 		public string GetUsage()
 		{
 			return "<config_id>";
+		}
+
+		public override void Init()
+		{
+		}
+
+		public override void OnConfigReload()
+		{
+			config = Server.ServerConfig.config.GetString("start_config_on_full", "disabled");
+		}
+
+		public override string GetFeatureDescription()
+		{
+			return "Adds a command to start a new server given a config folder.";
+		}
+
+		public override string GetFeatureName()
+		{
+			return "New";
 		}
 	}
 }
