@@ -16,7 +16,11 @@ namespace MultiAdmin.MultiAdmin.Features
 		{
 			if (restartAfter < 0) return;
 			count++;
-			if (count > restartAfter) Server.SoftRestartServer();
+
+			if (count <= restartAfter) return;
+
+			Server.Write($"{count}/{restartAfter} rounds have passed, restarting...");
+			Server.SoftRestartServer();
 		}
 
 		public override void Init()
