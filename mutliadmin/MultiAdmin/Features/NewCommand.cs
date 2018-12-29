@@ -1,5 +1,4 @@
-﻿using System;
-using MultiAdmin.MultiAdmin.Features.Attributes;
+﻿using MultiAdmin.MultiAdmin.Features.Attributes;
 
 namespace MultiAdmin.MultiAdmin.Features
 {
@@ -15,10 +14,6 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public void OnCall(string[] args)
 		{
-			if (args.Length == 0)
-				Server.Write("Must provide a config ID", ConsoleColor.Magenta);
-			else
-				Server.NewInstance(args[0].ToLower());
 		}
 
 		public string GetCommand()
@@ -33,13 +28,13 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public string GetCommandDescription()
 		{
-			return "Starts a new server with the given config id.";
+			return "Starts a new server with the given config id";
 		}
 
 
 		public string GetUsage()
 		{
-			return "<config_id>";
+			return "<CONFIG ID>";
 		}
 
 		public override void Init()
@@ -48,12 +43,12 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public override void OnConfigReload()
 		{
-			config = Server.ServerConfig.config.GetString("start_config_on_full", "disabled");
+			config = Server.serverConfig.StartConfigOnFull;
 		}
 
 		public override string GetFeatureDescription()
 		{
-			return "Adds a command to start a new server given a config folder.";
+			return "Adds a command to start a new server given a config folder";
 		}
 
 		public override string GetFeatureName()

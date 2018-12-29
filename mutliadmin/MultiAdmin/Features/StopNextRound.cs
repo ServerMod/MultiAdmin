@@ -60,7 +60,7 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public override string GetFeatureDescription()
 		{
-			return "Stops the server after the current round ends.";
+			return "Stops the server after the current round ends";
 		}
 
 		public override string GetFeatureName()

@@ -11,6 +11,7 @@
     <FileAlignment>512</FileAlignment>
     <RootNamespace>MultiAdmin</RootNamespace>
     <TargetFrameworkProfile />
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -22,8 +23,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.0</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <ApplicationVersion>3.0.0.0</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -49,7 +49,6 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.ServiceModel.Web" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MultiAdmin\Features\ConfigReload.cs" />
@@ -61,11 +60,9 @@
     <Compile Include="MultiAdmin\Features\ModLog.cs" />
     <Compile Include="MultiAdmin\Features\MultiAdminInfo.cs" />
     <Compile Include="MultiAdmin\Features\NewCommand.cs" />
-    <Compile Include="MultiAdmin\Features\ChainStart.cs" />
     <Compile Include="MultiAdmin\Features\EventTest.cs" />
     <Compile Include="MultiAdmin\Features\Restart.cs" />
     <Compile Include="MultiAdmin\Features\TitleBar.cs" />
-    <Compile Include="MultiAdmin\Features\AutoScale.cs" />
     <Compile Include="MultiAdmin\Features\MemoryChecker.cs" />
     <Compile Include="MultiAdmin\Features\InactivityShutdown.cs" />
     <Compile Include="MultiAdmin\Features\RestartRoundCounter.cs" />
@@ -76,11 +73,11 @@
     <Compile Include="MultiAdmin\FileManager.cs" />
     <Compile Include="MultiAdmin\InputThread.cs" />
     <Compile Include="MultiAdmin\Interfaces.cs" />
+    <Compile Include="MultiAdmin\MultiAdminConfig.cs" />
     <Compile Include="MultiAdmin\Program.cs" />
     <Compile Include="MultiAdmin\Server.cs" />
     <Compile Include="MultiAdmin\OutputThread.cs" />
     <Compile Include="MultiAdmin\Utils.cs" />
-    <Compile Include="MultiAdmin\YamlConfig.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

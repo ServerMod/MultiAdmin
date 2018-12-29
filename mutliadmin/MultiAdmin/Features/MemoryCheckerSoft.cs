@@ -6,14 +6,29 @@ namespace MultiAdmin.MultiAdmin.Features
 	[Feature]
 	internal class MemoryCheckerSoft : Feature, IEventTick, IEventRoundEnd
 	{
-		private int lowMb;
-		private int maxMb;
+		private const long BytesInMegabyte = 1048576L;
+		private long lowBytes;
+
+		private long maxBytes;
+
 		private bool restart;
 		private int tickCount;
 		private bool warn;
 
 		public MemoryCheckerSoft(Server server) : base(server)
 		{
+		}
+
+		private long LowMb
+		{
+			get => lowBytes / BytesInMegabyte;
+			set => lowBytes = value * BytesInMegabyte;
+		}
+
+		private long MaxMb
+		{
+			get => maxBytes / BytesInMegabyte;
+			set => maxBytes = value * BytesInMegabyte;
 		}
 
 		public void OnRoundEnd()
@@ -23,33 +38,31 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public void OnTick()
 		{
-			if (lowMb >= 0 && maxMb >= 0)
+			if (lowBytes < 0 || maxBytes < 0) return;
+
+			Server.GameProcess.Refresh();
+			long workingMemory = Server.GameProcess.WorkingSet64; // process memory in bytes
+			long memoryLeft = maxBytes - workingMemory;
+
+			if (memoryLeft <= lowBytes)
 			{
-				Server.GetGameProcess().Refresh();
-				long workingMemory = Server.GetGameProcess().WorkingSet64 / 1048576L; // process memory in MB
-				long memoryLeft = maxMb - workingMemory;
+				if (!warn)
+					Server.Write(
+						$"Warning: program is running low on memory ({memoryLeft / BytesInMegabyte} MB left) the server will restart at the end of the round if it continues",
+						ConsoleColor.Red);
+				warn = true;
+				tickCount++;
+			}
+			else
+			{
+				warn = false;
+				tickCount = 0;
+			}
 
-				if (memoryLeft < lowMb)
-				{
-					if (!warn)
-						Server.Write(
-							"Warning: program is running low on memory (" + memoryLeft +
-							" MB left) the server will restart at the end of the round if it continues",
-							ConsoleColor.Red);
-					warn = true;
-					tickCount++;
-				}
-				else
-				{
-					warn = false;
-					tickCount = 0;
-				}
-
-				if (tickCount == 10)
-				{
-					restart = true;
-					Server.Write("Restarting the server at end of the round due to low memory");
-				}
+			if (tickCount == 10)
+			{
+				restart = true;
+				Server.Write("Restarting the server at end of the round due to low memory");
 			}
 		}
 
@@ -67,14 +80,13 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public override string GetFeatureName()
 		{
-			return "Restart On Low Memory at the end of the round";
+			return "Restart On Low Memory at Round End";
 		}
 
 		public override void OnConfigReload()
 		{
-			lowMb = Server.ServerConfig.config.GetInt("restart_low_memory_roundend", 450);
-
-			maxMb = Server.ServerConfig.config.GetInt("max_memory", 2048); // 32 bit limited to 2GB
+			LowMb = Server.serverConfig.RestartLowMemoryRoundEnd;
+			MaxMb = Server.serverConfig.MaxMemory;
 		}
 	}
 }

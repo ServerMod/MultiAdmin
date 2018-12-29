@@ -41,7 +41,7 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public override string GetFeatureName()
 		{
-			return "Restart command";
+			return "Restart Command";
 		}
 
 		public override void Init()

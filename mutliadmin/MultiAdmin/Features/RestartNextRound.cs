@@ -55,7 +55,7 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public override string GetFeatureDescription()
 		{
-			return "Restarts the server after the current round ends.";
+			return "Restarts the server after the current round ends";
 		}
 
 		public override string GetFeatureName()

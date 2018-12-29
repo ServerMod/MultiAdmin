@@ -23,7 +23,7 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public string GetUsage()
 		{
-			return "[filelocation]";
+			return "[FILE LOCATION]";
 		}
 
 		public void OnCall(string[] args)
@@ -36,22 +36,25 @@ namespace MultiAdmin.MultiAdmin.Features
 
 			string dir = string.Join(" ", args);
 
-			List<string> lines = new List<string>();
-			lines.Add("# MultiAdmin");
-			lines.Add(string.Empty);
-			lines.Add("## Features");
+			List<string> lines = new List<string>
+			{
+				"# MultiAdmin",
+				string.Empty,
+				"## Features"
+			};
 
-			foreach (Feature feature in Server.Features)
+			foreach (Feature feature in Server.features)
 			{
 				if (feature.Equals(this)) continue;
 				lines.Add("- " + feature.GetFeatureName() + ": " + feature.GetFeatureDescription());
 			}
 
+			lines.Add(string.Empty);
 			lines.Add("## MultiAdmin Commands");
 			lines.Add(
-				"This does not include ServerMod or in-game commands, for a full list type \"HELP\" in MultiAdmin which will produce all commands.");
+				"This does not include ServerMod or in-game commands, for a full list type `HELP` in MultiAdmin which will produce all commands.");
 			lines.Add(string.Empty);
-			foreach (ICommand comm in Server.Commands.Values)
+			foreach (ICommand comm in Server.commands.Values)
 			{
 				string commandString = (comm.GetCommand() + " " + comm.GetUsage()).Trim();
 				lines.Add("- " + commandString + ": " + comm.GetCommandDescription());

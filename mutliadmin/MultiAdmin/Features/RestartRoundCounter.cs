@@ -26,18 +26,18 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public override void OnConfigReload()
 		{
-			restartAfter = Server.ServerConfig.config.GetInt("restart_every_num_rounds", -1);
+			restartAfter = Server.serverConfig.RestartEveryNumRounds;
 		}
 
 
 		public override string GetFeatureDescription()
 		{
-			return "Restarts the server after X num rounds completed.";
+			return "Restarts the server after a number rounds completed";
 		}
 
 		public override string GetFeatureName()
 		{
-			return "Restart After X Rounds";
+			return "Restart After a Number of Rounds";
 		}
 	}
 }

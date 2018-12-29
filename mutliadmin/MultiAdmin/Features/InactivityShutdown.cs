@@ -46,18 +46,18 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public override void OnConfigReload()
 		{
-			waitFor = Server.ServerConfig.config.GetInt("shutdown_once_empty_for", -1);
+			waitFor = Server.serverConfig.ShutdownWhenEmptyFor;
 		}
 
 
 		public override string GetFeatureDescription()
 		{
-			return "Stops the server after a period inactivity.";
+			return "Stops the server after a period inactivity";
 		}
 
 		public override string GetFeatureName()
 		{
-			return "Stop Server once Inactive";
+			return "Stop Server When Inactive";
 		}
 	}
 }

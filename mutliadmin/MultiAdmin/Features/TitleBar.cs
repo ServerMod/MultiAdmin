@@ -31,7 +31,6 @@ namespace MultiAdmin.MultiAdmin.Features
 			UpdateTitlebar();
 		}
 
-
 		public override string GetFeatureDescription()
 		{
 			return
@@ -40,35 +39,36 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public override string GetFeatureName()
 		{
-			return "Titlebar";
+			return "TitleBar";
 		}
 
 		public override void Init()
 		{
-			maxPlayers = Server.ServerConfig.config.GetInt("max_players", 20);
+			maxPlayers = Server.serverConfig.MaxPlayers;
 			playerCount = -1; // -1 for the "server" player, once the server starts this will increase to 0.
 			UpdateTitlebar();
 		}
 
 		public override void OnConfigReload()
 		{
+			maxPlayers = Server.serverConfig.MaxPlayers;
 		}
 
 		public void UpdateTitlebar()
 		{
-			if (Server.SkipProcessHandle() || Process.GetCurrentProcess().MainWindowHandle != IntPtr.Zero)
-			{
-				string smod = string.Empty;
-				if (Server.HasServerMod) smod = "SMod " + Server.ServerModVersion;
-				int displayPlayerCount = playerCount;
-				if (playerCount == -1) displayPlayerCount = 0;
-				string processId = Server.GetGameProcess() == null
-					? string.Empty
-					: Server.GetGameProcess().Id.ToString();
-				Console.Title = "MultiAdmin " + Server.MaVersion + " | Config: " + Server.ConfigKey + " | Session:" +
-				                Server.GetSessionId() + " PID: " + processId + " | " + displayPlayerCount + "/" +
-				                maxPlayers + " | " + smod;
-			}
+			if (!Utils.SkipProcessHandle() && Process.GetCurrentProcess().MainWindowHandle == IntPtr.Zero) return;
+
+			string smod = string.Empty;
+			if (Server.hasServerMod) smod = "SMod " + Server.serverModVersion;
+			int displayPlayerCount = playerCount;
+			if (playerCount == -1) displayPlayerCount = 0;
+			string processId = Server.GameProcess == null
+				? string.Empty
+				: Server.GameProcess.Id.ToString();
+
+			// TODO: Add config key to title bar
+			Console.Title =
+				$"MultiAdmin {Server.MaVersion} | Config: NOT YET IMPLEMENTED | Session: {Server.SessionId} PID: {processId} | {displayPlayerCount}/{maxPlayers}{(Server.hasServerMod ? " |" + smod : "")}";
 		}
 	}
 }

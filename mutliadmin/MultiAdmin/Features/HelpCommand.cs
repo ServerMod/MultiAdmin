@@ -18,19 +18,18 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public string GetCommandDescription()
 		{
-			return "Prints out available commands and their function.";
+			return "Prints out available commands and their function";
 		}
 
 		public void OnCall(string[] args)
 		{
 			Server.Write("Commands from MultiAdmin:");
 			List<string> helpOutput = new List<string>();
-			foreach (KeyValuePair<string, ICommand> command in Server.Commands)
+			foreach (KeyValuePair<string, ICommand> command in Server.commands)
 			{
 				string usage = command.Value.GetUsage();
 				if (usage.Length > 0) usage = " " + usage;
-				string output = string.Format("{0}{1}: {2}", command.Key.ToUpper(), usage,
-					command.Value.GetCommandDescription());
+				string output = $"{command.Key.ToUpper()}{usage}: {command.Value.GetCommandDescription()}";
 				helpOutput.Add(output);
 			}
 
@@ -57,7 +56,7 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public override string GetFeatureDescription()
 		{
-			return "Display a full list of multiadmin commands and in game commands.";
+			return "Display a full list of MultiAdmin commands and in game commands";
 		}
 
 		public override string GetFeatureName()

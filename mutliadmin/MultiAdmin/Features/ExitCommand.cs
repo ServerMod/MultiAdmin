@@ -42,12 +42,12 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public override string GetFeatureDescription()
 		{
-			return "Adds a graceful exit command.";
+			return "Adds a graceful exit command";
 		}
 
 		public override string GetFeatureName()
 		{
-			return "Exit command";
+			return "Exit Command";
 		}
 
 		public override void Init()

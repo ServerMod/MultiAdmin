@@ -2,7 +2,7 @@
 {
 	public abstract class Feature
 	{
-		public Feature(Server server)
+		protected Feature(Server server)
 		{
 			Server = server;
 		}

@@ -5,8 +5,6 @@ namespace MultiAdmin.MultiAdmin.Features
 	[Feature]
 	internal class ConfigReload : Feature, ICommand
 	{
-		private bool pass;
-
 		public ConfigReload(Server server) : base(server)
 		{
 		}
@@ -18,36 +16,35 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public string GetCommandDescription()
 		{
-			return "Handles reloading the config";
+			return "Reloads the configuration file";
 		}
 
 		public string GetUsage()
 		{
-			return "<reload>";
+			return "<RELOAD>";
 		}
 
 		public void OnCall(string[] args)
 		{
-			if (args.Length == 0) return;
-			if (args[0].ToLower().Equals("reload"))
-			{
-				Server.SwapConfigs();
-				pass = true;
-				Server.Write("Reloading config");
-				Server.Write("if the config opens in notepad, dont worry, thats just the game. It should be reloaded.");
-				Server.ServerConfig.Reload();
-				foreach (Feature feature in Server.Features) feature.OnConfigReload();
-			}
+			if (args.Length == 0 || !args[0].ToLower().Equals("reload")) return;
+
+			Server.Write("Reloading configs...");
+
+			MultiAdminConfig.multiAdminConfig.ReadConfigFile();
+			Server.serverConfig.serverConfig.ReadConfigFile();
+			foreach (Feature feature in Server.features) feature.OnConfigReload();
+
+			Server.Write("MultiAdmin config has been reloaded!");
 		}
 
 		public bool PassToGame()
 		{
-			return pass;
+			return true;
 		}
 
 		public override string GetFeatureDescription()
 		{
-			return "Config reload will swap configs";
+			return "Reloads the MultiAdmin configuration file";
 		}
 
 		public override string GetFeatureName()
@@ -57,7 +54,6 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public override void Init()
 		{
-			pass = true;
 		}
 
 		public override void OnConfigReload()

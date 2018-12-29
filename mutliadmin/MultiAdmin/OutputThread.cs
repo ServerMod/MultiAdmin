@@ -33,7 +33,7 @@ namespace MultiAdmin.MultiAdmin
 			watcher.Path = dedicatedDir;
 			watcher.IncludeSubdirectories = true;
 
-			if (isLinux())
+			if (Utils.IsUnix)
 			{
 				ReadLinux(server, watcher);
 				return;
@@ -42,39 +42,33 @@ namespace MultiAdmin.MultiAdmin
 			ReadWindows(server, watcher);
 		}
 
-		public static bool isLinux()
-		{
-			int p = (int) Environment.OSVersion.Platform;
-			return p == 4 || p == 6 || p == 128;
-		}
-
 		public static void ReadWindows(Server server, FileSystemWatcher watcher)
 		{
-			watcher.Changed += (sender, eventArgs) => OnDirectoryChanged(sender, eventArgs, server);
+			watcher.Changed += (sender, eventArgs) => OnDirectoryChanged(eventArgs, server);
 			watcher.EnableRaisingEvents = true;
 		}
 
 		public static void ReadLinux(Server server, FileSystemWatcher watcher)
 		{
-			watcher.Created += (sender, eventArgs) => OnMapiCreated(sender, eventArgs, server);
+			watcher.Created += (sender, eventArgs) => OnMapiCreated(eventArgs, server);
 			watcher.Filter = "sl*.mapi";
 			watcher.EnableRaisingEvents = true;
 		}
 
-		private static void OnDirectoryChanged(object source, FileSystemEventArgs e, Server server)
+		private static void OnDirectoryChanged(FileSystemEventArgs e, Server server)
 		{
 			if (!Directory.Exists(e.FullPath)) return;
 
-			if (!e.FullPath.Contains(server.GetSessionId())) return;
+			if (!e.FullPath.Contains(server.SessionId)) return;
 
 			string[] files = Directory.GetFiles(e.FullPath, "sl*.mapi", SearchOption.TopDirectoryOnly).OrderBy(f => f)
 				.ToArray();
 			foreach (string file in files) ProcessFile(server, file);
 		}
 
-		private static void OnMapiCreated(object source, FileSystemEventArgs e, Server server)
+		private static void OnMapiCreated(FileSystemEventArgs e, Server server)
 		{
-			if (!e.FullPath.Contains(server.GetSessionId())) return;
+			if (!e.FullPath.Contains(server.SessionId)) return;
 
 			Thread.Sleep(15);
 			ProcessFile(server, e.FullPath);
@@ -87,8 +81,7 @@ namespace MultiAdmin.MultiAdmin
 			int attempts = 0;
 			bool read = false;
 
-			while (attempts < (server.runOptimized ? 10 : 100) && !read && !server.IsStopping())
-			{
+			while (attempts < 50 && !read && !server.IsStopping())
 				try
 				{
 					if (!File.Exists(file)) return;
@@ -104,18 +97,14 @@ namespace MultiAdmin.MultiAdmin
 				catch
 				{
 					attempts++;
-					if (attempts >= (server.runOptimized ? 10 : 100))
+					if (attempts >= 50)
 					{
 						server.Write(
 							"Message printer warning: Could not " + command + " " + file +
-							". Make sure that MultiAdmin.exe has all necessary read-write permissions.",
-							ConsoleColor.Yellow);
+							". Make sure that MultiAdmin.exe has all necessary read-write permissions.");
 						server.Write("skipping");
 					}
 				}
-
-				Thread.Sleep(server.printSpeed);
-			}
 
 			if (server.IsStopping()) return;
 
@@ -219,9 +208,8 @@ namespace MultiAdmin.MultiAdmin
 					streamSplit = stream.Split(new[] {']'}, 3);
 					server.WritePart(streamSplit[2], DefaultBackground, msgColor, false, true);
 					// This way, it outputs the whole message.
-					// P.S. the format is [Info] [courtney.exampleplugin] Something intresting happened
+					// P.S. the format is [Info] [courtney.exampleplugin] Something interesting happened
 					// That was just an example
-					display = false;
 
 					// This return should be here
 					return;
@@ -229,83 +217,55 @@ namespace MultiAdmin.MultiAdmin
 
 
 			if (stream.Contains("Mod Log:"))
-				foreach (Feature f in server.Features)
-					if (f is IEventAdminAction)
-						((IEventAdminAction) f).OnAdminAction(stream.Replace("Mod log:", string.Empty));
+				foreach (Feature f in server.features)
+					if (f is IEventAdminAction adminAction)
+						adminAction.OnAdminAction(stream.Replace("Mod log:", string.Empty));
 
 			if (stream.Contains("ServerMod - Version"))
 			{
-				server.HasServerMod = true;
+				server.hasServerMod = true;
 				// This should work fine with older ServerMod versions too
 				streamSplit = stream.Replace("ServerMod - Version", string.Empty).Split('-');
-				server.ServerModVersion = streamSplit[0].Trim();
-				server.ServerModBuild = (streamSplit.Length > 1 ? streamSplit[1] : "A").Trim();
+				server.serverModVersion = streamSplit[0].Trim();
+				server.serverModBuild = (streamSplit.Length > 1 ? streamSplit[1] : "A").Trim();
 			}
 
-			if (server.ServerModCheck(1, 7, 2))
+			if (stream.Contains("Round restarting"))
+				foreach (Feature f in server.features)
+					if (f is IEventRoundEnd roundEnd)
+						roundEnd.OnRoundEnd();
+
+			if (stream.Contains("Waiting for players"))
 			{
-				if (stream.Contains("Round restarting"))
-					foreach (Feature f in server.Features)
-						if (f is IEventRoundEnd)
-							((IEventRoundEnd) f).OnRoundEnd();
-
-				if (stream.Contains("Waiting for players"))
+				if (!server.initialRoundStarted)
 				{
-					if (!server.InitialRoundStarted)
-					{
-						server.InitialRoundStarted = true;
-						foreach (Feature f in server.Features)
-							if (f is IEventRoundStart)
-								((IEventRoundStart) f).OnRoundStart();
-					}
-
-					if (server.ServerModCheck(1, 5, 0) && server.fixBuggedPlayers)
-					{
-						server.SendMessage("ROUNDRESTART");
-						server.fixBuggedPlayers = false;
-					}
+					server.initialRoundStarted = true;
+					foreach (Feature f in server.features)
+						if (f is IEventRoundStart roundStart)
+							roundStart.OnRoundStart();
 				}
-			}
-			else
-			{
-				if (stream.Contains("Waiting for players"))
-				{
-					if (!server.InitialRoundStarted)
-					{
-						server.InitialRoundStarted = true;
-						foreach (Feature f in server.Features)
-							if (f is IEventRoundStart)
-								((IEventRoundStart) f).OnRoundStart();
-					}
-					else
-					{
-						foreach (Feature f in server.Features)
-							if (f is IEventRoundEnd)
-								((IEventRoundEnd) f).OnRoundEnd();
-					}
 
-					if (server.ServerModCheck(1, 5, 0) && server.fixBuggedPlayers)
-					{
-						server.SendMessage("ROUNDRESTART");
-						server.fixBuggedPlayers = false;
-					}
+				if (server.ServerModCheck(1, 5, 0) && server.fixBuggedPlayers)
+				{
+					server.SendMessage("ROUNDRESTART");
+					server.fixBuggedPlayers = false;
 				}
 			}
 
 
 			if (stream.Contains("New round has been started"))
-				foreach (Feature f in server.Features)
+				foreach (Feature f in server.features)
 					if (f is IEventRoundStart)
 						((IEventRoundStart) f).OnRoundStart();
 
 			if (stream.Contains("Level loaded. Creating match..."))
-				foreach (Feature f in server.Features)
+				foreach (Feature f in server.features)
 					if (f is IEventServerStart)
 						((IEventServerStart) f).OnServerStart();
 
 
 			if (stream.Contains("Server full"))
-				foreach (Feature f in server.Features)
+				foreach (Feature f in server.features)
 					if (f is IEventServerFull)
 						((IEventServerFull) f).OnServerFull();
 
@@ -314,7 +274,7 @@ namespace MultiAdmin.MultiAdmin
 			{
 				display = false;
 				server.Log("Player connect event");
-				foreach (Feature f in server.Features)
+				foreach (Feature f in server.features)
 					if (f is IEventPlayerConnect)
 					{
 						string name = stream.Substring(stream.IndexOf(":"));
@@ -326,7 +286,7 @@ namespace MultiAdmin.MultiAdmin
 			{
 				display = false;
 				server.Log("Player disconnect event");
-				foreach (Feature f in server.Features)
+				foreach (Feature f in server.features)
 					if (f is IEventPlayerDisconnect)
 					{
 						string name = stream.Substring(stream.IndexOf(":"));

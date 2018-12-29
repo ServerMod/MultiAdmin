@@ -15,20 +15,21 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public void OnAdminAction(string message)
 		{
-			if (logToOwnFile)
-				lock (this)
+			if (!logToOwnFile) return;
+
+			lock (this)
+			{
+				using (StreamWriter sw = File.AppendText(modLogLocation))
 				{
-					using (StreamWriter sw = File.AppendText(modLogLocation))
-					{
-						message = Server.Timestamp(message);
-						sw.WriteLine(message);
-					}
+					message = Server.TimeStamp(message);
+					sw.WriteLine(message);
 				}
+			}
 		}
 
 		public override string GetFeatureDescription()
 		{
-			return "Logs adming messages to seperate file, or prints them";
+			return "Logs admin messages to separate file, or prints them";
 		}
 
 		public override string GetFeatureName()
@@ -39,12 +40,12 @@ namespace MultiAdmin.MultiAdmin.Features
 		public override void Init()
 		{
 			logToOwnFile = false;
-			modLogLocation = Server.LogFolder + Server.StartDateTime + "_MODERATOR_output_log.txt";
+			modLogLocation = Server.LogFolder + Server.startDateTime + "_MODERATOR_output_log.txt";
 		}
 
 		public override void OnConfigReload()
 		{
-			logToOwnFile = Server.ServerConfig.config.GetBool("log_mod_actions_to_own_file", false);
+			logToOwnFile = Server.serverConfig.LogModActionsToOwnFile;
 		}
 	}
 }

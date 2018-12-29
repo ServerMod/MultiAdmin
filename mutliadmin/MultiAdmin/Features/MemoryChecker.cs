@@ -6,38 +6,52 @@ namespace MultiAdmin.MultiAdmin.Features
 	[Feature]
 	internal class MemoryChecker : Feature, IEventTick
 	{
-		private int lowMb;
-		private int maxMb;
+		private const long BytesInMegabyte = 1048576L;
+		private long lowBytes;
+
+		private long maxBytes;
+
 		private int tickCount;
 
 		public MemoryChecker(Server server) : base(server)
 		{
 		}
 
+		private long LowMb
+		{
+			get => lowBytes / BytesInMegabyte;
+			set => lowBytes = value * BytesInMegabyte;
+		}
+
+		private long MaxMb
+		{
+			get => maxBytes / BytesInMegabyte;
+			set => maxBytes = value * BytesInMegabyte;
+		}
+
 		public void OnTick()
 		{
-			if (lowMb >= 0 && maxMb >= 0)
+			if (lowBytes < 0 || maxBytes < 0) return;
+
+			Server.GameProcess.Refresh();
+			long workingMemory = Server.GameProcess.WorkingSet64; // Process memory in bytes
+			long memoryLeft = maxBytes - workingMemory;
+
+			if (memoryLeft <= lowBytes)
 			{
-				Server.GetGameProcess().Refresh();
-				long workingMemory = Server.GetGameProcess().WorkingSet64 / 1048576L; // process memory in MB
-				long memoryLeft = maxMb - workingMemory; // 32 bit limited to 2GB
+				Server.Write($"Warning: Program is running low on memory ({memoryLeft / BytesInMegabyte} MB left)",
+					ConsoleColor.Red);
+				tickCount++;
+			}
+			else
+			{
+				tickCount = 0;
+			}
 
-				if (memoryLeft < lowMb)
-				{
-					Server.Write("Warning: program is running low on memory (" + memoryLeft + " MB left)",
-						ConsoleColor.Red);
-					tickCount++;
-				}
-				else
-				{
-					tickCount = 0;
-				}
-
-				if (tickCount == 10)
-				{
-					Server.Write("Restarting due to lower memory", ConsoleColor.Red);
-					Server.SoftRestartServer();
-				}
+			if (tickCount == 10)
+			{
+				Server.Write("Restarting due to lower memory", ConsoleColor.Red);
+				Server.SoftRestartServer();
 			}
 		}
 
@@ -58,9 +72,8 @@ namespace MultiAdmin.MultiAdmin.Features
 
 		public override void OnConfigReload()
 		{
-			lowMb = Server.ServerConfig.config.GetInt("restart_low_memory", 400);
-
-			maxMb = Server.ServerConfig.config.GetInt("max_memory", 2048); // 32 bit limited to 2GB
+			LowMb = Server.serverConfig.RestartLowMemory;
+			MaxMb = Server.serverConfig.MaxMemory;
 		}
 	}
 }
