@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using MultiAdmin;
 using MultiAdmin.MultiAdmin;
-//using YamlDotNet.Serialization;
 
 namespace MutliAdmin
 {
@@ -166,79 +165,6 @@ namespace MutliAdmin
 			return hasServerToStart;
 		}
 
-		public static void ConvertConfigs()
-		{
-			string[] dirs = Directory.GetDirectories(Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers" + Path.DirectorySeparatorChar);
-			foreach (string file in dirs)
-			{
-				var name = file + Path.DirectorySeparatorChar + "config.txt";
-				var backup = file + Path.DirectorySeparatorChar + "config.backup";
-				Write("Converting old config to YAML: " + file, ConsoleColor.Green);
-				OldConfig config = new OldConfig(file + Path.DirectorySeparatorChar + "config.txt");
-				//var serializer = new SerializerBuilder().Build();
-				//var yaml = serializer.Serialize(config.values);
-				//Write(yaml, ConsoleColor.White);
-
-				string yaml = string.Empty;
-
-				foreach (string line in config.GetRaw())
-				{
-					try
-					{
-						string commentText = "//"; // Dunno if everyone uses that comment style, whatever
-
-						if (line.Contains("=") && line.Contains(";") && line.IndexOf("=") < line.IndexOf(";")) // Matches format "key = value; //comment"
-						{
-							string keyandEquals = line.Substring(0, line.IndexOf("=")).Trim(); // "key " -> "key"
-							string value = line.Substring(line.IndexOf("=") + 1, line.IndexOf(";") - (line.IndexOf("=") + 1)).Trim(); // " value" -> "value"
-							string followingContent = line.Substring(line.IndexOf(";") + 1, line.Length - (line.IndexOf(";") + 1)).Trim(); // " //comment" -> "//comment"
-
-							if (followingContent.StartsWith(commentText)) // "//comment" -> "comment"
-							{
-								followingContent = followingContent.Substring(commentText.Length).Trim();
-							}
-
-							string newLine = keyandEquals + ": " + value;
-
-							// Write any comments
-							if (!string.IsNullOrEmpty(followingContent))
-							{
-								yaml += (followingContent.StartsWith("#") ? string.Empty : "#") + followingContent + Environment.NewLine;
-							}
-
-							yaml += newLine + Environment.NewLine;
-						}
-						else
-						{
-							string newLine = line.Trim();
-
-							if (newLine.StartsWith(commentText)) // "//comment" -> "comment"
-							{
-								newLine = newLine.Substring(commentText.Length).Trim();
-							}
-
-							newLine = (string.IsNullOrEmpty(newLine) ? string.Empty : (newLine.StartsWith("#") ? string.Empty : "#") + newLine);
-
-							yaml += newLine + Environment.NewLine;
-						}
-					}
-					catch (Exception e)
-					{
-						Write(e.Message);
-						Write(e.Source);
-						Write(e.StackTrace);
-					}
-				}
-
-				File.Copy(name, backup);
-				File.WriteAllText(name, yaml);
-
-				Write(yaml, ConsoleColor.White);
-
-				Write("Success!", ConsoleColor.Green);
-			}
-		}
-
 		public static string GetServerDirectory()
 		{
 			return Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "servers";
@@ -260,16 +186,6 @@ namespace MutliAdmin
 				Console.ReadKey();
 				return;
 			}
-			if (args.Length == 1)
-			{
-				if (args[0].Equals("--convert-config"))
-				{
-					ConvertConfigs();
-					Console.ReadKey();
-					return;
-				}
-			}
-
 
 			configChain = string.Empty;
 			if (StartHandleConfigs(args))

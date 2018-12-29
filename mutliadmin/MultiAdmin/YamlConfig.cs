@@ -5,7 +5,7 @@ using System.Linq;
 
 public class YamlConfig
 {
-	public string[] RawData;
+	public string[] rawData;
 
 	public YamlConfig()
 	{
@@ -19,18 +19,25 @@ public class YamlConfig
 		}
 		else
 		{
-			RawData = new string[] { };
+			rawData = new string[] { };
 		}
 	}
 
 	public void LoadConfigFile(string path)
 	{
-		RawData = FileManager.ReadAllLines(path);
+		if (File.Exists(path))
+		{
+			rawData = FileManager.ReadAllLines(path);
+		}
+		else
+		{
+			rawData = new string[] { };
+		}
 	}
 
 	public string GetString(string key, string def = null)
 	{
-		foreach (var line in RawData)
+		foreach (var line in rawData)
 		{
 			if (line.ToLower().StartsWith(key.ToLower() + ": ")) return line.Substring(key.Length + 2);
 		}
@@ -40,7 +47,7 @@ public class YamlConfig
 
 	public int GetInt(string key, int def = 0)
 	{
-		foreach (var line in RawData)
+		foreach (var line in rawData)
 		{
 			if (!line.ToLower().StartsWith(key.ToLower() + ": ")) continue;
 			try
@@ -66,7 +73,7 @@ public class YamlConfig
 
 	public bool GetBool(string key, bool def = false)
 	{
-		foreach (var line in RawData)
+		foreach (var line in rawData)
 		{
 			if (!line.ToLower().StartsWith(key.ToLower() + ": ")) continue;
 			return line.Substring(key.Length + 2) == "true";
@@ -79,7 +86,7 @@ public class YamlConfig
 	{
 		var read = false;
 		var list = new List<string>();
-		foreach (var line in RawData)
+		foreach (var line in rawData)
 		{
 			if (line.ToLower().StartsWith(key.ToLower() + ":"))
 			{
