@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using MultiAdmin.MultiAdmin.Features.Attributes;
+using MultiAdmin.Features.Attributes;
 
-namespace MultiAdmin.MultiAdmin.Features
+namespace MultiAdmin.Features
 {
 	[Feature]
 	public class HelpCommand : Feature, ICommand

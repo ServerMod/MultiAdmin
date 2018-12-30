@@ -4,9 +4,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Threading;
-using MultiAdmin.MultiAdmin.Features;
+using MultiAdmin.Features;
 
-namespace MultiAdmin.MultiAdmin
+namespace MultiAdmin
 {
 	public class Server
 	{

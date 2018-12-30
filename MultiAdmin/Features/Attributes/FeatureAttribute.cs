@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MultiAdmin.MultiAdmin.Features.Attributes
+namespace MultiAdmin.Features.Attributes
 {
 	[AttributeUsage(AttributeTargets.Class)
 	]

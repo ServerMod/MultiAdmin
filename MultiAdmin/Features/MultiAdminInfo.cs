@@ -1,7 +1,7 @@
 ﻿using System;
-using MultiAdmin.MultiAdmin.Features.Attributes;
+using MultiAdmin.Features.Attributes;
 
-namespace MultiAdmin.MultiAdmin.Features
+namespace MultiAdmin.Features
 {
 	[Feature]
 	internal class MultiAdminInfo : Feature, IEventServerPreStart, ICommand

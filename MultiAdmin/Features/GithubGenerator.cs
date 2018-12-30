@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using MultiAdmin.MultiAdmin.Features.Attributes;
+using MultiAdmin.Features.Attributes;
 
-namespace MultiAdmin.MultiAdmin.Features
+namespace MultiAdmin.Features
 {
 	[Feature]
 	internal class GithubGenerator : Feature, ICommand

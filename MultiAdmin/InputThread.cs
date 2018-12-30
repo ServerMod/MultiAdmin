@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading;
 
-namespace MultiAdmin.MultiAdmin
+namespace MultiAdmin
 {
 	internal class InputThread
 	{

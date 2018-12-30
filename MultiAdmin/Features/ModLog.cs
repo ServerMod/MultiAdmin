@@ -1,7 +1,7 @@
 ﻿using System.IO;
-using MultiAdmin.MultiAdmin.Features.Attributes;
+using MultiAdmin.Features.Attributes;
 
-namespace MultiAdmin.MultiAdmin.Features
+namespace MultiAdmin.Features
 {
 	[Feature]
 	internal class ModLog : Feature, IEventAdminAction

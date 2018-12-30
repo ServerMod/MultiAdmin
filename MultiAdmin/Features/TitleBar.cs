@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
-using MultiAdmin.MultiAdmin.Features.Attributes;
+using MultiAdmin.Features.Attributes;
 
-namespace MultiAdmin.MultiAdmin.Features
+namespace MultiAdmin.Features
 {
 	[Feature]
 	internal class Titlebar : Feature, IEventPlayerConnect, IEventPlayerDisconnect, IEventServerStart

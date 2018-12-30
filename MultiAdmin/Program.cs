@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 
-namespace MultiAdmin.MultiAdmin
+namespace MultiAdmin
 {
 	public static class Program
 	{

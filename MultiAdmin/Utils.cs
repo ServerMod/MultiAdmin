@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MultiAdmin.MultiAdmin
+namespace MultiAdmin
 {
 	internal class Utils
 	{

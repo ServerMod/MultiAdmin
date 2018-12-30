@@ -1,4 +1,4 @@
-﻿namespace MultiAdmin.MultiAdmin
+﻿namespace MultiAdmin
 {
 	public class MultiAdminConfig
 	{

@@ -1,6 +1,6 @@
-﻿using MultiAdmin.MultiAdmin.Features.Attributes;
+﻿using MultiAdmin.Features.Attributes;
 
-namespace MultiAdmin.MultiAdmin.Features
+namespace MultiAdmin.Features
 {
 	[Feature]
 	internal class Restart : Feature, ICommand

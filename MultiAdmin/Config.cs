@@ -2,7 +2,7 @@
 using System.IO;
 using System.Linq;
 
-namespace MultiAdmin.MultiAdmin
+namespace MultiAdmin
 {
 	public class Config
 	{
