@@ -3,7 +3,7 @@
 namespace MultiAdmin.Features
 {
 	[Feature]
-	internal class NewCommand : Feature, ICommand
+	internal class NewCommand : Feature, ICommand, IEventServerFull
 	{
 		private string config;
 
@@ -54,6 +54,11 @@ namespace MultiAdmin.Features
 		public override string GetFeatureName()
 		{
 			return "New";
+		}
+
+		public void OnServerFull()
+		{
+			// TODO: Start server from given configuration file
 		}
 	}
 }

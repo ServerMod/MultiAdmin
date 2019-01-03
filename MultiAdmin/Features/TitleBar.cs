@@ -70,7 +70,7 @@ namespace MultiAdmin.Features
 			{
 				$"MultiAdmin {Server.MaVersion}",
 				"Config: NOT YET IMPLEMENTED", // TODO: Add config key to title bar
-				$"Session: {Server.SessionId} PID: {processId}",
+				$"Session: {Server.SessionId}" + (string.IsNullOrEmpty(processId) ? string.Empty : $" PID: {processId}"),
 				$"{displayPlayerCount}/{maxPlayers}"
 			});
 

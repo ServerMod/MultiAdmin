@@ -9,7 +9,7 @@
 			                           : GlobalManualStart);
 
 		public const string StartConfigOnFullKey = "start_config_on_full";
-		public static string GlobalStartConfigOnFull => multiAdminConfig.GetString(StartConfigOnFullKey, "disabled");
+		public static string GlobalStartConfigOnFull => multiAdminConfig.GetString(StartConfigOnFullKey);
 		public string StartConfigOnFull => serverConfig != null && serverConfig.Contains(StartConfigOnFullKey)
 			? serverConfig.GetString(StartConfigOnFullKey)
 			: GlobalStartConfigOnFull;
@@ -62,6 +62,24 @@
 		public int MaxPlayers => serverConfig != null && serverConfig.Contains(MaxPlayersKey)
 			? serverConfig.GetInt(MaxPlayersKey)
 			: GlobalMaxPlayers;
+
+		public const string DisableConfigValidationKey = "disable_config_validation";
+		public static bool GlobalDisableConfigValidation => multiAdminConfig.GetBool(DisableConfigValidationKey);
+		public bool DisableConfigValidation => serverConfig != null && serverConfig.Contains(DisableConfigValidationKey)
+			? serverConfig.GetBool(DisableConfigValidationKey)
+			: GlobalDisableConfigValidation;
+
+		public const string ShareNonConfigsKey = "share_non_configs";
+		public static bool GlobalShareNonConfigs => multiAdminConfig.GetBool(ShareNonConfigsKey);
+		public bool ShareNonConfigs => serverConfig != null && serverConfig.Contains(ShareNonConfigsKey)
+			? serverConfig.GetBool(ShareNonConfigsKey)
+			: GlobalShareNonConfigs;
+
+		public const string ConfigLocationKey = "config_location";
+		public static string GlobalConfigLocation => multiAdminConfig.GetString(ConfigLocationKey);
+		public string ConfigLocation => serverConfig != null && serverConfig.Contains(ConfigLocationKey)
+			? serverConfig.GetString(ConfigLocationKey)
+			: GlobalConfigLocation;
 
 		public static Config multiAdminConfig = new Config("scp_multiadmin.cfg");
 		public Config serverConfig;

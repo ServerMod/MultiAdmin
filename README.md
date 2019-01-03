@@ -42,15 +42,20 @@ This does not include ServerMod or ingame commands, for a full list type `HELP` 
 - STOPNEXTROUND: Stops the server at the end of this round
 
 ## Config settings
-- manual_start (wether of not to start the server automatically when launching multiadmin, default = False)
-- start_config_on_full (start server with this config folder when the server becomes full) [requires servermod]
-- shutdown_when_empty_for (shutdown the server once a round hasnt started in a number of seconds, default = -1)
-- restart_every_num_rounds (restart the server every number rounds, default = -1)
-- restart_low_memory (restart if the games memory falls below this, default = 400)
-- restart_low_memory_roundend (restart at the end of the round if the games memory falls below this, default = 450)
-- max_memory (the amount of memory for MultiAdmin to check against, default = 2048)
-- multiadmin_nolog (disable logging to file, default = false)
-- log_mod_actions_to_own_file (logs admin messages to seperate file, default = false)
+Config Option | Value Type | Default Value | Description
+--- | :---: | :---: | :------:
+manual_start | Boolean | False | Whether or not to start the server automatically when launching MultiAdmin
+start_config_on_full | String | **Empty** | Start server with this config folder once the server becomes full [Requires ServerMod]
+shutdown_when_empty_for | Seconds | -1 | Shutdown the server once a round hasn't started in a number of seconds
+restart_every_num_rounds | Integer | -1 | Restart the server every number rounds
+restart_low_memory | Integer | 400 | Restart if the games memory falls below this value in megabytes
+restart_low_memory_roundend | Integer | 450 | Restart at the end of the round if the games memory falls below this value in megabytes
+max_memory | Integer | 2048 | The amount of memory in megabytes for MultiAdmin to check against
+multiadmin_nolog | Boolean | False | Disable logging to file
+log_mod_actions_to_own_file | Boolean | False | Logs admin messages to seperate file
+disable_config_validation | Boolean | False | Disable the config validator
+share_non_configs | Boolean | False | Make all servers share an AppData directory rather than being organized by port
+config_location | String | **Empty** | The default location for the game to use for storing configuration files
 
 ## Upcoming Features
 - Support for running multiple server instances

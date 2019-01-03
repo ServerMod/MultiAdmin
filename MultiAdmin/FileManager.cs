@@ -54,7 +54,7 @@ namespace MultiAdmin
 		public static void RemoveEmptyLines(string path)
 		{
 			string[] data = ReadAllLines(path).Where(s =>
-				!string.IsNullOrEmpty(s.Replace(Environment.NewLine, "").Replace("\n", "").Replace(" ", ""))).ToArray();
+				!string.IsNullOrEmpty(s.Replace(Environment.NewLine, string.Empty).Replace("\n", string.Empty).Replace(" ", string.Empty))).ToArray();
 			WriteToFile(data, path);
 		}
 	}

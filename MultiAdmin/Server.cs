@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using MultiAdmin.Features;
 using MultiAdmin.Features.Attributes;
 
 namespace MultiAdmin
@@ -23,11 +22,12 @@ namespace MultiAdmin
 		public readonly MultiAdminConfig serverConfig;
 
 		public readonly string serverId;
+		public readonly string configLocation;
 
 		// we want a tick only list since its the only event that happens constantly, all the rest can be in a single list
 		private readonly List<IEventTick> tick = new List<IEventTick>();
 
-		private string currentLine = "";
+		private string currentLine = string.Empty;
 
 		public bool hasServerMod;
 
@@ -37,7 +37,7 @@ namespace MultiAdmin
 		public string serverModBuild;
 		public string serverModVersion;
 
-		public Server()
+		public Server(string serverId = null, string configLocation = null)
 		{
 			readerThread = new Thread(() => InputThread.Write(this));
 			printerThread = new Thread(() => OutputThread.Read(this));
@@ -47,6 +47,9 @@ namespace MultiAdmin
 
 			// Load config
 			serverConfig = new MultiAdminConfig(FileManager.AppFolder + "scp_multiadmin.cfg");
+
+			this.serverId = serverId;
+			this.configLocation = configLocation ?? serverConfig.ConfigLocation;
 
 			// Init features
 			InitFeatures();
@@ -65,7 +68,7 @@ namespace MultiAdmin
 		}
 
 		public string ServerDir => "servers" + Path.DirectorySeparatorChar + serverId;
-		public string LogDir => (string.IsNullOrEmpty(serverId) ? "" : ServerDir + Path.DirectorySeparatorChar) + "logs";
+		public string LogDir => (string.IsNullOrEmpty(serverId) ? string.Empty : ServerDir + Path.DirectorySeparatorChar) + "logs";
 
 		public string LogDirFile
 		{
@@ -162,7 +165,7 @@ namespace MultiAdmin
 					Write("Cleaning Session", ConsoleColor.Red);
 					DeleteSession();
 					SessionId = Utils.UnixTime;
-					Write($"Restarting game with new session id \"{SessionId}\"");
+					Write($"Restarting game with new session id ({SessionId})");
 					StartServer();
 					InitFeatures();
 				}
@@ -199,7 +202,7 @@ namespace MultiAdmin
 			}
 			catch
 			{
-				Write("Failed - Please close all open files in SCPSL_Data/Dedicated and restart the server!",
+				Write($"Failed - Please close all open files in \"SCPSL_Data{Path.DirectorySeparatorChar}Dedicated\" and restart the server!",
 					ConsoleColor.Red);
 				Write("Press any key to close...", ConsoleColor.DarkGray);
 				Console.ReadKey(true);
@@ -240,7 +243,7 @@ namespace MultiAdmin
 		public void WritePart(string part, ConsoleColor backgroundColor = ConsoleColor.Black,
 			ConsoleColor textColor = ConsoleColor.Yellow, bool date = false, bool lineEnd = false)
 		{
-			string datepart = "";
+			string datepart = string.Empty;
 			if (date)
 			{
 				DateTime now = DateTime.Now;
@@ -258,7 +261,7 @@ namespace MultiAdmin
 					Console.Write(datepart + part + Environment.NewLine);
 				currentLine += datepart + part;
 				Log(currentLine);
-				currentLine = "";
+				currentLine = string.Empty;
 			}
 			else
 			{
@@ -337,25 +340,57 @@ namespace MultiAdmin
 				StartDateTime = Utils.DateTime;
 
 				PrepareFiles();
-				string[] files = Directory.GetFiles(Directory.GetCurrentDirectory(), "SCPSL.*",
-					SearchOption.TopDirectoryOnly);
-				Write($"Executing \"{files[0]}\"...", ConsoleColor.DarkGreen);
 
-				string[] args =
+				string file;
+
+				switch (Environment.OSVersion.Platform)
+				{
+					case PlatformID.Unix:
+						file = "SCPSL.x86_64";
+						break;
+
+					case PlatformID.Win32S:
+					case PlatformID.Win32Windows:
+					case PlatformID.Win32NT:
+					case PlatformID.WinCE:
+						file = "SCPSL.exe";
+						break;
+
+					default:
+						throw new FileNotFoundException("Invalid OS, can't run executable");
+				}
+
+				if (!File.Exists(file))
+					throw new FileNotFoundException($"Can't find game executable \"{file}\"");
+
+				Write($"Executing \"{file}\"...", ConsoleColor.DarkGreen);
+
+				List<string> args = new List<string>( new[]
 				{
 					"-batchmode",
 					"-nographics",
 					"-silent-crashes",
+					"-nodedicateddelete",
 					$"-key{SessionId}",
 					$"-id{Process.GetCurrentProcess().Id}",
 					$"-{(serverConfig.NoLog ? "nolog" : $"logFile \"{ScpLogFile}\"")}"
-				};
+				});
+
+				if (serverConfig.DisableConfigValidation)
+					args.Add("-disableconfigvalidation");
+
+				if (serverConfig.ShareNonConfigs)
+					args.Add("-sharenonconfigs");
+
+				if (!string.IsNullOrEmpty(configLocation))
+					args.Add(configLocation);
+
 				string argsString = string.Join(" ", args);
 
 				Write("Starting server with the following parameters");
-				Write(files[0] + " " + argsString);
-				ProcessStartInfo startInfo = new ProcessStartInfo(files[0]);
-				startInfo.Arguments = argsString;
+				Write(file + " " + argsString);
+
+				ProcessStartInfo startInfo = new ProcessStartInfo(file) {Arguments = argsString};
 
 				GameProcess = Process.Start(startInfo);
 
