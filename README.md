@@ -43,6 +43,7 @@ This does not include ServerMod or ingame commands, for a full list type `HELP` 
 
 ## Config settings
 All configuration settings go into a file named `scp_multiadmin.cfg` (you'll have to make this file) in the same directory as MultiAdmin.exe
+
 Config Option | Value Type | Default Value | Description
 --- | :---: | :---: | :------:
 manual_start | Boolean | False | Whether or not to start the server automatically when launching MultiAdmin
