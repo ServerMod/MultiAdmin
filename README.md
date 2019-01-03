@@ -4,7 +4,7 @@ ServerMod is on its own repo now: https://github.com/Grover-c13/Smod2/
 # MultiAdmin
 MultiAdmin is a replacement server tool for SCP: Secret Laboratory, which was built to help enable servers to have multiple configurations per server instance.
 
-The latest release can be found here: [Release link](https://github.com/Grover-c13/MultiAdmin/releases/latest)
+The latest release can be found here: [Release link](https://github.com/Dankrushen/MultiAdmin/releases/latest)
 
 ## Discord
 You can join our discord here: https://discord.gg/8nvmMTr
@@ -42,6 +42,7 @@ This does not include ServerMod or ingame commands, for a full list type `HELP` 
 - STOPNEXTROUND: Stops the server at the end of this round
 
 ## Config settings
+All configuration settings go into a file named `scp_multiadmin.cfg` (you'll have to make this file) in the same directory as MultiAdmin.exe
 Config Option | Value Type | Default Value | Description
 --- | :---: | :---: | :------:
 manual_start | Boolean | False | Whether or not to start the server automatically when launching MultiAdmin
@@ -60,3 +61,4 @@ config_location | String | **Empty** | The default location for the game to use 
 ## Upcoming Features
 - Support for running multiple server instances
 - Support for running multiple server instances in one MultiAdmin instance
+- Printing speed configuration option

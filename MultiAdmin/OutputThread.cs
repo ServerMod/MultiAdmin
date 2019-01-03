@@ -257,19 +257,19 @@ namespace MultiAdmin
 
 			if (stream.Contains("New round has been started"))
 				foreach (Feature f in server.features)
-					if (f is IEventRoundStart)
-						((IEventRoundStart) f).OnRoundStart();
+					if (f is IEventRoundStart roundStart)
+						roundStart.OnRoundStart();
 
 			if (stream.Contains("Level loaded. Creating match..."))
 				foreach (Feature f in server.features)
-					if (f is IEventServerStart)
-						((IEventServerStart) f).OnServerStart();
+					if (f is IEventServerStart serverStart)
+						serverStart.OnServerStart();
 
 
 			if (stream.Contains("Server full"))
 				foreach (Feature f in server.features)
-					if (f is IEventServerFull)
-						((IEventServerFull) f).OnServerFull();
+					if (f is IEventServerFull serverFull)
+						serverFull.OnServerFull();
 
 
 			if (stream.Contains("Player connect"))
@@ -277,10 +277,10 @@ namespace MultiAdmin
 				display = false;
 				server.Log("Player connect event");
 				foreach (Feature f in server.features)
-					if (f is IEventPlayerConnect)
+					if (f is IEventPlayerConnect playerConnect)
 					{
 						string name = stream.Substring(stream.IndexOf(":"));
-						((IEventPlayerConnect) f).OnPlayerConnect(name);
+						playerConnect.OnPlayerConnect(name);
 					}
 			}
 
@@ -289,10 +289,10 @@ namespace MultiAdmin
 				display = false;
 				server.Log("Player disconnect event");
 				foreach (Feature f in server.features)
-					if (f is IEventPlayerDisconnect)
+					if (f is IEventPlayerDisconnect playerDisconnect)
 					{
 						string name = stream.Substring(stream.IndexOf(":"));
-						((IEventPlayerDisconnect) f).OnPlayerDisconnect(name);
+						playerDisconnect.OnPlayerDisconnect(name);
 					}
 			}
 
