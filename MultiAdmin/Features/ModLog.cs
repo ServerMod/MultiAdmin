@@ -7,7 +7,6 @@ namespace MultiAdmin.Features
 	internal class ModLog : Feature, IEventAdminAction
 	{
 		private bool logToOwnFile;
-		private string modLogLocation;
 
 		public ModLog(Server server) : base(server)
 		{
@@ -19,7 +18,7 @@ namespace MultiAdmin.Features
 
 			lock (this)
 			{
-				using (StreamWriter sw = File.AppendText(modLogLocation))
+				using (StreamWriter sw = File.AppendText(Server.ModLogFile))
 				{
 					message = Server.TimeStamp(message);
 					sw.WriteLine(message);
@@ -39,8 +38,6 @@ namespace MultiAdmin.Features
 
 		public override void Init()
 		{
-			logToOwnFile = false;
-			modLogLocation = Server.LogFolder + Server.startDateTime + "_MODERATOR_output_log.txt";
 		}
 
 		public override void OnConfigReload()

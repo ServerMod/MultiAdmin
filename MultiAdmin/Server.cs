@@ -2,31 +2,32 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using MultiAdmin.Features;
+using MultiAdmin.Features.Attributes;
 
 namespace MultiAdmin
 {
 	public class Server
 	{
-		public static readonly string MaVersion = "3.0";
+		public static readonly string MaVersion = "3.0.0";
 		public readonly Dictionary<string, ICommand> commands = new Dictionary<string, ICommand>();
 
 		public readonly List<Feature> features = new List<Feature>();
-		private readonly string maLogLocation;
 
 		private readonly Thread printerThread;
 		private readonly Thread readerThread;
 
 		public readonly MultiAdminConfig serverConfig;
-		public readonly string startDateTime = Utils.DateTime;
+
+		public readonly string serverId;
 
 		// we want a tick only list since its the only event that happens constantly, all the rest can be in a single list
 		private readonly List<IEventTick> tick = new List<IEventTick>();
 
 		private string currentLine = "";
-		public bool fixBuggedPlayers;
 
 		public bool hasServerMod;
 
@@ -35,49 +36,57 @@ namespace MultiAdmin
 		private int logId;
 		public string serverModBuild;
 		public string serverModVersion;
-		private bool stopping;
 
 		public Server()
 		{
-			maLogLocation = LogFolder + startDateTime + "_MA_output_log.txt";
 			readerThread = new Thread(() => InputThread.Write(this));
 			printerThread = new Thread(() => OutputThread.Read(this));
 
-			// Register all features 
+			// Register all features
 			RegisterFeatures();
 
-			// Load config 
+			// Load config
 			serverConfig = new MultiAdminConfig(FileManager.AppFolder + "scp_multiadmin.cfg");
 
 			// Init features
 			InitFeatures();
-
-			// Start the server and threads
-			if (!StartServer()) return;
-
-			readerThread.Start();
-			printerThread.Start();
-			MainLoop();
 		}
 
-		public Process GameProcess { get; private set; }
+		public bool Stopping
+		{
+			get;
+			private set;
+		}
 
-		public string SessionId { get; private set; } = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
+		public string StartDateTime
+		{
+			get;
+			private set;
+		}
 
-		public string SessionDirectory => "SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" +
-		                                  Path.DirectorySeparatorChar + SessionId;
+		public string ServerDir => "servers" + Path.DirectorySeparatorChar + serverId;
+		public string LogDir => (string.IsNullOrEmpty(serverId) ? "" : ServerDir + Path.DirectorySeparatorChar) + "logs";
 
-		public string LogFolder
+		public string LogDirFile
 		{
 			get
 			{
-				string loc = "logs" + Path.DirectorySeparatorChar;
+				if (string.IsNullOrEmpty(StartDateTime))
+					throw new NullReferenceException("Server has not been started yet");
 
-				if (!Directory.Exists(loc)) Directory.CreateDirectory(loc);
-
-				return loc;
+				return LogDir + Path.DirectorySeparatorChar + StartDateTime + "_{0}_output_log.txt";
 			}
 		}
+		public string MaLogFile => string.Format(LogDirFile, "MA");
+		public string ScpLogFile => string.Format(LogDirFile, "SCP");
+		public string ModLogFile => string.Format(LogDirFile, "MODERATOR");
+
+		public Process GameProcess { get; private set; }
+
+		public string SessionId { get; private set; } = Utils.UnixTime;
+
+		public string SessionDirectory => "SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" +
+		                                  Path.DirectorySeparatorChar + SessionId;
 
 		private static IEnumerable<Type> GetTypesWithHelpAttribute(Type attribute)
 		{
@@ -91,34 +100,39 @@ namespace MultiAdmin
 
 		private void RegisterFeatures()
 		{
-			/*
-			var assembly = GetTypesWithHelpAttribute(typeof(Feature)).ToList();
+			Type[] assembly = GetTypesWithHelpAttribute(typeof(FeatureAttribute)).ToArray();
 			foreach (Type type in assembly)
-            {
-                var feature = Activator.CreateInstance(type, this) as Feature;
-                if(feature is null)
-                    continue;
+			{
+				try
+				{
+					object featureInstance = Activator.CreateInstance(type, this);
+					if (featureInstance is Feature feature)
+					{
+						RegisterFeature(feature);
+					}
+				}
+				catch
+				{
+					// ignored
+				}
+			}
 
-                RegisterFeature(feature);
-            }
-			*/
-
-			RegisterFeature(new ConfigReload(this));
-			RegisterFeature(new ExitCommand(this));
-			//RegisterFeature(new EventTest(this));
-			RegisterFeature(new GithubGenerator(this));
-			RegisterFeature(new HelpCommand(this));
-			RegisterFeature(new InactivityShutdown(this));
-			RegisterFeature(new MemoryChecker(this));
-			RegisterFeature(new MemoryCheckerSoft(this));
-			RegisterFeature(new ModLog(this));
-			RegisterFeature(new MultiAdminInfo(this));
-			RegisterFeature(new NewCommand(this));
-			RegisterFeature(new Restart(this));
-			RegisterFeature(new RestartNextRound(this));
-			RegisterFeature(new RestartRoundCounter(this));
-			RegisterFeature(new StopNextRound(this));
-			RegisterFeature(new Titlebar(this));
+			//RegisterFeature(new ConfigReload(this));
+			//RegisterFeature(new ExitCommand(this));
+			////RegisterFeature(new EventTest(this));
+			//RegisterFeature(new GithubGenerator(this));
+			//RegisterFeature(new HelpCommand(this));
+			//RegisterFeature(new InactivityShutdown(this));
+			//RegisterFeature(new MemoryChecker(this));
+			//RegisterFeature(new MemoryCheckerSoft(this));
+			//RegisterFeature(new ModLog(this));
+			//RegisterFeature(new MultiAdminInfo(this));
+			//RegisterFeature(new NewCommand(this));
+			//RegisterFeature(new Restart(this));
+			//RegisterFeature(new RestartNextRound(this));
+			//RegisterFeature(new RestartRoundCounter(this));
+			//RegisterFeature(new StopNextRound(this));
+			//RegisterFeature(new Titlebar(this));
 		}
 
 		private void InitFeatures()
@@ -130,25 +144,25 @@ namespace MultiAdmin
 			}
 		}
 
-		public void MainLoop()
+		private void MainLoop()
 		{
-			while (!stopping)
+			while (!Stopping)
 			{
 				if (GameProcess != null && !GameProcess.HasExited)
 				{
 					foreach (IEventTick tickEvent in tick) tickEvent.OnTick();
 				}
-				else if (!stopping)
+				else if (!Stopping)
 				{
 					foreach (Feature f in features)
-						if (f is IEventCrash)
-							((IEventCrash) f).OnCrash();
+						if (f is IEventCrash eventCrash)
+							eventCrash.OnCrash();
 
 					Write("Game engine exited/crashed/closed/restarting", ConsoleColor.Red);
 					Write("Cleaning Session", ConsoleColor.Red);
 					DeleteSession();
-					SessionId = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
-					Write("Restarting game with new session id");
+					SessionId = Utils.UnixTime;
+					Write($"Restarting game with new session id \"{SessionId}\"");
 					StartServer();
 					InitFeatures();
 				}
@@ -156,13 +170,7 @@ namespace MultiAdmin
 				Thread.Sleep(1000);
 			}
 
-			Thread.Sleep(100);
 			CleanUp();
-		}
-
-		public bool IsStopping()
-		{
-			return stopping;
 		}
 
 		public void RegisterFeature(Feature feature)
@@ -186,8 +194,7 @@ namespace MultiAdmin
 		{
 			try
 			{
-				Directory.CreateDirectory("SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated" +
-				                          Path.DirectorySeparatorChar + SessionId);
+				Directory.CreateDirectory(SessionDirectory);
 				Write("Started new session.", ConsoleColor.DarkGreen);
 			}
 			catch
@@ -203,7 +210,8 @@ namespace MultiAdmin
 		public void Write(string message, ConsoleColor color = ConsoleColor.Yellow, int height = 0)
 		{
 			Log(message);
-			if (Utils.SkipProcessHandle() || Process.GetCurrentProcess().MainWindowHandle != IntPtr.Zero)
+
+			if (!Utils.IsProcessHandleZero)
 			{
 				int cursorTop = 0, bufferHeight = 0;
 				try
@@ -263,7 +271,7 @@ namespace MultiAdmin
 		{
 			lock (this)
 			{
-				using (StreamWriter sw = File.AppendText(maLogLocation))
+				using (StreamWriter sw = File.AppendText(MaLogFile))
 				{
 					message = TimeStamp(message);
 					sw.WriteLine(message);
@@ -273,15 +281,8 @@ namespace MultiAdmin
 
 		public void SoftRestartServer()
 		{
-			if (ServerModCheck(1, 5, 0))
-			{
-				SendMessage("RECONNECTRS");
-				SessionId = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
-			}
-			else
-			{
-				GameProcess.Kill();
-			}
+			SendMessage("RECONNECTRS");
+			SessionId = Utils.UnixTime;
 		}
 
 		public bool ServerModCheck(int major, int minor, int fix)
@@ -320,7 +321,7 @@ namespace MultiAdmin
 					stopEvent.OnServerStop();
 
 			if (killGame) GameProcess.Kill();
-			stopping = true;
+			Stopping = true;
 		}
 
 		public void CleanUp()
@@ -328,31 +329,43 @@ namespace MultiAdmin
 			DeleteSession();
 		}
 
-		public bool StartServer()
+		public void StartServer()
 		{
-			bool started = false;
 			initialRoundStarted = false;
 			try
 			{
+				StartDateTime = Utils.DateTime;
+
 				PrepareFiles();
 				string[] files = Directory.GetFiles(Directory.GetCurrentDirectory(), "SCPSL.*",
 					SearchOption.TopDirectoryOnly);
 				Write($"Executing \"{files[0]}\"...", ConsoleColor.DarkGreen);
 
-				string args =
-					$"-batchmode -nographics -key{SessionId} -silent-crashes -id{Process.GetCurrentProcess().Id} -{(serverConfig.NoLog ? "nolog" : $"logFile \"{LogFolder}{Utils.DateTime}_SCP_output_log.txt\"")}";
+				string[] args =
+				{
+					"-batchmode",
+					"-nographics",
+					"-silent-crashes",
+					$"-key{SessionId}",
+					$"-id{Process.GetCurrentProcess().Id}",
+					$"-{(serverConfig.NoLog ? "nolog" : $"logFile \"{ScpLogFile}\"")}"
+				};
+				string argsString = string.Join(" ", args);
 
 				Write("Starting server with the following parameters");
-				Write(files[0] + " " + args);
+				Write(files[0] + " " + argsString);
 				ProcessStartInfo startInfo = new ProcessStartInfo(files[0]);
-				startInfo.Arguments = args;
+				startInfo.Arguments = argsString;
 
 				GameProcess = Process.Start(startInfo);
-				started = true;
 
 				foreach (Feature f in features)
 					if (f is IEventServerPreStart eventPreStart)
 						eventPreStart.OnServerPreStart();
+
+				readerThread.Start();
+				printerThread.Start();
+				MainLoop();
 			}
 			catch (Exception e)
 			{
@@ -362,8 +375,6 @@ namespace MultiAdmin
 				Console.ReadKey(true);
 				Process.GetCurrentProcess().Kill();
 			}
-
-			return started;
 		}
 
 		private void CleanSession()

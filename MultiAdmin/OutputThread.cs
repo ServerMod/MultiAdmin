@@ -6,8 +6,10 @@ using System.Threading;
 
 namespace MultiAdmin
 {
-	internal class OutputThread
+	internal static class OutputThread
 	{
+		public static bool fixBuggedPlayers;
+
 		public static readonly Regex SmodRegex =
 			new Regex(@"\[(DEBUG|INFO|WARN|ERROR)\] (\[.*?\]) (.*)", RegexOptions.Compiled);
 
@@ -81,7 +83,7 @@ namespace MultiAdmin
 			int attempts = 0;
 			bool read = false;
 
-			while (attempts < 50 && !read && !server.IsStopping())
+			while (attempts < 50 && !read && !server.Stopping)
 				try
 				{
 					if (!File.Exists(file)) return;
@@ -106,7 +108,7 @@ namespace MultiAdmin
 					}
 				}
 
-			if (server.IsStopping()) return;
+			if (server.Stopping) return;
 
 			bool display = true;
 			ConsoleColor color = ConsoleColor.Cyan;
@@ -245,10 +247,10 @@ namespace MultiAdmin
 							roundStart.OnRoundStart();
 				}
 
-				if (server.ServerModCheck(1, 5, 0) && server.fixBuggedPlayers)
+				if (fixBuggedPlayers)
 				{
 					server.SendMessage("ROUNDRESTART");
-					server.fixBuggedPlayers = false;
+					fixBuggedPlayers = false;
 				}
 			}
 
@@ -295,8 +297,7 @@ namespace MultiAdmin
 			}
 
 			if (stream.Contains("Player has connected before load is complete"))
-				if (server.ServerModCheck(1, 5, 0))
-					server.fixBuggedPlayers = true;
+				fixBuggedPlayers = true;
 
 			if (display) server.Write(stream.Trim(), color);
 		}

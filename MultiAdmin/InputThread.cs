@@ -4,15 +4,15 @@ using System.Threading;
 
 namespace MultiAdmin
 {
-	internal class InputThread
+	internal static class InputThread
 	{
 		public static void Write(Server server)
 		{
-			while (!server.IsStopping())
+			while (!server.Stopping)
 			{
 				while (!Console.KeyAvailable)
 				{
-					if (server.IsStopping()) return;
+					if (server.Stopping) return;
 					Thread.Sleep(500);
 				}
 

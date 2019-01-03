@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using MultiAdmin.Features.Attributes;
 
 namespace MultiAdmin.Features
@@ -56,19 +56,28 @@ namespace MultiAdmin.Features
 
 		public void UpdateTitlebar()
 		{
-			if (!Utils.SkipProcessHandle() && Process.GetCurrentProcess().MainWindowHandle == IntPtr.Zero) return;
+			if (Utils.IsProcessHandleZero) return;
 
 			string smod = string.Empty;
 			if (Server.hasServerMod) smod = "SMod " + Server.serverModVersion;
 			int displayPlayerCount = playerCount;
-			if (playerCount == -1) displayPlayerCount = 0;
+			if (playerCount < 0) displayPlayerCount = 0;
 			string processId = Server.GameProcess == null
 				? string.Empty
 				: Server.GameProcess.Id.ToString();
 
-			// TODO: Add config key to title bar
-			Console.Title =
-				$"MultiAdmin {Server.MaVersion} | Config: NOT YET IMPLEMENTED | Session: {Server.SessionId} PID: {processId} | {displayPlayerCount}/{maxPlayers}{(Server.hasServerMod ? " |" + smod : "")}";
+			List<string> titleBar = new List<string>(new[]
+			{
+				$"MultiAdmin {Server.MaVersion}",
+				"Config: NOT YET IMPLEMENTED", // TODO: Add config key to title bar
+				$"Session: {Server.SessionId} PID: {processId}",
+				$"{displayPlayerCount}/{maxPlayers}"
+			});
+
+			if (Server.hasServerMod)
+				titleBar.Add(smod);
+
+			Console.Title = string.Join(" | ", titleBar);
 		}
 	}
 }
