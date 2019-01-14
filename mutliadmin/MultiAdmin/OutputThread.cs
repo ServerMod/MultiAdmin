@@ -161,54 +161,7 @@ namespace MultiAdmin
 
 			}
 
-			// Smod3 Color tags
-
-			string[] streamSplit = stream.Split("@#".ToCharArray());
-
-			if (streamSplit.Length > 1)
-			{
-				ConsoleColor fg = DEFAULT_FOREGROUND;
-				ConsoleColor bg = DEFAULT_BACKGROUND;
-				// date
-				server.WritePart(string.Empty, DEFAULT_BACKGROUND, ConsoleColor.Cyan, true, false);
-
-				foreach (string line in streamSplit)
-				{
-					string part = line;
-					if (part.Length >= 3 && part.Contains(";"))
-					{
-						string colorTag = part.Substring(3, part.IndexOf(";") - 3);
-
-						if (part.Substring(0, 3).Equals("fg="))
-						{
-							fg = MapConsoleColor(colorTag, DEFAULT_FOREGROUND);
-						}
-
-						if (line.Substring(0, 3).Equals("bg="))
-						{
-							bg = MapConsoleColor(colorTag, DEFAULT_BACKGROUND);
-						}
-
-						if (part.Length == line.IndexOf(";"))
-						{
-							part = string.Empty;
-						}
-						else
-						{
-							part = part.Substring(line.IndexOf(";") + 1);
-						}
-
-					}
-
-					server.WritePart(part, bg, fg, false, false);
-				}
-				// end
-				server.WritePart(string.Empty, DEFAULT_BACKGROUND, ConsoleColor.Cyan, false, true);
-				display = false;
-			}
-
 			// Smod2 loggers pretty printing
-
 			var match = SMOD_REGEX.Match(stream);
 			if (match.Success)
 			{
