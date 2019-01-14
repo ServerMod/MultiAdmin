@@ -62,7 +62,7 @@ MultiAdmin would read these settings from your server config file.
 - log_mod_actions_to_own_file (logs admin messages to seperate file, default = false)
 
 ## MultiAdmin config file
-You may create additional file in your root game directory to configure fine aspects of MultiAdmin.
+You may create additional file named `scp_multiadmin.cfg` in your root game directory to configure fine aspects of MultiAdmin.
 
 - cfg_loc (requested config files location, default = '%AppData%/SCP Secret Laboratory/config_gameplay.txt' on Windows and '~/.config/SCP Secret Laboratory/config_gameplay.txt' on Linux)
 - enable_multiadmin_optimizations (various timing optimizations around IO operations, default = true)
