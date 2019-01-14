@@ -127,7 +127,6 @@ namespace MultiAdmin
 						server.Write("skipping");
 					}
 				}
-				Thread.Sleep(server.printSpeed);
 			}
 
 			if (server.IsStopping()) return;
@@ -205,11 +204,13 @@ namespace MultiAdmin
 					// That was just an example
 					display = false;
 
+					// Limiting output speed for Smod messages
+					Thread.Sleep(server.printSpeed);
+
 					// This return should be here
 					return;
 				}
 			}
-
 
 			if (stream.Contains("Mod Log:"))
 			{
@@ -373,7 +374,13 @@ namespace MultiAdmin
 				}
 			}
 
-			if (display) server.Write(stream.Trim(), color);
+			if (display)
+			{
+				server.Write(stream.Trim(), color);
+
+				// Limiting output speed for generic message
+				Thread.Sleep(server.printSpeed);
+			}
 		}
 	}
 }
