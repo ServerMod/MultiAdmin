@@ -9,7 +9,7 @@ namespace MultiAdmin
 {
 	class OutputThread
 	{
-		public static readonly Regex SMOD_REGEX = new Regex(@"\[(DEBUG|INFO|WARN|ERROR)\] (\[.*?\]) (.*)", RegexOptions.Compiled);
+		public static readonly Regex SMOD_REGEX = new Regex(@"\[(DEBUG|INFO|WARN|ERROR)\] (\[.*?\]) (.*)", RegexOptions.Compiled | RegexOptions.Singleline);
 		public static readonly ConsoleColor DEFAULT_FOREGROUND = ConsoleColor.Cyan;
 		public static readonly ConsoleColor DEFAULT_BACKGROUND = ConsoleColor.Black;
 
@@ -127,7 +127,6 @@ namespace MultiAdmin
 						server.Write("skipping");
 					}
 				}
-				Thread.Sleep(server.printSpeed);
 			}
 
 			if (server.IsStopping()) return;
@@ -158,57 +157,11 @@ namespace MultiAdmin
 							break;
 					}
 				}
-
 			}
 
-			// Smod3 Color tags
-
-			string[] streamSplit = stream.Split("@#".ToCharArray());
-
-			if (streamSplit.Length > 1)
-			{
-				ConsoleColor fg = DEFAULT_FOREGROUND;
-				ConsoleColor bg = DEFAULT_BACKGROUND;
-				// date
-				server.WritePart(string.Empty, DEFAULT_BACKGROUND, ConsoleColor.Cyan, true, false);
-
-				foreach (string line in streamSplit)
-				{
-					string part = line;
-					if (part.Length >= 3 && part.Contains(";"))
-					{
-						string colorTag = part.Substring(3, part.IndexOf(";") - 3);
-
-						if (part.Substring(0, 3).Equals("fg="))
-						{
-							fg = MapConsoleColor(colorTag, DEFAULT_FOREGROUND);
-						}
-
-						if (line.Substring(0, 3).Equals("bg="))
-						{
-							bg = MapConsoleColor(colorTag, DEFAULT_BACKGROUND);
-						}
-
-						if (part.Length == line.IndexOf(";"))
-						{
-							part = string.Empty;
-						}
-						else
-						{
-							part = part.Substring(line.IndexOf(";") + 1);
-						}
-
-					}
-
-					server.WritePart(part, bg, fg, false, false);
-				}
-				// end
-				server.WritePart(string.Empty, DEFAULT_BACKGROUND, ConsoleColor.Cyan, false, true);
-				display = false;
-			}
+			string[] streamSplit;
 
 			// Smod2 loggers pretty printing
-
 			var match = SMOD_REGEX.Match(stream);
 			if (match.Success)
 			{
@@ -219,16 +172,16 @@ namespace MultiAdmin
 					ConsoleColor msgColor = ConsoleColor.White;
 					switch (match.Groups[1].Value.Trim())
 					{
-						case "[DEBUG]":
+						case "DEBUG":
 							levelColor = ConsoleColor.Gray;
 							break;
-						case "[INFO]":
+						case "INFO":
 							levelColor = ConsoleColor.Green;
 							break;
-						case "[WARN]":
+						case "WARN":
 							levelColor = ConsoleColor.DarkYellow;
 							break;
-						case "[ERROR]":
+						case "ERROR":
 							levelColor = ConsoleColor.Red;
 							msgColor = ConsoleColor.Red;
 							break;
@@ -236,24 +189,28 @@ namespace MultiAdmin
 							color = ConsoleColor.Cyan;
 							break;
 					}
-					server.WritePart(string.Empty, DEFAULT_BACKGROUND, ConsoleColor.Cyan, true, false);
-					server.WritePart("[" + match.Groups[1].Value + "] ", DEFAULT_BACKGROUND, levelColor, false, false);
-					server.WritePart(match.Groups[2].Value + " ", DEFAULT_BACKGROUND, tagColor, false, false);
-					// OLD: server.WritePart(match.Groups[3].Value, msgColor, 0, false, true);
-					// The regex.Match was trimming out the new lines and that is why no new lines were created.
-					// To be sure this will not happen again:
-					streamSplit = stream.Split(new char[] { ']' }, 3);
-					server.WritePart(streamSplit[2], DEFAULT_BACKGROUND, msgColor, false, true);
-					// This way, it outputs the whole message.
-					// P.S. the format is [Info] [courtney.exampleplugin] Something intresting happened
+
+					lock (server)
+					{
+						server.WritePart(string.Empty, DEFAULT_BACKGROUND, ConsoleColor.Cyan, true, false);
+						server.WritePart("[" + match.Groups[1].Value + "] ", DEFAULT_BACKGROUND, levelColor, false, false);
+						server.WritePart(match.Groups[2].Value + " ", DEFAULT_BACKGROUND, tagColor, false, false);
+						server.WritePart(match.Groups[3].Value, DEFAULT_BACKGROUND, msgColor, false, true);
+					}
+
+					server.Log("[" + match.Groups[1].Value + "] " + match.Groups[2].Value + " " + match.Groups[3].Value);
+
+					// P.S. the format is [Info] [courtney.exampleplugin] Something interesting happened
 					// That was just an example
 					display = false;
+
+					// Limiting output speed for Smod messages
+					Thread.Sleep(server.printSpeed);
 
 					// This return should be here
 					return;
 				}
 			}
-
 
 			if (stream.Contains("Mod Log:"))
 			{
@@ -417,7 +374,13 @@ namespace MultiAdmin
 				}
 			}
 
-			if (display) server.Write(stream.Trim(), color);
+			if (display)
+			{
+				server.Write(stream.Trim(), color);
+
+				// Limiting output speed for generic message
+				Thread.Sleep(server.printSpeed);
+			}
 		}
 	}
 }

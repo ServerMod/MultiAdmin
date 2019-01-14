@@ -74,8 +74,6 @@ namespace MultiAdmin.MultiAdmin
 		public Boolean nolog = false;
 		public int printSpeed = 150;
 
-		private string currentLine = "";
-
 		public Server(string serverDir, string configKey, Config multiAdminCfg, string mainConfigLocation, string configChain, bool multiMode)
 		{
 			this.multiMode = multiMode;
@@ -284,33 +282,21 @@ namespace MultiAdmin.MultiAdmin
 
 		public void WritePart(String part, ConsoleColor backgroundColor = ConsoleColor.Black, ConsoleColor textColor = ConsoleColor.Yellow, bool date = false, bool lineEnd = false)
 		{
-			String datepart = "";
+			Console.ForegroundColor = textColor;
+			Console.BackgroundColor = backgroundColor;
+
 			if (date)
 			{
 				DateTime now = DateTime.Now;
-				datepart = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
+				string datePart = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
+				Console.Write(datePart);
 			}
-			Console.ForegroundColor = textColor;
-			Console.BackgroundColor = backgroundColor;
-			if (lineEnd)
+
+			Console.Write(part);
+
+			if (lineEnd && !part.EndsWith(Environment.NewLine))
 			{
-				if (part.EndsWith(Environment.NewLine))
-				{
-					//this.Write("This ends in a newline, not adding anymore!");
-					Console.Write(datepart + part);
-				}
-				else
-				{
-					Console.Write(datepart + part + Environment.NewLine);
-				}
-				currentLine += datepart + part;
-				Log(currentLine);
-				currentLine = "";
-			}
-			else
-			{
-				Console.Write(datepart + part);
-				currentLine += datepart + part;
+				Console.WriteLine();
 			}
 		}
 
@@ -321,7 +307,11 @@ namespace MultiAdmin.MultiAdmin
 				using (StreamWriter sw = File.AppendText(this.maLogLocation))
 				{
 					message = Server.Timestamp(message);
-					sw.WriteLine(message);
+					sw.Write(message);
+					if (!message.EndsWith(Environment.NewLine))
+					{
+						sw.WriteLine();
+					}
 				}
 			}
 
