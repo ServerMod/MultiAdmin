@@ -9,7 +9,7 @@ namespace MultiAdmin
 {
 	class OutputThread
 	{
-		public static readonly Regex SMOD_REGEX = new Regex(@"\[(DEBUG|INFO|WARN|ERROR)\] (\[.*?\]) (.*)", RegexOptions.Compiled);
+		public static readonly Regex SMOD_REGEX = new Regex(@"\[(DEBUG|INFO|WARN|ERROR)\] (\[.*?\]) (.*)", RegexOptions.Compiled | RegexOptions.Singleline);
 		public static readonly ConsoleColor DEFAULT_FOREGROUND = ConsoleColor.Cyan;
 		public static readonly ConsoleColor DEFAULT_BACKGROUND = ConsoleColor.Black;
 
@@ -158,8 +158,9 @@ namespace MultiAdmin
 							break;
 					}
 				}
-
 			}
+
+			string[] streamSplit;
 
 			// Smod2 loggers pretty printing
 			var match = SMOD_REGEX.Match(stream);
@@ -172,16 +173,16 @@ namespace MultiAdmin
 					ConsoleColor msgColor = ConsoleColor.White;
 					switch (match.Groups[1].Value.Trim())
 					{
-						case "[DEBUG]":
+						case "DEBUG":
 							levelColor = ConsoleColor.Gray;
 							break;
-						case "[INFO]":
+						case "INFO":
 							levelColor = ConsoleColor.Green;
 							break;
-						case "[WARN]":
+						case "WARN":
 							levelColor = ConsoleColor.DarkYellow;
 							break;
-						case "[ERROR]":
+						case "ERROR":
 							levelColor = ConsoleColor.Red;
 							msgColor = ConsoleColor.Red;
 							break;
@@ -189,16 +190,18 @@ namespace MultiAdmin
 							color = ConsoleColor.Cyan;
 							break;
 					}
-					server.WritePart(string.Empty, DEFAULT_BACKGROUND, ConsoleColor.Cyan, true, false);
-					server.WritePart("[" + match.Groups[1].Value + "] ", DEFAULT_BACKGROUND, levelColor, false, false);
-					server.WritePart(match.Groups[2].Value + " ", DEFAULT_BACKGROUND, tagColor, false, false);
-					// OLD: server.WritePart(match.Groups[3].Value, msgColor, 0, false, true);
-					// The regex.Match was trimming out the new lines and that is why no new lines were created.
-					// To be sure this will not happen again:
-					streamSplit = stream.Split(new char[] { ']' }, 3);
-					server.WritePart(streamSplit[2], DEFAULT_BACKGROUND, msgColor, false, true);
-					// This way, it outputs the whole message.
-					// P.S. the format is [Info] [courtney.exampleplugin] Something intresting happened
+
+					lock (server)
+					{
+						server.WritePart(string.Empty, DEFAULT_BACKGROUND, ConsoleColor.Cyan, true, false);
+						server.WritePart("[" + match.Groups[1].Value + "] ", DEFAULT_BACKGROUND, levelColor, false, false);
+						server.WritePart(match.Groups[2].Value + " ", DEFAULT_BACKGROUND, tagColor, false, false);
+						server.WritePart(match.Groups[3].Value, DEFAULT_BACKGROUND, msgColor, false, true);
+					}
+
+					server.Log("[" + match.Groups[1].Value + "] " + match.Groups[2].Value + " " + match.Groups[3].Value);
+
+					// P.S. the format is [Info] [courtney.exampleplugin] Something interesting happened
 					// That was just an example
 					display = false;
 
