@@ -109,6 +109,10 @@ namespace MultiAdmin.MultiAdmin
 				readerThread.Start();
 				printerThread.Start();
 				MainLoop();
+
+				// Cleanup after exit from MainLoop
+				readerThread.Abort();
+				printerThread.Abort();
 			}
 		}
 
