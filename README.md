@@ -49,6 +49,8 @@ This does not include ServerMod or ingame commands, for a full list type HELP in
 - STOPNEXTROUND: Stops the server at the end of this round
 
 ## Config settings
+MultiAdmin would read these settings from your server config file.
+
 - manual_start (wether of not to start the server automatically when launching multiadmin, default = False)
 - start_config_on_full (start server with this config folder when the server becomes full) [requires servermod]
 - multiadmin_print_speed (delay between outputs in the MultiAdmin console, default = 150)
@@ -57,7 +59,12 @@ This does not include ServerMod or ingame commands, for a full list type HELP in
 - restart_low_memory (restart if the games memory falls below this, default = 400)
 - restart_low_memory_roundend (restart if the games memory falls below this at the end of this round, default = 450)
 - max_memory (used to determine if the servers memory is low, default = 2048)
-- enable_multiadmin_optimizations (various timing optimizations around IO operations, default = true)
-- multiadmin_nolog (disable logging to file, default = false)
 - log_mod_actions_to_own_file (logs admin messages to seperate file, default = false)
+
+## MultiAdmin config file
+You may create additional file in your root game directory to configure fine aspects of MultiAdmin.
+
 - cfg_loc (requested config files location, default = '%AppData%/SCP Secret Laboratory/config_gameplay.txt' on Windows and '~/.config/SCP Secret Laboratory/config_gameplay.txt' on Linux)
+- enable_multiadmin_optimizations (various timing optimizations around IO operations, default = true)
+- multiadmin_print_speed (delay between printing lines in console for Windows, default = 150)
+- multiadmin_nolog (disable logging to file, default = false)
