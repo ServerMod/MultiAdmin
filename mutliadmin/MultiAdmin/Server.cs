@@ -307,7 +307,11 @@ namespace MultiAdmin.MultiAdmin
 				using (StreamWriter sw = File.AppendText(this.maLogLocation))
 				{
 					message = Server.Timestamp(message);
-					sw.WriteLine(message);
+					sw.Write(message);
+					if (!message.EndsWith(Environment.NewLine))
+					{
+						sw.WriteLine();
+					}
 				}
 			}
 
