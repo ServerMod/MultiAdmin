@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading;
 using MultiAdmin.MultiAdmin.Commands;
 using MultiAdmin.MultiAdmin.Features;
@@ -12,7 +13,7 @@ namespace MultiAdmin.MultiAdmin
 {
 	public class Server
 	{
-		public static readonly string MA_VERSION = "2.1.3.1";
+		public static readonly string MA_VERSION = "2.1.4";
 
 		public bool HasServerMod { get; set; }
 		public string ServerModVersion { get; set; }
@@ -73,6 +74,26 @@ namespace MultiAdmin.MultiAdmin
 		public bool runOptimized = true;
 		public Boolean nolog = false;
 		public int printSpeed = 150;
+
+		// This simple regex will match this entire piece
+		/*
+		 * # 123 # 2019-12-12 22:22:22 # Smod config validator # Start
+		 * something: true
+		 * another_thing: true
+		 * # 123 # 2019-12-12 22:22:22 # Smod config validator # Finish
+		 * */
+		// First group would be
+		// # 123 # 2019-12-12 22:22:22
+		// Second group will contains only session ID
+		// 123
+		// Third group will have timestamp
+		// 2019-12-12 22:22:22
+		// And fourth group will contain actual configs being added
+		/*
+		 * something: true
+		 * another_thing: true
+		 * */
+		public static readonly Regex VALIDATOR_REGEX = new Regex(@"(# ([0-9]+) # (.*?)) # Smod config validator # Start.*?^(.*?)\1 # Smod config validator # Finish", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.Multiline);
 
 		public Server(string serverDir, string configKey, Config multiAdminCfg, string mainConfigLocation, string configChain, bool multiMode)
 		{
@@ -566,6 +587,52 @@ namespace MultiAdmin.MultiAdmin
 		public bool GetMultimode()
 		{
 			return this.multiMode;
+		}
+
+		public void RevalidateConfig()
+		{
+			if (!this.GetMultimode())
+			{
+				this.Log("MultiAdmin is running in single server mode. No further action required.");
+				return;
+			}
+
+			bool success = false;
+			string data = File.ReadAllText(this.MainConfigLocation);
+			Match match = VALIDATOR_REGEX.Match(data);
+			while (match.Success)
+			{
+				if (match.Groups[2].Value != this.session_id)
+				{
+					match = match.NextMatch();
+					continue;
+				}
+
+				string newData = string.Format("{0}# {1} # Smod config validator{0}{2}{0}", Environment.NewLine, match.Groups[3].Value, match.Groups[4].Value);
+				try
+				{
+					File.AppendAllText(this.ServerConfig.GetConfigFilePath(), newData);
+					success = true;
+				}
+				catch (Exception e)
+				{
+					success = false;
+					this.Log(string.Format("Error: {0}", e.ToString()));
+				}
+
+				match = match.NextMatch();
+			}
+
+			if (success)
+			{
+				this.Log(string.Format("MultiAdmin saved new config to {0}", this.ServerConfig.GetConfigFilePath()));
+				this.SwapConfigs();
+				this.SendMessage("config reload");
+			}
+			else
+			{
+				this.Log(string.Format("MultiAdmin failed saving new config to {0}", this.ServerConfig.GetConfigFilePath()));
+			}
 		}
 	}
 }
