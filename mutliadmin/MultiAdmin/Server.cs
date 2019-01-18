@@ -562,5 +562,10 @@ namespace MultiAdmin.MultiAdmin
 			message = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] " + message;
 			return message;
 		}
+
+		public bool GetMultimode()
+		{
+			return this.multiMode;
+		}
 	}
 }

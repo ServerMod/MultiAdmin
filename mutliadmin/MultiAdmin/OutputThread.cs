@@ -374,6 +374,40 @@ namespace MultiAdmin
 				}
 			}
 
+			if (stream.Contains("ServerMod successfully validated config file"))
+			{
+				display = false;
+				server.Log("ServerMod successfully validated config file");
+
+				if (server.GetMultimode())
+				{
+					bool success = true;
+					var data = File.ReadAllText(server.MainConfigLocation);
+					try
+					{
+						File.WriteAllText(server.ServerConfig.GetConfigFilePath(), data);
+					}
+					catch (Exception e)
+					{
+						success = false;
+						server.Log(string.Format("Error: {0}", e.ToString()));
+					}
+
+					if (success)
+					{
+						server.Log(string.Format("MultiAdmin saved new config to {0}", server.ServerConfig.GetConfigFilePath()));
+					}
+					else
+					{
+						server.Log(string.Format("MultiAdmin failed saving new config to {0}", server.ServerConfig.GetConfigFilePath()));
+					}
+				}
+				else
+				{
+					server.Log("MultiAdmin is running in single server mode. No further action required.");
+				}
+			}
+
 			if (display)
 			{
 				server.Write(stream.Trim(), color);
