@@ -374,6 +374,13 @@ namespace MultiAdmin
 				}
 			}
 
+			if (stream.Contains("ServerMod successfully validated config file"))
+			{
+				display = false;
+				server.Log("ServerMod successfully validated config file");
+				server.RevalidateConfig();
+			}
+
 			if (display)
 			{
 				server.Write(stream.Trim(), color);

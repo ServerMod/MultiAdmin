@@ -33,5 +33,10 @@ namespace MultiAdmin
 
 			config = new YamlConfig(configFile);
 		}
+
+		public string GetConfigFilePath()
+		{
+			return this.configFile;
+		}
 	}
 }
