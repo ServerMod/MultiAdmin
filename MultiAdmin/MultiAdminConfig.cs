@@ -81,6 +81,12 @@
 			? serverConfig.GetString(ConfigLocationKey)
 			: GlobalConfigLocation;
 
+		public const string ServersFolderKey = "servers_folder";
+		public static string GlobalServersFolder => multiAdminConfig.GetString(ServersFolderKey);
+		public string ServersFolder => serverConfig != null && serverConfig.Contains(ServersFolderKey)
+			? serverConfig.GetString(ServersFolderKey)
+			: GlobalServersFolder;
+
 		public static Config multiAdminConfig = new Config("scp_multiadmin.cfg");
 		public Config serverConfig;
 
