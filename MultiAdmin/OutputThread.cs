@@ -11,8 +11,8 @@ namespace MultiAdmin
 		public static bool fixBuggedPlayers;
 
 		public static readonly Regex SmodRegex =
-			new Regex(@"\[(DEBUG|INFO|WARN|ERROR)\] (\[.*?\]) (.*)", RegexOptions.Compiled);
-
+			new Regex(@"\[(DEBUG|INFO|WARN|ERROR)\] (\[.*?\]) (.*)", RegexOptions.Compiled | RegexOptions.Singleline);
+		
 		public static readonly ConsoleColor DefaultForeground = ConsoleColor.Cyan;
 		public static readonly ConsoleColor DefaultBackground = ConsoleColor.Black;
 
@@ -84,9 +84,17 @@ namespace MultiAdmin
 			bool read = false;
 
 			while (attempts < 50 && !read && !server.Stopping)
+			{
 				try
 				{
-					if (!File.Exists(file)) return;
+					if (!File.Exists(file))
+					{
+						// The file definitely existed at the moment Change event was raised by OS
+						// If the file is not here after 15 ms that means that
+						// (a) either it was already processed
+						// (b) it was deleted by some other application
+						return;
+					}
 
 					StreamReader sr = new StreamReader(file);
 					stream = sr.ReadToEnd();
@@ -107,6 +115,7 @@ namespace MultiAdmin
 						server.Write("skipping");
 					}
 				}
+			}
 
 			if (server.Stopping) return;
 
@@ -114,6 +123,7 @@ namespace MultiAdmin
 			ConsoleColor color = ConsoleColor.Cyan;
 
 			if (!string.IsNullOrEmpty(stream.Trim()))
+			{
 				if (stream.Contains("LOGTYPE"))
 				{
 					string type = stream.Substring(stream.IndexOf("LOGTYPE")).Trim();
@@ -135,47 +145,12 @@ namespace MultiAdmin
 							break;
 					}
 				}
-
-			// Smod3 Color tags
-
-			string[] streamSplit = stream.Split("@#".ToCharArray());
-
-			if (streamSplit.Length > 1)
-			{
-				ConsoleColor fg = DefaultForeground;
-				ConsoleColor bg = DefaultBackground;
-				// date
-				server.WritePart(string.Empty, DefaultBackground, ConsoleColor.Cyan, true, false);
-
-				foreach (string line in streamSplit)
-				{
-					string part = line;
-					if (part.Length >= 3 && part.Contains(";"))
-					{
-						string colorTag = part.Substring(3, part.IndexOf(";") - 3);
-
-						if (part.Substring(0, 3).Equals("fg=")) fg = MapConsoleColor(colorTag, DefaultForeground);
-
-						if (line.Substring(0, 3).Equals("bg=")) bg = MapConsoleColor(colorTag, DefaultBackground);
-
-						if (part.Length == line.IndexOf(";"))
-							part = string.Empty;
-						else
-							part = part.Substring(line.IndexOf(";") + 1);
-					}
-
-					server.WritePart(part, bg, fg, false, false);
-				}
-
-				// end
-				server.WritePart(string.Empty, DefaultBackground, ConsoleColor.Cyan, false, true);
-				display = false;
 			}
 
 			// Smod2 loggers pretty printing
-
 			Match match = SmodRegex.Match(stream);
 			if (match.Success)
+			{
 				if (match.Groups.Count >= 2)
 				{
 					ConsoleColor levelColor = ConsoleColor.Cyan;
@@ -183,16 +158,16 @@ namespace MultiAdmin
 					ConsoleColor msgColor = ConsoleColor.White;
 					switch (match.Groups[1].Value.Trim())
 					{
-						case "[DEBUG]":
+						case "DEBUG":
 							levelColor = ConsoleColor.Gray;
 							break;
-						case "[INFO]":
+						case "INFO":
 							levelColor = ConsoleColor.Green;
 							break;
-						case "[WARN]":
+						case "WARN":
 							levelColor = ConsoleColor.DarkYellow;
 							break;
-						case "[ERROR]":
+						case "ERROR":
 							levelColor = ConsoleColor.Red;
 							msgColor = ConsoleColor.Red;
 							break;
@@ -201,22 +176,23 @@ namespace MultiAdmin
 							break;
 					}
 
-					server.WritePart(string.Empty, DefaultBackground, ConsoleColor.Cyan, true, false);
-					server.WritePart("[" + match.Groups[1].Value + "] ", DefaultBackground, levelColor, false, false);
-					server.WritePart(match.Groups[2].Value + " ", DefaultBackground, tagColor, false, false);
-					// OLD: server.WritePart(match.Groups[3].Value, msgColor, 0, false, true);
-					// The regex.Match was trimming out the new lines and that is why no new lines were created.
-					// To be sure this will not happen again:
-					streamSplit = stream.Split(new[] {']'}, 3);
-					server.WritePart(streamSplit[2], DefaultBackground, msgColor, false, true);
-					// This way, it outputs the whole message.
+					lock (server)
+					{
+						server.WritePart(string.Empty, DefaultBackground, ConsoleColor.Cyan, true, false);
+						server.WritePart("[" + match.Groups[1].Value + "] ", DefaultBackground, levelColor, false, false);
+						server.WritePart(match.Groups[2].Value + " ", DefaultBackground, tagColor, false, false);
+						server.WritePart(match.Groups[3].Value, DefaultBackground, msgColor, false, true);
+					}
+
+					server.Log("[" + match.Groups[1].Value + "] " + match.Groups[2].Value + " " + match.Groups[3].Value);
+
 					// P.S. the format is [Info] [courtney.exampleplugin] Something interesting happened
 					// That was just an example
 
 					// This return should be here
 					return;
 				}
-
+			}
 
 			if (stream.Contains("Mod Log:"))
 				foreach (Feature f in server.features)
@@ -227,7 +203,7 @@ namespace MultiAdmin
 			{
 				server.hasServerMod = true;
 				// This should work fine with older ServerMod versions too
-				streamSplit = stream.Replace("ServerMod - Version", string.Empty).Split('-');
+				string[] streamSplit = stream.Replace("ServerMod - Version", string.Empty).Split('-');
 				server.serverModVersion = streamSplit[0].Trim();
 				server.serverModBuild = (streamSplit.Length > 1 ? streamSplit[1] : "A").Trim();
 			}

@@ -1,33 +1,21 @@
 ﻿using System;
 using System.Linq;
-using System.Threading;
 
 namespace MultiAdmin
 {
 	internal static class InputThread
 	{
+		private static readonly char[] separator = {' '};
+
 		public static void Write(Server server)
 		{
 			while (!server.Stopping)
 			{
-				while (!Console.KeyAvailable)
-				{
-					if (server.Stopping) return;
-					Thread.Sleep(500);
-				}
-
 				string message = Console.ReadLine();
-				int cursorTop = Console.CursorTop;
-				Console.SetCursorPosition(0, Console.CursorTop - 1);
-				Console.Write(new string(' ', Console.WindowWidth));
-				server.Write(">>> " + message, ConsoleColor.DarkMagenta, -1);
-				Console.SetCursorPosition(0, cursorTop);
+				server.Write(">>> " + message, ConsoleColor.DarkMagenta);
 
-				if (message == null) continue;
-
-				string[] messageSplit = message.ToUpper().Split(' ');
-
-				if (messageSplit.Length <= 0) continue;
+				string[] messageSplit = message.ToUpper().Split(separator, StringSplitOptions.RemoveEmptyEntries);
+				if (messageSplit.Length == 0) continue;
 
 				bool callServer = true;
 				server.commands.TryGetValue(messageSplit[0].ToLower().Trim(), out ICommand command);
