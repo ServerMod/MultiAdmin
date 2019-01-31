@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -14,16 +13,16 @@ namespace MultiAdmin
 
 		public const ConsoleColor DefaultBackground = ConsoleColor.Black;
 
-		private static readonly string DedicatedDir = "SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated";
+		public static readonly string DedicatedDir = "SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated";
 
-		private FileSystemWatcher fsWatcher;
+		private readonly FileSystemWatcher fsWatcher;
 		private bool fixBuggedPlayers;
 
 		public static ConsoleColor MapConsoleColor(string color, ConsoleColor def = ConsoleColor.Cyan)
 		{
 			try
 			{
-				return (ConsoleColor) Enum.Parse(typeof(ConsoleColor), color);
+				return (ConsoleColor)Enum.Parse(typeof(ConsoleColor), color);
 			}
 			catch
 			{

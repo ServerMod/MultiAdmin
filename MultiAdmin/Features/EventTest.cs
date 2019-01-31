@@ -1,6 +1,6 @@
 ﻿namespace MultiAdmin.Features
 {
-	internal class EventTest : Feature, IEventCrash, IEventMatchStart, IEventPlayerConnect, IEventPlayerDisconnect,
+	internal class EventTest : Feature, IEventCrash, IEventPlayerConnect, IEventPlayerDisconnect,
 		IEventRoundEnd, IEventRoundStart, IEventServerFull, IEventServerPreStart, IEventServerStart, IEventServerStop
 	{
 		public EventTest(Server server) : base(server)
@@ -10,11 +10,6 @@
 		public void OnCrash()
 		{
 			Server.Write("EVENTTEST Crash");
-		}
-
-		public void OnMatchStart()
-		{
-			Server.Write("EVENTTEST Match Start");
 		}
 
 		public void OnPlayerConnect(string name)

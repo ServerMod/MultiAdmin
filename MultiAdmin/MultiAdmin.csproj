@@ -90,7 +90,6 @@
     <Compile Include="Features\RestartRoundCounter.cs" />
     <Compile Include="Features\StopNextRound.cs" />
     <Compile Include="Features\TitleBar.cs" />
-    <Compile Include="FileManager.cs" />
     <Compile Include="InputThread.cs" />
     <Compile Include="Interfaces.cs" />
     <Compile Include="MultiAdminConfig.cs" />

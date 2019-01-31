@@ -5,7 +5,7 @@ namespace MultiAdmin
 {
 	internal static class InputThread
 	{
-		private static readonly char[] separator = {' '};
+		private static readonly char[] Separator = { ' ' };
 
 		public static void Write(Server server)
 		{
@@ -14,7 +14,9 @@ namespace MultiAdmin
 				string message = Console.ReadLine();
 				server.Write(">>> " + message, ConsoleColor.DarkMagenta);
 
-				string[] messageSplit = message.ToUpper().Split(separator, StringSplitOptions.RemoveEmptyEntries);
+				if (string.IsNullOrEmpty(message)) continue;
+
+				string[] messageSplit = message.ToUpper().Split(Separator, StringSplitOptions.RemoveEmptyEntries);
 				if (messageSplit.Length == 0) continue;
 
 				bool callServer = true;

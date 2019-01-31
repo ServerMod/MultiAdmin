@@ -25,11 +25,6 @@
 		void OnRoundStart();
 	}
 
-	public interface IEventMatchStart
-	{
-		void OnMatchStart();
-	}
-
 	public interface IEventCrash
 	{
 		void OnCrash();

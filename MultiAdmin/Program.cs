@@ -15,7 +15,7 @@ namespace MultiAdmin
 			if (Utils.IsProcessHandleZero) return;
 
 			Console.ForegroundColor = color;
-			message = Server.TimeStamp(message);
+			message = Utils.TimeStamp(message);
 			Console.WriteLine(message);
 			Console.ForegroundColor = ConsoleColor.White;
 			Console.BackgroundColor = ConsoleColor.Black;
@@ -24,6 +24,9 @@ namespace MultiAdmin
 		private static void OnExit(object sender, EventArgs e)
 		{
 			// TODO: Cleanup server on exit
+
+			foreach (Server server in servers) server.StopServer();
+
 			//Console.WriteLine("exit");
 			//Console.ReadKey();
 		}
@@ -47,15 +50,9 @@ namespace MultiAdmin
 			{
 				string arg = args[i].ToLower();
 
-				if (!string.IsNullOrEmpty(key) && arg == $"--{key.ToLower()}")
-				{
-					return args[i + 1];
-				}
+				if (!string.IsNullOrEmpty(key) && arg == $"--{key.ToLower()}") return args[i + 1];
 
-				if (!string.IsNullOrEmpty(alias) && arg == $"-{alias.ToLower()}")
-				{
-					return args[i + 1];
-				}
+				if (!string.IsNullOrEmpty(alias) && arg == $"-{alias.ToLower()}") return args[i + 1];
 			}
 
 			return null;

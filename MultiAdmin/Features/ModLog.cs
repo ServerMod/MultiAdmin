@@ -20,7 +20,7 @@ namespace MultiAdmin.Features
 			{
 				using (StreamWriter sw = File.AppendText(Server.ModLogFile))
 				{
-					message = Server.TimeStamp(message);
+					message = Utils.TimeStamp(message);
 					sw.WriteLine(message);
 				}
 			}

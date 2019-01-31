@@ -58,6 +58,7 @@ log_mod_actions_to_own_file | Boolean | False | Logs admin messages to seperate 
 disable_config_validation | Boolean | False | Disable the config validator
 share_non_configs | Boolean | False | Make all servers share an AppData directory rather than being organized by port
 config_location | String | **Empty** | The default location for the game to use for storing configuration files
+servers_folder | String | servers | The location of the "servers" folder for MultiAdmin to load multiple server configurations from
 
 ## Upcoming Features
 - Support for running multiple server instances
