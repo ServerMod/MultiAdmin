@@ -30,7 +30,7 @@ namespace MultiAdmin.Features
 
 		public override void OnConfigReload()
 		{
-			restartAfter = Server.serverConfig.RestartEveryNumRounds;
+			restartAfter = Server.ServerConfig.RestartEveryNumRounds;
 		}
 
 

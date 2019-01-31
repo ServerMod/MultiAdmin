@@ -30,8 +30,7 @@ namespace MultiAdmin.Features
 
 			Server.Write("Reloading configs...");
 
-			MultiAdminConfig.GlobalConfig.ReadConfigFile();
-			Server.serverConfig.serverConfig.ReadConfigFile();
+			Server.ServerConfig.ReloadConfig();
 			foreach (Feature feature in Server.features) feature.OnConfigReload();
 
 			Server.Write("MultiAdmin config has been reloaded!");

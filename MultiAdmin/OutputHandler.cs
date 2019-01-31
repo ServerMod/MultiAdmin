@@ -60,7 +60,7 @@ namespace MultiAdmin
 		{
 			if (!Directory.Exists(e.FullPath)) return;
 
-			if (server.Stopping || !e.FullPath.Contains(server.SessionId)) return;
+			if (server.Stopping || string.IsNullOrEmpty(server.SessionId) || !e.FullPath.Contains(server.SessionId)) return;
 
 			string[] files = Directory.GetFiles(e.FullPath, "sl*.mapi", SearchOption.TopDirectoryOnly).OrderBy(f => f)
 				.ToArray();
@@ -69,7 +69,7 @@ namespace MultiAdmin
 
 		private void OnMapiCreated(FileSystemEventArgs e, Server server)
 		{
-			if (server.Stopping || !e.FullPath.Contains(server.SessionId)) return;
+			if (server.Stopping || string.IsNullOrEmpty(server.SessionId) || !e.FullPath.Contains(server.SessionId)) return;
 
 			Thread.Sleep(15);
 			ProcessFile(server, e.FullPath);
@@ -165,10 +165,10 @@ namespace MultiAdmin
 
 					lock (server)
 					{
-						server.WritePart(string.Empty, DefaultBackground, ConsoleColor.Cyan, true, false);
-						server.WritePart("[" + match.Groups[1].Value + "] ", DefaultBackground, levelColor, false, false);
-						server.WritePart(match.Groups[2].Value + " ", DefaultBackground, tagColor, false, false);
-						server.WritePart(match.Groups[3].Value, DefaultBackground, msgColor, false, true);
+						Server.WritePart(string.Empty, DefaultBackground, ConsoleColor.Cyan, true, false);
+						Server.WritePart("[" + match.Groups[1].Value + "] ", DefaultBackground, levelColor, false, false);
+						Server.WritePart(match.Groups[2].Value + " ", DefaultBackground, tagColor, false, false);
+						Server.WritePart(match.Groups[3].Value, DefaultBackground, msgColor, false, true);
 					}
 
 					server.Log("[" + match.Groups[1].Value + "] " + match.Groups[2].Value + " " + match.Groups[3].Value);
@@ -201,9 +201,9 @@ namespace MultiAdmin
 
 			if (stream.Contains("Waiting for players"))
 			{
-				if (!server.initialRoundStarted)
+				if (!server.InitialRoundStarted)
 				{
-					server.initialRoundStarted = true;
+					server.InitialRoundStarted = true;
 					foreach (Feature f in server.features)
 						if (f is IEventRoundStart roundStart)
 							roundStart.OnRoundStart();

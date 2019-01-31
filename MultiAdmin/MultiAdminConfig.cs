@@ -70,7 +70,7 @@
 			: GlobalDisableConfigValidation;
 
 		public const string ShareNonConfigsKey = "share_non_configs";
-		public static bool GlobalShareNonConfigs => GlobalConfig.GetBool(ShareNonConfigsKey);
+		public static bool GlobalShareNonConfigs => GlobalConfig.GetBool(ShareNonConfigsKey, true);
 		public bool ShareNonConfigs => serverConfig != null && serverConfig.Contains(ShareNonConfigsKey)
 			? serverConfig.GetBool(ShareNonConfigsKey)
 			: GlobalShareNonConfigs;
@@ -92,14 +92,31 @@
 		public static readonly Config GlobalConfig = new Config(ConfigFileName);
 		public readonly Config serverConfig;
 
-		public MultiAdminConfig(string path)
+		/// <summary>
+		/// Creates a <see cref="MultiAdminConfig"/> object with a null <see cref="serverConfig"/>. This object will always return the <see cref="GlobalConfig"/>'s value.
+		/// </summary>
+		public MultiAdminConfig()
 		{
-			serverConfig = new Config(path);
 		}
 
 		public MultiAdminConfig(Config config)
 		{
 			serverConfig = config;
+		}
+
+		public MultiAdminConfig(string path) : this(new Config(path))
+		{
+		}
+
+		public static void ReloadGlobalConfig()
+		{
+			GlobalConfig.ReadConfigFile();
+		}
+
+		public void ReloadConfig()
+		{
+			ReloadGlobalConfig();
+			serverConfig?.ReadConfigFile();
 		}
 	}
 }

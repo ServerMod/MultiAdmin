@@ -43,7 +43,7 @@ namespace MultiAdmin.Features
 
 		public override void OnConfigReload()
 		{
-			config = Server.serverConfig.StartConfigOnFull;
+			config = Server.ServerConfig.StartConfigOnFull;
 		}
 
 		public override string GetFeatureDescription()

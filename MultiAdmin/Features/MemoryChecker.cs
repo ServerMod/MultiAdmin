@@ -4,14 +4,21 @@ using MultiAdmin.Features.Attributes;
 namespace MultiAdmin.Features
 {
 	[Feature]
-	internal class MemoryChecker : Feature, IEventTick
+	internal class MemoryChecker : Feature, IEventTick, IEventRoundEnd
 	{
 		private const long BytesInMegabyte = 1048576L;
+
 		private long lowBytes;
+		private long lowBytesSoft;
 
 		private long maxBytes;
 
 		private int tickCount;
+		private int tickCountSoft;
+
+		// Memory Checker Soft
+		private bool restart;
+		private bool warnedSoft;
 
 		public MemoryChecker(Server server) : base(server)
 		{
@@ -23,15 +30,30 @@ namespace MultiAdmin.Features
 			set => lowBytes = value * BytesInMegabyte;
 		}
 
+		private long LowMbSoft
+		{
+			get => lowBytesSoft / BytesInMegabyte;
+			set => lowBytesSoft = value * BytesInMegabyte;
+		}
+
 		private long MaxMb
 		{
 			get => maxBytes / BytesInMegabyte;
 			set => maxBytes = value * BytesInMegabyte;
 		}
 
+		public void OnRoundEnd()
+		{
+			if (restart)
+			{
+				Server.Write("Restarting due to low memory...", ConsoleColor.Red);
+				Server.SoftRestartServer();
+			}
+		}
+
 		public void OnTick()
 		{
-			if (lowBytes < 0 || maxBytes < 0) return;
+			if (lowBytes < 0 && lowBytesSoft < 0 || maxBytes < 0) return;
 
 			Server.GameProcess.Refresh();
 			long workingMemory = Server.GameProcess.WorkingSet64; // Process memory in bytes
@@ -48,16 +70,36 @@ namespace MultiAdmin.Features
 				tickCount = 0;
 			}
 
-			if (tickCount == 10)
+			if (memoryLeft <= lowBytesSoft)
 			{
-				Server.Write("Restarting due to lower memory", ConsoleColor.Red);
+				if (!warnedSoft)
+					Server.Write(
+						$"Warning: program is running low on memory ({memoryLeft / BytesInMegabyte} MB left) the server will restart at the end of the round if it continues",
+						ConsoleColor.Red);
+				warnedSoft = true;
+				tickCountSoft++;
+			}
+			else
+			{
+				warnedSoft = false;
+				tickCountSoft = 0;
+			}
+
+			if (tickCount >= 10)
+			{
+				restart = false;
+				Server.Write("Restarting due to low memory...", ConsoleColor.Red);
 				Server.SoftRestartServer();
+			}
+			else if (tickCountSoft >= 10)
+			{
+				restart = true;
+				Server.Write("Restarting the server at end of the round due to low memory");
 			}
 		}
 
 		public override void Init()
 		{
-			tickCount = 0;
 		}
 
 		public override string GetFeatureDescription()
@@ -72,8 +114,9 @@ namespace MultiAdmin.Features
 
 		public override void OnConfigReload()
 		{
-			LowMb = Server.serverConfig.RestartLowMemory;
-			MaxMb = Server.serverConfig.MaxMemory;
+			LowMb = Server.ServerConfig.RestartLowMemory;
+			LowMbSoft = Server.ServerConfig.RestartLowMemoryRoundEnd;
+			MaxMb = Server.ServerConfig.MaxMemory;
 		}
 	}
 }

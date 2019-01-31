@@ -46,7 +46,7 @@ namespace MultiAdmin.Features
 
 		public override void OnConfigReload()
 		{
-			waitFor = Server.serverConfig.ShutdownWhenEmptyFor;
+			waitFor = Server.ServerConfig.ShutdownWhenEmptyFor;
 		}
 
 

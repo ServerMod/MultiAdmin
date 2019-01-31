@@ -72,6 +72,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config.cs" />
+    <Compile Include="Exceptions.cs" />
     <Compile Include="Feature.cs" />
     <Compile Include="Features\Attributes\FeatureAttribute.cs" />
     <Compile Include="Features\ConfigReload.cs" />
@@ -81,7 +82,6 @@
     <Compile Include="Features\HelpCommand.cs" />
     <Compile Include="Features\InactivityShutdown.cs" />
     <Compile Include="Features\MemoryChecker.cs" />
-    <Compile Include="Features\MemoryCheckerSoft.cs" />
     <Compile Include="Features\ModLog.cs" />
     <Compile Include="Features\MultiAdminInfo.cs" />
     <Compile Include="Features\NewCommand.cs" />

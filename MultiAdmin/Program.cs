@@ -6,9 +6,16 @@ namespace MultiAdmin
 {
 	public static class Program
 	{
-		public static List<Server> servers = new List<Server>();
+		private static readonly List<Server> Servers = new List<Server>();
 
-		public static string[] ServerDirectories => Directory.GetDirectories(MultiAdminConfig.GlobalServersFolder);
+		public static string[] ServerDirectories
+		{
+			get
+			{
+				string globalServersFolder = MultiAdminConfig.GlobalServersFolder;
+				return Directory.Exists(globalServersFolder) ? new string[] { } : Directory.GetDirectories(globalServersFolder);
+			}
+		}
 
 		public static void Write(string message, ConsoleColor color = ConsoleColor.DarkYellow)
 		{
@@ -25,7 +32,7 @@ namespace MultiAdmin
 		{
 			// TODO: Cleanup server on exit
 
-			foreach (Server server in servers) server.StopServer();
+			foreach (Server server in Servers) server.StopServer();
 
 			//Console.WriteLine("exit");
 			//Console.ReadKey();
@@ -37,13 +44,24 @@ namespace MultiAdmin
 
 			string configArg = GetParamFromArgs("");
 
-			servers.Add(!string.IsNullOrEmpty(configArg) ? new Server(configLocation: configArg) : new Server());
+			Servers.Add(!string.IsNullOrEmpty(configArg) ? new Server(configLocation: configArg) : new Server());
 
-			servers[0].StartServer();
+			while (true)
+			{
+				Servers[0].StartServer();
+
+				if (!Servers[0].Crashed)
+					break;
+
+				Write("Game engine exited/crashed/closed/restarting", ConsoleColor.Red);
+				Write("Restarting game with new session id...");
+			}
 		}
 
 		public static string GetParamFromArgs(string key = null, string alias = null)
 		{
+			if (string.IsNullOrEmpty(key) && string.IsNullOrEmpty(alias)) return null;
+
 			string[] args = Environment.GetCommandLineArgs();
 
 			for (int i = 0; i < args.Length - 1; i++)

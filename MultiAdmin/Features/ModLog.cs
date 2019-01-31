@@ -14,7 +14,7 @@ namespace MultiAdmin.Features
 
 		public void OnAdminAction(string message)
 		{
-			if (!logToOwnFile) return;
+			if (!logToOwnFile || string.IsNullOrEmpty(Server.ModLogFile)) return;
 
 			lock (this)
 			{
@@ -42,7 +42,7 @@ namespace MultiAdmin.Features
 
 		public override void OnConfigReload()
 		{
-			logToOwnFile = Server.serverConfig.LogModActionsToOwnFile;
+			logToOwnFile = Server.ServerConfig.LogModActionsToOwnFile;
 		}
 	}
 }

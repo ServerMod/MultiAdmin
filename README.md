@@ -56,7 +56,7 @@ max_memory | Integer | 2048 | The amount of memory in megabytes for MultiAdmin t
 multiadmin_nolog | Boolean | False | Disable logging to file
 log_mod_actions_to_own_file | Boolean | False | Logs admin messages to seperate file
 disable_config_validation | Boolean | False | Disable the config validator
-share_non_configs | Boolean | False | Make all servers share an AppData directory rather than being organized by port
+share_non_configs | Boolean | True | Makes all files other than the config files store in AppData
 config_location | String | **Empty** | The default location for the game to use for storing configuration files
 servers_folder | String | servers | The location of the "servers" folder for MultiAdmin to load multiple server configurations from
 
