@@ -16,9 +16,6 @@ namespace MultiAdmin
 
 		public readonly List<Feature> features = new List<Feature>();
 
-		private readonly Thread printerThread;
-		private readonly Thread readerThread;
-
 		public readonly MultiAdminConfig serverConfig;
 
 		public readonly string serverId;
@@ -26,8 +23,6 @@ namespace MultiAdmin
 
 		// we want a tick only list since its the only event that happens constantly, all the rest can be in a single list
 		private readonly List<IEventTick> tick = new List<IEventTick>();
-
-		private string currentLine = string.Empty;
 
 		public bool hasServerMod;
 
@@ -39,9 +34,6 @@ namespace MultiAdmin
 
 		public Server(string serverId = null, string configLocation = null)
 		{
-			readerThread = new Thread(() => InputThread.Write(this));
-			printerThread = new Thread(() => OutputThread.Read(this));
-
 			// Register all features
 			RegisterFeatures();
 
@@ -243,30 +235,21 @@ namespace MultiAdmin
 		public void WritePart(string part, ConsoleColor backgroundColor = ConsoleColor.Black,
 			ConsoleColor textColor = ConsoleColor.Yellow, bool date = false, bool lineEnd = false)
 		{
-			string datepart = string.Empty;
+			Console.ForegroundColor = textColor;
+			Console.BackgroundColor = backgroundColor;
+
 			if (date)
 			{
 				DateTime now = DateTime.Now;
-				datepart = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" +
-				           now.Second.ToString("00") + "] ";
+				string datePart = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
+				Console.Write(datePart);
 			}
 
-			Console.ForegroundColor = textColor;
-			Console.BackgroundColor = backgroundColor;
-			if (lineEnd)
+			Console.Write(part);
+
+			if (lineEnd && !part.EndsWith(Environment.NewLine))
 			{
-				if (part.EndsWith(Environment.NewLine))
-					Console.Write(datepart + part);
-				else
-					Console.Write(datepart + part + Environment.NewLine);
-				currentLine += datepart + part;
-				Log(currentLine);
-				currentLine = string.Empty;
-			}
-			else
-			{
-				Console.Write(datepart + part);
-				currentLine += datepart + part;
+				Console.WriteLine();
 			}
 		}
 
@@ -277,7 +260,11 @@ namespace MultiAdmin
 				using (StreamWriter sw = File.AppendText(MaLogFile))
 				{
 					message = TimeStamp(message);
-					sw.WriteLine(message);
+					sw.Write(message);
+					if (!message.EndsWith(Environment.NewLine))
+					{
+						sw.WriteLine();
+					}
 				}
 			}
 		}
@@ -398,9 +385,16 @@ namespace MultiAdmin
 					if (f is IEventServerPreStart eventPreStart)
 						eventPreStart.OnServerPreStart();
 
+				Thread readerThread = new Thread(() => InputThread.Write(this));
 				readerThread.Start();
-				printerThread.Start();
+
+				OutputHandler outputHandler = new OutputHandler(this);
+
 				MainLoop();
+
+				// Cleanup after exit from MainLoop
+				readerThread.Abort();
+				outputHandler.Dispose();
 			}
 			catch (Exception e)
 			{

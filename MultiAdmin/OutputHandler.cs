@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -6,15 +7,17 @@ using System.Threading;
 
 namespace MultiAdmin
 {
-	internal static class OutputThread
+	internal class OutputHandler : IDisposable
 	{
-		public static bool fixBuggedPlayers;
-
 		public static readonly Regex SmodRegex =
 			new Regex(@"\[(DEBUG|INFO|WARN|ERROR)\] (\[.*?\]) (.*)", RegexOptions.Compiled | RegexOptions.Singleline);
-		
-		public static readonly ConsoleColor DefaultForeground = ConsoleColor.Cyan;
-		public static readonly ConsoleColor DefaultBackground = ConsoleColor.Black;
+
+		public const ConsoleColor DefaultBackground = ConsoleColor.Black;
+
+		private static readonly string DedicatedDir = "SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated";
+
+		private FileSystemWatcher fsWatcher;
+		private bool fixBuggedPlayers;
 
 		public static ConsoleColor MapConsoleColor(string color, ConsoleColor def = ConsoleColor.Cyan)
 		{
@@ -28,55 +31,52 @@ namespace MultiAdmin
 			}
 		}
 
-		public static void Read(Server server)
+		public OutputHandler(Server server)
 		{
-			string dedicatedDir = "SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated";
-			FileSystemWatcher watcher = new FileSystemWatcher();
-			watcher.Path = dedicatedDir;
-			watcher.IncludeSubdirectories = true;
+			fsWatcher = new FileSystemWatcher { Path = DedicatedDir, IncludeSubdirectories = true };
 
 			if (Utils.IsUnix)
 			{
-				ReadLinux(server, watcher);
+				ReadLinux(server, fsWatcher);
 				return;
 			}
 
-			ReadWindows(server, watcher);
+			ReadWindows(server, fsWatcher);
 		}
 
-		public static void ReadWindows(Server server, FileSystemWatcher watcher)
+		private void ReadWindows(Server server, FileSystemWatcher watcher)
 		{
 			watcher.Changed += (sender, eventArgs) => OnDirectoryChanged(eventArgs, server);
 			watcher.EnableRaisingEvents = true;
 		}
 
-		public static void ReadLinux(Server server, FileSystemWatcher watcher)
+		private void ReadLinux(Server server, FileSystemWatcher watcher)
 		{
 			watcher.Created += (sender, eventArgs) => OnMapiCreated(eventArgs, server);
 			watcher.Filter = "sl*.mapi";
 			watcher.EnableRaisingEvents = true;
 		}
 
-		private static void OnDirectoryChanged(FileSystemEventArgs e, Server server)
+		private void OnDirectoryChanged(FileSystemEventArgs e, Server server)
 		{
 			if (!Directory.Exists(e.FullPath)) return;
 
-			if (!e.FullPath.Contains(server.SessionId)) return;
+			if (server.Stopping || !e.FullPath.Contains(server.SessionId)) return;
 
 			string[] files = Directory.GetFiles(e.FullPath, "sl*.mapi", SearchOption.TopDirectoryOnly).OrderBy(f => f)
 				.ToArray();
 			foreach (string file in files) ProcessFile(server, file);
 		}
 
-		private static void OnMapiCreated(FileSystemEventArgs e, Server server)
+		private void OnMapiCreated(FileSystemEventArgs e, Server server)
 		{
-			if (!e.FullPath.Contains(server.SessionId)) return;
+			if (server.Stopping || !e.FullPath.Contains(server.SessionId)) return;
 
 			Thread.Sleep(15);
 			ProcessFile(server, e.FullPath);
 		}
 
-		private static void ProcessFile(Server server, string file)
+		private void ProcessFile(Server server, string file)
 		{
 			string stream = string.Empty;
 			string command = "open";
@@ -84,17 +84,9 @@ namespace MultiAdmin
 			bool read = false;
 
 			while (attempts < 50 && !read && !server.Stopping)
-			{
 				try
 				{
-					if (!File.Exists(file))
-					{
-						// The file definitely existed at the moment Change event was raised by OS
-						// If the file is not here after 15 ms that means that
-						// (a) either it was already processed
-						// (b) it was deleted by some other application
-						return;
-					}
+					if (!File.Exists(file)) return;
 
 					StreamReader sr = new StreamReader(file);
 					stream = sr.ReadToEnd();
@@ -115,7 +107,6 @@ namespace MultiAdmin
 						server.Write("skipping");
 					}
 				}
-			}
 
 			if (server.Stopping) return;
 
@@ -123,7 +114,6 @@ namespace MultiAdmin
 			ConsoleColor color = ConsoleColor.Cyan;
 
 			if (!string.IsNullOrEmpty(stream.Trim()))
-			{
 				if (stream.Contains("LOGTYPE"))
 				{
 					string type = stream.Substring(stream.IndexOf("LOGTYPE")).Trim();
@@ -145,12 +135,10 @@ namespace MultiAdmin
 							break;
 					}
 				}
-			}
 
 			// Smod2 loggers pretty printing
 			Match match = SmodRegex.Match(stream);
 			if (match.Success)
-			{
 				if (match.Groups.Count >= 2)
 				{
 					ConsoleColor levelColor = ConsoleColor.Cyan;
@@ -192,7 +180,6 @@ namespace MultiAdmin
 					// This return should be here
 					return;
 				}
-			}
 
 			if (stream.Contains("Mod Log:"))
 				foreach (Feature f in server.features)
@@ -276,6 +263,11 @@ namespace MultiAdmin
 				fixBuggedPlayers = true;
 
 			if (display) server.Write(stream.Trim(), color);
+		}
+
+		public void Dispose()
+		{
+			fsWatcher?.Dispose();
 		}
 	}
 }

@@ -94,7 +94,7 @@
     <Compile Include="InputThread.cs" />
     <Compile Include="Interfaces.cs" />
     <Compile Include="MultiAdminConfig.cs" />
-    <Compile Include="OutputThread.cs" />
+    <Compile Include="OutputHandler.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="Utils.cs" />
