@@ -44,11 +44,12 @@ namespace MultiAdmin.Features
 
 		public void OnRoundEnd()
 		{
-			if (restart)
-			{
-				Server.Write("Restarting due to low memory...", ConsoleColor.Red);
-				Server.SoftRestartServer();
-			}
+			if (!restart) return;
+
+			Server.Write("Restarting due to low memory...", ConsoleColor.Red);
+
+			Server.SoftRestartServer();
+			restart = false;
 		}
 
 		public void OnTick()
