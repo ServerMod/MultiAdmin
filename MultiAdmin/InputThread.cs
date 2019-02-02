@@ -16,7 +16,7 @@ namespace MultiAdmin
 
 				if (string.IsNullOrEmpty(message)) continue;
 
-				string[] messageSplit = message.ToUpper().Split(Separator, StringSplitOptions.RemoveEmptyEntries);
+				string[] messageSplit = message.Split(Separator, StringSplitOptions.RemoveEmptyEntries);
 				if (messageSplit.Length == 0) continue;
 
 				bool callServer = true;

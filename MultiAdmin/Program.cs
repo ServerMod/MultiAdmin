@@ -77,8 +77,6 @@ namespace MultiAdmin
 				{
 					Write("Starting this instance in multi server mode...");
 
-					string assemblyLocation = Assembly.GetEntryAssembly().Location;
-
 					for (int i = 0; i < autoStartServerDirectories.Length; i++)
 					{
 						string serverId = Path.GetFileName(autoStartServerDirectories[i]);
@@ -91,11 +89,7 @@ namespace MultiAdmin
 						}
 						else
 						{
-							ProcessStartInfo startInfo = new ProcessStartInfo(assemblyLocation) { Arguments = $"--id {serverId}" };
-
-							//Write($"Launching \"{startInfo.FileName}\" with arguments \"{startInfo.Arguments}\"...");
-
-							Process.Start(startInfo);
+							StartServerFromId(serverId);
 						}
 					}
 				}
@@ -129,6 +123,17 @@ namespace MultiAdmin
 			}
 
 			return null;
+		}
+
+		public static void StartServerFromId(string serverId)
+		{
+			string assemblyLocation = Assembly.GetEntryAssembly().Location;
+
+			ProcessStartInfo startInfo = new ProcessStartInfo(assemblyLocation) { Arguments = $"--id {serverId}" };
+
+			//Write($"Launching \"{startInfo.FileName}\" with arguments \"{startInfo.Arguments}\"...");
+
+			Process.Start(startInfo);
 		}
 	}
 }

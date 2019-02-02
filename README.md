@@ -12,7 +12,13 @@ You can join our discord here: https://discord.gg/8nvmMTr
 ## Installation Instructions:
 1. Place MultiAdmin.exe in your root server directory (next to LocalAdmin.exe)
 
+For running multiple servers with MultiAdmin:
+2. Create a new directory defined by `servers_folder` (`servers` by default)
+3. For each server you'd like, create a directory within the `servers_folder` directory
+4. Optional: Create a file named `scp_multiadmin.cfg` within your server's folder for configuring MultiAdmin specifically for that server
+
 ## Features
+- Autoscale: Auto-starts a new server once this one becomes full (Requires ServerMod to function fully)
 - Config Reload: Reloads the MultiAdmin configuration file
 - Exit Command: Adds a graceful exit command
 - Help: Display a full list of MultiAdmin commands and in game commands
@@ -26,7 +32,7 @@ You can join our discord here: https://discord.gg/8nvmMTr
 - Restart Next Round: Restarts the server after the current round ends
 - Restart After a Number of Rounds: Restarts the server after a number rounds completed
 - Stop Next Round: Stops the server after the current round ends
-- TitleBar: Updates the title bar with instance based information, such as session id and player count. (Requires ServerMod to function fully)
+- TitleBar: Updates the title bar with instance based information, such as session id and player count (Requires ServerMod to function fully)
 
 ## MultiAdmin Commands
 This does not include ServerMod or ingame commands, for a full list type `HELP` in multiadmin which will produce all commands.
@@ -36,13 +42,14 @@ This does not include ServerMod or ingame commands, for a full list type `HELP` 
 - GITHUBGEN [FILE LOCATION]: Generates a github .md file outlining all the features/commands
 - HELP: Prints out available commands and their function
 - INFO: Prints MultiAdmin license information
-- NEW <CONFIG ID>: Starts a new server with the given config id
+- NEW <SERVER ID>: Starts a new server with the given Server ID
 - RESTART: Restarts the game server (MultiAdmin will not restart, just the game)
 - RESTARTNEXTROUND: Restarts the server at the end of this round
 - STOPNEXTROUND: Stops the server at the end of this round
 
-## Config settings
-All configuration settings go into a file named `scp_multiadmin.cfg` (you'll have to make this file) in the same directory as MultiAdmin.exe
+## Config Settings
+All configuration settings go into a file named `scp_multiadmin.cfg` (you'll have to make this file) in the same directory as MultiAdmin.exe or in your server directory within the `servers_folder` value defined in the global configuration file
+Any configuration files within the directory defined by `servers_folder` will have it's values used for that server over the global configuration file
 
 Config Option | Value Type | Default Value | Description
 --- | :---: | :---: | :------:
@@ -61,6 +68,5 @@ config_location | String | **Empty** | The default location for the game to use 
 servers_folder | String | servers | The location of the "servers" folder for MultiAdmin to load multiple server configurations from
 
 ## Upcoming Features
-- Support for running multiple server instances
 - Support for running multiple server instances in one MultiAdmin instance
 - Printing speed configuration option

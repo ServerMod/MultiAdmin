@@ -5,15 +5,28 @@ namespace MultiAdmin.Features
 	[Feature]
 	internal class NewCommand : Feature, ICommand, IEventServerFull
 	{
-		private string config;
+		private string onFullServerId;
 
 		public NewCommand(Server server) : base(server)
 		{
 		}
 
-
 		public void OnCall(string[] args)
 		{
+			if (args.Length > 0)
+			{
+				string serverId = string.Join(" ", args);
+
+				if (string.IsNullOrEmpty(serverId)) return;
+
+				Server.Write($"Launching new server with Server ID: \"{serverId}\"...");
+
+				Program.StartServerFromId(serverId);
+			}
+			else
+			{
+				Server.Write("Error: Missing Server ID!");
+			}
 		}
 
 		public string GetCommand()
@@ -28,13 +41,12 @@ namespace MultiAdmin.Features
 
 		public string GetCommandDescription()
 		{
-			return "Starts a new server with the given config id";
+			return "Starts a new server with the given Server ID";
 		}
-
 
 		public string GetUsage()
 		{
-			return "<CONFIG ID>";
+			return "<SERVER ID>";
 		}
 
 		public override void Init()
@@ -43,7 +55,7 @@ namespace MultiAdmin.Features
 
 		public override void OnConfigReload()
 		{
-			config = Server.ServerConfig.StartConfigOnFull;
+			onFullServerId = Server.ServerConfig.StartConfigOnFull;
 		}
 
 		public override string GetFeatureDescription()
@@ -58,7 +70,11 @@ namespace MultiAdmin.Features
 
 		public void OnServerFull()
 		{
-			// TODO: Start server from given configuration file
+			if (string.IsNullOrEmpty(onFullServerId)) return;
+
+			Server.Write($"Launching new server with Server ID: \"{onFullServerId}\" due to this server being full...");
+
+			Program.StartServerFromId(onFullServerId);
 		}
 	}
 }
