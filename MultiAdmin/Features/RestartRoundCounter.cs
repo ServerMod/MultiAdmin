@@ -21,6 +21,7 @@ namespace MultiAdmin.Features
 
 			Server.Write($"{count}/{restartAfter} rounds have passed, restarting...");
 			Server.SoftRestartServer();
+			count = 0;
 		}
 
 		public override void Init()

@@ -40,7 +40,10 @@ namespace MultiAdmin.Features
 
 		public void OnRoundEnd()
 		{
-			if (restart) Server.SoftRestartServer();
+			if (!restart) return;
+
+			Server.SoftRestartServer();
+			restart = false;
 		}
 
 		public override void Init()

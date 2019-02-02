@@ -40,14 +40,16 @@ namespace MultiAdmin.Features
 
 		public void OnRoundEnd()
 		{
-			if (stop) Server.StopServer();
+			if (!stop) return;
+
+			Server.StopServer();
+			stop = false;
 		}
 
 		public override void Init()
 		{
 			stop = false;
 		}
-
 
 		public override void OnConfigReload()
 		{

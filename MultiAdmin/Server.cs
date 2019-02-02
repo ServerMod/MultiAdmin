@@ -46,9 +46,6 @@ namespace MultiAdmin
 
 			// Register all features
 			RegisterFeatures();
-
-			// Init features
-			InitFeatures();
 		}
 
 		public bool InitialRoundStarted { get; set; }
@@ -167,7 +164,11 @@ namespace MultiAdmin
 
 			try
 			{
+				// Create session directory
 				PrepareSession();
+
+				// Init features
+				InitFeatures();
 
 				string scpslExe;
 

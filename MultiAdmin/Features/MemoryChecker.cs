@@ -101,6 +101,7 @@ namespace MultiAdmin.Features
 
 		public override void Init()
 		{
+			restart = false;
 		}
 
 		public override string GetFeatureDescription()
