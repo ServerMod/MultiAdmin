@@ -10,9 +10,11 @@ The latest release can be found here: [Release link](https://github.com/Dankrush
 You can join our discord here: https://discord.gg/8nvmMTr
 
 ## Installation Instructions:
+### Running a Single Server with MultiAdmin
 1. Place MultiAdmin.exe in your root server directory (next to LocalAdmin.exe)
 
-For running multiple servers with MultiAdmin:
+### Running Multiple Servers with MultiAdmin
+1. Place MultiAdmin.exe in your root server directory (next to LocalAdmin.exe)
 2. Create a new directory defined by `servers_folder` (`servers` by default)
 3. For each server you'd like, create a directory within the `servers_folder` directory
 4. Optional: Create a file named `scp_multiadmin.cfg` within your server's folder for configuring MultiAdmin specifically for that server
