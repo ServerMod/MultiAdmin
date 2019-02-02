@@ -62,6 +62,7 @@ restart_low_memory_roundend | Integer | 450 | Restart at the end of the round if
 max_memory | Integer | 2048 | The amount of memory in megabytes for MultiAdmin to check against
 multiadmin_nolog | Boolean | False | Disable logging to file
 log_mod_actions_to_own_file | Boolean | False | Logs admin messages to seperate file
+max_players | Integer | 20 | The number of players to display as the maximum for the server (within MultiAdmin, not in-game)
 disable_config_validation | Boolean | False | Disable the config validator
 share_non_configs | Boolean | True | Makes all files other than the config files store in AppData
 config_location | String | **Empty** | The default location for the game to use for storing configuration files
