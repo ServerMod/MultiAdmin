@@ -36,16 +36,16 @@ namespace MultiAdmin
 		public Server(string serverId = null, string configLocation = null)
 		{
 			this.serverId = serverId;
-			serverDir = string.IsNullOrEmpty(serverId) ? null : MultiAdminConfig.GlobalServersFolder + Path.DirectorySeparatorChar + serverId;
+			serverDir = string.IsNullOrEmpty(this.serverId) ? null : MultiAdminConfig.GlobalServersFolder + Path.DirectorySeparatorChar + this.serverId;
 
 			this.configLocation = configLocation ?? MultiAdminConfig.GlobalConfigLocation ?? serverDir;
 			logDir = (string.IsNullOrEmpty(serverDir) ? string.Empty : serverDir + Path.DirectorySeparatorChar) + "logs";
 
+			// Load config
+			serverConfig = string.IsNullOrEmpty(this.configLocation) ? new MultiAdminConfig() : new MultiAdminConfig(this.configLocation + Path.DirectorySeparatorChar + MultiAdminConfig.ConfigFileName);
+
 			// Register all features
 			RegisterFeatures();
-
-			// Load config
-			serverConfig = string.IsNullOrEmpty(configLocation) ? new MultiAdminConfig() : new MultiAdminConfig(configLocation + Path.DirectorySeparatorChar + MultiAdminConfig.ConfigFileName);
 
 			// Init features
 			InitFeatures();
