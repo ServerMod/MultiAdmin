@@ -18,6 +18,8 @@ namespace MultiAdmin.Features
 
 			lock (this)
 			{
+				Directory.CreateDirectory(Server.logDir);
+
 				using (StreamWriter sw = File.AppendText(Server.ModLogFile))
 				{
 					message = Utils.TimeStamp(message);

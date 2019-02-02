@@ -5,7 +5,7 @@ using MultiAdmin.Features.Attributes;
 namespace MultiAdmin.Features
 {
 	[Feature]
-	internal class Titlebar : Feature, IEventPlayerConnect, IEventPlayerDisconnect, IEventServerStart
+	internal class Titlebar : Feature, IEventPlayerConnect, IEventPlayerDisconnect, IEventServerFull, IEventServerStart
 	{
 		private int maxPlayers;
 		private int playerCount;
@@ -23,6 +23,12 @@ namespace MultiAdmin.Features
 		public void OnPlayerDisconnect(string name)
 		{
 			playerCount--;
+			UpdateTitlebar();
+		}
+
+		public void OnServerFull()
+		{
+			playerCount = maxPlayers + 1;
 			UpdateTitlebar();
 		}
 
@@ -54,28 +60,29 @@ namespace MultiAdmin.Features
 			maxPlayers = Server.ServerConfig.MaxPlayers;
 		}
 
-		public void UpdateTitlebar()
+		private void UpdateTitlebar()
 		{
 			if (Utils.IsProcessHandleZero) return;
 
-			string smod = string.Empty;
-			if (Server.hasServerMod) smod = "SMod " + Server.serverModVersion;
-			int displayPlayerCount = playerCount;
-			if (playerCount < 0) displayPlayerCount = 0;
-			string processId = Server.GameProcess == null
-				? string.Empty
-				: Server.GameProcess.Id.ToString();
+			int displayPlayerCount = playerCount < 0 ? 0 : playerCount;
 
-			List<string> titleBar = new List<string>(new[]
-			{
-				$"MultiAdmin {Server.MaVersion}",
-				"Config: NOT YET IMPLEMENTED", // TODO: Add config key to title bar
-				$"Session: {Server.SessionId}" + (string.IsNullOrEmpty(processId) ? string.Empty : $" PID: {processId}"),
-				$"{displayPlayerCount}/{maxPlayers}"
-			});
+			List<string> titleBar = new List<string>();
+
+			titleBar.Add($"MultiAdmin {Server.MaVersion}");
+
+			if (!string.IsNullOrEmpty(Server.serverId))
+				titleBar.Add($"Config: {Server.serverId}");
+
+			if (!string.IsNullOrEmpty(Server.SessionId))
+				titleBar.Add($"Session: {Server.SessionId}");
+
+			if (Server.GameProcess != null)
+				titleBar.Add($"PID: {Server.GameProcess.Id}");
+
+			titleBar.Add($"{displayPlayerCount}/{maxPlayers}");
 
 			if (Server.hasServerMod)
-				titleBar.Add(smod);
+				titleBar.Add("SMod " + Server.serverModVersion);
 
 			Console.Title = string.Join(" | ", titleBar);
 		}

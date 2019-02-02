@@ -35,17 +35,17 @@ namespace MultiAdmin
 
 		public Server(string serverId = null, string configLocation = null)
 		{
+			this.serverId = serverId;
+			serverDir = string.IsNullOrEmpty(serverId) ? null : MultiAdminConfig.GlobalServersFolder + Path.DirectorySeparatorChar + serverId;
+
+			this.configLocation = configLocation ?? MultiAdminConfig.GlobalConfigLocation ?? serverDir;
+			logDir = (string.IsNullOrEmpty(serverDir) ? string.Empty : serverDir + Path.DirectorySeparatorChar) + "logs";
+
 			// Register all features
 			RegisterFeatures();
 
 			// Load config
 			serverConfig = string.IsNullOrEmpty(configLocation) ? new MultiAdminConfig() : new MultiAdminConfig(configLocation + Path.DirectorySeparatorChar + MultiAdminConfig.ConfigFileName);
-
-			this.serverId = serverId;
-			this.configLocation = configLocation ?? ServerConfig.ConfigLocation;
-
-			serverDir = string.IsNullOrEmpty(serverId) ? null : MultiAdminConfig.GlobalServersFolder + Path.DirectorySeparatorChar + serverId;
-			logDir = (string.IsNullOrEmpty(serverId) ? string.Empty : serverDir + Path.DirectorySeparatorChar) + "logs";
 
 			// Init features
 			InitFeatures();
@@ -65,7 +65,8 @@ namespace MultiAdmin
 			{
 				startDateTime = value;
 
-				LogDirFile = string.IsNullOrEmpty(StartDateTime) ? null : logDir + Path.DirectorySeparatorChar + StartDateTime + "_{0}_output_log.txt";
+				// Update related variables
+				LogDirFile = string.IsNullOrEmpty(value) ? null : logDir + Path.DirectorySeparatorChar + value + "_{0}_output_log.txt";
 
 				lock (this)
 				{
@@ -92,7 +93,8 @@ namespace MultiAdmin
 			{
 				sessionId = value;
 
-				SessionDirectory = string.IsNullOrEmpty(SessionId) ? null : OutputHandler.DedicatedDir + Path.DirectorySeparatorChar + SessionId;
+				// Update related variables
+				SessionDirectory = string.IsNullOrEmpty(value) ? null : OutputHandler.DedicatedDir + Path.DirectorySeparatorChar + value;
 			}
 		}
 
@@ -105,7 +107,6 @@ namespace MultiAdmin
 			if (!Running) throw new Exceptions.ServerNotRunningException();
 
 			while (!Stopping)
-			{
 				if (GameProcess != null && !GameProcess.HasExited)
 				{
 					foreach (IEventTick tickEvent in tick) tickEvent.OnTick();
@@ -121,9 +122,6 @@ namespace MultiAdmin
 						if (f is IEventCrash eventCrash)
 							eventCrash.OnCrash();
 				}
-			}
-
-			CleanUp();
 		}
 
 		public void SendMessage(string message)
@@ -151,11 +149,6 @@ namespace MultiAdmin
 			Write("Sending request to SCP: Secret Laboratory...", ConsoleColor.White);
 		}
 
-		public void CleanUp()
-		{
-			DeleteSession();
-		}
-
 		#endregion
 
 		#region Server Execution Controls
@@ -169,28 +162,28 @@ namespace MultiAdmin
 			Crashed = false;
 			InitialRoundStarted = false;
 
-			SessionId = Utils.UnixTime;
+			SessionId = DateTime.UtcNow.Ticks.ToString();
 			StartDateTime = Utils.DateTime;
 
 			try
 			{
-				PrepareFiles();
+				PrepareSession();
 
-				string file;
+				string scpslExe;
 
 				if (Utils.IsUnix)
-					file = "SCPSL.x86_64";
+					scpslExe = "SCPSL.x86_64";
 				else if (Utils.IsWindows)
-					file = "SCPSL.exe";
+					scpslExe = "SCPSL.exe";
 				else
 					throw new FileNotFoundException("Invalid OS, can't run executable");
 
-				if (!File.Exists(file))
-					throw new FileNotFoundException($"Can't find game executable \"{file}\"");
+				if (!File.Exists(scpslExe))
+					throw new FileNotFoundException($"Can't find game executable \"{scpslExe}\"");
 
-				Write($"Executing \"{file}\"...", ConsoleColor.DarkGreen);
+				Write($"Executing \"{scpslExe}\"...", ConsoleColor.DarkGreen);
 
-				List<string> args = new List<string>(new[]
+				List<string> scpslArgs = new List<string>(new[]
 				{
 					"-batchmode",
 					"-nographics",
@@ -202,20 +195,20 @@ namespace MultiAdmin
 				});
 
 				if (ServerConfig.DisableConfigValidation)
-					args.Add("-disableconfigvalidation");
+					scpslArgs.Add("-disableconfigvalidation");
 
 				if (ServerConfig.ShareNonConfigs)
-					args.Add("-sharenonconfigs");
+					scpslArgs.Add("-sharenonconfigs");
 
 				if (!string.IsNullOrEmpty(configLocation))
-					args.Add($"-configpath \"{configLocation}\"");
+					scpslArgs.Add($"-configpath \"{configLocation}\"");
 
-				string argsString = string.Join(" ", args);
+				string argsString = string.Join(" ", scpslArgs);
 
 				Write("Starting server with the following parameters");
-				Write(file + " " + argsString);
+				Write(scpslExe + " " + argsString);
 
-				ProcessStartInfo startInfo = new ProcessStartInfo(file) { Arguments = argsString };
+				ProcessStartInfo startInfo = new ProcessStartInfo(scpslExe) { Arguments = argsString };
 
 				foreach (Feature f in features)
 					if (f is IEventServerPreStart eventPreStart)
@@ -236,6 +229,8 @@ namespace MultiAdmin
 				// Cleanup after exit from MainLoop
 				inputReaderThread.Abort();
 				outputHandler.Dispose();
+
+				DeleteSession();
 
 				Running = false;
 				Stopping = false;
@@ -347,7 +342,7 @@ namespace MultiAdmin
 
 		#region Session Directory Management
 
-		private void PrepareFiles()
+		private void PrepareSession()
 		{
 			try
 			{
@@ -435,6 +430,8 @@ namespace MultiAdmin
 
 			lock (this)
 			{
+				Directory.CreateDirectory(logDir);
+
 				using (StreamWriter sw = File.AppendText(MaLogFile))
 				{
 					message = Utils.TimeStamp(message);

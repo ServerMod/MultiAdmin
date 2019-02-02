@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
 
 namespace MultiAdmin
 {
@@ -58,9 +57,7 @@ namespace MultiAdmin
 
 		private void OnDirectoryChanged(FileSystemEventArgs e, Server server)
 		{
-			if (!Directory.Exists(e.FullPath)) return;
-
-			if (server.Stopping || string.IsNullOrEmpty(server.SessionId) || !e.FullPath.Contains(server.SessionId)) return;
+			if (server.Stopping || string.IsNullOrEmpty(server.SessionId) || !e.FullPath.Contains(server.SessionId) || !Directory.Exists(e.FullPath)) return;
 
 			string[] files = Directory.GetFiles(e.FullPath, "sl*.mapi", SearchOption.TopDirectoryOnly).OrderBy(f => f)
 				.ToArray();
@@ -69,9 +66,8 @@ namespace MultiAdmin
 
 		private void OnMapiCreated(FileSystemEventArgs e, Server server)
 		{
-			if (server.Stopping || string.IsNullOrEmpty(server.SessionId) || !e.FullPath.Contains(server.SessionId)) return;
+			if (server.Stopping || string.IsNullOrEmpty(server.SessionId) || !e.FullPath.Contains(server.SessionId) || !File.Exists(e.FullPath)) return;
 
-			Thread.Sleep(15);
 			ProcessFile(server, e.FullPath);
 		}
 
@@ -80,32 +76,43 @@ namespace MultiAdmin
 			string stream = string.Empty;
 			string command = "open";
 			int attempts = 0;
-			bool read = false;
 
-			while (attempts < 50 && !read && !server.Stopping)
-				try
-				{
-					if (!File.Exists(file)) return;
-
-					StreamReader sr = new StreamReader(file);
-					stream = sr.ReadToEnd();
-					command = "close";
-					sr.Close();
-					command = "delete";
-					File.Delete(file);
-					read = true;
-				}
-				catch
-				{
-					attempts++;
-					if (attempts >= 50)
+			// Lock this object to wait for this event to finish before trying to read another file
+			lock (this)
+			{
+				while (attempts < 100 && !server.Stopping)
+					try
 					{
-						server.Write(
-							"Message printer warning: Could not " + command + " " + file +
-							". Make sure that MultiAdmin.exe has all necessary read-write permissions.");
-						server.Write("skipping");
+						if (!File.Exists(file)) return;
+
+						// Lock the file to prevent it from being modified further, or read by another instance
+						using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None))
+						{
+							using (StreamReader sr = new StreamReader(fs))
+							{
+								command = "read";
+								stream = sr.ReadToEnd();
+							}
+
+							command = "delete";
+							File.Delete(file);
+						}
+
+						break;
 					}
-				}
+					catch
+
+					{
+						attempts++;
+						if (attempts >= 100)
+						{
+							server.Write(
+								"Message printer warning: Could not " + command + " " + file +
+								". Make sure that MultiAdmin.exe has all necessary read-write permissions.");
+							server.Write("skipping");
+						}
+					}
+			}
 
 			if (server.Stopping) return;
 
@@ -183,7 +190,7 @@ namespace MultiAdmin
 			if (stream.Contains("Mod Log:"))
 				foreach (Feature f in server.features)
 					if (f is IEventAdminAction adminAction)
-						adminAction.OnAdminAction(stream.Replace("Mod log:", string.Empty));
+						adminAction.OnAdminAction(stream.Replace("Mod Log:", string.Empty));
 
 			if (stream.Contains("ServerMod - Version"))
 			{

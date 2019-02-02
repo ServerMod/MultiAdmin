@@ -6,7 +6,6 @@ namespace MultiAdmin
 	internal static class Utils
 	{
 		public static string DateTime => System.DateTime.Now.ToString("yyyy-MM-dd_HH_mm");
-		public static string UnixTime => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
 
 		public static bool IsUnix => Environment.OSVersion.Platform == PlatformID.Unix;
 		public static bool IsMac => Environment.OSVersion.Platform == PlatformID.MacOSX;

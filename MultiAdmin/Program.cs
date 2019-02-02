@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 
 namespace MultiAdmin
 {
@@ -13,9 +16,11 @@ namespace MultiAdmin
 			get
 			{
 				string globalServersFolder = MultiAdminConfig.GlobalServersFolder;
-				return Directory.Exists(globalServersFolder) ? new string[] { } : Directory.GetDirectories(globalServersFolder);
+				return !Directory.Exists(globalServersFolder) ? new string[] { } : Directory.GetDirectories(globalServersFolder);
 			}
 		}
+
+		public static string[] AutoStartServerDirectories => ServerDirectories.Where(serverDirectory => !new MultiAdminConfig(serverDirectory + Path.DirectorySeparatorChar + MultiAdminConfig.ConfigFileName).ManualStart).ToArray();
 
 		public static void Write(string message, ConsoleColor color = ConsoleColor.DarkYellow)
 		{
@@ -38,13 +43,63 @@ namespace MultiAdmin
 			//Console.ReadKey();
 		}
 
-		public static void Main(string[] args)
+		public static void Main()
 		{
 			AppDomain.CurrentDomain.ProcessExit += OnExit;
 
-			string configArg = GetParamFromArgs("");
+			string configArg = GetParamFromArgs("config", "c");
+			string serverIdArg = GetParamFromArgs("id");
 
-			Servers.Add(!string.IsNullOrEmpty(configArg) ? new Server(configLocation: configArg) : new Server());
+			if (!string.IsNullOrEmpty(configArg))
+			{
+				Write($"Starting this instance with config directory: \"{configArg}\"...");
+
+				Servers.Add(new Server(configLocation: configArg));
+			}
+			else if (!string.IsNullOrEmpty(serverIdArg))
+			{
+				Write($"Starting this instance with Server ID: \"{serverIdArg}\"...");
+
+				Servers.Add(new Server(serverIdArg));
+			}
+			else
+			{
+				string[] serverDirectories = ServerDirectories;
+				string[] autoStartServerDirectories = AutoStartServerDirectories;
+
+				if (serverDirectories.Length <= 0 || autoStartServerDirectories.Length <= 0)
+				{
+					Write("Starting this instance in single server mode...");
+
+					Servers.Add(new Server());
+				}
+				else
+				{
+					Write("Starting this instance in multi server mode...");
+
+					string assemblyLocation = Assembly.GetEntryAssembly().Location;
+
+					for (int i = 0; i < autoStartServerDirectories.Length; i++)
+					{
+						string serverId = Path.GetFileName(autoStartServerDirectories[i]);
+
+						if (i == 0)
+						{
+							Write($"Starting this instance with Server ID: \"{serverId}\"...");
+
+							Servers.Add(new Server(serverId));
+						}
+						else
+						{
+							ProcessStartInfo startInfo = new ProcessStartInfo(assemblyLocation) { Arguments = $"--id {serverId}" };
+
+							//Write($"Launching \"{startInfo.FileName}\" with arguments \"{startInfo.Arguments}\"...");
+
+							Process.Start(startInfo);
+						}
+					}
+				}
+			}
 
 			while (true)
 			{
