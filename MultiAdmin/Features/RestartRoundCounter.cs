@@ -14,12 +14,14 @@ namespace MultiAdmin.Features
 
 		public void OnRoundEnd()
 		{
-			if (restartAfter < 0) return;
 			count++;
 
-			if (count <= restartAfter) return;
+			// If the config value is set to an invalid value, disable this feature
+			// Or if the count is less than the set number of rounds to go through
+			if (restartAfter <= 0 || count < restartAfter) return;
 
 			Server.Write($"{count}/{restartAfter} rounds have passed, restarting...");
+
 			Server.SoftRestartServer();
 			count = 0;
 		}
@@ -33,7 +35,6 @@ namespace MultiAdmin.Features
 		{
 			restartAfter = Server.ServerConfig.RestartEveryNumRounds;
 		}
-
 
 		public override string GetFeatureDescription()
 		{

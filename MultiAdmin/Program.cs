@@ -9,7 +9,11 @@ namespace MultiAdmin
 {
 	public static class Program
 	{
-		private static readonly List<Server> Servers = new List<Server>();
+		private static readonly List<Server> InstantiatedServers = new List<Server>();
+
+		#region Server Properties
+
+		public static Server[] Servers => ServerDirectories.Select(serverDir => new Server(Path.GetFileName(serverDir), serverDir)).ToArray();
 
 		public static string[] ServerDirectories
 		{
@@ -20,7 +24,19 @@ namespace MultiAdmin
 			}
 		}
 
-		public static string[] AutoStartServerDirectories => ServerDirectories.Where(serverDirectory => !new MultiAdminConfig(serverDirectory + Path.DirectorySeparatorChar + MultiAdminConfig.ConfigFileName).ManualStart).ToArray();
+		public static string[] ServerIds => Servers.Select(server => server.serverId).ToArray();
+
+		#endregion
+
+		#region Auto-Start Server Properties
+
+		public static Server[] AutoStartServers => Servers.Where(server => !server.ServerConfig.ManualStart).ToArray();
+
+		public static string[] AutoStartServerDirectories => AutoStartServers.Select(autoStartServer => autoStartServer.serverDir).ToArray();
+
+		public static string[] AutoStartServerIds => AutoStartServers.Select(autoStartServer => autoStartServer.serverId).ToArray();
+
+		#endregion
 
 		public static void Write(string message, ConsoleColor color = ConsoleColor.DarkYellow)
 		{
@@ -37,7 +53,7 @@ namespace MultiAdmin
 		{
 			// TODO: Cleanup server on exit
 
-			foreach (Server server in Servers) server.StopServer();
+			foreach (Server server in InstantiatedServers) server.StopServer();
 
 			//Console.WriteLine("exit");
 			//Console.ReadKey();
@@ -47,63 +63,69 @@ namespace MultiAdmin
 		{
 			AppDomain.CurrentDomain.ProcessExit += OnExit;
 
+			string serverIdArg = GetParamFromArgs("server-id", "id");
 			string configArg = GetParamFromArgs("config", "c");
-			string serverIdArg = GetParamFromArgs("id");
 
-			if (!string.IsNullOrEmpty(configArg))
+			Server server = null;
+
+			if (!string.IsNullOrEmpty(serverIdArg) || !string.IsNullOrEmpty(configArg))
 			{
-				Write($"Starting this instance with config directory: \"{configArg}\"...");
+				server = new Server(serverIdArg, configArg);
 
-				Servers.Add(new Server(configLocation: configArg));
-			}
-			else if (!string.IsNullOrEmpty(serverIdArg))
-			{
-				Write($"Starting this instance with Server ID: \"{serverIdArg}\"...");
-
-				Servers.Add(new Server(serverIdArg));
+				InstantiatedServers.Add(server);
 			}
 			else
 			{
-				string[] serverDirectories = ServerDirectories;
-				string[] autoStartServerDirectories = AutoStartServerDirectories;
+				Server[] autoStartServers = AutoStartServers;
 
-				if (serverDirectories.Length <= 0 || autoStartServerDirectories.Length <= 0)
+				if (autoStartServers.Length <= 0)
 				{
-					Write("Starting this instance in single server mode...");
+					server = new Server();
 
-					Servers.Add(new Server());
+					InstantiatedServers.Add(server);
 				}
 				else
 				{
 					Write("Starting this instance in multi server mode...");
 
-					for (int i = 0; i < autoStartServerDirectories.Length; i++)
-					{
-						string serverId = Path.GetFileName(autoStartServerDirectories[i]);
-
+					for (int i = 0; i < autoStartServers.Length; i++)
 						if (i == 0)
 						{
-							Write($"Starting this instance with Server ID: \"{serverId}\"...");
+							server = autoStartServers[i];
 
-							Servers.Add(new Server(serverId));
+							InstantiatedServers.Add(server);
 						}
 						else
 						{
-							StartServerFromId(serverId);
+							StartServer(autoStartServers[i]);
 						}
-					}
 				}
 			}
 
-			while (true)
+			if (server != null)
 			{
-				Servers[0].StartServer();
+				if (!string.IsNullOrEmpty(server.serverId) && !string.IsNullOrEmpty(server.configLocation))
+					Write($"Starting this instance with Server ID: \"{server.serverId}\" and config directory: \"{server.configLocation}\"...");
 
-				if (!Servers[0].Crashed)
-					break;
+				else if (!string.IsNullOrEmpty(server.serverId))
+					Write($"Starting this instance with Server ID: \"{server.serverId}\"...");
 
-				Write("Game engine exited/crashed/closed/restarting", ConsoleColor.Red);
-				Write("Restarting game with new session id...");
+				else if (!string.IsNullOrEmpty(server.configLocation))
+					Write($"Starting this instance with config directory: \"{server.configLocation}\"...");
+
+				else
+					Write("Starting this instance in single server mode...");
+
+				while (true)
+				{
+					server.StartServer();
+
+					if (!server.Crashed)
+						break;
+
+					Write("Game engine exited/crashed/closed/restarting", ConsoleColor.Red);
+					Write("Restarting game with new session id...");
+				}
 			}
 		}
 
@@ -125,11 +147,23 @@ namespace MultiAdmin
 			return null;
 		}
 
-		public static void StartServerFromId(string serverId)
+		public static void StartServer(Server server)
 		{
 			string assemblyLocation = Assembly.GetEntryAssembly().Location;
 
-			ProcessStartInfo startInfo = new ProcessStartInfo(assemblyLocation) { Arguments = $"--id {serverId}" };
+			List<string> args = new List<string>();
+
+			if (!string.IsNullOrEmpty(server.serverId))
+				args.Add($"-id \"{server.serverId}\"");
+
+			if (!string.IsNullOrEmpty(server.configLocation))
+				args.Add($"-c \"{server.configLocation}\"");
+
+			args.RemoveAll(string.IsNullOrEmpty);
+
+			string stringArgs = string.Join(" ", args);
+
+			ProcessStartInfo startInfo = new ProcessStartInfo(assemblyLocation, stringArgs);
 
 			//Write($"Launching \"{startInfo.FileName}\" with arguments \"{startInfo.Arguments}\"...");
 

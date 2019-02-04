@@ -5,7 +5,7 @@ using MultiAdmin.Features.Attributes;
 namespace MultiAdmin.Features
 {
 	[Feature]
-	internal class Titlebar : Feature, IEventPlayerConnect, IEventPlayerDisconnect, IEventServerFull, IEventServerStart
+	internal class Titlebar : Feature, IEventPlayerConnect, IEventPlayerDisconnect, IEventServerStart
 	{
 		private int maxPlayers;
 		private int playerCount;
@@ -23,12 +23,6 @@ namespace MultiAdmin.Features
 		public void OnPlayerDisconnect(string name)
 		{
 			playerCount--;
-			UpdateTitlebar();
-		}
-
-		public void OnServerFull()
-		{
-			playerCount = maxPlayers + 1;
 			UpdateTitlebar();
 		}
 
@@ -58,6 +52,7 @@ namespace MultiAdmin.Features
 		public override void OnConfigReload()
 		{
 			maxPlayers = Server.ServerConfig.MaxPlayers;
+			UpdateTitlebar();
 		}
 
 		private void UpdateTitlebar()

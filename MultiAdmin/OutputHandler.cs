@@ -12,7 +12,7 @@ namespace MultiAdmin
 
 		public const ConsoleColor DefaultBackground = ConsoleColor.Black;
 
-		public static readonly string DedicatedDir = "SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated";
+		public static readonly string DedicatedDir = Path.GetFullPath("SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated");
 
 		private readonly FileSystemWatcher fsWatcher;
 		private bool fixBuggedPlayers;
@@ -21,7 +21,7 @@ namespace MultiAdmin
 		{
 			try
 			{
-				return (ConsoleColor)Enum.Parse(typeof(ConsoleColor), color);
+				return (ConsoleColor) Enum.Parse(typeof(ConsoleColor), color);
 			}
 			catch
 			{
@@ -31,7 +31,7 @@ namespace MultiAdmin
 
 		public OutputHandler(Server server)
 		{
-			fsWatcher = new FileSystemWatcher { Path = DedicatedDir, IncludeSubdirectories = true };
+			fsWatcher = new FileSystemWatcher {Path = DedicatedDir, IncludeSubdirectories = true};
 
 			if (Utils.IsUnix)
 			{

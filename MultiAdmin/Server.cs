@@ -14,7 +14,9 @@ namespace MultiAdmin
 		public const string MaVersion = "3.0.0";
 
 		public readonly Dictionary<string, ICommand> commands = new Dictionary<string, ICommand>();
+
 		public readonly List<Feature> features = new List<Feature>();
+
 		// we want a tick only list since its the only event that happens constantly, all the rest can be in a single list
 		private readonly List<IEventTick> tick = new List<IEventTick>();
 
@@ -36,13 +38,16 @@ namespace MultiAdmin
 		public Server(string serverId = null, string configLocation = null)
 		{
 			this.serverId = serverId;
-			serverDir = string.IsNullOrEmpty(this.serverId) ? null : MultiAdminConfig.GlobalServersFolder + Path.DirectorySeparatorChar + this.serverId;
+			serverDir = string.IsNullOrEmpty(this.serverId) ? null : Path.GetFullPath(MultiAdminConfig.GlobalServersFolder + Path.DirectorySeparatorChar + this.serverId);
 
 			this.configLocation = configLocation ?? MultiAdminConfig.GlobalConfigLocation ?? serverDir;
-			logDir = (string.IsNullOrEmpty(serverDir) ? string.Empty : serverDir + Path.DirectorySeparatorChar) + "logs";
+
+			if (this.configLocation != null) this.configLocation = Path.GetFullPath(this.configLocation);
+
+			logDir = Path.GetFullPath((string.IsNullOrEmpty(serverDir) ? string.Empty : serverDir + Path.DirectorySeparatorChar) + "logs");
 
 			// Load config
-			serverConfig = string.IsNullOrEmpty(this.configLocation) ? new MultiAdminConfig() : new MultiAdminConfig(this.configLocation + Path.DirectorySeparatorChar + MultiAdminConfig.ConfigFileName);
+			serverConfig = this.configLocation == null ? new MultiAdminConfig() : new MultiAdminConfig(this.configLocation + Path.DirectorySeparatorChar + MultiAdminConfig.ConfigFileName);
 
 			// Register all features
 			RegisterFeatures();
@@ -54,6 +59,7 @@ namespace MultiAdmin
 		public bool Crashed { get; private set; }
 
 		private string startDateTime;
+
 		public string StartDateTime
 		{
 			get => startDateTime;
@@ -82,6 +88,7 @@ namespace MultiAdmin
 		public Process GameProcess { get; private set; }
 
 		private string sessionId;
+
 		public string SessionId
 		{
 			get => sessionId;
@@ -204,12 +211,14 @@ namespace MultiAdmin
 				if (!string.IsNullOrEmpty(configLocation))
 					scpslArgs.Add($"-configpath \"{configLocation}\"");
 
+				scpslArgs.RemoveAll(string.IsNullOrEmpty);
+
 				string argsString = string.Join(" ", scpslArgs);
 
 				Write("Starting server with the following parameters");
 				Write(scpslExe + " " + argsString);
 
-				ProcessStartInfo startInfo = new ProcessStartInfo(scpslExe) { Arguments = argsString };
+				ProcessStartInfo startInfo = new ProcessStartInfo(scpslExe, argsString);
 
 				foreach (Feature f in features)
 					if (f is IEventServerPreStart eventPreStart)
@@ -402,7 +411,7 @@ namespace MultiAdmin
 			catch (ArgumentOutOfRangeException e)
 			{
 				Console.WriteLine(Utils.TimeStamp("Value " + cursorTop + " exceeded buffer height " + bufferHeight +
-											"."));
+				                                  "."));
 				Console.WriteLine(e.StackTrace);
 			}
 		}
@@ -470,7 +479,7 @@ namespace MultiAdmin
 			if (major == 0 && minor == 0 && verFix == 0) return false;
 
 			return verMajor > major || verMajor >= major && verMinor > minor ||
-				   verMajor >= major && verMinor >= minor && verFix >= fix;
+			       verMajor >= major && verMinor >= minor && verFix >= fix;
 		}
 	}
 }

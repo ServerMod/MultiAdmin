@@ -5,7 +5,7 @@ namespace MultiAdmin
 {
 	internal static class InputThread
 	{
-		private static readonly char[] Separator = { ' ' };
+		private static readonly char[] Separator = {' '};
 
 		public static void Write(Server server)
 		{
