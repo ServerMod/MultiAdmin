@@ -1,4 +1,4 @@
-﻿namespace MultiAdmin.Features
+namespace MultiAdmin.Features
 {
 	internal class EventTest : Feature, IEventCrash, IEventPlayerConnect, IEventPlayerDisconnect,
 		IEventRoundEnd, IEventRoundStart, IEventServerFull, IEventServerPreStart, IEventServerStart, IEventServerStop

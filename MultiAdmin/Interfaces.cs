@@ -1,4 +1,4 @@
-﻿namespace MultiAdmin
+namespace MultiAdmin
 {
 	public interface IEventServerPreStart
 	{
