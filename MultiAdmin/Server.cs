@@ -127,6 +127,10 @@ namespace MultiAdmin
 
 					break;
 				}
+				else
+				{
+					break;
+				}
 		}
 
 		public void SendMessage(string message)
