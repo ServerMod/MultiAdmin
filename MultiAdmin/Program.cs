@@ -53,12 +53,18 @@ namespace MultiAdmin
 
 		private static void OnExit(object sender, EventArgs e)
 		{
-			// TODO: Cleanup server on exit
+			foreach (Server server in InstantiatedServers)
+				try
+				{
+					if (!server.Running) continue;
 
-			foreach (Server server in InstantiatedServers) server.StopServer();
-
-			//Console.WriteLine("exit");
-			//Console.ReadKey();
+					server.StopServer(true);
+					server.DeleteSession();
+				}
+				catch
+				{
+					// ignored
+				}
 		}
 
 		public static void Main()

@@ -259,15 +259,17 @@ namespace MultiAdmin
 			}
 		}
 
-		public void StopServer(bool killGame = true)
+		public void StopServer(bool killGame = false)
 		{
-			if (Stopping || !Running) throw new Exceptions.ServerNotRunningException();
+			if (!Running) throw new Exceptions.ServerNotRunningException();
 
 			foreach (Feature f in features)
 				if (f is IEventServerStop stopEvent)
 					stopEvent.OnServerStop();
 
 			if (killGame) GameProcess.Kill();
+			else SendMessage("QUIT");
+
 			Stopping = true;
 		}
 
@@ -353,7 +355,7 @@ namespace MultiAdmin
 
 		#region Session Directory Management
 
-		private void PrepareSession()
+		public void PrepareSession()
 		{
 			try
 			{
@@ -370,7 +372,7 @@ namespace MultiAdmin
 			}
 		}
 
-		private void CleanSession()
+		public void CleanSession()
 		{
 			if (!Directory.Exists(SessionDirectory)) return;
 
@@ -378,7 +380,7 @@ namespace MultiAdmin
 				File.Delete(file);
 		}
 
-		private void DeleteSession()
+		public void DeleteSession()
 		{
 			CleanSession();
 			if (Directory.Exists(SessionDirectory)) Directory.Delete(SessionDirectory);

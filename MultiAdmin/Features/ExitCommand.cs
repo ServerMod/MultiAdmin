@@ -28,7 +28,7 @@ namespace MultiAdmin.Features
 
 		public void OnCall(string[] args)
 		{
-			Server.StopServer(false);
+			Server.StopServer();
 		}
 
 		public bool PassToGame()
