@@ -38,9 +38,11 @@ namespace MultiAdmin
 
 		#endregion
 
+		public static bool Headless { get; private set; }
+
 		public static void Write(string message, ConsoleColor color = ConsoleColor.DarkYellow)
 		{
-			if (Utils.IsProcessHandleZero) return;
+			if (Utils.IsProcessHeadless) return;
 
 			Console.ForegroundColor = color;
 			message = Utils.TimeStamp(message);
@@ -62,6 +64,8 @@ namespace MultiAdmin
 		public static void Main()
 		{
 			AppDomain.CurrentDomain.ProcessExit += OnExit;
+
+			Headless = ArgsContainsParam("headless", "h");
 
 			string serverIdArg = GetParamFromArgs("server-id", "id");
 			string configArg = GetParamFromArgs("config", "c");
@@ -139,12 +143,17 @@ namespace MultiAdmin
 			{
 				string arg = args[i].ToLower();
 
-				if (!string.IsNullOrEmpty(key) && arg == $"--{key.ToLower()}") return args[i + 1];
-
-				if (!string.IsNullOrEmpty(alias) && arg == $"-{alias.ToLower()}") return args[i + 1];
+				if (!string.IsNullOrEmpty(key) && arg == $"--{key.ToLower()}" || !string.IsNullOrEmpty(alias) && arg == $"-{alias.ToLower()}") return args[i + 1];
 			}
 
 			return null;
+		}
+
+		public static bool ArgsContainsParam(string key = null, string alias = null)
+		{
+			if (string.IsNullOrEmpty(key) && string.IsNullOrEmpty(alias)) return false;
+
+			return Environment.GetCommandLineArgs().Select(arg => arg.ToLower()).Any(lowArg => !string.IsNullOrEmpty(key) && lowArg == $"--{key.ToLower()}" || !string.IsNullOrEmpty(alias) && lowArg == $"-{alias.ToLower()}");
 		}
 
 		public static void StartServer(Server server)
@@ -159,13 +168,16 @@ namespace MultiAdmin
 			if (!string.IsNullOrEmpty(server.configLocation))
 				args.Add($"-c \"{server.configLocation}\"");
 
+			if (Headless)
+				args.Add("-h");
+
 			args.RemoveAll(string.IsNullOrEmpty);
 
 			string stringArgs = string.Join(" ", args);
 
 			ProcessStartInfo startInfo = new ProcessStartInfo(assemblyLocation, stringArgs);
 
-			//Write($"Launching \"{startInfo.FileName}\" with arguments \"{startInfo.Arguments}\"...");
+			Write($"Launching \"{startInfo.FileName}\" with arguments \"{startInfo.Arguments}\"...");
 
 			Process.Start(startInfo);
 		}

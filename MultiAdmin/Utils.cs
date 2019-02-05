@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 
 namespace MultiAdmin
 {
@@ -16,7 +17,7 @@ namespace MultiAdmin
 		                                Environment.OSVersion.Platform == PlatformID.WinCE;
 
 		// Skip process handle check if using Unix
-		public static bool IsProcessHandleZero => !IsUnix && Process.GetCurrentProcess().MainWindowHandle == IntPtr.Zero;
+		public static bool IsProcessHeadless => Program.Headless || !IsUnix && Process.GetCurrentProcess().MainWindowHandle == IntPtr.Zero;
 
 		public static string TimeStamp(string message)
 		{
@@ -25,6 +26,11 @@ namespace MultiAdmin
 			DateTime now = System.DateTime.Now;
 			return "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" +
 			       now.Second.ToString("00") + "] " + message;
+		}
+
+		public static string GetFullPathSafe(string path)
+		{
+			return !string.IsNullOrEmpty(path) && !string.IsNullOrEmpty(path.Trim()) ? Path.GetFullPath(path) : null;
 		}
 	}
 }

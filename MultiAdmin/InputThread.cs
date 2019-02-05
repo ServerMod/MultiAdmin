@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading;
 
 namespace MultiAdmin
 {
@@ -11,10 +12,21 @@ namespace MultiAdmin
 		{
 			while (!server.Stopping)
 			{
-				string message = Console.ReadLine();
-				server.Write(">>> " + message, ConsoleColor.DarkMagenta);
+				if (Utils.IsProcessHeadless)
+				{
+					Thread.Sleep(5000);
+					continue;
+				}
 
-				if (string.IsNullOrEmpty(message)) continue;
+				string message = Console.ReadLine();
+
+				if (message == null)
+				{
+					Thread.Sleep(5000);
+					continue;
+				}
+
+				server.Write(">>> " + message, ConsoleColor.DarkMagenta);
 
 				string[] messageSplit = message.Split(Separator, StringSplitOptions.RemoveEmptyEntries);
 				if (messageSplit.Length == 0) continue;

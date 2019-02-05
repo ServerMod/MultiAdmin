@@ -38,16 +38,14 @@ namespace MultiAdmin
 		public Server(string serverId = null, string configLocation = null)
 		{
 			this.serverId = serverId;
-			serverDir = string.IsNullOrEmpty(this.serverId) ? null : Path.GetFullPath(MultiAdminConfig.GlobalServersFolder + Path.DirectorySeparatorChar + this.serverId);
+			serverDir = string.IsNullOrEmpty(this.serverId) ? null : Utils.GetFullPathSafe(MultiAdminConfig.GlobalServersFolder + Path.DirectorySeparatorChar + this.serverId);
 
-			this.configLocation = configLocation ?? MultiAdminConfig.GlobalConfigLocation ?? serverDir;
+			this.configLocation = Utils.GetFullPathSafe(configLocation) ?? Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfigLocation) ?? Utils.GetFullPathSafe(serverDir);
 
-			if (this.configLocation != null) this.configLocation = Path.GetFullPath(this.configLocation);
-
-			logDir = Path.GetFullPath((string.IsNullOrEmpty(serverDir) ? string.Empty : serverDir + Path.DirectorySeparatorChar) + "logs");
+			logDir = Utils.GetFullPathSafe((string.IsNullOrEmpty(serverDir) ? string.Empty : serverDir + Path.DirectorySeparatorChar) + "logs");
 
 			// Load config
-			serverConfig = this.configLocation == null ? new MultiAdminConfig() : new MultiAdminConfig(this.configLocation + Path.DirectorySeparatorChar + MultiAdminConfig.ConfigFileName);
+			serverConfig = string.IsNullOrEmpty(this.configLocation) ? new MultiAdminConfig() : new MultiAdminConfig(this.configLocation + Path.DirectorySeparatorChar + MultiAdminConfig.ConfigFileName);
 
 			// Register all features
 			RegisterFeatures();
@@ -125,6 +123,8 @@ namespace MultiAdmin
 					foreach (Feature f in features)
 						if (f is IEventCrash eventCrash)
 							eventCrash.OnCrash();
+
+					break;
 				}
 		}
 
@@ -226,7 +226,8 @@ namespace MultiAdmin
 
 				// Start the input reader
 				Thread inputReaderThread = new Thread(() => InputThread.Write(this));
-				inputReaderThread.Start();
+				if (!Program.Headless)
+					inputReaderThread.Start();
 
 				// Start the output reader
 				OutputHandler outputHandler = new OutputHandler(this);
@@ -391,7 +392,7 @@ namespace MultiAdmin
 		{
 			Log(message);
 
-			if (Utils.IsProcessHandleZero) return;
+			if (Utils.IsProcessHeadless) return;
 
 			int cursorTop = 0, bufferHeight = 0;
 			try
@@ -419,6 +420,8 @@ namespace MultiAdmin
 		public static void WritePart(string part, ConsoleColor backgroundColor = ConsoleColor.Black,
 			ConsoleColor textColor = ConsoleColor.Yellow, bool date = false, bool lineEnd = false)
 		{
+			if (Utils.IsProcessHeadless) return;
+
 			Console.ForegroundColor = textColor;
 			Console.BackgroundColor = backgroundColor;
 

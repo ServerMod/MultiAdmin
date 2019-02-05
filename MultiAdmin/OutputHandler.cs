@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace MultiAdmin
 {
@@ -12,7 +13,7 @@ namespace MultiAdmin
 
 		public const ConsoleColor DefaultBackground = ConsoleColor.Black;
 
-		public static readonly string DedicatedDir = Path.GetFullPath("SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated");
+		public static readonly string DedicatedDir = Utils.GetFullPathSafe("SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated");
 
 		private readonly FileSystemWatcher fsWatcher;
 		private bool fixBuggedPlayers;
@@ -75,12 +76,14 @@ namespace MultiAdmin
 		{
 			string stream = string.Empty;
 			string command = "open";
-			int attempts = 0;
+
+			bool isRead = false;
 
 			// Lock this object to wait for this event to finish before trying to read another file
 			lock (this)
 			{
-				while (attempts < 100 && !server.Stopping)
+				for (int attempts = 0; attempts < 100 && !server.Stopping; attempts++)
+				{
 					try
 					{
 						if (!File.Exists(file)) return;
@@ -96,22 +99,32 @@ namespace MultiAdmin
 
 							command = "delete";
 							File.Delete(file);
+
+							isRead = true;
 						}
 
 						break;
 					}
-					catch
-
+					catch (UnauthorizedAccessException)
 					{
-						attempts++;
-						if (attempts >= 100)
-						{
-							server.Write(
-								"Message printer warning: Could not " + command + " " + file +
-								". Make sure that MultiAdmin.exe has all necessary read-write permissions.");
-							server.Write("skipping");
-						}
+						Thread.Sleep(3);
 					}
+					catch
+					{
+						// ignored
+					}
+
+					Thread.Sleep(2);
+				}
+			}
+
+			if (!isRead)
+			{
+				server.Write(
+					$"Message printer warning: Could not {command} {file}. Make sure that MultiAdmin has all necessary read-write permissions.");
+				server.Write("Skipping...");
+
+				return;
 			}
 
 			if (server.Stopping) return;

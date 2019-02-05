@@ -57,7 +57,7 @@ namespace MultiAdmin.Features
 
 		private void UpdateTitlebar()
 		{
-			if (Utils.IsProcessHandleZero) return;
+			if (Utils.IsProcessHeadless) return;
 
 			int displayPlayerCount = playerCount < 0 ? 0 : playerCount;
 
