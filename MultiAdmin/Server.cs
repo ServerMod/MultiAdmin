@@ -51,10 +51,11 @@ namespace MultiAdmin
 			RegisterFeatures();
 		}
 
-		public bool InitialRoundStarted { get; set; }
 		public bool Running { get; private set; }
 		public bool Stopping { get; private set; }
+		public bool ForceStop { get; private set; }
 		public bool Crashed { get; private set; }
+		public bool InitialRoundStarted { get; set; }
 
 		private string startDateTime;
 
@@ -108,7 +109,7 @@ namespace MultiAdmin
 		{
 			if (!Running) throw new Exceptions.ServerNotRunningException();
 
-			while (!Stopping)
+			while (!ForceStop)
 				if (GameProcess != null && !GameProcess.HasExited)
 				{
 					foreach (IEventTick tickEvent in tick) tickEvent.OnTick();
@@ -163,6 +164,7 @@ namespace MultiAdmin
 
 			Running = true;
 			Stopping = false;
+			ForceStop = false;
 			Crashed = false;
 			InitialRoundStarted = false;
 
@@ -238,6 +240,9 @@ namespace MultiAdmin
 				MainLoop();
 
 				// Cleanup after exit from MainLoop
+				GameProcess.Close();
+				GameProcess = null;
+
 				inputReaderThread.Abort();
 				outputHandler.Dispose();
 
@@ -245,6 +250,7 @@ namespace MultiAdmin
 
 				Running = false;
 				Stopping = false;
+				ForceStop = false;
 
 				SessionId = null;
 				StartDateTime = null;
@@ -259,7 +265,7 @@ namespace MultiAdmin
 			}
 		}
 
-		public void StopServer(bool killGame = false)
+		public void StopServer(bool closeGame = false, bool killGame = false)
 		{
 			if (!Running) throw new Exceptions.ServerNotRunningException();
 
@@ -267,7 +273,10 @@ namespace MultiAdmin
 				if (f is IEventServerStop stopEvent)
 					stopEvent.OnServerStop();
 
-			if (killGame) GameProcess.Kill();
+			if (killGame)
+				GameProcess.Kill();
+			else if (closeGame)
+				GameProcess.CloseMainWindow();
 			else SendMessage("QUIT");
 
 			Stopping = true;

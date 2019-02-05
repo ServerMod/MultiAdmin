@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 
 namespace MultiAdmin
 {
@@ -56,10 +57,11 @@ namespace MultiAdmin
 			foreach (Server server in InstantiatedServers)
 				try
 				{
-					if (!server.Running) continue;
-
-					server.StopServer(true);
-					server.DeleteSession();
+					while (server.Running)
+					{
+						server.StopServer(killGame: true);
+						Thread.Sleep(10);
+					}
 				}
 				catch
 				{
