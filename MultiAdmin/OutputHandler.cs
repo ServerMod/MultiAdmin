@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace MultiAdmin
 {
-	internal class OutputHandler : IDisposable
+	public class OutputHandler : IDisposable
 	{
 		public static readonly Regex SmodRegex =
 			new Regex(@"\[(DEBUG|INFO|WARN|ERROR)\] (\[.*?\]) (.*)", RegexOptions.Compiled | RegexOptions.Singleline);
@@ -183,15 +183,12 @@ namespace MultiAdmin
 							break;
 					}
 
-					lock (server)
+					server.Write(new ColoredMessage[]
 					{
-						Server.WritePart(string.Empty, DefaultBackground, ConsoleColor.Cyan, true, false);
-						Server.WritePart("[" + match.Groups[1].Value + "] ", DefaultBackground, levelColor, false, false);
-						Server.WritePart(match.Groups[2].Value + " ", DefaultBackground, tagColor, false, false);
-						Server.WritePart(match.Groups[3].Value, DefaultBackground, msgColor, false, true);
-					}
-
-					server.Log("[" + match.Groups[1].Value + "] " + match.Groups[2].Value + " " + match.Groups[3].Value);
+						new ColoredMessage($"[{match.Groups[1].Value}] ", levelColor, DefaultBackground),
+						new ColoredMessage(match.Groups[2].Value + " ", tagColor, DefaultBackground),
+						new ColoredMessage(match.Groups[3].Value, msgColor, DefaultBackground)
+					}, ConsoleColor.Cyan);
 
 					// P.S. the format is [Info] [courtney.exampleplugin] Something interesting happened
 					// That was just an example

@@ -43,13 +43,12 @@ namespace MultiAdmin
 
 		public static void Write(string message, ConsoleColor color = ConsoleColor.DarkYellow)
 		{
-			if (Utils.IsProcessHeadless) return;
+			lock (ColoredConsole.MultiColorWriteLock)
+			{
+				if (Utils.IsProcessHeadless) return;
 
-			Console.ForegroundColor = color;
-			message = Utils.TimeStamp(message);
-			Console.WriteLine(message);
-			Console.ForegroundColor = ConsoleColor.White;
-			Console.BackgroundColor = ConsoleColor.Black;
+				new ColoredMessage(Utils.TimeStampMessage(message), color).WriteLine();
+			}
 		}
 
 		private static void OnExit(object sender, EventArgs e)

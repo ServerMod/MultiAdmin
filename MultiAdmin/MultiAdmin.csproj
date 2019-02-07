@@ -71,6 +71,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ColoredConsole.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Feature.cs" />

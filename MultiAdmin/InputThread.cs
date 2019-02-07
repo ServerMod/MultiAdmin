@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace MultiAdmin
 {
-	internal static class InputThread
+	public static class InputThread
 	{
 		private static readonly char[] Separator = {' '};
 

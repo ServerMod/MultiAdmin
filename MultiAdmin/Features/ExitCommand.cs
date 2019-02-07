@@ -28,7 +28,7 @@ namespace MultiAdmin.Features
 
 		public void OnCall(string[] args)
 		{
-			Server.StopServer();
+			Server.StopServer(killGame: !Server.InitialRoundStarted);
 		}
 
 		public bool PassToGame()

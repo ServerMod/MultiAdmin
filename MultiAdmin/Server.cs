@@ -221,7 +221,7 @@ namespace MultiAdmin
 
 				string argsString = string.Join(" ", scpslArgs);
 
-				Write("Starting server with the following parameters");
+				Write("Starting server with the following parameters:");
 				Write(scpslExe + " " + argsString);
 
 				ProcessStartInfo startInfo = new ProcessStartInfo(scpslExe, argsString);
@@ -403,70 +403,100 @@ namespace MultiAdmin
 
 		#region Console Output and Logging
 
-		public void Write(string message, ConsoleColor color = ConsoleColor.Yellow, int height = 0)
+		public void Write(ColoredMessage message, int height = 0)
 		{
-			Log(message);
-
-			if (Utils.IsProcessHeadless) return;
-
-			int cursorTop = 0, bufferHeight = 0;
-			try
+			lock (ColoredConsole.MultiColorWriteLock)
 			{
-				cursorTop = Console.CursorTop + height;
-				bufferHeight = Console.BufferHeight;
-				if (cursorTop < 0)
-					cursorTop = 0;
-				else if (cursorTop >= Console.BufferHeight) cursorTop = Console.BufferHeight - 1;
-				Console.CursorTop = cursorTop;
-				Console.ForegroundColor = color;
-				message = Utils.TimeStamp(message);
-				Console.WriteLine(message);
-				Console.ForegroundColor = ConsoleColor.White;
-				Console.BackgroundColor = ConsoleColor.Black;
-			}
-			catch (ArgumentOutOfRangeException e)
-			{
-				Console.WriteLine(Utils.TimeStamp("Value " + cursorTop + " exceeded buffer height " + bufferHeight +
-				                                  "."));
-				Console.WriteLine(e.StackTrace);
+				if (message == null) return;
+
+				Log(message.text);
+
+				if (Utils.IsProcessHeadless) return;
+
+				int cursorTop = 0, bufferHeight = 0;
+				try
+				{
+					cursorTop = Console.CursorTop + height;
+					bufferHeight = Console.BufferHeight;
+					if (cursorTop < 0)
+						cursorTop = 0;
+					else if (cursorTop >= Console.BufferHeight) cursorTop = Console.BufferHeight - 1;
+					Console.CursorTop = cursorTop;
+					Utils.TimeStampMessage(message).WriteLine();
+				}
+				catch (ArgumentOutOfRangeException e)
+				{
+					new ColoredMessage[]
+					{
+						new ColoredMessage(Utils.TimeStampMessage($"Value {cursorTop} exceeded buffer height {bufferHeight}.")),
+						new ColoredMessage(e.StackTrace)
+					}.WriteLines();
+				}
 			}
 		}
 
-		public static void WritePart(string part, ConsoleColor backgroundColor = ConsoleColor.Black,
-			ConsoleColor textColor = ConsoleColor.Yellow, bool date = false, bool lineEnd = false)
+		public void Write(string message, ConsoleColor color = ConsoleColor.Yellow, int height = 0)
 		{
-			if (Utils.IsProcessHeadless) return;
-
-			Console.ForegroundColor = textColor;
-			Console.BackgroundColor = backgroundColor;
-
-			if (date)
+			lock (ColoredConsole.MultiColorWriteLock)
 			{
-				DateTime now = DateTime.Now;
-				string datePart = "[" + now.Hour.ToString("00") + ":" + now.Minute.ToString("00") + ":" + now.Second.ToString("00") + "] ";
-				Console.Write(datePart);
+				if (message == null) return;
+
+				Write(new ColoredMessage(message, color), height);
 			}
+		}
 
-			Console.Write(part);
+		public void Write(ColoredMessage[] message, ConsoleColor timeStampColor = ConsoleColor.Black)
+		{
+			lock (ColoredConsole.MultiColorWriteLock)
+			{
+				if (message == null) return;
 
-			if (lineEnd && !part.EndsWith(Environment.NewLine)) Console.WriteLine();
+				Log(message.GetText());
+
+				if (Utils.IsProcessHeadless) return;
+
+				int cursorTop = 0, bufferHeight = 0;
+				try
+				{
+					cursorTop = Console.CursorTop;
+					bufferHeight = Console.BufferHeight;
+					if (cursorTop < 0)
+						cursorTop = 0;
+					else if (cursorTop >= Console.BufferHeight) cursorTop = Console.BufferHeight - 1;
+					Console.CursorTop = cursorTop;
+					Utils.TimeStampMessage(message, timeStampColor).WriteLine();
+				}
+				catch (ArgumentOutOfRangeException e)
+				{
+					new ColoredMessage[]
+					{
+						new ColoredMessage(Utils.TimeStampMessage($"Value {cursorTop} exceeded buffer height {bufferHeight}.")),
+						new ColoredMessage(e.StackTrace)
+					}.WriteLines();
+				}
+			}
 		}
 
 		public void Log(string message)
 		{
-			if (string.IsNullOrEmpty(MaLogFile)) return;
-
-			lock (this)
+			lock (ColoredConsole.MultiColorWriteLock)
 			{
+				if (message == null || string.IsNullOrEmpty(MaLogFile)) return;
+
 				Directory.CreateDirectory(logDir);
 
 				using (StreamWriter sw = File.AppendText(MaLogFile))
 				{
-					message = Utils.TimeStamp(message);
+					message = Utils.TimeStampMessage(message);
 					sw.Write(message);
 					if (!message.EndsWith(Environment.NewLine)) sw.WriteLine();
 				}
 			}
+		}
+
+		public void Log(ColoredMessage message)
+		{
+			Log(message?.text);
 		}
 
 		#endregion

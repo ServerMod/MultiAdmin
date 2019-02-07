@@ -13,8 +13,11 @@ namespace MultiAdmin.Features
 
 		private long maxBytes;
 
-		private int tickCount;
-		private int tickCountSoft;
+		private uint tickCount;
+		private uint tickCountSoft;
+
+		private const uint MaxTicks = 10;
+		private const uint MaxTicksSoft = 10;
 
 		// Memory Checker Soft
 		private bool restart;
@@ -46,10 +49,11 @@ namespace MultiAdmin.Features
 		{
 			if (!restart) return;
 
-			Server.Write("Restarting due to low memory...", ConsoleColor.Red);
+			Server.Write("Restarting due to low memory (Round End)...", ConsoleColor.Red);
 
 			Server.SoftRestartServer();
 			restart = false;
+			warnedSoft = false;
 		}
 
 		public void OnTick()
@@ -62,7 +66,7 @@ namespace MultiAdmin.Features
 
 			if (memoryLeft <= lowBytes)
 			{
-				Server.Write($"Warning: Program is running low on memory ({memoryLeft / BytesInMegabyte} MB left)",
+				Server.Write($"Warning: Program is running low on memory ({memoryLeft / BytesInMegabyte} MB left), the server will restart if it continues",
 					ConsoleColor.Red);
 				tickCount++;
 			}
@@ -71,31 +75,32 @@ namespace MultiAdmin.Features
 				tickCount = 0;
 			}
 
-			if (memoryLeft <= lowBytesSoft)
+			if (memoryLeft <= lowBytesSoft && tickCount > 0)
 			{
-				if (!warnedSoft)
-					Server.Write(
-						$"Warning: program is running low on memory ({memoryLeft / BytesInMegabyte} MB left) the server will restart at the end of the round if it continues",
-						ConsoleColor.Red);
-				warnedSoft = true;
+				Server.Write(
+					$"Warning: Program is running low on memory ({memoryLeft / BytesInMegabyte} MB left), the server will restart at the end of the round if it continues",
+					ConsoleColor.Red);
 				tickCountSoft++;
 			}
 			else
 			{
-				warnedSoft = false;
 				tickCountSoft = 0;
 			}
 
-			if (tickCount >= 10)
+			if (tickCount >= MaxTicks)
 			{
-				restart = false;
 				Server.Write("Restarting due to low memory...", ConsoleColor.Red);
 				Server.SoftRestartServer();
+
+				restart = false;
 			}
-			else if (tickCountSoft >= 10)
+			else if (tickCountSoft >= MaxTicksSoft)
 			{
+				if (!warnedSoft)
+					Server.Write("Server will restart at the end of the round due to low memory");
+
 				restart = true;
-				Server.Write("Restarting the server at end of the round due to low memory");
+				warnedSoft = true;
 			}
 		}
 
