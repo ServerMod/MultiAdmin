@@ -86,6 +86,8 @@ namespace MultiAdmin
 
 		public Process GameProcess { get; private set; }
 
+		public static readonly string DedicatedDir = Utils.GetFullPathSafe("SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated");
+
 		private string sessionId;
 
 		public string SessionId
@@ -97,7 +99,7 @@ namespace MultiAdmin
 				sessionId = value;
 
 				// Update related variables
-				SessionDirectory = string.IsNullOrEmpty(value) ? null : OutputHandler.DedicatedDir + Path.DirectorySeparatorChar + value;
+				SessionDirectory = string.IsNullOrEmpty(value) ? null : DedicatedDir + Path.DirectorySeparatorChar + value;
 			}
 		}
 
@@ -377,7 +379,7 @@ namespace MultiAdmin
 			}
 			catch
 			{
-				Write($"Failed - Please close all open files in \"{OutputHandler.DedicatedDir}\" and restart the server!",
+				Write($"Failed - Please close all open files in \"{DedicatedDir}\" and restart the server!",
 					ConsoleColor.Red);
 				Write("Press any key to close...", ConsoleColor.DarkGray);
 				Console.ReadKey(true);

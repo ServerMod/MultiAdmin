@@ -13,8 +13,6 @@ namespace MultiAdmin
 
 		public const ConsoleColor DefaultBackground = ConsoleColor.Black;
 
-		public static readonly string DedicatedDir = Utils.GetFullPathSafe("SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated");
-
 		private readonly FileSystemWatcher fsWatcher;
 		private bool fixBuggedPlayers;
 
@@ -32,30 +30,17 @@ namespace MultiAdmin
 
 		public OutputHandler(Server server)
 		{
-			fsWatcher = new FileSystemWatcher {Path = DedicatedDir, IncludeSubdirectories = true};
-
-			if (Utils.IsUnix)
-			{
-				ReadLinux(server, fsWatcher);
+			if (string.IsNullOrEmpty(server.SessionDirectory))
 				return;
-			}
 
-			ReadWindows(server, fsWatcher);
+			fsWatcher = new FileSystemWatcher {Path = server.SessionDirectory};
+
+			fsWatcher.Created += (sender, eventArgs) => OnMapiCreated(eventArgs, server);
+			fsWatcher.Filter = "sl*.mapi";
+			fsWatcher.EnableRaisingEvents = true;
 		}
 
-		private void ReadWindows(Server server, FileSystemWatcher watcher)
-		{
-			watcher.Changed += (sender, eventArgs) => OnDirectoryChanged(eventArgs, server);
-			watcher.EnableRaisingEvents = true;
-		}
-
-		private void ReadLinux(Server server, FileSystemWatcher watcher)
-		{
-			watcher.Created += (sender, eventArgs) => OnMapiCreated(eventArgs, server);
-			watcher.Filter = "sl*.mapi";
-			watcher.EnableRaisingEvents = true;
-		}
-
+		/* Old Windows MAPI Watching Code
 		private void OnDirectoryChanged(FileSystemEventArgs e, Server server)
 		{
 			if (server.Stopping || string.IsNullOrEmpty(server.SessionId) || !e.FullPath.Contains(server.SessionId) || !Directory.Exists(e.FullPath)) return;
@@ -64,6 +49,7 @@ namespace MultiAdmin
 				.ToArray();
 			foreach (string file in files) ProcessFile(server, file);
 		}
+		*/
 
 		private void OnMapiCreated(FileSystemEventArgs e, Server server)
 		{
