@@ -6,7 +6,7 @@ namespace MultiAdmin.Features
 	[Feature]
 	internal class InactivityShutdown : Feature, IEventRoundStart, IEventRoundEnd, IEventTick
 	{
-		private long roundEndTime;
+		private DateTime roundEndTime;
 		private int waitFor;
 		private bool waiting;
 
@@ -16,7 +16,7 @@ namespace MultiAdmin.Features
 
 		public void OnRoundEnd()
 		{
-			roundEndTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+			roundEndTime = DateTime.UtcNow;
 			waiting = true;
 		}
 
@@ -29,7 +29,7 @@ namespace MultiAdmin.Features
 		{
 			if (waitFor > 0 && waiting)
 			{
-				long elapsed = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - roundEndTime;
+				int elapsed = (DateTime.UtcNow - roundEndTime).Seconds;
 
 				if (elapsed >= waitFor)
 				{
@@ -41,7 +41,7 @@ namespace MultiAdmin.Features
 
 		public override void Init()
 		{
-			roundEndTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+			roundEndTime = DateTime.UtcNow;
 		}
 
 		public override void OnConfigReload()
