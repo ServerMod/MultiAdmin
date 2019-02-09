@@ -47,7 +47,7 @@ namespace MultiAdmin
 			if (message == null) return null;
 
 			ColoredMessage[] newMessage = new ColoredMessage[message.Length + 1];
-			newMessage[0] = new ColoredMessage(TimeStamp, color);
+			newMessage[0] = new ColoredMessage($"{TimeStamp} ", color);
 
 			for (int i = 0; i < message.Length; i++) newMessage[i + 1] = message[i].Clone();
 

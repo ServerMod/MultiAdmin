@@ -4,9 +4,9 @@ using MultiAdmin.Features.Attributes;
 namespace MultiAdmin.Features
 {
 	[Feature]
-	internal class InactivityShutdown : Feature, IEventRoundStart, IEventRoundEnd, IEventTick
+	internal class InactivityShutdown : Feature, IEventRoundStart, IEventWaitingForPlayers, IEventTick
 	{
-		private DateTime roundEndTime;
+		private DateTime queueStartTime;
 		private int waitFor;
 		private bool waiting;
 
@@ -14,9 +14,9 @@ namespace MultiAdmin.Features
 		{
 		}
 
-		public void OnRoundEnd()
+		public void OnWaitingForPlayers()
 		{
-			roundEndTime = DateTime.UtcNow;
+			queueStartTime = DateTime.UtcNow;
 			waiting = true;
 		}
 
@@ -29,7 +29,7 @@ namespace MultiAdmin.Features
 		{
 			if (waitFor > 0 && waiting)
 			{
-				int elapsed = (DateTime.UtcNow - roundEndTime).Seconds;
+				int elapsed = (DateTime.UtcNow - queueStartTime).Seconds;
 
 				if (elapsed >= waitFor)
 				{
@@ -41,7 +41,7 @@ namespace MultiAdmin.Features
 
 		public override void Init()
 		{
-			roundEndTime = DateTime.UtcNow;
+			queueStartTime = DateTime.UtcNow;
 		}
 
 		public override void OnConfigReload()

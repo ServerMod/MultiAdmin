@@ -3,9 +3,9 @@ using MultiAdmin.Features.Attributes;
 namespace MultiAdmin.Features
 {
 	[Feature]
-	internal class ExitCommand : Feature, ICommand
+	internal class ExitCommand : Feature, ICommand, IEventWaitingForPlayers
 	{
-		private bool pass;
+		private bool initialRoundStarted;
 
 		public ExitCommand(Server server) : base(server)
 		{
@@ -28,12 +28,12 @@ namespace MultiAdmin.Features
 
 		public void OnCall(string[] args)
 		{
-			Server.StopServer(killGame: !Server.InitialRoundStarted);
+			Server.StopServer(!initialRoundStarted);
 		}
 
 		public bool PassToGame()
 		{
-			return pass;
+			return false;
 		}
 
 		public override void OnConfigReload()
@@ -52,7 +52,11 @@ namespace MultiAdmin.Features
 
 		public override void Init()
 		{
-			pass = true;
+		}
+
+		public void OnWaitingForPlayers()
+		{
+			initialRoundStarted = true;
 		}
 	}
 }

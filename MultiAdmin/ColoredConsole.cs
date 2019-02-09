@@ -6,11 +6,11 @@ namespace MultiAdmin
 {
 	public class ColoredConsole
 	{
-		public static readonly object MultiColorWriteLock = new object();
+		public static readonly object WriteLock = new object();
 
 		public static void Write(string text, ConsoleColor textColor = ConsoleColor.White, ConsoleColor backgroundColor = ConsoleColor.Black)
 		{
-			lock (MultiColorWriteLock)
+			lock (WriteLock)
 			{
 				if (text == null) return;
 
@@ -26,7 +26,7 @@ namespace MultiAdmin
 
 		public static void WriteLine(string text, ConsoleColor textColor = ConsoleColor.White, ConsoleColor backgroundColor = ConsoleColor.Black)
 		{
-			lock (MultiColorWriteLock)
+			lock (WriteLock)
 			{
 				if (text != null)
 					Write(text, textColor, backgroundColor);
@@ -37,7 +37,7 @@ namespace MultiAdmin
 
 		public static void Write(params ColoredMessage[] message)
 		{
-			lock (MultiColorWriteLock)
+			lock (WriteLock)
 			{
 				foreach (ColoredMessage coloredMessage in message) Write(coloredMessage.text, coloredMessage.textColor, coloredMessage.backgroundColor);
 			}
@@ -45,7 +45,7 @@ namespace MultiAdmin
 
 		public static void WriteLine(params ColoredMessage[] message)
 		{
-			lock (MultiColorWriteLock)
+			lock (WriteLock)
 			{
 				Write(message);
 
@@ -55,12 +55,9 @@ namespace MultiAdmin
 
 		public static void WriteLines(params ColoredMessage[] message)
 		{
-			lock (MultiColorWriteLock)
+			lock (WriteLock)
 			{
-				foreach (ColoredMessage coloredMessage in message)
-				{
-					WriteLine(coloredMessage);
-				}
+				foreach (ColoredMessage coloredMessage in message) WriteLine(coloredMessage);
 			}
 		}
 	}

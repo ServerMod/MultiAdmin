@@ -51,11 +51,23 @@ namespace MultiAdmin
 			RegisterFeatures();
 		}
 
-		public bool Running { get; private set; }
-		public bool Stopping { get; private set; }
-		public bool ForceStop { get; private set; }
-		public bool Crashed { get; private set; }
-		public bool InitialRoundStarted { get; set; }
+		public ServerStatus LastStatus { get; private set; } = ServerStatus.NotStarted;
+
+		private ServerStatus status = ServerStatus.NotStarted;
+
+		public ServerStatus Status
+		{
+			get => status;
+			private set
+			{
+				LastStatus = status;
+				status = value;
+			}
+		}
+
+		public bool IsRunning => Status != ServerStatus.NotStarted && Status != ServerStatus.Stopped && Status != ServerStatus.StoppedUnexpectedly;
+		public bool IsStopping => Status == ServerStatus.Stopping || Status == ServerStatus.ForceStopping || Status == ServerStatus.Restarting;
+		public bool IsStopped => Status == ServerStatus.NotStarted || Status == ServerStatus.Stopped || Status == ServerStatus.StoppedUnexpectedly;
 
 		private string startDateTime;
 
@@ -109,30 +121,15 @@ namespace MultiAdmin
 
 		private void MainLoop()
 		{
-			if (!Running) throw new Exceptions.ServerNotRunningException();
+			while (GameProcess != null && !GameProcess.HasExited)
+			{
+				if (Status == ServerStatus.ForceStopping)
+					StopServer(true);
 
-			while (!ForceStop)
-				if (GameProcess != null && !GameProcess.HasExited)
-				{
-					foreach (IEventTick tickEvent in tick) tickEvent.OnTick();
+				foreach (IEventTick tickEvent in tick) tickEvent.OnTick();
 
-					Thread.Sleep(1000);
-				}
-				else if (!Stopping)
-				{
-					Crashed = true;
-					Stopping = true;
-
-					foreach (Feature f in features)
-						if (f is IEventCrash eventCrash)
-							eventCrash.OnCrash();
-
-					break;
-				}
-				else
-				{
-					break;
-				}
+				Thread.Sleep(1000);
+			}
 		}
 
 		public void SendMessage(string message)
@@ -164,116 +161,143 @@ namespace MultiAdmin
 
 		#region Server Execution Controls
 
-		public void StartServer()
+		public void StartServer(bool restartOnCrash = true)
 		{
-			if (Running) throw new Exceptions.ServerAlreadyRunningException();
+			if (!IsStopped) throw new Exceptions.ServerAlreadyRunningException();
 
-			Running = true;
-			Stopping = false;
-			ForceStop = false;
-			Crashed = false;
-			InitialRoundStarted = false;
+			bool shouldRestart = false;
 
-			SessionId = DateTime.UtcNow.Ticks.ToString();
-			StartDateTime = Utils.DateTime;
-
-			try
+			do
 			{
-				// Create session directory
-				PrepareSession();
+				Status = ServerStatus.Starting;
 
-				// Init features
-				InitFeatures();
+				SessionId = DateTime.UtcNow.Ticks.ToString();
+				StartDateTime = Utils.DateTime;
 
-				string scpslExe;
-
-				if (Utils.IsUnix)
-					scpslExe = "SCPSL.x86_64";
-				else if (Utils.IsWindows)
-					scpslExe = "SCPSL.exe";
-				else
-					throw new FileNotFoundException("Invalid OS, can't run executable");
-
-				if (!File.Exists(scpslExe))
-					throw new FileNotFoundException($"Can't find game executable \"{scpslExe}\"");
-
-				Write($"Executing \"{scpslExe}\"...", ConsoleColor.DarkGreen);
-
-				List<string> scpslArgs = new List<string>(new[]
+				try
 				{
-					"-batchmode",
-					"-nographics",
-					"-silent-crashes",
-					"-nodedicateddelete",
-					$"-key{SessionId}",
-					$"-id{Process.GetCurrentProcess().Id}",
-					$"-{(string.IsNullOrEmpty(ScpLogFile) || ServerConfig.NoLog ? "nolog" : $"logFile \"{ScpLogFile}\"")}"
-				});
+					// Create session directory
+					PrepareSession();
 
-				if (ServerConfig.DisableConfigValidation)
-					scpslArgs.Add("-disableconfigvalidation");
+					// Init features
+					InitFeatures();
 
-				if (ServerConfig.ShareNonConfigs)
-					scpslArgs.Add("-sharenonconfigs");
+					string scpslExe;
 
-				if (!string.IsNullOrEmpty(configLocation))
-					scpslArgs.Add($"-configpath \"{configLocation}\"");
+					if (Utils.IsUnix)
+						scpslExe = "SCPSL.x86_64";
+					else if (Utils.IsWindows)
+						scpslExe = "SCPSL.exe";
+					else
+						throw new FileNotFoundException("Invalid OS, can't run executable");
 
-				scpslArgs.RemoveAll(string.IsNullOrEmpty);
+					if (!File.Exists(scpslExe))
+						throw new FileNotFoundException($"Can't find game executable \"{scpslExe}\"");
 
-				string argsString = string.Join(" ", scpslArgs);
+					Write($"Executing \"{scpslExe}\"...", ConsoleColor.DarkGreen);
 
-				Write("Starting server with the following parameters:");
-				Write(scpslExe + " " + argsString);
+					List<string> scpslArgs = new List<string>(new[]
+					{
+						"-batchmode",
+						"-nographics",
+						"-silent-crashes",
+						"-nodedicateddelete",
+						$"-key{SessionId}",
+						$"-id{Process.GetCurrentProcess().Id}",
+						$"-{(string.IsNullOrEmpty(ScpLogFile) || ServerConfig.NoLog ? "nolog" : $"logFile \"{ScpLogFile}\"")}"
+					});
 
-				ProcessStartInfo startInfo = new ProcessStartInfo(scpslExe, argsString);
+					if (ServerConfig.DisableConfigValidation)
+						scpslArgs.Add("-disableconfigvalidation");
 
-				foreach (Feature f in features)
-					if (f is IEventServerPreStart eventPreStart)
-						eventPreStart.OnServerPreStart();
+					if (ServerConfig.ShareNonConfigs)
+						scpslArgs.Add("-sharenonconfigs");
 
-				// Start the input reader
-				Thread inputReaderThread = new Thread(() => InputThread.Write(this));
-				if (!Program.Headless)
-					inputReaderThread.Start();
+					if (!string.IsNullOrEmpty(configLocation))
+						scpslArgs.Add($"-configpath \"{configLocation}\"");
 
-				// Start the output reader
-				OutputHandler outputHandler = new OutputHandler(this);
+					scpslArgs.RemoveAll(string.IsNullOrEmpty);
 
-				// Finally, start the game
-				GameProcess = Process.Start(startInfo);
+					string argsString = string.Join(" ", scpslArgs);
 
-				MainLoop();
+					Write("Starting server with the following parameters:");
+					Write(scpslExe + " " + argsString);
 
-				// Cleanup after exit from MainLoop
-				GameProcess.Close();
-				GameProcess = null;
+					ProcessStartInfo startInfo = new ProcessStartInfo(scpslExe, argsString);
 
-				inputReaderThread.Abort();
-				outputHandler.Dispose();
+					foreach (Feature f in features)
+						if (f is IEventServerPreStart eventPreStart)
+							eventPreStart.OnServerPreStart();
 
-				DeleteSession();
+					// Start the input reader
+					Thread inputReaderThread = new Thread(() => InputThread.Write(this));
+					if (!Program.Headless)
+						inputReaderThread.Start();
 
-				Running = false;
-				Stopping = false;
-				ForceStop = false;
+					// Start the output reader
+					OutputHandler outputHandler = new OutputHandler(this);
 
-				SessionId = null;
-				StartDateTime = null;
-			}
-			catch (Exception e)
-			{
-				Write("Failed - Executable file not found or config issue!", ConsoleColor.Red);
-				Write(e.Message, ConsoleColor.Red);
-				Write("Press any key to close...", ConsoleColor.DarkGray);
-				Console.ReadKey(true);
-				Process.GetCurrentProcess().Kill();
-			}
+					// Finally, start the game
+					GameProcess = Process.Start(startInfo);
+
+					MainLoop();
+
+					switch (Status)
+					{
+						case ServerStatus.Stopping:
+						case ServerStatus.ForceStopping:
+							Status = ServerStatus.Stopped;
+
+							shouldRestart = false;
+							break;
+
+						case ServerStatus.Restarting:
+							shouldRestart = true;
+							break;
+
+						default:
+							Status = ServerStatus.StoppedUnexpectedly;
+
+							foreach (Feature f in features)
+								if (f is IEventCrash eventCrash)
+									eventCrash.OnCrash();
+
+							Write("Game engine exited unexpectedly", ConsoleColor.Red);
+
+							shouldRestart = restartOnCrash;
+							break;
+					}
+
+					// Cleanup after exit from MainLoop
+					GameProcess.Close();
+					GameProcess = null;
+
+					inputReaderThread.Abort();
+					outputHandler.Dispose();
+
+					DeleteSession();
+
+					SessionId = null;
+					StartDateTime = null;
+
+					if (shouldRestart) Write("Restarting server with a new Session ID...");
+				}
+				catch (Exception e)
+				{
+					Write("Failed - Executable file not found or config issue!", ConsoleColor.Red);
+					Write(e.Message, ConsoleColor.Red);
+					Write("Press any key to close...", ConsoleColor.DarkGray);
+					Console.ReadKey(true);
+					Process.GetCurrentProcess().Kill();
+				}
+			} while (shouldRestart);
 		}
 
-		public void StopServer(bool closeGame = false, bool killGame = false)
+		public void StopServer(bool killGame = false)
 		{
-			if (!Running) throw new Exceptions.ServerNotRunningException();
+			if (!IsRunning) throw new Exceptions.ServerNotRunningException();
+
+			Status = ServerStatus.Stopping;
 
 			foreach (Feature f in features)
 				if (f is IEventServerStop stopEvent)
@@ -281,16 +305,14 @@ namespace MultiAdmin
 
 			if (killGame)
 				GameProcess.Kill();
-			else if (closeGame)
-				GameProcess.CloseMainWindow();
 			else SendMessage("QUIT");
-
-			Stopping = true;
 		}
 
 		public void SoftRestartServer()
 		{
-			if (!Running) throw new Exceptions.ServerNotRunningException();
+			if (!IsRunning) throw new Exceptions.ServerNotRunningException();
+
+			Status = ServerStatus.Restarting;
 
 			SendMessage("RECONNECTRS");
 		}
@@ -338,23 +360,6 @@ namespace MultiAdmin
 				{
 					// ignored
 				}
-
-			//RegisterFeature(new ConfigReload(this));
-			//RegisterFeature(new ExitCommand(this));
-			////RegisterFeature(new EventTest(this));
-			//RegisterFeature(new GithubGenerator(this));
-			//RegisterFeature(new HelpCommand(this));
-			//RegisterFeature(new InactivityShutdown(this));
-			//RegisterFeature(new MemoryChecker(this));
-			//RegisterFeature(new MemoryCheckerSoft(this));
-			//RegisterFeature(new ModLog(this));
-			//RegisterFeature(new MultiAdminInfo(this));
-			//RegisterFeature(new NewCommand(this));
-			//RegisterFeature(new Restart(this));
-			//RegisterFeature(new RestartNextRound(this));
-			//RegisterFeature(new RestartRoundCounter(this));
-			//RegisterFeature(new StopNextRound(this));
-			//RegisterFeature(new Titlebar(this));
 		}
 
 		private void InitFeatures()
@@ -407,7 +412,7 @@ namespace MultiAdmin
 
 		public void Write(ColoredMessage message, int height = 0)
 		{
-			lock (ColoredConsole.MultiColorWriteLock)
+			lock (ColoredConsole.WriteLock)
 			{
 				if (message == null) return;
 
@@ -439,7 +444,7 @@ namespace MultiAdmin
 
 		public void Write(string message, ConsoleColor color = ConsoleColor.Yellow, int height = 0)
 		{
-			lock (ColoredConsole.MultiColorWriteLock)
+			lock (ColoredConsole.WriteLock)
 			{
 				if (message == null) return;
 
@@ -449,7 +454,7 @@ namespace MultiAdmin
 
 		public void Write(ColoredMessage[] message, ConsoleColor timeStampColor = ConsoleColor.Black)
 		{
-			lock (ColoredConsole.MultiColorWriteLock)
+			lock (ColoredConsole.WriteLock)
 			{
 				if (message == null) return;
 
@@ -481,7 +486,7 @@ namespace MultiAdmin
 
 		public void Log(string message)
 		{
-			lock (ColoredConsole.MultiColorWriteLock)
+			lock (ColoredConsole.WriteLock)
 			{
 				if (message == null || string.IsNullOrEmpty(MaLogFile)) return;
 
@@ -531,5 +536,17 @@ namespace MultiAdmin
 			return verMajor > major || verMajor >= major && verMinor > minor ||
 			       verMajor >= major && verMinor >= minor && verFix >= fix;
 		}
+	}
+
+	public enum ServerStatus
+	{
+		NotStarted,
+		Starting,
+		Running,
+		Stopping,
+		ForceStopping,
+		Restarting,
+		Stopped,
+		StoppedUnexpectedly
 	}
 }

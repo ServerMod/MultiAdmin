@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 
@@ -53,9 +52,16 @@ namespace MultiAdmin
 
 		private void OnMapiCreated(FileSystemEventArgs e, Server server)
 		{
-			if (server.Stopping || string.IsNullOrEmpty(server.SessionId) || !e.FullPath.Contains(server.SessionId) || !File.Exists(e.FullPath)) return;
+			if (!server.IsRunning || string.IsNullOrEmpty(server.SessionId) || !e.FullPath.Contains(server.SessionId) || !File.Exists(e.FullPath)) return;
 
-			ProcessFile(server, e.FullPath);
+			try
+			{
+				ProcessFile(server, e.FullPath);
+			}
+			catch
+			{
+				// ignored
+			}
 		}
 
 		private void ProcessFile(Server server, string file)
@@ -68,8 +74,7 @@ namespace MultiAdmin
 			// Lock this object to wait for this event to finish before trying to read another file
 			lock (this)
 			{
-				for (int attempts = 0; attempts < 100 && !server.Stopping; attempts++)
-				{
+				for (int attempts = 0; attempts < 100 && server.IsRunning; attempts++)
 					try
 					{
 						if (!File.Exists(file)) return;
@@ -93,15 +98,12 @@ namespace MultiAdmin
 					}
 					catch (UnauthorizedAccessException)
 					{
-						Thread.Sleep(3);
+						Thread.Sleep(5);
 					}
 					catch
 					{
-						// ignored
+						Thread.Sleep(2);
 					}
-
-					Thread.Sleep(2);
-				}
 			}
 
 			if (!isRead)
@@ -113,38 +115,40 @@ namespace MultiAdmin
 				return;
 			}
 
-			if (server.Stopping) return;
+			if (!server.IsRunning) return;
 
 			bool display = true;
 			ConsoleColor color = ConsoleColor.Cyan;
 
-			if (!string.IsNullOrEmpty(stream.Trim()))
-				if (stream.Contains("LOGTYPE"))
-				{
-					string type = stream.Substring(stream.IndexOf("LOGTYPE")).Trim();
-					stream = stream.Substring(0, stream.IndexOf("LOGTYPE")).Trim();
+			if (stream.EndsWith(Environment.NewLine))
+				stream = stream.Substring(0, stream.Length - Environment.NewLine.Length);
 
-					switch (type)
-					{
-						case "LOGTYPE02":
-							color = ConsoleColor.Green;
-							break;
-						case "LOGTYPE-8":
-							color = ConsoleColor.DarkRed;
-							break;
-						case "LOGTYPE14":
-							color = ConsoleColor.Magenta;
-							break;
-						default:
-							color = ConsoleColor.Cyan;
-							break;
-					}
+			if (stream.Contains("LOGTYPE"))
+			{
+				string type = stream.Substring(stream.IndexOf("LOGTYPE")).Trim();
+				stream = stream.Substring(0, stream.IndexOf("LOGTYPE")).Trim();
+
+				switch (type)
+				{
+					case "LOGTYPE02":
+						color = ConsoleColor.Green;
+						break;
+					case "LOGTYPE-8":
+						color = ConsoleColor.DarkRed;
+						break;
+					case "LOGTYPE14":
+						color = ConsoleColor.Magenta;
+						break;
+					default:
+						color = ConsoleColor.Cyan;
+						break;
 				}
+			}
 
 			// Smod2 loggers pretty printing
 			Match match = SmodRegex.Match(stream);
 			if (match.Success)
-				if (match.Groups.Count >= 2)
+				if (match.Groups.Count >= 3)
 				{
 					ConsoleColor levelColor = ConsoleColor.Cyan;
 					ConsoleColor tagColor = ConsoleColor.Yellow;
@@ -172,7 +176,7 @@ namespace MultiAdmin
 					server.Write(new ColoredMessage[]
 					{
 						new ColoredMessage($"[{match.Groups[1].Value}] ", levelColor, DefaultBackground),
-						new ColoredMessage(match.Groups[2].Value + " ", tagColor, DefaultBackground),
+						new ColoredMessage($"{match.Groups[2].Value} ", tagColor, DefaultBackground),
 						new ColoredMessage(match.Groups[3].Value, msgColor, DefaultBackground)
 					}, ConsoleColor.Cyan);
 
@@ -204,13 +208,9 @@ namespace MultiAdmin
 
 			if (stream.Contains("Waiting for players"))
 			{
-				if (!server.InitialRoundStarted)
-				{
-					server.InitialRoundStarted = true;
-					foreach (Feature f in server.features)
-						if (f is IEventRoundStart roundStart)
-							roundStart.OnRoundStart();
-				}
+				foreach (Feature f in server.features)
+					if (f is IEventWaitingForPlayers waitingForPlayers)
+						waitingForPlayers.OnWaitingForPlayers();
 
 				if (fixBuggedPlayers)
 				{
@@ -264,7 +264,7 @@ namespace MultiAdmin
 			if (stream.Contains("Player has connected before load is complete"))
 				fixBuggedPlayers = true;
 
-			if (display) server.Write(stream.Trim(), color);
+			if (display) server.Write(stream, color);
 		}
 
 		public void Dispose()

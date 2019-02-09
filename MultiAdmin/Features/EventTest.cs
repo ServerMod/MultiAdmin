@@ -1,7 +1,7 @@
 namespace MultiAdmin.Features
 {
 	internal class EventTest : Feature, IEventCrash, IEventPlayerConnect, IEventPlayerDisconnect,
-		IEventRoundEnd, IEventRoundStart, IEventServerFull, IEventServerPreStart, IEventServerStart, IEventServerStop
+		IEventRoundEnd, IEventWaitingForPlayers, IEventRoundStart, IEventServerFull, IEventServerPreStart, IEventServerStart, IEventServerStop
 	{
 		public EventTest(Server server) : base(server)
 		{
@@ -25,6 +25,11 @@ namespace MultiAdmin.Features
 		public void OnRoundEnd()
 		{
 			Server.Write("EVENTTEST on round end");
+		}
+
+		public void OnWaitingForPlayers()
+		{
+			Server.Write("EVENTTEST on waiting for players");
 		}
 
 		public void OnRoundStart()

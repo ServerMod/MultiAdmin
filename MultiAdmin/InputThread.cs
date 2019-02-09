@@ -10,7 +10,7 @@ namespace MultiAdmin
 
 		public static void Write(Server server)
 		{
-			while (!server.Stopping)
+			while (server.IsRunning)
 			{
 				if (Utils.IsProcessHeadless)
 				{

@@ -43,7 +43,7 @@ namespace MultiAdmin
 
 		public static void Write(string message, ConsoleColor color = ConsoleColor.DarkYellow)
 		{
-			lock (ColoredConsole.MultiColorWriteLock)
+			lock (ColoredConsole.WriteLock)
 			{
 				if (Utils.IsProcessHeadless) return;
 
@@ -56,9 +56,9 @@ namespace MultiAdmin
 			foreach (Server server in InstantiatedServers)
 				try
 				{
-					while (server.Running)
+					while (server.IsRunning)
 					{
-						server.StopServer(killGame: true);
+						server.StopServer(true);
 						Thread.Sleep(10);
 					}
 				}
@@ -127,16 +127,7 @@ namespace MultiAdmin
 				else
 					Write("Starting this instance in single server mode...");
 
-				while (true)
-				{
-					server.StartServer();
-
-					if (!server.Crashed)
-						break;
-
-					Write("Game engine exited/crashed/closed/restarting", ConsoleColor.Red);
-					Write("Restarting game with new session id...");
-				}
+				server.StartServer();
 			}
 		}
 

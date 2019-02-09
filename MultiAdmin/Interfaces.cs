@@ -20,6 +20,11 @@ namespace MultiAdmin
 		void OnRoundEnd();
 	}
 
+	public interface IEventWaitingForPlayers
+	{
+		void OnWaitingForPlayers();
+	}
+
 	public interface IEventRoundStart
 	{
 		void OnRoundStart();
