@@ -52,6 +52,7 @@ namespace MultiAdmin.Features
 
 		public override void Init()
 		{
+			initialRoundStarted = false;
 		}
 
 		public void OnWaitingForPlayers()
