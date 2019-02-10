@@ -12,7 +12,7 @@ namespace MultiAdmin
 		{
 			while (server.IsRunning)
 			{
-				if (Utils.IsProcessHeadless)
+				if (Program.Headless)
 				{
 					Thread.Sleep(5000);
 					continue;

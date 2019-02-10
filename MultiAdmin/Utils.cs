@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 
 namespace MultiAdmin
@@ -24,9 +23,6 @@ namespace MultiAdmin
 		                                Environment.OSVersion.Platform == PlatformID.Win32Windows ||
 		                                Environment.OSVersion.Platform == PlatformID.Win32NT ||
 		                                Environment.OSVersion.Platform == PlatformID.WinCE;
-
-		// Skip process handle check if using Unix
-		public static bool IsProcessHeadless => Program.Headless || !IsUnix && Process.GetCurrentProcess().MainWindowHandle == IntPtr.Zero;
 
 		public static string TimeStampMessage(string message)
 		{

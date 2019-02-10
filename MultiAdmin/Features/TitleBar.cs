@@ -57,13 +57,11 @@ namespace MultiAdmin.Features
 
 		private void UpdateTitlebar()
 		{
-			if (Utils.IsProcessHeadless) return;
+			if (Program.Headless) return;
 
 			int displayPlayerCount = playerCount < 0 ? 0 : playerCount;
 
-			List<string> titleBar = new List<string>();
-
-			titleBar.Add($"MultiAdmin {Server.MaVersion}");
+			List<string> titleBar = new List<string> {$"MultiAdmin {Program.MaVersion}"};
 
 			if (!string.IsNullOrEmpty(Server.serverId))
 				titleBar.Add($"Config: {Server.serverId}");

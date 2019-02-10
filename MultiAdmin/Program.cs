@@ -10,6 +10,8 @@ namespace MultiAdmin
 {
 	public static class Program
 	{
+		public const string MaVersion = "3.0.0";
+
 		private static readonly List<Server> InstantiatedServers = new List<Server>();
 
 		#region Server Properties
@@ -45,7 +47,7 @@ namespace MultiAdmin
 		{
 			lock (ColoredConsole.WriteLock)
 			{
-				if (Utils.IsProcessHeadless) return;
+				if (Headless) return;
 
 				new ColoredMessage(Utils.TimeStampMessage(message), color).WriteLine();
 			}

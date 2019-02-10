@@ -11,8 +11,6 @@ namespace MultiAdmin
 {
 	public class Server
 	{
-		public const string MaVersion = "3.0.0";
-
 		public readonly Dictionary<string, ICommand> commands = new Dictionary<string, ICommand>();
 
 		public readonly List<Feature> features = new List<Feature>();
@@ -418,7 +416,7 @@ namespace MultiAdmin
 
 				Log(message.text);
 
-				if (Utils.IsProcessHeadless) return;
+				if (Program.Headless) return;
 
 				int cursorTop = 0, bufferHeight = 0;
 				try
@@ -460,7 +458,7 @@ namespace MultiAdmin
 
 				Log(message.GetText());
 
-				if (Utils.IsProcessHeadless) return;
+				if (Program.Headless) return;
 
 				int cursorTop = 0, bufferHeight = 0;
 				try
