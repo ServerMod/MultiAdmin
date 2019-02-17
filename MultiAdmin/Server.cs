@@ -49,6 +49,8 @@ namespace MultiAdmin
 			RegisterFeatures();
 		}
 
+		#region Server Status
+
 		public ServerStatus LastStatus { get; private set; } = ServerStatus.NotStarted;
 
 		private ServerStatus status = ServerStatus.NotStarted;
@@ -63,9 +65,14 @@ namespace MultiAdmin
 			}
 		}
 
-		public bool IsRunning => Status != ServerStatus.NotStarted && Status != ServerStatus.Stopped && Status != ServerStatus.StoppedUnexpectedly;
-		public bool IsStopping => Status == ServerStatus.Stopping || Status == ServerStatus.ForceStopping || Status == ServerStatus.Restarting;
 		public bool IsStopped => Status == ServerStatus.NotStarted || Status == ServerStatus.Stopped || Status == ServerStatus.StoppedUnexpectedly;
+		public bool IsRunning => !IsStopped;
+		public bool IsStarted => !IsStopped && !IsStarting;
+
+		public bool IsStarting => Status == ServerStatus.Starting;
+		public bool IsStopping => Status == ServerStatus.Stopping || Status == ServerStatus.ForceStopping || Status == ServerStatus.Restarting;
+
+		#endregion
 
 		private string startDateTime;
 
@@ -312,7 +319,15 @@ namespace MultiAdmin
 
 			Status = ServerStatus.Restarting;
 
-			SendMessage("RECONNECTRS");
+			if (hasServerMod)
+			{
+				SendMessage("RECONNECTRS");
+			}
+			else
+			{
+				SendMessage("ROUNDRESTART");
+				SendMessage("QUIT");
+			}
 		}
 
 		#endregion

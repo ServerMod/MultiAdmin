@@ -74,7 +74,7 @@ namespace MultiAdmin.Features
 
 			titleBar.Add($"{displayPlayerCount}/{maxPlayers}");
 
-			if (Server.hasServerMod)
+			if (Server.hasServerMod && !string.IsNullOrEmpty(Server.serverModVersion))
 				titleBar.Add("SMod " + Server.serverModVersion);
 
 			Console.Title = string.Join(" | ", titleBar);
