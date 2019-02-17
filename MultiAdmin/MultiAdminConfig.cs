@@ -1,3 +1,5 @@
+using System.IO;
+
 namespace MultiAdmin
 {
 	public class MultiAdminConfig
@@ -118,11 +120,20 @@ namespace MultiAdmin
 		/// </summary>
 		public MultiAdminConfig()
 		{
+			if (!File.Exists(GlobalConfig.ConfigPath))
+			{
+				File.Create(GlobalConfig.ConfigPath);
+			}
 		}
 
-		public MultiAdminConfig(Config config)
+		public MultiAdminConfig(Config config) : this()
 		{
 			serverConfig = config;
+
+			if (!File.Exists(serverConfig.ConfigPath))
+			{
+				File.Create(serverConfig.ConfigPath);
+			}
 		}
 
 		public MultiAdminConfig(string path) : this(new Config(path))

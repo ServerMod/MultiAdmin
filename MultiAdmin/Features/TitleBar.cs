@@ -64,18 +64,26 @@ namespace MultiAdmin.Features
 			List<string> titleBar = new List<string> {$"MultiAdmin {Program.MaVersion}"};
 
 			if (!string.IsNullOrEmpty(Server.serverId))
+			{
 				titleBar.Add($"Config: {Server.serverId}");
+			}
 
 			if (!string.IsNullOrEmpty(Server.SessionId))
+			{
 				titleBar.Add($"Session: {Server.SessionId}");
+			}
 
 			if (Server.GameProcess != null)
+			{
 				titleBar.Add($"PID: {Server.GameProcess.Id}");
+			}
 
 			titleBar.Add($"{displayPlayerCount}/{maxPlayers}");
 
 			if (Server.hasServerMod && !string.IsNullOrEmpty(Server.serverModVersion))
-				titleBar.Add("SMod " + Server.serverModVersion);
+			{
+				titleBar.Add(string.IsNullOrEmpty(Server.serverModBuild) ? $"SMod {Server.serverModVersion}" : $"SMod {Server.serverModVersion}-{Server.serverModBuild}");
+			}
 
 			Console.Title = string.Join(" | ", titleBar);
 		}

@@ -14,19 +14,28 @@ namespace MultiAdmin
 			ReadConfigFile(path);
 		}
 
-		public string Path { get; private set; }
+		public string ConfigPath { get; private set; }
 
-		public void ReadConfigFile(string path)
+		public void ReadConfigFile(string configPath)
 		{
-			if (string.IsNullOrEmpty(path)) return;
+			if (string.IsNullOrEmpty(configPath)) return;
 
-			rawData = File.Exists(path) ? File.ReadAllLines(path, Encoding.UTF8) : new string[] { };
-			Path = path;
+			ConfigPath = configPath;
+			try
+			{
+				ConfigPath = Path.GetFullPath(ConfigPath);
+			}
+			catch
+			{
+				// ignored
+			}
+
+			rawData = File.Exists(ConfigPath) ? File.ReadAllLines(ConfigPath, Encoding.UTF8) : new string[] { };
 		}
 
 		public void ReadConfigFile()
 		{
-			ReadConfigFile(Path);
+			ReadConfigFile(ConfigPath);
 		}
 
 		public bool Contains(string key)
