@@ -13,7 +13,7 @@ namespace MultiAdmin
 		#region Manual Start
 
 		public const string ManualStartKey = "manual_start";
-		public static bool GlobalManualStart => GlobalConfig.GetBool(ManualStartKey);
+		public static bool GlobalManualStart => GlobalConfig.GetBool(ManualStartKey, false);
 
 		public bool ManualStart => ServerConfigContains(ManualStartKey)
 			? serverConfig.GetBool(ManualStartKey)
@@ -24,7 +24,7 @@ namespace MultiAdmin
 		#region Start Config On Full
 
 		public const string StartConfigOnFullKey = "start_config_on_full";
-		public static string GlobalStartConfigOnFull => GlobalConfig.GetString(StartConfigOnFullKey);
+		public static string GlobalStartConfigOnFull => GlobalConfig.GetString(StartConfigOnFullKey, "");
 
 		public string StartConfigOnFull => ServerConfigContains(StartConfigOnFullKey)
 			? serverConfig.GetString(StartConfigOnFullKey)
@@ -91,7 +91,7 @@ namespace MultiAdmin
 		#region No Log
 
 		public const string NoLogKey = "multiadmin_nolog";
-		public static bool GlobalNoLog => GlobalConfig.GetBool(NoLogKey);
+		public static bool GlobalNoLog => GlobalConfig.GetBool(NoLogKey, false);
 
 		public bool NoLog => ServerConfigContains(NoLogKey)
 			? serverConfig.GetBool(NoLogKey)
@@ -102,7 +102,7 @@ namespace MultiAdmin
 		#region Log Mod Actions To Own File
 
 		public const string LogModActionsToOwnFileKey = "log_mod_actions_to_own_file";
-		public static bool GlobalLogModActionsToOwnFile => GlobalConfig.GetBool(LogModActionsToOwnFileKey);
+		public static bool GlobalLogModActionsToOwnFile => GlobalConfig.GetBool(LogModActionsToOwnFileKey, false);
 
 		public bool LogModActionsToOwnFile => ServerConfigContains(LogModActionsToOwnFileKey)
 			? serverConfig.GetBool(LogModActionsToOwnFileKey)
@@ -124,7 +124,7 @@ namespace MultiAdmin
 		#region Disable Config Validation
 
 		public const string DisableConfigValidationKey = "disable_config_validation";
-		public static bool GlobalDisableConfigValidation => GlobalConfig.GetBool(DisableConfigValidationKey);
+		public static bool GlobalDisableConfigValidation => GlobalConfig.GetBool(DisableConfigValidationKey, false);
 
 		public bool DisableConfigValidation => ServerConfigContains(DisableConfigValidationKey)
 			? serverConfig.GetBool(DisableConfigValidationKey)
@@ -146,7 +146,7 @@ namespace MultiAdmin
 		#region Config Location
 
 		public const string ConfigLocationKey = "config_location";
-		public static string GlobalConfigLocation => GlobalConfig.GetString(ConfigLocationKey);
+		public static string GlobalConfigLocation => GlobalConfig.GetString(ConfigLocationKey, "");
 
 		public string ConfigLocation => ServerConfigContains(ConfigLocationKey)
 			? serverConfig.GetString(ConfigLocationKey)
@@ -168,7 +168,7 @@ namespace MultiAdmin
 		#region Random Input Colors
 
 		public const string RandomInputColorsKey = "random_input_colors";
-		public static bool GlobalRandomInputColors => GlobalConfig.GetBool(RandomInputColorsKey);
+		public static bool GlobalRandomInputColors => GlobalConfig.GetBool(RandomInputColorsKey, false);
 
 		public bool RandomInputColors => ServerConfigContains(RandomInputColorsKey)
 			? serverConfig.GetBool(RandomInputColorsKey)
