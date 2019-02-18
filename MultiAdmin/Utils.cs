@@ -29,25 +29,22 @@ namespace MultiAdmin
 			return string.IsNullOrEmpty(message) ? message : $"{TimeStamp} {message}";
 		}
 
-		public static ColoredMessage TimeStampMessage(ColoredMessage message)
-		{
-			if (message?.text == null) return null;
-
-			ColoredMessage clone = message.Clone();
-			clone.text = TimeStampMessage(clone.text);
-			return clone;
-		}
-
-		public static ColoredMessage[] TimeStampMessage(ColoredMessage[] message, ConsoleColor color = ConsoleColor.Black)
+		public static ColoredMessage[] TimeStampMessage(ColoredMessage[] message, ConsoleColor color = ConsoleColor.White)
 		{
 			if (message == null) return null;
 
 			ColoredMessage[] newMessage = new ColoredMessage[message.Length + 1];
 			newMessage[0] = new ColoredMessage($"{TimeStamp} ", color);
 
-			for (int i = 0; i < message.Length; i++) newMessage[i + 1] = message[i].Clone();
+			for (int i = 0; i < message.Length; i++)
+				newMessage[i + 1] = message[i]?.Clone();
 
 			return newMessage;
+		}
+
+		public static ColoredMessage[] TimeStampMessage(ColoredMessage message, ConsoleColor color = ConsoleColor.White)
+		{
+			return TimeStampMessage(new ColoredMessage[] {message}, color);
 		}
 
 		public static string GetFullPathSafe(string path)

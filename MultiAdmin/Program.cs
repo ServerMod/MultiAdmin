@@ -49,7 +49,29 @@ namespace MultiAdmin
 			{
 				if (Headless) return;
 
+				ClearConsoleLine();
 				new ColoredMessage(Utils.TimeStampMessage(message), color).WriteLine();
+			}
+		}
+
+		public static void ClearConsoleLine()
+		{
+			lock (ColoredConsole.WriteLock)
+			{
+				if (Headless) return;
+
+				try
+				{
+					Console.Write("\r" + new string(' ', Console.WindowWidth - 1) + "\r");
+				}
+				catch (Exception e)
+				{
+					new ColoredMessage[]
+					{
+						new ColoredMessage("Error while clearing input text:", ConsoleColor.Red),
+						new ColoredMessage(e.ToString(), ConsoleColor.Red)
+					}.WriteLines();
+				}
 			}
 		}
 

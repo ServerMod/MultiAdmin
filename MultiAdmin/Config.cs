@@ -23,7 +23,7 @@ namespace MultiAdmin
 			ConfigPath = configPath;
 			try
 			{
-				ConfigPath = Path.GetFullPath(ConfigPath);
+				ConfigPath = Utils.GetFullPathSafe(ConfigPath);
 			}
 			catch
 			{

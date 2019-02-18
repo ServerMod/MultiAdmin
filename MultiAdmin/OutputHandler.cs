@@ -29,8 +29,17 @@ namespace MultiAdmin
 
 		public OutputHandler(Server server)
 		{
-			if (string.IsNullOrEmpty(server.SessionDirectory))
+			if (server == null)
+			{
+				Program.Write("Error in OutputHandler: Server server is null!", ConsoleColor.Red);
 				return;
+			}
+
+			if (string.IsNullOrEmpty(server.SessionDirectory))
+			{
+				server.Write($"Missing session directory! Output is not being watched... (SessionDirectory = \"{server.SessionDirectory ?? "null"}\" SessionId = \"{server.SessionId ?? "null"}\" DedicatedDir = \"{Server.DedicatedDir ?? "null"}\")", ConsoleColor.Red);
+				return;
+			}
 
 			fsWatcher = new FileSystemWatcher {Path = server.SessionDirectory};
 

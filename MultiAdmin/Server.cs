@@ -423,77 +423,53 @@ namespace MultiAdmin
 
 		#region Console Output and Logging
 
-		public void Write(ColoredMessage message, int height = 0)
+		public void Write(ColoredMessage[] messages, ConsoleColor timeStampColor = ConsoleColor.White)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
-				if (message == null) return;
+				if (messages == null) return;
 
-				Log(message.text);
+				Log(messages.GetText());
 
 				if (Program.Headless) return;
 
-				int cursorTop = 0, bufferHeight = 0;
-				try
-				{
-					cursorTop = Console.CursorTop + height;
-					bufferHeight = Console.BufferHeight;
-					if (cursorTop < 0)
-						cursorTop = 0;
-					else if (cursorTop >= Console.BufferHeight) cursorTop = Console.BufferHeight - 1;
-					Console.CursorTop = cursorTop;
-					Utils.TimeStampMessage(message).WriteLine();
-				}
-				catch (ArgumentOutOfRangeException e)
-				{
-					new ColoredMessage[]
-					{
-						new ColoredMessage(Utils.TimeStampMessage($"Value {cursorTop} exceeded buffer height {bufferHeight}.")),
-						new ColoredMessage(e.StackTrace)
-					}.WriteLines();
-				}
+				ColoredMessage[] timeStampedMessage = Utils.TimeStampMessage(messages, timeStampColor);
+
+				Program.ClearConsoleLine();
+				timeStampedMessage.WriteLine();
+				InputThread.WriteInput();
 			}
 		}
 
-		public void Write(string message, ConsoleColor color = ConsoleColor.Yellow, int height = 0)
+		public void Write(ColoredMessage message, ConsoleColor timeStampColor)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
-				if (message == null) return;
-
-				Write(new ColoredMessage(message, color), height);
+				Write(new ColoredMessage[] {message}, timeStampColor);
 			}
 		}
 
-		public void Write(ColoredMessage[] message, ConsoleColor timeStampColor = ConsoleColor.Black)
+		public void Write(ColoredMessage message)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
-				if (message == null) return;
+				Write(message, message.textColor);
+			}
+		}
 
-				Log(message.GetText());
+		public void Write(string message, ConsoleColor color, ConsoleColor timeStampColor)
+		{
+			lock (ColoredConsole.WriteLock)
+			{
+				Write(new ColoredMessage(message, color), timeStampColor);
+			}
+		}
 
-				if (Program.Headless) return;
-
-				int cursorTop = 0, bufferHeight = 0;
-				try
-				{
-					cursorTop = Console.CursorTop;
-					bufferHeight = Console.BufferHeight;
-					if (cursorTop < 0)
-						cursorTop = 0;
-					else if (cursorTop >= Console.BufferHeight) cursorTop = Console.BufferHeight - 1;
-					Console.CursorTop = cursorTop;
-					Utils.TimeStampMessage(message, timeStampColor).WriteLine();
-				}
-				catch (ArgumentOutOfRangeException e)
-				{
-					new ColoredMessage[]
-					{
-						new ColoredMessage(Utils.TimeStampMessage($"Value {cursorTop} exceeded buffer height {bufferHeight}.")),
-						new ColoredMessage(e.StackTrace)
-					}.WriteLines();
-				}
+		public void Write(string message, ConsoleColor color = ConsoleColor.Yellow)
+		{
+			lock (ColoredConsole.WriteLock)
+			{
+				Write(new ColoredMessage(message, color));
 			}
 		}
 
