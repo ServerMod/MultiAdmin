@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
@@ -10,9 +11,11 @@ namespace MultiAdmin
 	{
 		private static readonly char[] Separator = {' '};
 
-		public static readonly ColoredMessage InputPrefix = new ColoredMessage("> ", ConsoleColor.DarkMagenta);
-		public static readonly ColoredMessage LeftSideIndicator = new ColoredMessage("...", ConsoleColor.DarkMagenta);
-		public static readonly ColoredMessage RightSideIndicator = new ColoredMessage("...", ConsoleColor.DarkMagenta);
+		public static readonly ColoredMessage BaseSection = new ColoredMessage(null, ConsoleColor.Blue);
+
+		public static readonly ColoredMessage InputPrefix = new ColoredMessage("> ");
+		public static readonly ColoredMessage LeftSideIndicator = new ColoredMessage("...");
+		public static readonly ColoredMessage RightSideIndicator = new ColoredMessage("...");
 
 		public static int InputPrefixLength => InputPrefix?.Length ?? 0;
 		public static int LeftSideIndicatorLength => LeftSideIndicator?.Length ?? 0;
@@ -38,6 +41,8 @@ namespace MultiAdmin
 
 		public static void Write(Server server)
 		{
+			ShiftingList prevMessages = new ShiftingList(25);
+
 			while (server.IsRunning && !server.IsStopping)
 			{
 				if (Program.Headless)
@@ -46,11 +51,18 @@ namespace MultiAdmin
 					continue;
 				}
 
+				if (server.ServerConfig.RandomInputColors)
+					RandomizeInputColors();
+
+				string curMessage = string.Empty;
 				string message = string.Empty;
 				int messageCursor = 0;
+				int prevMessageCursor = -1;
 				bool exitLoop = false;
 				while (!exitLoop)
 				{
+					#region Key Press Handling
+
 					ConsoleKeyInfo key = Console.ReadKey(true);
 
 					switch (key.Key)
@@ -75,6 +87,24 @@ namespace MultiAdmin
 							exitLoop = true;
 							break;
 
+						case ConsoleKey.UpArrow:
+							prevMessageCursor++;
+							if (prevMessageCursor >= prevMessages.Count)
+								prevMessageCursor = prevMessages.Count - 1;
+
+							message = prevMessageCursor < 0 ? curMessage : prevMessages[prevMessageCursor];
+
+							break;
+
+						case ConsoleKey.DownArrow:
+							prevMessageCursor--;
+							if (prevMessageCursor < -1)
+								prevMessageCursor = -1;
+
+							message = prevMessageCursor < 0 ? curMessage : prevMessages[prevMessageCursor];
+
+							break;
+
 						case ConsoleKey.LeftArrow:
 							messageCursor--;
 							break;
@@ -92,11 +122,11 @@ namespace MultiAdmin
 							break;
 
 						case ConsoleKey.PageUp:
-							messageCursor += SectionBufferWidth - (LeftSideIndicatorLength + RightSideIndicatorLength);
+							messageCursor -= SectionBufferWidth - (LeftSideIndicatorLength + RightSideIndicatorLength);
 							break;
 
 						case ConsoleKey.PageDown:
-							messageCursor -= SectionBufferWidth - (LeftSideIndicatorLength + RightSideIndicatorLength);
+							messageCursor += SectionBufferWidth - (LeftSideIndicatorLength + RightSideIndicatorLength);
 							break;
 
 						default:
@@ -119,12 +149,20 @@ namespace MultiAdmin
 							break;
 					}
 
+					#endregion
+
+					if (prevMessageCursor < 0)
+						curMessage = message;
+
 					// If the input is done and should exit the loop, this will cause the loop to be exited and the input to be processed
 					if (exitLoop)
 					{
 						// Reset the current input parameters
 						CurrentInput = string.Empty;
 						CurrentCursor = 0;
+
+						if (!string.IsNullOrEmpty(message))
+							prevMessages.Add(message);
 
 						break;
 					}
@@ -133,6 +171,8 @@ namespace MultiAdmin
 						messageCursor = 0;
 					else if (messageCursor > message.Length)
 						messageCursor = message.Length;
+
+					#region Input Printing Management
 
 					// If the message has changed, re-write it to the console
 					if (CurrentInput != message)
@@ -159,6 +199,8 @@ namespace MultiAdmin
 
 					CurrentInput = message;
 					CurrentCursor = messageCursor;
+
+					#endregion
 				}
 
 				server.Write($">>> {message}", ConsoleColor.DarkMagenta);
@@ -180,6 +222,8 @@ namespace MultiAdmin
 			CurrentInput = null;
 			CurrentCursor = 0;
 		}
+
+		#region String Modification Methods
 
 		private static string AddText(string origString, string textToAdd, int index = 0)
 		{
@@ -203,6 +247,10 @@ namespace MultiAdmin
 
 			return index <= 0 ? origString : origString.Remove(index >= origString.Length ? origString.Length - 1 : index - 1, count);
 		}
+
+		#endregion
+
+		#region Console Management Methods
 
 		private static void SetCursor(int messageCursor)
 		{
@@ -230,7 +278,7 @@ namespace MultiAdmin
 					if (input.Length > SectionBufferWidth)
 					{
 						// Split the string into sections with side indicators
-						StringSections stringSections = GetStringSections(input, SectionBufferWidth, LeftSideIndicator, RightSideIndicator);
+						StringSections stringSections = GetStringSections(input, SectionBufferWidth, LeftSideIndicator, RightSideIndicator, BaseSection);
 
 						// Get the current section that the cursor is in (-1 so that the text before the cursor is displayed at an indicator)
 						if (stringSections.GetSection(messageCursor <= 0 ? 0 : messageCursor - 1) is StringSection section)
@@ -249,7 +297,12 @@ namespace MultiAdmin
 				}
 
 				if (!displayTextSet)
-					output.Add(new ColoredMessage(input, ConsoleColor.Magenta));
+				{
+					ColoredMessage section = BaseSection.Clone();
+					section.text = input;
+
+					output.Add(section);
+				}
 
 				Program.ClearConsoleLine();
 				output.Write();
@@ -263,9 +316,17 @@ namespace MultiAdmin
 			WriteInput(CurrentInput, CurrentCursor);
 		}
 
-		private static StringSections GetStringSections(string fullString, int sectionLength, ColoredMessage leftIndicator, ColoredMessage rightIndicator, ConsoleColor sectionColor = ConsoleColor.Magenta)
+		#endregion
+
+		#region String Sectioning Methods & Structs
+
+		private static StringSections GetStringSections(string fullString, int sectionLength, ColoredMessage leftIndicator, ColoredMessage rightIndicator, ColoredMessage sectionBase)
 		{
 			List<StringSection> sections = new List<StringSection>();
+
+			// If the section base message is null, create a default one
+			if (sectionBase == null)
+				sectionBase = new ColoredMessage(null);
 
 			// The starting index of the current section being created
 			int sectionStartIndex = 0;
@@ -288,8 +349,12 @@ namespace MultiAdmin
 				// Check the section length against the final section length
 				if (curSecString.Length >= sectionLength - ((leftIndicatorSection?.Length ?? 0) + (rightIndicatorSection?.Length ?? 0)))
 				{
+					// Copy the section base message and replace the text
+					ColoredMessage section = sectionBase.Clone();
+					section.text = curSecString;
+
 					// Instantiate the section with the final parameters
-					sections.Add(new StringSection(new ColoredMessage(curSecString, sectionColor), leftIndicatorSection, rightIndicatorSection, sectionStartIndex, i));
+					sections.Add(new StringSection(section, leftIndicatorSection, rightIndicatorSection, sectionStartIndex, i));
 
 					// Reset the current section being worked on
 					curSecString = string.Empty;
@@ -303,7 +368,12 @@ namespace MultiAdmin
 				// Only decide for the left indicator, as this last section will always be the rightmost section
 				ColoredMessage leftIndicatorSection = sections.Count > 0 ? leftIndicator : null;
 
-				sections.Add(new StringSection(new ColoredMessage(curSecString, sectionColor), leftIndicatorSection, null, sectionStartIndex, fullString.Length));
+				// Copy the section base message and replace the text
+				ColoredMessage section = sectionBase.Clone();
+				section.text = curSecString;
+
+				// Instantiate the section with the final parameters
+				sections.Add(new StringSection(section, leftIndicatorSection, null, sectionStartIndex, fullString.Length));
 			}
 
 			return new StringSections(sections.ToArray());
@@ -362,6 +432,80 @@ namespace MultiAdmin
 			{
 				return index - MinIndex + (LeftIndicator?.Length ?? 0);
 			}
+		}
+
+		#endregion
+
+		public static void RandomizeInputColors()
+		{
+			try
+			{
+				Random random = new Random();
+				Array colors = Enum.GetValues(typeof(ConsoleColor));
+
+				ConsoleColor random1 = (ConsoleColor) colors.GetValue(random.Next(colors.Length));
+				ConsoleColor random2 = (ConsoleColor) colors.GetValue(random.Next(colors.Length));
+
+				BaseSection.textColor = random1;
+
+				InputPrefix.textColor = random2;
+				LeftSideIndicator.textColor = random2;
+				RightSideIndicator.textColor = random2;
+			}
+			catch
+			{
+				// ignored
+			}
+		}
+
+		public class ShiftingList : ReadOnlyCollection<string>
+		{
+			public int MaxCount { get; }
+
+			public ShiftingList(int maxCount) : base(new List<string>(maxCount))
+			{
+				if (maxCount <= 0)
+					throw new ArgumentException("The maximum index count can not be less than or equal to zero.");
+
+				MaxCount = maxCount;
+			}
+
+			private void LimitLength()
+			{
+				while (Items.Count > MaxCount)
+				{
+					Items.RemoveAt(Items.Count - 1);
+				}
+			}
+
+			public void Add(string item, int index = 0)
+			{
+				lock (Items)
+				{
+					Items.Insert(index, item);
+
+					LimitLength();
+				}
+			}
+
+			/*
+			public void Remove(int index)
+			{
+				lock (Items)
+				{
+					Items.RemoveAt(index);
+				}
+			}
+
+			public void Replace(string item, int index = 0)
+			{
+				lock (Items)
+				{
+					Remove(index);
+					Add(item, index);
+				}
+			}
+			*/
 		}
 	}
 }

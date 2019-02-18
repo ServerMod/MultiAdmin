@@ -10,12 +10,18 @@ namespace MultiAdmin
 		 * it returns the static global value.
 		 */
 
+		#region Manual Start
+
 		public const string ManualStartKey = "manual_start";
 		public static bool GlobalManualStart => GlobalConfig.GetBool(ManualStartKey);
 
 		public bool ManualStart => ServerConfigContains(ManualStartKey)
 			? serverConfig.GetBool(ManualStartKey)
 			: GlobalManualStart;
+
+		#endregion
+
+		#region Start Config On Full
 
 		public const string StartConfigOnFullKey = "start_config_on_full";
 		public static string GlobalStartConfigOnFull => GlobalConfig.GetString(StartConfigOnFullKey);
@@ -24,12 +30,20 @@ namespace MultiAdmin
 			? serverConfig.GetString(StartConfigOnFullKey)
 			: GlobalStartConfigOnFull;
 
+		#endregion
+
+		#region Shutdown When Empty For
+
 		public const string ShutdownWhenEmptyForKey = "shutdown_when_empty_for";
 		public static int GlobalShutdownWhenEmptyFor => GlobalConfig.GetInt(ShutdownWhenEmptyForKey, -1);
 
 		public int ShutdownWhenEmptyFor => ServerConfigContains(ShutdownWhenEmptyForKey)
 			? serverConfig.GetInt(ShutdownWhenEmptyForKey)
 			: GlobalShutdownWhenEmptyFor;
+
+		#endregion
+
+		#region Restart Every Num Rounds
 
 		public const string RestartEveryNumRoundsKey = "restart_every_num_rounds";
 		public static int GlobalRestartEveryNumRounds => GlobalConfig.GetInt(RestartEveryNumRoundsKey, -1);
@@ -38,12 +52,20 @@ namespace MultiAdmin
 			? serverConfig.GetInt(RestartEveryNumRoundsKey)
 			: GlobalRestartEveryNumRounds;
 
+		#endregion
+
+		#region Restart Low Memory
+
 		public const string RestartLowMemoryKey = "restart_low_memory";
 		public static int GlobalRestartLowMemory => GlobalConfig.GetInt(RestartLowMemoryKey, 400);
 
 		public int RestartLowMemory => ServerConfigContains(RestartLowMemoryKey)
 			? serverConfig.GetInt(RestartLowMemoryKey)
 			: GlobalRestartLowMemory;
+
+		#endregion
+
+		#region Restart Low Memory Round End
 
 		public const string RestartLowMemoryRoundEndKey = "restart_low_memory_roundend";
 		public static int GlobalRestartLowMemoryRoundEnd => GlobalConfig.GetInt(RestartLowMemoryRoundEndKey, 450);
@@ -53,12 +75,20 @@ namespace MultiAdmin
 				? serverConfig.GetInt(RestartLowMemoryRoundEndKey)
 				: GlobalRestartLowMemoryRoundEnd;
 
+		#endregion
+
+		#region Max Memory
+
 		public const string MaxMemoryKey = "max_memory";
 		public static int GlobalMaxMemory => GlobalConfig.GetInt(MaxMemoryKey, 2048);
 
 		public int MaxMemory => ServerConfigContains(MaxMemoryKey)
 			? serverConfig.GetInt(MaxMemoryKey)
 			: GlobalMaxMemory;
+
+		#endregion
+
+		#region No Log
 
 		public const string NoLogKey = "multiadmin_nolog";
 		public static bool GlobalNoLog => GlobalConfig.GetBool(NoLogKey);
@@ -67,12 +97,20 @@ namespace MultiAdmin
 			? serverConfig.GetBool(NoLogKey)
 			: GlobalNoLog;
 
+		#endregion
+
+		#region Log Mod Actions To Own File
+
 		public const string LogModActionsToOwnFileKey = "log_mod_actions_to_own_file";
 		public static bool GlobalLogModActionsToOwnFile => GlobalConfig.GetBool(LogModActionsToOwnFileKey);
 
 		public bool LogModActionsToOwnFile => ServerConfigContains(LogModActionsToOwnFileKey)
 			? serverConfig.GetBool(LogModActionsToOwnFileKey)
 			: GlobalLogModActionsToOwnFile;
+
+		#endregion
+
+		#region Max Players
 
 		public const string MaxPlayersKey = "max_players";
 		public static int GlobalMaxPlayers => GlobalConfig.GetInt(MaxPlayersKey, 20);
@@ -81,12 +119,20 @@ namespace MultiAdmin
 			? serverConfig.GetInt(MaxPlayersKey)
 			: GlobalMaxPlayers;
 
+		#endregion
+
+		#region Disable Config Validation
+
 		public const string DisableConfigValidationKey = "disable_config_validation";
 		public static bool GlobalDisableConfigValidation => GlobalConfig.GetBool(DisableConfigValidationKey);
 
 		public bool DisableConfigValidation => ServerConfigContains(DisableConfigValidationKey)
 			? serverConfig.GetBool(DisableConfigValidationKey)
 			: GlobalDisableConfigValidation;
+
+		#endregion
+
+		#region Share Non Configs
 
 		public const string ShareNonConfigsKey = "share_non_configs";
 		public static bool GlobalShareNonConfigs => GlobalConfig.GetBool(ShareNonConfigsKey, true);
@@ -95,6 +141,10 @@ namespace MultiAdmin
 			? serverConfig.GetBool(ShareNonConfigsKey)
 			: GlobalShareNonConfigs;
 
+		#endregion
+
+		#region Config Location
+
 		public const string ConfigLocationKey = "config_location";
 		public static string GlobalConfigLocation => GlobalConfig.GetString(ConfigLocationKey);
 
@@ -102,12 +152,29 @@ namespace MultiAdmin
 			? serverConfig.GetString(ConfigLocationKey)
 			: GlobalConfigLocation;
 
+		#endregion
+
+		#region Servers Folder
+
 		public const string ServersFolderKey = "servers_folder";
 		public static string GlobalServersFolder => GlobalConfig.GetString(ServersFolderKey, "servers");
 
 		public string ServersFolder => ServerConfigContains(ServersFolderKey)
 			? serverConfig.GetString(ServersFolderKey)
 			: GlobalServersFolder;
+
+		#endregion
+
+		#region Random Input Colors
+
+		public const string RandomInputColorsKey = "random_input_colors";
+		public static bool GlobalRandomInputColors => GlobalConfig.GetBool(RandomInputColorsKey);
+
+		public bool RandomInputColors => ServerConfigContains(RandomInputColorsKey)
+			? serverConfig.GetBool(RandomInputColorsKey)
+			: GlobalRandomInputColors;
+
+		#endregion
 
 		public const string ConfigFileName = "scp_multiadmin.cfg";
 
