@@ -57,10 +57,10 @@ namespace MultiAdmin
 		#region Restart Low Memory
 
 		public const string RestartLowMemoryKey = "restart_low_memory";
-		public static int GlobalRestartLowMemory => GlobalConfig.GetInt(RestartLowMemoryKey, 400);
+		public static float GlobalRestartLowMemory => GlobalConfig.GetFloat(RestartLowMemoryKey, 400);
 
-		public int RestartLowMemory => ServerConfigContains(RestartLowMemoryKey)
-			? serverConfig.GetInt(RestartLowMemoryKey)
+		public float RestartLowMemory => ServerConfigContains(RestartLowMemoryKey)
+			? serverConfig.GetFloat(RestartLowMemoryKey)
 			: GlobalRestartLowMemory;
 
 		#endregion
@@ -68,11 +68,11 @@ namespace MultiAdmin
 		#region Restart Low Memory Round End
 
 		public const string RestartLowMemoryRoundEndKey = "restart_low_memory_roundend";
-		public static int GlobalRestartLowMemoryRoundEnd => GlobalConfig.GetInt(RestartLowMemoryRoundEndKey, 450);
+		public static float GlobalRestartLowMemoryRoundEnd => GlobalConfig.GetFloat(RestartLowMemoryRoundEndKey, 450);
 
-		public int RestartLowMemoryRoundEnd =>
+		public float RestartLowMemoryRoundEnd =>
 			ServerConfigContains(RestartLowMemoryRoundEndKey)
-				? serverConfig.GetInt(RestartLowMemoryRoundEndKey)
+				? serverConfig.GetFloat(RestartLowMemoryRoundEndKey)
 				: GlobalRestartLowMemoryRoundEnd;
 
 		#endregion
@@ -80,10 +80,10 @@ namespace MultiAdmin
 		#region Max Memory
 
 		public const string MaxMemoryKey = "max_memory";
-		public static int GlobalMaxMemory => GlobalConfig.GetInt(MaxMemoryKey, 2048);
+		public static float GlobalMaxMemory => GlobalConfig.GetFloat(MaxMemoryKey, 2048);
 
-		public int MaxMemory => ServerConfigContains(MaxMemoryKey)
-			? serverConfig.GetInt(MaxMemoryKey)
+		public float MaxMemory => ServerConfigContains(MaxMemoryKey)
+			? serverConfig.GetFloat(MaxMemoryKey)
 			: GlobalMaxMemory;
 
 		#endregion

@@ -27,22 +27,22 @@ namespace MultiAdmin.Features
 		{
 		}
 
-		private long LowMb
+		private float LowMb
 		{
-			get => lowBytes / BytesInMegabyte;
-			set => lowBytes = value * BytesInMegabyte;
+			get => lowBytes / (float) BytesInMegabyte;
+			set => lowBytes = (long) (value * BytesInMegabyte);
 		}
 
-		private long LowMbSoft
+		private float LowMbSoft
 		{
-			get => lowBytesSoft / BytesInMegabyte;
-			set => lowBytesSoft = value * BytesInMegabyte;
+			get => lowBytesSoft / (float) BytesInMegabyte;
+			set => lowBytesSoft = (long) (value * BytesInMegabyte);
 		}
 
-		private long MaxMb
+		private float MaxMb
 		{
-			get => maxBytes / BytesInMegabyte;
-			set => maxBytes = value * BytesInMegabyte;
+			get => maxBytes / (float) BytesInMegabyte;
+			set => maxBytes = (long) (value * BytesInMegabyte);
 		}
 
 		public void OnRoundEnd()
@@ -64,7 +64,7 @@ namespace MultiAdmin.Features
 			long workingMemory = Server.GameProcess.WorkingSet64; // Process memory in bytes
 			long memoryLeft = maxBytes - workingMemory;
 
-			if (memoryLeft <= lowBytes)
+			if (lowBytes >= 0 && memoryLeft <= lowBytes)
 			{
 				Server.Write($"Warning: Program is running low on memory ({memoryLeft / BytesInMegabyte} MB left), the server will restart if it continues",
 					ConsoleColor.Red);
@@ -75,7 +75,7 @@ namespace MultiAdmin.Features
 				tickCount = 0;
 			}
 
-			if (memoryLeft <= lowBytesSoft && tickCount > 0)
+			if (lowBytesSoft >= 0 && memoryLeft <= lowBytesSoft)
 			{
 				Server.Write(
 					$"Warning: Program is running low on memory ({memoryLeft / BytesInMegabyte} MB left), the server will restart at the end of the round if it continues",

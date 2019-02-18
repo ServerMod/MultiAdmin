@@ -66,9 +66,9 @@ manual_start | Boolean | False | Whether or not to start the server automaticall
 start_config_on_full | String | **Empty** | Start server with this config folder once the server becomes full [Requires ServerMod]
 shutdown_when_empty_for | Seconds | -1 | Shutdown the server once a round hasn't started in a number of seconds
 restart_every_num_rounds | Integer | -1 | Restart the server every number rounds
-restart_low_memory | Integer | 400 | Restart if the games memory falls below this value in megabytes
-restart_low_memory_roundend | Integer | 450 | Restart at the end of the round if the games memory falls below this value in megabytes
-max_memory | Integer | 2048 | The amount of memory in megabytes for MultiAdmin to check against
+restart_low_memory | Float | 400.0 | Restart if the games memory falls below this value in megabytes
+restart_low_memory_roundend | Float | 450.0 | Restart at the end of the round if the games memory falls below this value in megabytes
+max_memory | Float | 2048.0 | The amount of memory in megabytes for MultiAdmin to check against
 multiadmin_nolog | Boolean | False | Disable logging to file
 log_mod_actions_to_own_file | Boolean | False | Logs admin messages to seperate file
 max_players | Integer | 20 | The number of players to display as the maximum for the server (within MultiAdmin, not in-game)

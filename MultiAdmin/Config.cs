@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -94,8 +93,25 @@ namespace MultiAdmin
 			{
 				string value = GetString(key);
 
-				if (!string.IsNullOrEmpty(value))
-					return Convert.ToInt32(value);
+				if (!string.IsNullOrEmpty(value) && int.TryParse(value, out int parseValue))
+					return parseValue;
+			}
+			catch
+			{
+				// ignored
+			}
+
+			return def;
+		}
+
+		public float GetFloat(string key, float def = 0)
+		{
+			try
+			{
+				string value = GetString(key);
+
+				if (!string.IsNullOrEmpty(value) && float.TryParse(value, out float parsedValue))
+					return parsedValue;
 			}
 			catch
 			{
@@ -111,8 +127,8 @@ namespace MultiAdmin
 			{
 				string value = GetString(key);
 
-				if (!string.IsNullOrEmpty(value))
-					return Convert.ToBoolean(value);
+				if (!string.IsNullOrEmpty(value) && bool.TryParse(value, out bool parsedValue))
+					return parsedValue;
 			}
 			catch
 			{
