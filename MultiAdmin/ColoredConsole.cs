@@ -112,7 +112,7 @@ namespace MultiAdmin
 
 	public static class ColoredMessageEnumerableExtensions
 	{
-		private static string JoinTextIgnoreNull(params object[] objects)
+		private static string JoinTextIgnoreNull(IEnumerable<object> objects)
 		{
 			StringBuilder builder = new StringBuilder(string.Empty);
 
