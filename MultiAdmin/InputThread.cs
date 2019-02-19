@@ -11,11 +11,11 @@ namespace MultiAdmin
 	{
 		private static readonly char[] Separator = {' '};
 
-		public static readonly ColoredMessage BaseSection = new ColoredMessage(null, ConsoleColor.Blue);
+		public static readonly ColoredMessage BaseSection = new ColoredMessage(null, ConsoleColor.White);
 
-		public static readonly ColoredMessage InputPrefix = new ColoredMessage("> ");
-		public static readonly ColoredMessage LeftSideIndicator = new ColoredMessage("...");
-		public static readonly ColoredMessage RightSideIndicator = new ColoredMessage("...");
+		public static readonly ColoredMessage InputPrefix = new ColoredMessage("> ", ConsoleColor.Yellow);
+		public static readonly ColoredMessage LeftSideIndicator = new ColoredMessage("...", ConsoleColor.Yellow);
+		public static readonly ColoredMessage RightSideIndicator = new ColoredMessage("...", ConsoleColor.Yellow);
 
 		public static int InputPrefixLength => InputPrefix?.Length ?? 0;
 		public static int LeftSideIndicatorLength => LeftSideIndicator?.Length ?? 0;
