@@ -29,7 +29,8 @@ namespace MultiAdmin.Features
 
 		public long MaxBytes { get; set; }
 
-		public long MemoryLeftBytes => MaxBytes - Server.GameProcess.WorkingSet64;
+		public long MemoryUsedBytes => Server.GameProcess.WorkingSet64;
+		public long MemoryLeftBytes => MaxBytes - MemoryUsedBytes;
 
 		public float LowMb
 		{
@@ -49,7 +50,11 @@ namespace MultiAdmin.Features
 			set => MaxBytes = (long) (value * BytesInMegabyte);
 		}
 
+		public float MemoryUsedMb => MemoryUsedBytes / (float) BytesInMegabyte;
 		public float MemoryLeftMb => MemoryLeftBytes / (float) BytesInMegabyte;
+
+		//public decimal DecimalMemoryUsedMb => DecimalDivide(MemoryUsedBytes, BytesInMegabyte, 2);
+		public decimal DecimalMemoryLeftMb => DecimalDivide(MemoryLeftBytes, BytesInMegabyte, 2);
 
 		public decimal DecimalDivide(long numerator, long denominator, int decimals)
 		{
@@ -74,11 +79,10 @@ namespace MultiAdmin.Features
 			if (LowBytes < 0 && LowBytesSoft < 0 || MaxBytes < 0) return;
 
 			Server.GameProcess.Refresh();
-			long memoryLeft = MemoryLeftBytes;
 
-			if (LowBytes >= 0 && memoryLeft <= LowBytes)
+			if (LowBytes >= 0 && MemoryLeftBytes <= LowBytes)
 			{
-				Server.Write($"Warning: Program is running low on memory ({DecimalDivide(memoryLeft, BytesInMegabyte, 2)} MB left), the server will restart if it continues",
+				Server.Write($"Warning: Program is running low on memory ({DecimalMemoryLeftMb} MB left), the server will restart if it continues",
 					ConsoleColor.Red);
 				tickCount++;
 			}
@@ -87,10 +91,10 @@ namespace MultiAdmin.Features
 				tickCount = 0;
 			}
 
-			if (LowBytesSoft >= 0 && memoryLeft <= LowBytesSoft)
+			if (LowBytesSoft >= 0 && MemoryLeftBytes <= LowBytesSoft)
 			{
 				Server.Write(
-					$"Warning: Program is running low on memory ({DecimalDivide(memoryLeft, BytesInMegabyte, 2)} MB left), the server will restart at the end of the round if it continues",
+					$"Warning: Program is running low on memory ({DecimalMemoryLeftMb} MB left), the server will restart at the end of the round if it continues",
 					ConsoleColor.Red);
 				tickCountSoft++;
 			}

@@ -45,6 +45,8 @@ namespace MultiAdmin
 			// Load config
 			serverConfig = string.IsNullOrEmpty(this.configLocation) ? new MultiAdminConfig() : new MultiAdminConfig(this.configLocation + Path.DirectorySeparatorChar + MultiAdminConfig.ConfigFileName);
 
+			ReloadConfig();
+
 			// Register all features
 			RegisterFeatures();
 		}
@@ -209,6 +211,7 @@ namespace MultiAdmin
 						"-nodedicateddelete",
 						$"-key{SessionId}",
 						$"-id{Process.GetCurrentProcess().Id}",
+						// $"-port{ServerConfig.Port}",
 						$"-{(string.IsNullOrEmpty(ScpLogFile) || ServerConfig.NoLog ? "nolog" : $"logFile \"{ScpLogFile}\"")}"
 					});
 
@@ -244,6 +247,8 @@ namespace MultiAdmin
 
 					// Finally, start the game
 					GameProcess = Process.Start(startInfo);
+
+					Status = ServerStatus.Running;
 
 					MainLoop();
 
@@ -435,8 +440,7 @@ namespace MultiAdmin
 
 				ColoredMessage[] timeStampedMessage = Utils.TimeStampMessage(messages, timeStampColor);
 
-				Program.ClearConsoleLine();
-				timeStampedMessage.WriteLine();
+				Program.ClearConsoleLine(timeStampedMessage).WriteLine();
 				InputThread.WriteInput();
 			}
 		}
@@ -524,6 +528,39 @@ namespace MultiAdmin
 
 			return verMajor > major || verMajor >= major && verMinor > minor ||
 			       verMajor >= major && verMinor >= minor && verFix >= fix;
+		}
+
+		public void ReloadConfig()
+		{
+			ServerConfig.ReloadConfig();
+
+			// Handle directory copying
+			string copyFromDir;
+			if (!string.IsNullOrEmpty(configLocation) && !string.IsNullOrEmpty(copyFromDir = ServerConfig.CopyFromFolderOnReload))
+			{
+				try
+				{
+					copyFromDir = Utils.GetFullPathSafe(copyFromDir);
+
+					if (!string.IsNullOrEmpty(copyFromDir))
+					{
+						Write($"Copying files and folders from \"{copyFromDir}\" into \"{configLocation}\"...");
+						Utils.CopyAll(copyFromDir, configLocation, ServerConfig.FilesToCopyFromFolder);
+						Write("Done copying files and folders!");
+					}
+				}
+				catch (Exception e)
+				{
+					new ColoredMessage[]
+					{
+						new ColoredMessage("Error while copying files and folders:", ConsoleColor.Red),
+						new ColoredMessage(e.ToString(), ConsoleColor.Red)
+					}.WriteLines();
+				}
+			}
+
+			// Handle each config reload event
+			foreach (Feature feature in features) feature.OnConfigReload();
 		}
 	}
 

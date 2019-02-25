@@ -76,7 +76,11 @@ disable_config_validation | Boolean | False | Disable the config validator
 share_non_configs | Boolean | True | Makes all files other than the config files store in AppData
 config_location | String | **Empty** | The default location for the game to use for storing configuration files (a directory)
 servers_folder | String | servers | The location of the "servers" folder for MultiAdmin to load multiple server configurations from
+port | Integer | 7777 | The port for the server to use
+copy_from_folder_on_reload | String | **Empty** | The location of a folder to copy files from into the folder defined by `config_location` whenever the configuration file is reloaded
+files_to_copy_from_folder | String List | **Empty** | The list of filenames to copy from the folder defined by `copy_from_folder_on_reload` (accepts `*` wildcards)
 
 ## Upcoming Features
 - Support for running multiple server instances in one MultiAdmin instance
 - Printing speed configuration option
+- Exit timeout before killing the server process

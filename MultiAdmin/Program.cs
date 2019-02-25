@@ -49,30 +49,73 @@ namespace MultiAdmin
 			{
 				if (Headless) return;
 
-				ClearConsoleLine();
-				new ColoredMessage(Utils.TimeStampMessage(message), color).WriteLine();
+				ClearConsoleLine(new ColoredMessage(Utils.TimeStampMessage(message), color)).WriteLine();
 			}
 		}
 
-		public static void ClearConsoleLine()
+		public static void ClearConsoleLine(int index, bool returnCursorPos = false)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
 				if (Headless) return;
 
+				int lastCursor = 0;
 				try
 				{
-					Console.Write("\r" + new string(' ', Console.WindowWidth - 1) + "\r");
+					lastCursor = returnCursorPos ? Console.CursorLeft : Console.WindowLeft;
 				}
-				catch (Exception e)
+				catch
 				{
-					new ColoredMessage[]
-					{
-						new ColoredMessage("Error while clearing input text:", ConsoleColor.Red),
-						new ColoredMessage(e.ToString(), ConsoleColor.Red)
-					}.WriteLines();
+					// ignored
+				}
+
+				try
+				{
+					Console.CursorLeft = index > Console.WindowWidth || index < Console.WindowWidth ? Console.WindowLeft : index;
+					Console.Write(new string(' ', Console.WindowWidth - Console.CursorLeft - 1));
+				}
+				catch
+				{
+					// ignored
+				}
+
+				try
+				{
+					Console.CursorLeft = lastCursor;
+				}
+				catch
+				{
+					// ignored
 				}
 			}
+		}
+
+		public static string ClearConsoleLine(string message)
+		{
+			if (!string.IsNullOrEmpty(message))
+				ClearConsoleLine(message.Contains(Environment.NewLine) ? 0 : message.Length);
+			else
+				ClearConsoleLine(0);
+
+			return message;
+		}
+
+		public static ColoredMessage ClearConsoleLine(ColoredMessage message)
+		{
+			ClearConsoleLine(message?.text);
+			return message;
+		}
+
+		public static ColoredMessage[] ClearConsoleLine(ColoredMessage[] message)
+		{
+			ClearConsoleLine(message?.GetText());
+			return message;
+		}
+
+		public static List<ColoredMessage> ClearConsoleLine(List<ColoredMessage> message)
+		{
+			ClearConsoleLine(message?.GetText());
+			return message;
 		}
 
 		private static void OnExit(object sender, EventArgs e)

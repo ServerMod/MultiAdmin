@@ -304,8 +304,7 @@ namespace MultiAdmin
 					output.Add(section);
 				}
 
-				Program.ClearConsoleLine();
-				output.Write();
+				Program.ClearConsoleLine(output).Write();
 
 				SetCursor(messageCursor);
 			}

@@ -176,6 +176,39 @@ namespace MultiAdmin
 
 		#endregion
 
+		#region Port
+
+		public const string PortKey = "port";
+		public static int GlobalPort => GlobalConfig.GetInt(PortKey, 7777);
+
+		public int Port => ServerConfigContains(PortKey)
+			? serverConfig.GetInt(PortKey)
+			: GlobalPort;
+
+		#endregion
+
+		#region Copy From Folder on Reload
+
+		public const string CopyFromFolderOnReloadKey = "copy_from_folder_on_reload";
+		public static string GlobalCopyFromFolderOnReload => GlobalConfig.GetString(CopyFromFolderOnReloadKey, "");
+
+		public string CopyFromFolderOnReload => ServerConfigContains(CopyFromFolderOnReloadKey)
+			? serverConfig.GetString(CopyFromFolderOnReloadKey)
+			: GlobalCopyFromFolderOnReload;
+
+		#endregion
+
+		#region Files to Copy From Folder
+
+		public const string FilesToCopyFromFolderKey = "files_to_copy_from_folder";
+		public static string[] GlobalFilesToCopyFromFolder => GlobalConfig.GetStringList(FilesToCopyFromFolderKey, new string[0]);
+
+		public string[] FilesToCopyFromFolder => ServerConfigContains(FilesToCopyFromFolderKey)
+			? serverConfig.GetStringList(FilesToCopyFromFolderKey)
+			: GlobalFilesToCopyFromFolder;
+
+		#endregion
+
 		public const string ConfigFileName = "scp_multiadmin.cfg";
 
 		public static readonly Config GlobalConfig = new Config(ConfigFileName);

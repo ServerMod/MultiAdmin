@@ -87,6 +87,32 @@ namespace MultiAdmin
 			return def;
 		}
 
+		public string[] GetStringList(string key, string[] def = null)
+		{
+			try
+			{
+				foreach (string line in rawData)
+				{
+					if (!line.ToLower().StartsWith(key.ToLower() + ":")) continue;
+
+					try
+					{
+						return line.Substring(key.Length + 1).Split(',').Select(CleanValue).ToArray();
+					}
+					catch
+					{
+						// ignored
+					}
+				}
+			}
+			catch
+			{
+				// ignored
+			}
+
+			return def;
+		}
+
 		public int GetInt(string key, int def = 0)
 		{
 			try
