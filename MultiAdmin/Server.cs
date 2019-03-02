@@ -33,6 +33,9 @@ namespace MultiAdmin
 
 		private int logId;
 
+		private DateTime initStopTimeoutTime;
+		private DateTime initRestartTimeoutTime;
+
 		public Server(string serverId = null, string configLocation = null)
 		{
 			this.serverId = serverId;
@@ -98,6 +101,9 @@ namespace MultiAdmin
 			}
 		}
 
+		public bool CheckStopTimeout => (DateTime.Now - initStopTimeoutTime).Seconds > ServerConfig.ServerStopTimeout;
+		public bool CheckRestartTimeout => (DateTime.Now - initRestartTimeoutTime).Seconds > ServerConfig.ServerRestartTimeout;
+
 		public string LogDirFile { get; private set; }
 		public string MaLogFile { get; private set; }
 		public string ScpLogFile { get; private set; }
@@ -130,12 +136,32 @@ namespace MultiAdmin
 		{
 			while (GameProcess != null && !GameProcess.HasExited)
 			{
-				if (Status == ServerStatus.ForceStopping)
-					StopServer(true);
+				Stopwatch timer = Stopwatch.StartNew();
 
 				foreach (IEventTick tickEvent in tick) tickEvent.OnTick();
 
-				Thread.Sleep(1000);
+				timer.Stop();
+
+				// Wait 1 second per tick (calculating how long the tick took and compensating)
+				Thread.Sleep(Math.Max(1000 - timer.Elapsed.Milliseconds, 0));
+
+				if (Status == ServerStatus.Restarting && CheckRestartTimeout)
+				{
+					Write("Server restart timed out, killing the server process...", ConsoleColor.Red);
+					GameProcess.Kill();
+				}
+
+				if (Status == ServerStatus.Stopping && CheckStopTimeout)
+				{
+					Write("Server exit timed out, killing the server process...", ConsoleColor.Red);
+					StopServer(true);
+				}
+
+				if (Status == ServerStatus.ForceStopping)
+				{
+					Write("Force stopping the server process...", ConsoleColor.Red);
+					StopServer(true);
+				}
 			}
 		}
 
@@ -178,7 +204,7 @@ namespace MultiAdmin
 			{
 				Status = ServerStatus.Starting;
 
-				SessionId = DateTime.UtcNow.Ticks.ToString();
+				SessionId = DateTime.Now.Ticks.ToString();
 				StartDateTime = Utils.DateTime;
 
 				try
@@ -307,7 +333,8 @@ namespace MultiAdmin
 		{
 			if (!IsRunning) throw new Exceptions.ServerNotRunningException();
 
-			Status = ServerStatus.Stopping;
+			initStopTimeoutTime = DateTime.Now;
+			Status = killGame ? ServerStatus.ForceStopping : ServerStatus.Stopping;
 
 			foreach (Feature f in features)
 				if (f is IEventServerStop stopEvent)
@@ -322,6 +349,7 @@ namespace MultiAdmin
 		{
 			if (!IsRunning) throw new Exceptions.ServerNotRunningException();
 
+			initRestartTimeoutTime = DateTime.Now;
 			Status = ServerStatus.Restarting;
 
 			if (hasServerMod)

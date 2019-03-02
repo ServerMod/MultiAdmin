@@ -79,6 +79,8 @@ servers_folder | String | servers | The location of the "servers" folder for Mul
 port | Integer | 7777 | The port for the server to use
 copy_from_folder_on_reload | String | **Empty** | The location of a folder to copy files from into the folder defined by `config_location` whenever the configuration file is reloaded
 files_to_copy_from_folder | String List | **Empty** | The list of filenames to copy from the folder defined by `copy_from_folder_on_reload` (accepts `*` wildcards)
+server_stop_timeout | Float | 10.0 | The time in seconds before MultiAdmin forces a server shutdown if it doesn't respond to the regular shutdown command
+server_restart_timeout | Float | 10.0 | The time in seconds before MultiAdmin forces a server restart if it doesn't respond to the regular restart command
 
 ## Upcoming Features
 - Support for running multiple server instances in one MultiAdmin instance

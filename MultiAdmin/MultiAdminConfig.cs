@@ -209,6 +209,28 @@ namespace MultiAdmin
 
 		#endregion
 
+		#region Server Stop Timeout
+
+		public const string ServerStopTimeoutKey = "server_stop_timeout";
+		public static float GlobalServerStopTimeout => GlobalConfig.GetFloat(ServerStopTimeoutKey, 10);
+
+		public float ServerStopTimeout => ServerConfigContains(ServerStopTimeoutKey)
+			? serverConfig.GetFloat(ServerStopTimeoutKey)
+			: GlobalServerStopTimeout;
+
+		#endregion
+
+		#region Server Restart Timeout
+
+		public const string ServerRestartTimeoutKey = "server_restart_timeout";
+		public static float GlobalServerRestartTimeout => GlobalConfig.GetFloat(ServerRestartTimeoutKey, 10);
+
+		public float ServerRestartTimeout => ServerConfigContains(ServerRestartTimeoutKey)
+			? serverConfig.GetFloat(ServerRestartTimeoutKey)
+			: GlobalServerRestartTimeout;
+
+		#endregion
+
 		public const string ConfigFileName = "scp_multiadmin.cfg";
 
 		public static readonly Config GlobalConfig = new Config(ConfigFileName);

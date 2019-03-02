@@ -14,7 +14,6 @@ namespace MultiAdmin.Features
 		private const uint MaxTicks = 10;
 		private const uint MaxTicksSoft = 10;
 
-		// Memory Checker Soft
 		private bool restart;
 		private bool warnedSoft;
 
@@ -65,13 +64,13 @@ namespace MultiAdmin.Features
 
 		public void OnRoundEnd()
 		{
-			if (!restart) return;
+			if (!restart || Server.Status == ServerStatus.Restarting) return;
 
 			Server.Write("Restarting due to low memory (Round End)...", ConsoleColor.Red);
 
 			Server.SoftRestartServer();
-			restart = false;
-			warnedSoft = false;
+
+			Init();
 		}
 
 		public void OnTick()
@@ -80,7 +79,7 @@ namespace MultiAdmin.Features
 
 			Server.GameProcess.Refresh();
 
-			if (LowBytes >= 0 && MemoryLeftBytes <= LowBytes)
+			if (tickCount < MaxTicks && LowBytes >= 0 && MemoryLeftBytes <= LowBytes)
 			{
 				Server.Write($"Warning: Program is running low on memory ({DecimalMemoryLeftMb} MB left), the server will restart if it continues",
 					ConsoleColor.Red);
@@ -91,7 +90,7 @@ namespace MultiAdmin.Features
 				tickCount = 0;
 			}
 
-			if (LowBytesSoft >= 0 && MemoryLeftBytes <= LowBytesSoft)
+			if (tickCountSoft < MaxTicksSoft && LowBytesSoft >= 0 && MemoryLeftBytes <= LowBytesSoft)
 			{
 				Server.Write(
 					$"Warning: Program is running low on memory ({DecimalMemoryLeftMb} MB left), the server will restart at the end of the round if it continues",
@@ -102,6 +101,8 @@ namespace MultiAdmin.Features
 			{
 				tickCountSoft = 0;
 			}
+
+			if (Server.Status == ServerStatus.Restarting) return;
 
 			if (tickCount >= MaxTicks)
 			{
@@ -122,7 +123,11 @@ namespace MultiAdmin.Features
 
 		public override void Init()
 		{
+			tickCount = 0;
+			tickCountSoft = 0;
+
 			restart = false;
+			warnedSoft = false;
 		}
 
 		public override string GetFeatureDescription()
