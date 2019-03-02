@@ -231,6 +231,28 @@ namespace MultiAdmin
 
 		#endregion
 
+		#region Folder Copy Round Queue
+
+		public const string FolderCopyRoundQueueKey = "folder_copy_round_queue";
+		public static string[] GlobalFolderCopyRoundQueue => GlobalConfig.GetStringList(FolderCopyRoundQueueKey, new string[0]);
+
+		public string[] FolderCopyRoundQueue => ServerConfigContains(FolderCopyRoundQueueKey)
+			? serverConfig.GetStringList(FolderCopyRoundQueueKey)
+			: GlobalFolderCopyRoundQueue;
+
+		#endregion
+
+		#region Randomize Folder Copy Round Queue
+
+		public const string RandomizeFolderCopyRoundQueueKey = "randomize_folder_copy_round_queue";
+		public static bool GlobalRandomizeFolderCopyRoundQueue => GlobalConfig.GetBool(RandomizeFolderCopyRoundQueueKey, false);
+
+		public bool RandomizeFolderCopyRoundQueue => ServerConfigContains(RandomizeFolderCopyRoundQueueKey)
+			? serverConfig.GetBool(RandomizeFolderCopyRoundQueueKey)
+			: GlobalRandomizeFolderCopyRoundQueue;
+
+		#endregion
+
 		public const string ConfigFileName = "scp_multiadmin.cfg";
 
 		public static readonly Config GlobalConfig = new Config(ConfigFileName);

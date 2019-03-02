@@ -558,37 +558,50 @@ namespace MultiAdmin
 			       verMajor >= major && verMinor >= minor && verFix >= fix;
 		}
 
-		public void ReloadConfig()
+		public void ReloadConfig(bool copyFiles = true, bool runEvent = true)
 		{
 			ServerConfig.ReloadConfig();
 
 			// Handle directory copying
 			string copyFromDir;
-			if (!string.IsNullOrEmpty(configLocation) && !string.IsNullOrEmpty(copyFromDir = ServerConfig.CopyFromFolderOnReload))
+			if (copyFiles && !string.IsNullOrEmpty(configLocation) && !string.IsNullOrEmpty(copyFromDir = ServerConfig.CopyFromFolderOnReload))
 			{
-				try
-				{
-					copyFromDir = Utils.GetFullPathSafe(copyFromDir);
-
-					if (!string.IsNullOrEmpty(copyFromDir))
-					{
-						Write($"Copying files and folders from \"{copyFromDir}\" into \"{configLocation}\"...");
-						Utils.CopyAll(copyFromDir, configLocation, ServerConfig.FilesToCopyFromFolder);
-						Write("Done copying files and folders!");
-					}
-				}
-				catch (Exception e)
-				{
-					new ColoredMessage[]
-					{
-						new ColoredMessage("Error while copying files and folders:", ConsoleColor.Red),
-						new ColoredMessage(e.ToString(), ConsoleColor.Red)
-					}.WriteLines();
-				}
+				CopyFromDir(copyFromDir, ServerConfig.FilesToCopyFromFolder);
 			}
 
 			// Handle each config reload event
-			foreach (Feature feature in features) feature.OnConfigReload();
+			if (runEvent)
+				foreach (Feature feature in features)
+					feature.OnConfigReload();
+		}
+
+		public bool CopyFromDir(string sourceDir, string[] files = null)
+		{
+			if (string.IsNullOrEmpty(configLocation) || string.IsNullOrEmpty(sourceDir)) return false;
+
+			try
+			{
+				sourceDir = Utils.GetFullPathSafe(sourceDir);
+
+				if (!string.IsNullOrEmpty(sourceDir))
+				{
+					Write($"Copying files and folders from \"{sourceDir}\" into \"{configLocation}\"...");
+					Utils.CopyAll(sourceDir, configLocation, files);
+					Write("Done copying files and folders!");
+
+					return true;
+				}
+			}
+			catch (Exception e)
+			{
+				Write(new ColoredMessage[]
+				{
+					new ColoredMessage("Error while copying files and folders:", ConsoleColor.Red),
+					new ColoredMessage(e.ToString(), ConsoleColor.Red)
+				});
+			}
+
+			return false;
 		}
 	}
 

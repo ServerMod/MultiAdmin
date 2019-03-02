@@ -80,6 +80,7 @@
     <Compile Include="Features\ConfigReload.cs" />
     <Compile Include="Features\EventTest.cs" />
     <Compile Include="Features\ExitCommand.cs" />
+    <Compile Include="Features\FolderCopyRoundQueue.cs" />
     <Compile Include="Features\GithubGenerator.cs" />
     <Compile Include="Features\HelpCommand.cs" />
     <Compile Include="Features\InactivityShutdown.cs" />

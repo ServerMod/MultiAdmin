@@ -81,6 +81,8 @@ copy_from_folder_on_reload | String | **Empty** | The location of a folder to co
 files_to_copy_from_folder | String List | **Empty** | The list of filenames to copy from the folder defined by `copy_from_folder_on_reload` (accepts `*` wildcards)
 server_stop_timeout | Float | 10.0 | The time in seconds before MultiAdmin forces a server shutdown if it doesn't respond to the regular shutdown command
 server_restart_timeout | Float | 10.0 | The time in seconds before MultiAdmin forces a server restart if it doesn't respond to the regular restart command
+folder_copy_round_queue | String List | **Empty** | The location of a folder to copy files from into the folder defined by `config_location` after each round, looping through the locations
+randomize_folder_copy_round_queue | Boolean | False | Whether to randomize the order of entries in `folder_copy_round_queue`
 
 ## Upcoming Features
 - Support for running multiple server instances in one MultiAdmin instance
