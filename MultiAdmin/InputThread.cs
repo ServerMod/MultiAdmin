@@ -130,7 +130,7 @@ namespace MultiAdmin
 							break;
 
 						default:
-							if (key.Key == ConsoleKey.V && (key.Modifiers & ConsoleModifiers.Control) != 0)
+							if (key.Key == ConsoleKey.V && key.Modifiers == ConsoleModifiers.Control)
 							{
 								try
 								{

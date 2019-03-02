@@ -48,10 +48,10 @@ namespace MultiAdmin
 			// Load config
 			serverConfig = string.IsNullOrEmpty(this.configLocation) ? new MultiAdminConfig() : new MultiAdminConfig(this.configLocation + Path.DirectorySeparatorChar + MultiAdminConfig.ConfigFileName);
 
-			ReloadConfig();
-
 			// Register all features
 			RegisterFeatures();
+
+			ReloadConfig();
 		}
 
 		#region Server Status
@@ -165,6 +165,10 @@ namespace MultiAdmin
 			}
 		}
 
+		/// <summary>
+		///     Sends the string <paramref name="message" /> to the SCP: SL server process.
+		/// </summary>
+		/// <param name="message"></param>
 		public void SendMessage(string message)
 		{
 			if (!Directory.Exists(SessionDirectory))

@@ -20,13 +20,24 @@ namespace MultiAdmin.Features
 		{
 			if (!HasValidQueue) return;
 
-			queueIndex = randomizeQueue ? GetNextRandomIndex() : LoopingLimitIndex(queueIndex + 1);
+			CopyNextQueueFolder();
+
+			Server.SendMessage("CONFIG RELOAD");
+		}
+
+		public void CopyNextQueueFolder()
+		{
+			if (!HasValidQueue) return;
+
+			queueIndex = LoopingLimitIndex(queueIndex);
 
 			string copyFrom = queue[queueIndex];
 
 			if (string.IsNullOrEmpty(copyFrom)) return;
 
 			Server.CopyFromDir(copyFrom);
+
+			queueIndex = randomizeQueue ? GetNextRandomIndex() : LoopingLimitIndex(queueIndex + 1);
 		}
 
 		private int LoopingLimitIndex(int index)
@@ -60,6 +71,8 @@ namespace MultiAdmin.Features
 		public override void Init()
 		{
 			queueIndex = 0;
+
+			CopyNextQueueFolder();
 		}
 
 		public override void OnConfigReload()
