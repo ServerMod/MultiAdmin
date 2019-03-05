@@ -447,13 +447,48 @@ namespace MultiAdmin
 			if (!Directory.Exists(SessionDirectory)) return;
 
 			foreach (string file in Directory.GetFiles(SessionDirectory))
-				File.Delete(file);
+			{
+				for (int i = 0; i < 20; i++)
+				{
+					try
+					{
+						File.Delete(file);
+						break;
+					}
+					catch (UnauthorizedAccessException)
+					{
+						Thread.Sleep(5);
+					}
+					catch
+					{
+						Thread.Sleep(2);
+					}
+				}
+			}
 		}
 
 		public void DeleteSession()
 		{
 			CleanSession();
-			if (Directory.Exists(SessionDirectory)) Directory.Delete(SessionDirectory);
+
+			if (!Directory.Exists(SessionDirectory)) return;
+
+			for (int i = 0; i < 20; i++)
+			{
+				try
+				{
+					Directory.Delete(SessionDirectory);
+					break;
+				}
+				catch (UnauthorizedAccessException)
+				{
+					Thread.Sleep(5);
+				}
+				catch
+				{
+					Thread.Sleep(2);
+				}
+			}
 		}
 
 		#endregion

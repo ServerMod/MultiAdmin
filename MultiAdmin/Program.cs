@@ -10,7 +10,7 @@ namespace MultiAdmin
 {
 	public static class Program
 	{
-		public const string MaVersion = "3.0.1";
+		public const string MaVersion = "3.1.0";
 
 		private static readonly List<Server> InstantiatedServers = new List<Server>();
 
@@ -139,7 +139,7 @@ namespace MultiAdmin
 		{
 			AppDomain.CurrentDomain.ProcessExit += OnExit;
 
-			Headless = ArgsContainsParam("headless", "h");
+			Headless = GetFlagFromArgs("headless", "h");
 
 			string serverIdArg = GetParamFromArgs("server-id", "id");
 			string configArg = GetParamFromArgs("config", "c");
@@ -198,27 +198,91 @@ namespace MultiAdmin
 			}
 		}
 
-		public static string GetParamFromArgs(string key = null, string alias = null)
+		private static bool ArrayIsNullOrEmpty(ICollection<object> array)
 		{
-			if (string.IsNullOrEmpty(key) && string.IsNullOrEmpty(alias)) return null;
+			return array == null || array.Count <= 0;
+		}
+
+		public static string GetParamFromArgs(string[] keys = null, string[] aliases = null)
+		{
+			if (ArrayIsNullOrEmpty(keys) && ArrayIsNullOrEmpty(aliases)) return null;
 
 			string[] args = Environment.GetCommandLineArgs();
 
 			for (int i = 0; i < args.Length - 1; i++)
 			{
-				string arg = args[i].ToLower();
+				string lowArg = args[i]?.ToLower();
 
-				if (!string.IsNullOrEmpty(key) && arg == $"--{key.ToLower()}" || !string.IsNullOrEmpty(alias) && arg == $"-{alias.ToLower()}") return args[i + 1];
+				if (string.IsNullOrEmpty(lowArg)) continue;
+
+				if (!ArrayIsNullOrEmpty(keys))
+				{
+					if (keys.Any(key => !string.IsNullOrEmpty(key) && lowArg == $"--{key.ToLower()}"))
+					{
+						return args[i + 1];
+					}
+				}
+
+				if (!ArrayIsNullOrEmpty(aliases))
+				{
+					if (aliases.Any(alias => !string.IsNullOrEmpty(alias) && lowArg == $"-{alias.ToLower()}"))
+					{
+						return args[i + 1];
+					}
+				}
 			}
 
 			return null;
 		}
 
+		public static bool ArgsContainsParam(string[] keys = null, string[] aliases = null)
+		{
+			foreach (string arg in Environment.GetCommandLineArgs())
+			{
+				string lowArg = arg?.ToLower();
+
+				if (string.IsNullOrEmpty(lowArg)) continue;
+
+				if (!ArrayIsNullOrEmpty(keys))
+				{
+					if (keys.Any(key => !string.IsNullOrEmpty(key) && lowArg == $"--{key.ToLower()}"))
+					{
+						return true;
+					}
+				}
+
+				if (!ArrayIsNullOrEmpty(aliases))
+				{
+					if (aliases.Any(alias => !string.IsNullOrEmpty(alias) && lowArg == $"-{alias.ToLower()}"))
+					{
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
+
+		public static bool GetFlagFromArgs(string[] keys = null, string[] aliases = null)
+		{
+			if (ArrayIsNullOrEmpty(keys) && ArrayIsNullOrEmpty(aliases)) return false;
+
+			return bool.TryParse(GetParamFromArgs(keys, aliases), out bool result) ? result : ArgsContainsParam(keys, aliases);
+		}
+
+		public static string GetParamFromArgs(string key = null, string alias = null)
+		{
+			return GetParamFromArgs(new string[] {key}, new string[] {alias});
+		}
+
 		public static bool ArgsContainsParam(string key = null, string alias = null)
 		{
-			if (string.IsNullOrEmpty(key) && string.IsNullOrEmpty(alias)) return false;
+			return ArgsContainsParam(new string[] {key}, new string[] {alias});
+		}
 
-			return Environment.GetCommandLineArgs().Select(arg => arg.ToLower()).Any(lowArg => !string.IsNullOrEmpty(key) && lowArg == $"--{key.ToLower()}" || !string.IsNullOrEmpty(alias) && lowArg == $"-{alias.ToLower()}");
+		public static bool GetFlagFromArgs(string key = null, string alias = null)
+		{
+			return GetFlagFromArgs(new string[] {key}, new string[] {alias});
 		}
 
 		public static void StartServer(Server server)

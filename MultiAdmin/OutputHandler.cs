@@ -31,7 +31,7 @@ namespace MultiAdmin
 		{
 			if (server == null)
 			{
-				Program.Write("Error in OutputHandler: Server server is null!", ConsoleColor.Red);
+				Program.Write("Error in OutputHandler - Server server is null!", ConsoleColor.Red);
 				return;
 			}
 
@@ -84,6 +84,7 @@ namespace MultiAdmin
 			lock (this)
 			{
 				for (int attempts = 0; attempts < 100 && server.IsRunning; attempts++)
+				{
 					try
 					{
 						if (!File.Exists(file)) return;
@@ -113,6 +114,7 @@ namespace MultiAdmin
 					{
 						Thread.Sleep(2);
 					}
+				}
 			}
 
 			if (!isRead)
