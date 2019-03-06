@@ -10,114 +10,14 @@ namespace MultiAdmin
 		 * it returns the static global value.
 		 */
 
-		#region Manual Start
+		#region Config Location
 
-		public const string ManualStartKey = "manual_start";
-		public static bool GlobalManualStart => GlobalConfig.GetBool(ManualStartKey, false);
+		public const string ConfigLocationKey = "config_location";
+		public static string GlobalConfigLocation => GlobalConfig.GetString(ConfigLocationKey, "");
 
-		public bool ManualStart => ServerConfigContains(ManualStartKey)
-			? serverConfig.GetBool(ManualStartKey)
-			: GlobalManualStart;
-
-		#endregion
-
-		#region Start Config On Full
-
-		public const string StartConfigOnFullKey = "start_config_on_full";
-		public static string GlobalStartConfigOnFull => GlobalConfig.GetString(StartConfigOnFullKey, "");
-
-		public string StartConfigOnFull => ServerConfigContains(StartConfigOnFullKey)
-			? serverConfig.GetString(StartConfigOnFullKey)
-			: GlobalStartConfigOnFull;
-
-		#endregion
-
-		#region Shutdown When Empty For
-
-		public const string ShutdownWhenEmptyForKey = "shutdown_when_empty_for";
-		public static int GlobalShutdownWhenEmptyFor => GlobalConfig.GetInt(ShutdownWhenEmptyForKey, -1);
-
-		public int ShutdownWhenEmptyFor => ServerConfigContains(ShutdownWhenEmptyForKey)
-			? serverConfig.GetInt(ShutdownWhenEmptyForKey)
-			: GlobalShutdownWhenEmptyFor;
-
-		#endregion
-
-		#region Restart Every Num Rounds
-
-		public const string RestartEveryNumRoundsKey = "restart_every_num_rounds";
-		public static int GlobalRestartEveryNumRounds => GlobalConfig.GetInt(RestartEveryNumRoundsKey, -1);
-
-		public int RestartEveryNumRounds => ServerConfigContains(RestartEveryNumRoundsKey)
-			? serverConfig.GetInt(RestartEveryNumRoundsKey)
-			: GlobalRestartEveryNumRounds;
-
-		#endregion
-
-		#region Restart Low Memory
-
-		public const string RestartLowMemoryKey = "restart_low_memory";
-		public static float GlobalRestartLowMemory => GlobalConfig.GetFloat(RestartLowMemoryKey, 400);
-
-		public float RestartLowMemory => ServerConfigContains(RestartLowMemoryKey)
-			? serverConfig.GetFloat(RestartLowMemoryKey)
-			: GlobalRestartLowMemory;
-
-		#endregion
-
-		#region Restart Low Memory Round End
-
-		public const string RestartLowMemoryRoundEndKey = "restart_low_memory_roundend";
-		public static float GlobalRestartLowMemoryRoundEnd => GlobalConfig.GetFloat(RestartLowMemoryRoundEndKey, 450);
-
-		public float RestartLowMemoryRoundEnd =>
-			ServerConfigContains(RestartLowMemoryRoundEndKey)
-				? serverConfig.GetFloat(RestartLowMemoryRoundEndKey)
-				: GlobalRestartLowMemoryRoundEnd;
-
-		#endregion
-
-		#region Max Memory
-
-		public const string MaxMemoryKey = "max_memory";
-		public static float GlobalMaxMemory => GlobalConfig.GetFloat(MaxMemoryKey, 2048);
-
-		public float MaxMemory => ServerConfigContains(MaxMemoryKey)
-			? serverConfig.GetFloat(MaxMemoryKey)
-			: GlobalMaxMemory;
-
-		#endregion
-
-		#region No Log
-
-		public const string NoLogKey = "multiadmin_nolog";
-		public static bool GlobalNoLog => GlobalConfig.GetBool(NoLogKey, false);
-
-		public bool NoLog => ServerConfigContains(NoLogKey)
-			? serverConfig.GetBool(NoLogKey)
-			: GlobalNoLog;
-
-		#endregion
-
-		#region Log Mod Actions To Own File
-
-		public const string LogModActionsToOwnFileKey = "log_mod_actions_to_own_file";
-		public static bool GlobalLogModActionsToOwnFile => GlobalConfig.GetBool(LogModActionsToOwnFileKey, false);
-
-		public bool LogModActionsToOwnFile => ServerConfigContains(LogModActionsToOwnFileKey)
-			? serverConfig.GetBool(LogModActionsToOwnFileKey)
-			: GlobalLogModActionsToOwnFile;
-
-		#endregion
-
-		#region Max Players
-
-		public const string MaxPlayersKey = "max_players";
-		public static int GlobalMaxPlayers => GlobalConfig.GetInt(MaxPlayersKey, 20);
-
-		public int MaxPlayers => ServerConfigContains(MaxPlayersKey)
-			? serverConfig.GetInt(MaxPlayersKey)
-			: GlobalMaxPlayers;
+		public string ConfigLocation => ServerConfigContains(ConfigLocationKey)
+			? serverConfig.GetString(ConfigLocationKey)
+			: GlobalConfigLocation;
 
 		#endregion
 
@@ -143,36 +43,14 @@ namespace MultiAdmin
 
 		#endregion
 
-		#region Config Location
+		#region MultiAdmin No Log
 
-		public const string ConfigLocationKey = "config_location";
-		public static string GlobalConfigLocation => GlobalConfig.GetString(ConfigLocationKey, "");
+		public const string NoLogKey = "multiadmin_nolog";
+		public static bool GlobalNoLog => GlobalConfig.GetBool(NoLogKey, false);
 
-		public string ConfigLocation => ServerConfigContains(ConfigLocationKey)
-			? serverConfig.GetString(ConfigLocationKey)
-			: GlobalConfigLocation;
-
-		#endregion
-
-		#region Servers Folder
-
-		public const string ServersFolderKey = "servers_folder";
-		public static string GlobalServersFolder => GlobalConfig.GetString(ServersFolderKey, "servers");
-
-		public string ServersFolder => ServerConfigContains(ServersFolderKey)
-			? serverConfig.GetString(ServersFolderKey)
-			: GlobalServersFolder;
-
-		#endregion
-
-		#region Random Input Colors
-
-		public const string RandomInputColorsKey = "random_input_colors";
-		public static bool GlobalRandomInputColors => GlobalConfig.GetBool(RandomInputColorsKey, false);
-
-		public bool RandomInputColors => ServerConfigContains(RandomInputColorsKey)
-			? serverConfig.GetBool(RandomInputColorsKey)
-			: GlobalRandomInputColors;
+		public bool NoLog => ServerConfigContains(NoLogKey)
+			? serverConfig.GetBool(NoLogKey)
+			: GlobalNoLog;
 
 		#endregion
 
@@ -209,28 +87,6 @@ namespace MultiAdmin
 
 		#endregion
 
-		#region Server Stop Timeout
-
-		public const string ServerStopTimeoutKey = "server_stop_timeout";
-		public static float GlobalServerStopTimeout => GlobalConfig.GetFloat(ServerStopTimeoutKey, 10);
-
-		public float ServerStopTimeout => ServerConfigContains(ServerStopTimeoutKey)
-			? serverConfig.GetFloat(ServerStopTimeoutKey)
-			: GlobalServerStopTimeout;
-
-		#endregion
-
-		#region Server Restart Timeout
-
-		public const string ServerRestartTimeoutKey = "server_restart_timeout";
-		public static float GlobalServerRestartTimeout => GlobalConfig.GetFloat(ServerRestartTimeoutKey, 10);
-
-		public float ServerRestartTimeout => ServerConfigContains(ServerRestartTimeoutKey)
-			? serverConfig.GetFloat(ServerRestartTimeoutKey)
-			: GlobalServerRestartTimeout;
-
-		#endregion
-
 		#region Folder Copy Round Queue
 
 		public const string FolderCopyRoundQueueKey = "folder_copy_round_queue";
@@ -250,6 +106,150 @@ namespace MultiAdmin
 		public bool RandomizeFolderCopyRoundQueue => ServerConfigContains(RandomizeFolderCopyRoundQueueKey)
 			? serverConfig.GetBool(RandomizeFolderCopyRoundQueueKey)
 			: GlobalRandomizeFolderCopyRoundQueue;
+
+		#endregion
+
+		#region Log Mod Actions To Own File
+
+		public const string LogModActionsToOwnFileKey = "log_mod_actions_to_own_file";
+		public static bool GlobalLogModActionsToOwnFile => GlobalConfig.GetBool(LogModActionsToOwnFileKey, false);
+
+		public bool LogModActionsToOwnFile => ServerConfigContains(LogModActionsToOwnFileKey)
+			? serverConfig.GetBool(LogModActionsToOwnFileKey)
+			: GlobalLogModActionsToOwnFile;
+
+		#endregion
+
+		#region Manual Start
+
+		public const string ManualStartKey = "manual_start";
+		public static bool GlobalManualStart => GlobalConfig.GetBool(ManualStartKey, false);
+
+		public bool ManualStart => ServerConfigContains(ManualStartKey)
+			? serverConfig.GetBool(ManualStartKey)
+			: GlobalManualStart;
+
+		#endregion
+
+		#region Max Memory
+
+		public const string MaxMemoryKey = "max_memory";
+		public static float GlobalMaxMemory => GlobalConfig.GetFloat(MaxMemoryKey, 2048);
+
+		public float MaxMemory => ServerConfigContains(MaxMemoryKey)
+			? serverConfig.GetFloat(MaxMemoryKey)
+			: GlobalMaxMemory;
+
+		#endregion
+
+		#region Restart Low Memory
+
+		public const string RestartLowMemoryKey = "restart_low_memory";
+		public static float GlobalRestartLowMemory => GlobalConfig.GetFloat(RestartLowMemoryKey, 400);
+
+		public float RestartLowMemory => ServerConfigContains(RestartLowMemoryKey)
+			? serverConfig.GetFloat(RestartLowMemoryKey)
+			: GlobalRestartLowMemory;
+
+		#endregion
+
+		#region Restart Low Memory Round End
+
+		public const string RestartLowMemoryRoundEndKey = "restart_low_memory_roundend";
+		public static float GlobalRestartLowMemoryRoundEnd => GlobalConfig.GetFloat(RestartLowMemoryRoundEndKey, 450);
+
+		public float RestartLowMemoryRoundEnd =>
+			ServerConfigContains(RestartLowMemoryRoundEndKey)
+				? serverConfig.GetFloat(RestartLowMemoryRoundEndKey)
+				: GlobalRestartLowMemoryRoundEnd;
+
+		#endregion
+
+		#region Max Players
+
+		public const string MaxPlayersKey = "max_players";
+		public static int GlobalMaxPlayers => GlobalConfig.GetInt(MaxPlayersKey, 20);
+
+		public int MaxPlayers => ServerConfigContains(MaxPlayersKey)
+			? serverConfig.GetInt(MaxPlayersKey)
+			: GlobalMaxPlayers;
+
+		#endregion
+
+		#region Random Input Colors
+
+		public const string RandomInputColorsKey = "random_input_colors";
+		public static bool GlobalRandomInputColors => GlobalConfig.GetBool(RandomInputColorsKey, false);
+
+		public bool RandomInputColors => ServerConfigContains(RandomInputColorsKey)
+			? serverConfig.GetBool(RandomInputColorsKey)
+			: GlobalRandomInputColors;
+
+		#endregion
+
+		#region Restart Every Num Rounds
+
+		public const string RestartEveryNumRoundsKey = "restart_every_num_rounds";
+		public static int GlobalRestartEveryNumRounds => GlobalConfig.GetInt(RestartEveryNumRoundsKey, -1);
+
+		public int RestartEveryNumRounds => ServerConfigContains(RestartEveryNumRoundsKey)
+			? serverConfig.GetInt(RestartEveryNumRoundsKey)
+			: GlobalRestartEveryNumRounds;
+
+		#endregion
+
+		#region Server Restart Timeout
+
+		public const string ServerRestartTimeoutKey = "server_restart_timeout";
+		public static float GlobalServerRestartTimeout => GlobalConfig.GetFloat(ServerRestartTimeoutKey, 10);
+
+		public float ServerRestartTimeout => ServerConfigContains(ServerRestartTimeoutKey)
+			? serverConfig.GetFloat(ServerRestartTimeoutKey)
+			: GlobalServerRestartTimeout;
+
+		#endregion
+
+		#region Server Stop Timeout
+
+		public const string ServerStopTimeoutKey = "server_stop_timeout";
+		public static float GlobalServerStopTimeout => GlobalConfig.GetFloat(ServerStopTimeoutKey, 10);
+
+		public float ServerStopTimeout => ServerConfigContains(ServerStopTimeoutKey)
+			? serverConfig.GetFloat(ServerStopTimeoutKey)
+			: GlobalServerStopTimeout;
+
+		#endregion
+
+		#region Servers Folder
+
+		public const string ServersFolderKey = "servers_folder";
+		public static string GlobalServersFolder => GlobalConfig.GetString(ServersFolderKey, "servers");
+
+		public string ServersFolder => ServerConfigContains(ServersFolderKey)
+			? serverConfig.GetString(ServersFolderKey)
+			: GlobalServersFolder;
+
+		#endregion
+
+		#region Shutdown When Empty For
+
+		public const string ShutdownWhenEmptyForKey = "shutdown_when_empty_for";
+		public static int GlobalShutdownWhenEmptyFor => GlobalConfig.GetInt(ShutdownWhenEmptyForKey, -1);
+
+		public int ShutdownWhenEmptyFor => ServerConfigContains(ShutdownWhenEmptyForKey)
+			? serverConfig.GetInt(ShutdownWhenEmptyForKey)
+			: GlobalShutdownWhenEmptyFor;
+
+		#endregion
+
+		#region Start Config On Full
+
+		public const string StartConfigOnFullKey = "start_config_on_full";
+		public static string GlobalStartConfigOnFull => GlobalConfig.GetString(StartConfigOnFullKey, "");
+
+		public string StartConfigOnFull => ServerConfigContains(StartConfigOnFullKey)
+			? serverConfig.GetString(StartConfigOnFullKey)
+			: GlobalStartConfigOnFull;
 
 		#endregion
 
