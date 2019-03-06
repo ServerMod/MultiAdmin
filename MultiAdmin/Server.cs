@@ -242,17 +242,36 @@ namespace MultiAdmin
 						$"-key{SessionId}",
 						$"-id{Process.GetCurrentProcess().Id}",
 						// $"-port{ServerConfig.Port}",
-						$"-{(string.IsNullOrEmpty(ScpLogFile) || ServerConfig.NoLog ? "nolog" : $"logFile \"{ScpLogFile}\"")}"
 					});
 
+					if (string.IsNullOrEmpty(ScpLogFile) || ServerConfig.NoLog)
+					{
+						scpslArgs.Add("-nolog");
+
+						if (Utils.IsUnix)
+							scpslArgs.Add("-logFile \"/dev/null\"");
+						else if (Utils.IsWindows)
+							scpslArgs.Add("-logFile \"NUL\"");
+					}
+					else
+					{
+						scpslArgs.Add($"-logFile \"{ScpLogFile}\"");
+					}
+
 					if (ServerConfig.DisableConfigValidation)
+					{
 						scpslArgs.Add("-disableconfigvalidation");
+					}
 
 					if (ServerConfig.ShareNonConfigs)
+					{
 						scpslArgs.Add("-sharenonconfigs");
+					}
 
 					if (!string.IsNullOrEmpty(configLocation))
+					{
 						scpslArgs.Add($"-configpath \"{configLocation}\"");
+					}
 
 					scpslArgs.RemoveAll(string.IsNullOrEmpty);
 
@@ -548,7 +567,7 @@ namespace MultiAdmin
 		{
 			lock (ColoredConsole.WriteLock)
 			{
-				if (message == null || string.IsNullOrEmpty(MaLogFile)) return;
+				if (message == null || string.IsNullOrEmpty(MaLogFile) || ServerConfig.NoLog) return;
 
 				Directory.CreateDirectory(logDir);
 
