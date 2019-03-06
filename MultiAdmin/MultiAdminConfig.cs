@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 
 namespace MultiAdmin
@@ -266,7 +267,19 @@ namespace MultiAdmin
 		{
 			if (!File.Exists(GlobalConfig.ConfigPath))
 			{
-				File.Create(GlobalConfig.ConfigPath);
+				try
+				{
+					if (GlobalConfig?.ConfigPath != null)
+						File.Create(GlobalConfig.ConfigPath).Close();
+				}
+				catch (Exception e)
+				{
+					new ColoredMessage[]
+					{
+						new ColoredMessage($"Error while creating config (Path = {serverConfig?.ConfigPath ?? "Null"}):", ConsoleColor.Red),
+						new ColoredMessage(e.ToString(), ConsoleColor.Red)
+					}.WriteLines();
+				}
 			}
 		}
 
@@ -274,9 +287,21 @@ namespace MultiAdmin
 		{
 			serverConfig = config;
 
-			if (!File.Exists(serverConfig.ConfigPath))
+			if (!File.Exists(serverConfig?.ConfigPath))
 			{
-				File.Create(serverConfig.ConfigPath);
+				try
+				{
+					if (serverConfig?.ConfigPath != null)
+						File.Create(serverConfig.ConfigPath).Close();
+				}
+				catch (Exception e)
+				{
+					new ColoredMessage[]
+					{
+						new ColoredMessage($"Error while creating config (Path = {serverConfig?.ConfigPath ?? "Null"}):", ConsoleColor.Red),
+						new ColoredMessage(e.ToString(), ConsoleColor.Red)
+					}.WriteLines();
+				}
 			}
 		}
 

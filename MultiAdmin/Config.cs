@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ namespace MultiAdmin
 {
 	public class Config
 	{
-		public string[] rawData;
+		public string[] rawData = { };
 
 		public Config(string path)
 		{
@@ -29,7 +30,18 @@ namespace MultiAdmin
 				// ignored
 			}
 
-			rawData = File.Exists(ConfigPath) ? File.ReadAllLines(ConfigPath, Encoding.UTF8) : new string[] { };
+			try
+			{
+				rawData = File.Exists(ConfigPath) ? File.ReadAllLines(ConfigPath, Encoding.UTF8) : new string[] { };
+			}
+			catch (Exception e)
+			{
+				new ColoredMessage[]
+				{
+					new ColoredMessage($"Error while reading config (Path = {ConfigPath ?? "Null"}):", ConsoleColor.Red),
+					new ColoredMessage(e.ToString(), ConsoleColor.Red)
+				}.WriteLines();
+			}
 		}
 
 		public void ReadConfigFile()
