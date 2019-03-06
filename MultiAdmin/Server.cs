@@ -240,8 +240,7 @@ namespace MultiAdmin
 						"-silent-crashes",
 						"-nodedicateddelete",
 						$"-key{SessionId}",
-						$"-id{Process.GetCurrentProcess().Id}",
-						// $"-port{ServerConfig.Port}",
+						$"-id{Process.GetCurrentProcess().Id}"
 					});
 
 					if (string.IsNullOrEmpty(ScpLogFile) || ServerConfig.NoLog)
@@ -271,6 +270,11 @@ namespace MultiAdmin
 					if (!string.IsNullOrEmpty(configLocation))
 					{
 						scpslArgs.Add($"-configpath \"{configLocation}\"");
+					}
+
+					if (ServerConfig.ServerOrGlobalConfigContains(MultiAdminConfig.PortKey))
+					{
+						scpslArgs.Add($"-port{ServerConfig.Port}");
 					}
 
 					scpslArgs.RemoveAll(string.IsNullOrEmpty);

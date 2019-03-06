@@ -299,5 +299,10 @@ namespace MultiAdmin
 		{
 			return serverConfig != null && serverConfig.Contains(key);
 		}
+
+		public bool ServerOrGlobalConfigContains(string key)
+		{
+			return ServerConfigContains(key) || GlobalConfig.Contains(key);
+		}
 	}
 }
