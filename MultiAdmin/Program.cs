@@ -53,6 +53,8 @@ namespace MultiAdmin
 			}
 		}
 
+		#region Clear Console Line Methods
+
 		public static void ClearConsoleLine(int index, bool returnCursorPos = false)
 		{
 			lock (ColoredConsole.WriteLock)
@@ -118,6 +120,8 @@ namespace MultiAdmin
 			return message;
 		}
 
+		#endregion
+
 		private static void OnExit(object sender, EventArgs e)
 		{
 			foreach (Server server in InstantiatedServers)
@@ -158,7 +162,10 @@ namespace MultiAdmin
 
 				if (autoStartServers.Length <= 0)
 				{
-					server = new Server();
+					Write("No servers are set to automatically start, please enter a Server ID to start:");
+					InputThread.InputPrefix.Write();
+
+					server = new Server(Console.ReadLine());
 
 					InstantiatedServers.Add(server);
 				}
