@@ -15,7 +15,6 @@ namespace MultiAdmin.Features
 		private const uint MaxTicksSoft = 10;
 
 		private bool restart;
-		private bool warnedSoft;
 
 		public MemoryChecker(Server server) : base(server)
 		{
@@ -90,7 +89,7 @@ namespace MultiAdmin.Features
 				tickCount = 0;
 			}
 
-			if (tickCountSoft < MaxTicksSoft && LowBytesSoft >= 0 && MemoryLeftBytes <= LowBytesSoft)
+			if (!restart && tickCountSoft < MaxTicksSoft && LowBytesSoft >= 0 && MemoryLeftBytes <= LowBytesSoft)
 			{
 				Server.Write(
 					$"Warning: Program is running low on memory ({DecimalMemoryLeftMb} MB left), the server will restart at the end of the round if it continues",
@@ -111,13 +110,11 @@ namespace MultiAdmin.Features
 
 				restart = false;
 			}
-			else if (tickCountSoft >= MaxTicksSoft)
+			else if (!restart && tickCountSoft >= MaxTicksSoft)
 			{
-				if (!warnedSoft)
-					Server.Write("Server will restart at the end of the round due to low memory");
+				Server.Write("Server will restart at the end of the round due to low memory");
 
 				restart = true;
-				warnedSoft = true;
 			}
 		}
 
@@ -127,7 +124,6 @@ namespace MultiAdmin.Features
 			tickCountSoft = 0;
 
 			restart = false;
-			warnedSoft = false;
 		}
 
 		public override string GetFeatureDescription()

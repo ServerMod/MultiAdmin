@@ -57,7 +57,7 @@ The arguments available for running MultiAdmin with
 - `--config <Config Location>` or `-c <Config Location>`: The config location to use for this MultiAdmin instance (Note: This is used over the config option `config_location`)
 
 ## Config Settings
-All configuration settings go into a file named `scp_multiadmin.cfg` (you'll have to make this file) in the same directory as MultiAdmin.exe or in your server directory within the `servers_folder` value defined in the global configuration file
+All configuration settings go into a file named `scp_multiadmin.cfg` in the same directory as MultiAdmin.exe or in your server directory within the `servers_folder` value defined in the global configuration file
 Any configuration files within the directory defined by `servers_folder` will have it's values used for that server over the global configuration file
 
 Config Option | Value Type | Default Value | Description
