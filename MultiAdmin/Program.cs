@@ -171,7 +171,7 @@ namespace MultiAdmin
 					if (autoStartServers.Length <= 0)
 					{
 						Write("No servers are set to automatically start, please enter a Server ID to start:");
-						InputThread.InputPrefix.Write();
+						InputThread.InputPrefix?.Write();
 
 						server = new Server(Console.ReadLine());
 
