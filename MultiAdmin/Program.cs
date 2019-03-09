@@ -158,32 +158,41 @@ namespace MultiAdmin
 			}
 			else
 			{
-				Server[] autoStartServers = AutoStartServers;
-
-				if (autoStartServers.Length <= 0)
+				if (Servers.Length <= 0)
 				{
-					Write("No servers are set to automatically start, please enter a Server ID to start:");
-					InputThread.InputPrefix.Write();
-
-					server = new Server(Console.ReadLine());
+					server = new Server();
 
 					InstantiatedServers.Add(server);
 				}
 				else
 				{
-					Write("Starting this instance in multi server mode...");
+					Server[] autoStartServers = AutoStartServers;
 
-					for (int i = 0; i < autoStartServers.Length; i++)
-						if (i == 0)
-						{
-							server = autoStartServers[i];
+					if (autoStartServers.Length <= 0)
+					{
+						Write("No servers are set to automatically start, please enter a Server ID to start:");
+						InputThread.InputPrefix.Write();
 
-							InstantiatedServers.Add(server);
-						}
-						else
-						{
-							StartServer(autoStartServers[i]);
-						}
+						server = new Server(Console.ReadLine());
+
+						InstantiatedServers.Add(server);
+					}
+					else
+					{
+						Write("Starting this instance in multi server mode...");
+
+						for (int i = 0; i < autoStartServers.Length; i++)
+							if (i == 0)
+							{
+								server = autoStartServers[i];
+
+								InstantiatedServers.Add(server);
+							}
+							else
+							{
+								StartServer(autoStartServers[i]);
+							}
+					}
 				}
 			}
 
