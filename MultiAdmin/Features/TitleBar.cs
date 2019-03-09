@@ -73,7 +73,7 @@ namespace MultiAdmin.Features
 				titleBar.Add($"Session: {Server.SessionId}");
 			}
 
-			if (Server.GameProcess != null)
+			if (Server.IsGameProcessRunning)
 			{
 				titleBar.Add($"PID: {Server.GameProcess.Id}");
 			}

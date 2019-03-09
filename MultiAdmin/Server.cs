@@ -111,6 +111,8 @@ namespace MultiAdmin
 
 		public Process GameProcess { get; private set; }
 
+		public bool IsGameProcessRunning => GameProcess != null && !GameProcess.HasExited;
+
 		public static readonly string DedicatedDir = Utils.GetFullPathSafe("SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated");
 
 		private string sessionId;
@@ -134,7 +136,7 @@ namespace MultiAdmin
 
 		private void MainLoop()
 		{
-			while (GameProcess != null && !GameProcess.HasExited)
+			while (IsGameProcessRunning)
 			{
 				Stopwatch timer = Stopwatch.StartNew();
 
@@ -148,7 +150,8 @@ namespace MultiAdmin
 				if (Status == ServerStatus.Restarting && CheckRestartTimeout)
 				{
 					Write("Server restart timed out, killing the server process...", ConsoleColor.Red);
-					GameProcess.Kill();
+					if (IsGameProcessRunning)
+						GameProcess.Kill();
 				}
 
 				if (Status == ServerStatus.Stopping && CheckStopTimeout)
@@ -240,7 +243,8 @@ namespace MultiAdmin
 						"-silent-crashes",
 						"-nodedicateddelete",
 						$"-key{SessionId}",
-						$"-id{Process.GetCurrentProcess().Id}"
+						$"-id{Process.GetCurrentProcess().Id}",
+						$"-port{ServerConfig.Port}"
 					});
 
 					if (string.IsNullOrEmpty(ScpLogFile) || ServerConfig.NoLog)
@@ -270,11 +274,6 @@ namespace MultiAdmin
 					if (!string.IsNullOrEmpty(configLocation))
 					{
 						scpslArgs.Add($"-configpath \"{configLocation}\"");
-					}
-
-					if (ServerConfig.ServerOrGlobalConfigContains(MultiAdminConfig.PortKey))
-					{
-						scpslArgs.Add($"-port{ServerConfig.Port}");
 					}
 
 					scpslArgs.RemoveAll(string.IsNullOrEmpty);
@@ -332,7 +331,7 @@ namespace MultiAdmin
 					}
 
 					// Cleanup after exit from MainLoop
-					GameProcess.Close();
+					GameProcess.Dispose();
 					GameProcess = null;
 
 					inputReaderThread.Abort();
@@ -367,7 +366,7 @@ namespace MultiAdmin
 				if (f is IEventServerStop stopEvent)
 					stopEvent.OnServerStop();
 
-			if (killGame)
+			if (killGame && IsGameProcessRunning)
 				GameProcess.Kill();
 			else SendMessage("QUIT");
 		}
