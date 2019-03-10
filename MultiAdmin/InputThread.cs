@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
-using System.Windows.Forms;
 
 namespace MultiAdmin
 {
@@ -130,21 +129,7 @@ namespace MultiAdmin
 							break;
 
 						default:
-							if (key.Key == ConsoleKey.V && key.Modifiers == ConsoleModifiers.Control)
-							{
-								try
-								{
-									message = AddText(message, Clipboard.GetText(), messageCursor++);
-								}
-								catch
-								{
-									// ignored
-								}
-							}
-							else
-							{
-								message = AddText(message, key.KeyChar.ToString(), messageCursor++);
-							}
+							message = AddText(message, key.KeyChar.ToString(), messageCursor++);
 
 							break;
 					}
