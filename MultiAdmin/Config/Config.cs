@@ -2,8 +2,9 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text;
+using MultiAdmin.ConsoleTools;
 
-namespace MultiAdmin
+namespace MultiAdmin.Config
 {
 	public class Config
 	{
@@ -25,9 +26,9 @@ namespace MultiAdmin
 			{
 				ConfigPath = Utils.GetFullPathSafe(ConfigPath);
 			}
-			catch
+			catch (Exception e)
 			{
-				// ignored
+				Program.LogDebugException("ReadConfigFile", e);
 			}
 
 			try
@@ -65,9 +66,9 @@ namespace MultiAdmin
 				if (newValue.StartsWith("\"") && newValue.EndsWith("\""))
 					return newValue.Substring(1, newValue.Length - 2);
 			}
-			catch
+			catch (Exception e)
 			{
-				// ignored
+				Program.LogDebugException("CleanValue", e);
 			}
 
 			return newValue;
@@ -85,15 +86,15 @@ namespace MultiAdmin
 					{
 						return CleanValue(line.Substring(key.Length + 1));
 					}
-					catch
+					catch (Exception e)
 					{
-						// ignored
+						Program.LogDebugException("GetString", e);
 					}
 				}
 			}
-			catch
+			catch (Exception e)
 			{
-				// ignored
+				Program.LogDebugException("GetString", e);
 			}
 
 			return def;
@@ -111,15 +112,15 @@ namespace MultiAdmin
 					{
 						return line.Substring(key.Length + 1).Split(',').Select(CleanValue).ToArray();
 					}
-					catch
+					catch (Exception e)
 					{
-						// ignored
+						Program.LogDebugException("GetStringList", e);
 					}
 				}
 			}
-			catch
+			catch (Exception e)
 			{
-				// ignored
+				Program.LogDebugException("GetStringList", e);
 			}
 
 			return def;
@@ -134,9 +135,26 @@ namespace MultiAdmin
 				if (!string.IsNullOrEmpty(value) && int.TryParse(value, out int parseValue))
 					return parseValue;
 			}
-			catch
+			catch (Exception e)
 			{
-				// ignored
+				Program.LogDebugException("GetInt", e);
+			}
+
+			return def;
+		}
+
+		public uint GetUInt(string key, uint def = 0)
+		{
+			try
+			{
+				string value = GetString(key);
+
+				if (!string.IsNullOrEmpty(value) && uint.TryParse(value, out uint parseValue))
+					return parseValue;
+			}
+			catch (Exception e)
+			{
+				Program.LogDebugException("GetUInt", e);
 			}
 
 			return def;
@@ -151,9 +169,9 @@ namespace MultiAdmin
 				if (!string.IsNullOrEmpty(value) && float.TryParse(value, out float parsedValue))
 					return parsedValue;
 			}
-			catch
+			catch (Exception e)
 			{
-				// ignored
+				Program.LogDebugException("GetFloat", e);
 			}
 
 			return def;
@@ -168,9 +186,9 @@ namespace MultiAdmin
 				if (!string.IsNullOrEmpty(value) && bool.TryParse(value, out bool parsedValue))
 					return parsedValue;
 			}
-			catch
+			catch (Exception e)
 			{
-				// ignored
+				Program.LogDebugException("GetBool", e);
 			}
 
 			return def;

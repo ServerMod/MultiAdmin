@@ -1,3 +1,4 @@
+using System.Linq;
 using MultiAdmin.Features.Attributes;
 
 namespace MultiAdmin.Features
@@ -26,7 +27,7 @@ namespace MultiAdmin.Features
 
 		public void OnCall(string[] args)
 		{
-			if (args.Length == 0 || !args[0].ToLower().Equals("reload")) return;
+			if (!args.Any() || !args[0].ToLower().Equals("reload")) return;
 
 			Server.Write("Reloading configs...");
 

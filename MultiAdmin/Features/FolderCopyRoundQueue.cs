@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Linq;
 using MultiAdmin.Features.Attributes;
 
 namespace MultiAdmin.Features
@@ -14,7 +15,7 @@ namespace MultiAdmin.Features
 		{
 		}
 
-		public bool HasValidQueue => queue != null && queue.Length > 0;
+		public bool HasValidQueue => queue != null && queue.Any();
 
 		public void OnRoundEnd()
 		{

@@ -85,7 +85,14 @@ namespace MultiAdmin.Features
 				titleBar.Add(string.IsNullOrEmpty(Server.serverModBuild) ? $"SMod {Server.serverModVersion}" : $"SMod {Server.serverModVersion}-{Server.serverModBuild}");
 			}
 
-			Console.Title = string.Join(" | ", titleBar);
+			try
+			{
+				Console.Title = string.Join(" | ", titleBar);
+			}
+			catch (Exception e)
+			{
+				Program.LogDebugException("UpdateTitlebar", e);
+			}
 		}
 	}
 }

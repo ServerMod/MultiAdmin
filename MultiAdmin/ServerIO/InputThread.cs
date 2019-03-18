@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
+using MultiAdmin.ConsoleTools;
 
-namespace MultiAdmin
+namespace MultiAdmin.ServerIO
 {
 	public static class InputThread
 	{
@@ -28,8 +29,9 @@ namespace MultiAdmin
 				{
 					return Console.BufferWidth - (1 + InputPrefixLength);
 				}
-				catch
+				catch (Exception e)
 				{
+					Program.LogDebugException("SectionBufferWidth", e);
 					return 0;
 				}
 			}
@@ -67,7 +69,7 @@ namespace MultiAdmin
 					switch (key.Key)
 					{
 						case ConsoleKey.Backspace:
-							if (message.Length > 0)
+							if (message.Any())
 							{
 								message = SubText(message, messageCursor--);
 							}
@@ -75,7 +77,7 @@ namespace MultiAdmin
 							break;
 
 						case ConsoleKey.Delete:
-							if (message.Length > 0 && messageCursor < message.Length)
+							if (message.Any() && messageCursor < message.Length)
 							{
 								message = SubText(message, messageCursor + 1);
 							}
@@ -176,8 +178,9 @@ namespace MultiAdmin
 							else
 								SetCursor(messageCursor);
 						}
-						catch
+						catch (Exception e)
 						{
+							Program.LogDebugException("Write", e);
 							SetCursor(messageCursor);
 						}
 					}
@@ -191,7 +194,7 @@ namespace MultiAdmin
 				server.Write($">>> {message}", ConsoleColor.DarkMagenta);
 
 				string[] messageSplit = message.Split(Separator, StringSplitOptions.RemoveEmptyEntries);
-				if (messageSplit.Length == 0) continue;
+				if (!messageSplit.Any()) continue;
 
 				bool callServer = true;
 				server.commands.TryGetValue(messageSplit[0].ToLower().Trim(), out ICommand command);
@@ -214,10 +217,10 @@ namespace MultiAdmin
 		{
 			if (origString == null || textToAdd == null) return null;
 
-			if (origString.Length <= 0)
+			if (!origString.Any())
 				return textToAdd;
 
-			if (textToAdd.Length <= 0)
+			if (!textToAdd.Any())
 				return origString;
 
 			bool atEnd = index >= origString.Length;
@@ -243,9 +246,9 @@ namespace MultiAdmin
 			{
 				Console.CursorLeft = messageCursor + InputPrefixLength;
 			}
-			catch
+			catch (Exception e)
 			{
-				// ignored
+				Program.LogDebugException("SetCursor", e);
 			}
 		}
 
@@ -257,39 +260,42 @@ namespace MultiAdmin
 
 				List<ColoredMessage> output = new List<ColoredMessage> {InputPrefix};
 
-				bool displayTextSet = false;
-				try
+				if (!string.IsNullOrEmpty(input))
 				{
-					if (input.Length > SectionBufferWidth)
+					bool displayTextSet = false;
+					try
 					{
-						// Split the string into sections with side indicators
-						StringSections stringSections = GetStringSections(input, SectionBufferWidth, LeftSideIndicator, RightSideIndicator, BaseSection);
-
-						// Get the current section that the cursor is in (-1 so that the text before the cursor is displayed at an indicator)
-						if (stringSections.GetSection(messageCursor <= 0 ? 0 : messageCursor - 1) is StringSection section)
+						if (input.Length > SectionBufferWidth)
 						{
-							// Set the displayed input text to the section text
-							output.AddRange(section.Section);
-							displayTextSet = true;
-							// Get the relative point in the console that the cursor would be at based on the string index
-							messageCursor = section.GetRelativeIndex(messageCursor);
+							// Split the string into sections with side indicators
+							StringSections stringSections = GetStringSections(input, SectionBufferWidth, LeftSideIndicator, RightSideIndicator, BaseSection);
+
+							// Get the current section that the cursor is in (-1 so that the text before the cursor is displayed at an indicator)
+							if (stringSections.GetSection(messageCursor <= 0 ? 0 : messageCursor - 1) is StringSection section)
+							{
+								// Set the displayed input text to the section text
+								output.AddRange(section.Section);
+								displayTextSet = true;
+								// Get the relative point in the console that the cursor would be at based on the string index
+								messageCursor = section.GetRelativeIndex(messageCursor);
+							}
 						}
 					}
-				}
-				catch
-				{
-					// ignored
+					catch (Exception e)
+					{
+						Program.LogDebugException("WriteInput", e);
+					}
+
+					if (!displayTextSet)
+					{
+						ColoredMessage section = BaseSection.Clone();
+						section.text = input;
+
+						output.Add(section);
+					}
 				}
 
-				if (!displayTextSet)
-				{
-					ColoredMessage section = BaseSection.Clone();
-					section.text = input;
-
-					output.Add(section);
-				}
-
-				Program.ClearConsoleLine(output).Write();
+				ConsoleUtils.ClearConsoleLine(output).Write();
 
 				SetCursor(messageCursor);
 			}
@@ -347,7 +353,7 @@ namespace MultiAdmin
 			}
 
 			// If there's still text remaining in a section that hasn't been processed, add it as a section
-			if (curSecString.Length > 0)
+			if (curSecString.Any())
 			{
 				// Only decide for the left indicator, as this last section will always be the rightmost section
 				ColoredMessage leftIndicatorSection = sections.Count > 0 ? leftIndicator : null;
@@ -427,8 +433,8 @@ namespace MultiAdmin
 				Random random = new Random();
 				Array colors = Enum.GetValues(typeof(ConsoleColor));
 
-				ConsoleColor random1 = (ConsoleColor) colors.GetValue(random.Next(colors.Length));
-				ConsoleColor random2 = (ConsoleColor) colors.GetValue(random.Next(colors.Length));
+				ConsoleColor random1 = (ConsoleColor)colors.GetValue(random.Next(colors.Length));
+				ConsoleColor random2 = (ConsoleColor)colors.GetValue(random.Next(colors.Length));
 
 				BaseSection.textColor = random1;
 
@@ -436,9 +442,9 @@ namespace MultiAdmin
 				LeftSideIndicator.textColor = random2;
 				RightSideIndicator.textColor = random2;
 			}
-			catch
+			catch (Exception e)
 			{
-				// ignored
+				Program.LogDebugException("RandomizeInputColors", e);
 			}
 		}
 

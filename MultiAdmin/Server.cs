@@ -5,7 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using MultiAdmin.Config;
+using MultiAdmin.ConsoleTools;
 using MultiAdmin.Features.Attributes;
+using MultiAdmin.ServerIO;
 
 namespace MultiAdmin
 {
@@ -15,14 +18,15 @@ namespace MultiAdmin
 
 		public readonly List<Feature> features = new List<Feature>();
 
-		// we want a tick only list since its the only event that happens constantly, all the rest can be in a single list
+		// We want a tick only list since its the only event that happens constantly, all the rest can be in a single list
 		private readonly List<IEventTick> tick = new List<IEventTick>();
 
 		private readonly MultiAdminConfig serverConfig;
-		public MultiAdminConfig ServerConfig => serverConfig ?? new MultiAdminConfig();
+		public MultiAdminConfig ServerConfig => serverConfig ?? MultiAdminConfig.GlobalConfig;
 
 		public readonly string serverId;
 		public readonly string configLocation;
+		public readonly uint? port;
 		public readonly string serverDir;
 		public readonly string logDir;
 
@@ -36,17 +40,19 @@ namespace MultiAdmin
 		private DateTime initStopTimeoutTime;
 		private DateTime initRestartTimeoutTime;
 
-		public Server(string serverId = null, string configLocation = null)
+		public Server(string serverId = null, string configLocation = null, uint? port = null)
 		{
 			this.serverId = serverId;
-			serverDir = string.IsNullOrEmpty(this.serverId) ? null : Utils.GetFullPathSafe(MultiAdminConfig.GlobalServersFolder + Path.DirectorySeparatorChar + this.serverId);
+			serverDir = string.IsNullOrEmpty(this.serverId) ? null : Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.ServersFolder + Path.DirectorySeparatorChar + this.serverId);
 
-			this.configLocation = Utils.GetFullPathSafe(configLocation) ?? Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfigLocation) ?? Utils.GetFullPathSafe(serverDir);
+			this.configLocation = Utils.GetFullPathSafe(configLocation) ?? Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.ConfigLocation) ?? Utils.GetFullPathSafe(serverDir);
+
+			this.port = port;
 
 			logDir = Utils.GetFullPathSafe((string.IsNullOrEmpty(serverDir) ? string.Empty : serverDir + Path.DirectorySeparatorChar) + "logs");
 
 			// Load config
-			serverConfig = string.IsNullOrEmpty(this.configLocation) ? new MultiAdminConfig() : new MultiAdminConfig(this.configLocation + Path.DirectorySeparatorChar + MultiAdminConfig.ConfigFileName);
+			serverConfig = string.IsNullOrEmpty(this.configLocation) ? MultiAdminConfig.GlobalConfig : new MultiAdminConfig(this.configLocation + Path.DirectorySeparatorChar + MultiAdminConfig.ConfigFileName);
 
 			// Register all features
 			RegisterFeatures();
@@ -90,7 +96,7 @@ namespace MultiAdmin
 				startDateTime = value;
 
 				// Update related variables
-				LogDirFile = string.IsNullOrEmpty(value) ? null : logDir + Path.DirectorySeparatorChar + value + "_{0}_output_log.txt";
+				LogDirFile = string.IsNullOrEmpty(value) || string.IsNullOrEmpty(logDir) ? null : $"{logDir}{Path.DirectorySeparatorChar}{value}_{{0}}_output_log.txt";
 
 				lock (this)
 				{
@@ -169,7 +175,7 @@ namespace MultiAdmin
 		}
 
 		/// <summary>
-		///     Sends the string <paramref name="message" /> to the SCP: SL server process.
+		/// Sends the string <paramref name="message" /> to the SCP: SL server process.
 		/// </summary>
 		/// <param name="message"></param>
 		public void SendMessage(string message)
@@ -181,7 +187,7 @@ namespace MultiAdmin
 				return;
 			}
 
-			string file = SessionDirectory + Path.DirectorySeparatorChar + "cs" + logId + ".mapi";
+			string file = $"{SessionDirectory}{Path.DirectorySeparatorChar}cs{logId}.mapi";
 			if (File.Exists(file))
 			{
 				Write($"Send Message error: Sending {message} failed. \"{file}\" already exists!");
@@ -244,7 +250,7 @@ namespace MultiAdmin
 						"-nodedicateddelete",
 						$"-key{SessionId}",
 						$"-id{Process.GetCurrentProcess().Id}",
-						$"-port{ServerConfig.Port}"
+						$"-port{port ?? ServerConfig.Port}"
 					});
 
 					if (string.IsNullOrEmpty(ScpLogFile) || ServerConfig.NoLog)
@@ -412,10 +418,12 @@ namespace MultiAdmin
 		private static IEnumerable<Type> GetTypesWithAttribute(Type attribute)
 		{
 			foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-			foreach (Type type in assembly.GetTypes())
 			{
-				object[] attribs = type.GetCustomAttributes(attribute, false);
-				if (attribs.Length > 0) yield return type;
+				foreach (Type type in assembly.GetTypes())
+				{
+					object[] attributes = type.GetCustomAttributes(attribute, false);
+					if (attributes.Any()) yield return type;
+				}
 			}
 		}
 
@@ -423,15 +431,17 @@ namespace MultiAdmin
 		{
 			Type[] assembly = GetTypesWithAttribute(typeof(FeatureAttribute)).ToArray();
 			foreach (Type type in assembly)
+			{
 				try
 				{
 					object featureInstance = Activator.CreateInstance(type, this);
 					if (featureInstance is Feature feature) RegisterFeature(feature);
 				}
-				catch
+				catch (Exception e)
 				{
-					// ignored
+					Program.LogDebugException("RegisterFeatures", e);
 				}
+			}
 		}
 
 		private void InitFeatures()
@@ -477,12 +487,14 @@ namespace MultiAdmin
 						File.Delete(file);
 						break;
 					}
-					catch (UnauthorizedAccessException)
+					catch (UnauthorizedAccessException e)
 					{
+						Program.LogDebugException("CleanSession", e);
 						Thread.Sleep(5);
 					}
-					catch
+					catch (Exception e)
 					{
+						Program.LogDebugException("CleanSession", e);
 						Thread.Sleep(2);
 					}
 				}
@@ -502,12 +514,14 @@ namespace MultiAdmin
 					Directory.Delete(SessionDirectory);
 					break;
 				}
-				catch (UnauthorizedAccessException)
+				catch (UnauthorizedAccessException e)
 				{
+					Program.LogDebugException("DeleteSession", e);
 					Thread.Sleep(5);
 				}
-				catch
+				catch (Exception e)
 				{
+					Program.LogDebugException("DeleteSession", e);
 					Thread.Sleep(2);
 				}
 			}
@@ -529,7 +543,7 @@ namespace MultiAdmin
 
 				ColoredMessage[] timeStampedMessage = Utils.TimeStampMessage(messages, timeStampColor);
 
-				Program.ClearConsoleLine(timeStampedMessage).WriteLine();
+				ConsoleUtils.ClearConsoleLine(timeStampedMessage).WriteLine();
 				InputThread.WriteInput();
 			}
 		}

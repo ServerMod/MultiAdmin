@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using MultiAdmin.ConsoleTools;
 
 namespace MultiAdmin
 {
@@ -70,10 +71,10 @@ namespace MultiAdmin
 			if (input == null)
 				return false;
 
-			if (input.Length == 0 && pattern.Length == 0)
+			if (!input.Any() && !pattern.Any())
 				return true;
 
-			if (input.Length == 0 || pattern.Length == 0)
+			if (!input.Any() || !pattern.Any())
 				return false;
 
 			string[] wildCardSections = pattern.Split(WildCard);
@@ -81,7 +82,7 @@ namespace MultiAdmin
 			int matchIndex = 0;
 			foreach (string wildCardSection in wildCardSections)
 			{
-				if (wildCardSection.Length <= 0)
+				if (!wildCardSection.Any())
 					continue;
 
 				if (matchIndex < 0 || matchIndex >= pattern.Length)
@@ -106,9 +107,9 @@ namespace MultiAdmin
 				}
 			}
 
-			// new ColoredMessage($"Debug: Done matching. Matches = {matchIndex == input.Length || wildCardSections[wildCardSections.Length - 1].Length <= 0}.").WriteLine();
+			// new ColoredMessage($"Debug: Done matching. Matches = {matchIndex == input.Length || !wildCardSections[wildCardSections.Length - 1].Any()}.").WriteLine();
 
-			return matchIndex == input.Length || wildCardSections[wildCardSections.Length - 1].Length <= 0;
+			return matchIndex == input.Length || !wildCardSections[wildCardSections.Length - 1].Any();
 		}
 
 		private static bool FileNamesContains(IEnumerable<string> namePatterns, string input)
@@ -133,7 +134,7 @@ namespace MultiAdmin
 			// Copy each file into it's new directory.
 			foreach (FileInfo fi in source.GetFiles())
 			{
-				if (fileNames == null || fileNames.Length <= 0 || FileNamesContains(fileNames, fi.Name))
+				if (fileNames == null || !fileNames.Any() || FileNamesContains(fileNames, fi.Name))
 				{
 					// Console.WriteLine(@"Copying {0}\{1}", target.FullName, fi.Name);
 					fi.CopyTo(Path.Combine(target.ToString(), fi.Name), true);
@@ -143,7 +144,7 @@ namespace MultiAdmin
 			// Copy each subdirectory using recursion.
 			foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
 			{
-				if (fileNames == null || fileNames.Length <= 0 || FileNamesContains(fileNames, diSourceSubDir.Name))
+				if (fileNames == null || !fileNames.Any() || FileNamesContains(fileNames, diSourceSubDir.Name))
 				{
 					DirectoryInfo nextTargetSubDir =
 						target.CreateSubdirectory(diSourceSubDir.Name);

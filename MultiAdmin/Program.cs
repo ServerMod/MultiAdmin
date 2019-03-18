@@ -5,6 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using MultiAdmin.Config;
+using MultiAdmin.ConsoleTools;
+using MultiAdmin.ServerIO;
 
 namespace MultiAdmin
 {
@@ -14,15 +17,20 @@ namespace MultiAdmin
 
 		private static readonly List<Server> InstantiatedServers = new List<Server>();
 
+		private static readonly string MaDebugLogDir = Utils.GetFullPathSafe("logs");
+		private static readonly string MaDebugLogFile = !string.IsNullOrEmpty(MaDebugLogDir) ? Utils.GetFullPathSafe($"{MaDebugLogDir}{Path.DirectorySeparatorChar}{Utils.DateTime}_MA_{MaVersion}_debug_log.txt") : null;
+
+		private static uint? portArg;
+
 		#region Server Properties
 
-		public static Server[] Servers => ServerDirectories.Select(serverDir => new Server(Path.GetFileName(serverDir), serverDir)).ToArray();
+		public static Server[] Servers => ServerDirectories.Select(serverDir => new Server(Path.GetFileName(serverDir), serverDir, portArg)).ToArray();
 
 		public static string[] ServerDirectories
 		{
 			get
 			{
-				string globalServersFolder = MultiAdminConfig.GlobalServersFolder;
+				string globalServersFolder = MultiAdminConfig.GlobalConfig.ServersFolder;
 				return !Directory.Exists(globalServersFolder) ? new string[] { } : Directory.GetDirectories(globalServersFolder);
 			}
 		}
@@ -43,81 +51,48 @@ namespace MultiAdmin
 
 		public static bool Headless { get; private set; }
 
+		#region Output Printing & Logging
+
 		public static void Write(string message, ConsoleColor color = ConsoleColor.DarkYellow)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
 				if (Headless) return;
 
-				ClearConsoleLine(new ColoredMessage(Utils.TimeStampMessage(message), color)).WriteLine();
+				ConsoleUtils.ClearConsoleLine(new ColoredMessage(Utils.TimeStampMessage(message), color)).WriteLine();
 			}
 		}
 
-		#region Clear Console Line Methods
-
-		public static void ClearConsoleLine(int index, bool returnCursorPos = false)
+		private static bool IsDebugLogTagAllowed(string tag)
 		{
-			lock (ColoredConsole.WriteLock)
+			return !MultiAdminConfig.GlobalConfig.DebugLogBlacklist.Contains(tag) && (!MultiAdminConfig.GlobalConfig.DebugLogWhitelist.Any() || MultiAdminConfig.GlobalConfig.DebugLogWhitelist.Contains(tag));
+		}
+
+		public static void LogDebugException(string tag, Exception exception)
+		{
+			lock (MaDebugLogFile)
 			{
-				if (Headless) return;
+				if (tag == null || !IsDebugLogTagAllowed(tag)) return;
 
-				int lastCursor = 0;
-				try
-				{
-					lastCursor = returnCursorPos ? Console.CursorLeft : Console.WindowLeft;
-				}
-				catch
-				{
-					// ignored
-				}
-
-				try
-				{
-					Console.CursorLeft = index > Console.WindowWidth || index < Console.WindowWidth ? Console.WindowLeft : index;
-					Console.Write(new string(' ', Console.WindowWidth - Console.CursorLeft - 1));
-				}
-				catch
-				{
-					// ignored
-				}
-
-				try
-				{
-					Console.CursorLeft = lastCursor;
-				}
-				catch
-				{
-					// ignored
-				}
+				LogDebug($"Error in \"{tag}\":{Environment.NewLine}{exception}");
 			}
 		}
 
-		public static string ClearConsoleLine(string message)
+		public static void LogDebug(string message)
 		{
-			if (!string.IsNullOrEmpty(message))
-				ClearConsoleLine(message.Contains(Environment.NewLine) ? 0 : message.Length);
-			else
-				ClearConsoleLine(0);
+			lock (MaDebugLogFile)
+			{
+				if (!MultiAdminConfig.GlobalConfig.DebugLog || string.IsNullOrEmpty(MaDebugLogFile)) return;
 
-			return message;
-		}
+				Directory.CreateDirectory(MaDebugLogDir);
 
-		public static ColoredMessage ClearConsoleLine(ColoredMessage message)
-		{
-			ClearConsoleLine(message?.text);
-			return message;
-		}
-
-		public static ColoredMessage[] ClearConsoleLine(ColoredMessage[] message)
-		{
-			ClearConsoleLine(message?.GetText());
-			return message;
-		}
-
-		public static List<ColoredMessage> ClearConsoleLine(List<ColoredMessage> message)
-		{
-			ClearConsoleLine(message?.GetText());
-			return message;
+				using (StreamWriter sw = File.AppendText(MaDebugLogFile))
+				{
+					message = Utils.TimeStampMessage(message);
+					sw.Write(message);
+					if (!message.EndsWith(Environment.NewLine)) sw.WriteLine();
+				}
+			}
 		}
 
 		#endregion
@@ -125,6 +100,7 @@ namespace MultiAdmin
 		private static void OnExit(object sender, EventArgs e)
 		{
 			foreach (Server server in InstantiatedServers)
+			{
 				try
 				{
 					while (server.IsRunning)
@@ -133,10 +109,11 @@ namespace MultiAdmin
 						Thread.Sleep(10);
 					}
 				}
-				catch
+				catch (Exception ex)
 				{
-					// ignored
+					LogDebugException("OnExit", ex);
 				}
+			}
 		}
 
 		public static void Main()
@@ -147,41 +124,28 @@ namespace MultiAdmin
 
 			string serverIdArg = GetParamFromArgs("server-id", "id");
 			string configArg = GetParamFromArgs("config", "c");
+			portArg = uint.TryParse(GetParamFromArgs("port", "p"), out uint port) ? (uint?)port : null;
 
 			Server server = null;
 
 			if (!string.IsNullOrEmpty(serverIdArg) || !string.IsNullOrEmpty(configArg))
 			{
-				server = new Server(serverIdArg, configArg);
+				server = new Server(serverIdArg, configArg, portArg);
 
 				InstantiatedServers.Add(server);
 			}
 			else
 			{
-				if (Servers.Length <= 0)
-				{
-					server = new Server();
-
-					InstantiatedServers.Add(server);
-				}
-				else
+				if (Servers.Any())
 				{
 					Server[] autoStartServers = AutoStartServers;
 
-					if (autoStartServers.Length <= 0)
-					{
-						Write("No servers are set to automatically start, please enter a Server ID to start:");
-						InputThread.InputPrefix?.Write();
-
-						server = new Server(Console.ReadLine());
-
-						InstantiatedServers.Add(server);
-					}
-					else
+					if (autoStartServers.Any())
 					{
 						Write("Starting this instance in multi server mode...");
 
 						for (int i = 0; i < autoStartServers.Length; i++)
+						{
 							if (i == 0)
 							{
 								server = autoStartServers[i];
@@ -192,7 +156,23 @@ namespace MultiAdmin
 							{
 								StartServer(autoStartServers[i]);
 							}
+						}
 					}
+					else
+					{
+						Write("No servers are set to automatically start, please enter a Server ID to start:");
+						InputThread.InputPrefix?.Write();
+
+						server = new Server(Console.ReadLine(), port: portArg);
+
+						InstantiatedServers.Add(server);
+					}
+				}
+				else
+				{
+					server = new Server(port: portArg);
+
+					InstantiatedServers.Add(server);
 				}
 			}
 
@@ -216,7 +196,7 @@ namespace MultiAdmin
 
 		private static bool ArrayIsNullOrEmpty(ICollection<object> array)
 		{
-			return array == null || array.Count <= 0;
+			return array == null || !array.Any();
 		}
 
 		public static string GetParamFromArgs(string[] keys = null, string[] aliases = null)

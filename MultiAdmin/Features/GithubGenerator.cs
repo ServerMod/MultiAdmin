@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using MultiAdmin.Features.Attributes;
 
 namespace MultiAdmin.Features
@@ -28,7 +29,7 @@ namespace MultiAdmin.Features
 
 		public void OnCall(string[] args)
 		{
-			if (args.Length == 0)
+			if (!args.Any())
 			{
 				Server.Write("You must specify the location of the file.");
 				return;
