@@ -77,6 +77,7 @@
     <Compile Include="ConsoleTools\ColoredConsole.cs" />
     <Compile Include="Config\Config.cs" />
     <Compile Include="ConsoleTools\ConsoleUtils.cs" />
+    <Compile Include="ServerIO\StringSections.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Feature.cs" />
     <Compile Include="Features\Attributes\FeatureAttribute.cs" />
@@ -102,6 +103,7 @@
     <Compile Include="ServerIO\OutputHandler.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Server.cs" />
+    <Compile Include="ServerIO\ShiftingList.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup />

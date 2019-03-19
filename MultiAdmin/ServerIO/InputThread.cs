@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using MultiAdmin.ConsoleTools;
@@ -37,7 +36,8 @@ namespace MultiAdmin.ServerIO
 			}
 		}
 
-		public static string CurrentInput { get; private set; }
+		public static string CurrentMessage { get; private set; }
+		public static ColoredMessage[] CurrentInput { get; private set; } = {InputPrefix};
 		public static int CurrentCursor { get; private set; }
 
 		public static void Write(Server server)
@@ -59,6 +59,8 @@ namespace MultiAdmin.ServerIO
 				string message = string.Empty;
 				int messageCursor = 0;
 				int prevMessageCursor = -1;
+				StringSections curSections = null;
+				int lastSectionIndex = -1;
 				bool exitLoop = false;
 				while (!exitLoop)
 				{
@@ -71,7 +73,7 @@ namespace MultiAdmin.ServerIO
 						case ConsoleKey.Backspace:
 							if (message.Any())
 							{
-								message = SubText(message, messageCursor--);
+								message = message.Remove(--messageCursor, 1);
 							}
 
 							break;
@@ -79,7 +81,7 @@ namespace MultiAdmin.ServerIO
 						case ConsoleKey.Delete:
 							if (message.Any() && messageCursor < message.Length)
 							{
-								message = SubText(message, messageCursor + 1);
+								message = message.Remove(messageCursor, 1);
 							}
 
 							break;
@@ -131,8 +133,7 @@ namespace MultiAdmin.ServerIO
 							break;
 
 						default:
-							message = AddText(message, key.KeyChar.ToString(), messageCursor++);
-
+							message = message.Insert(messageCursor++, key.KeyChar.ToString());
 							break;
 					}
 
@@ -145,7 +146,8 @@ namespace MultiAdmin.ServerIO
 					if (exitLoop)
 					{
 						// Reset the current input parameters
-						CurrentInput = string.Empty;
+						CurrentMessage = null;
+						SetCurrentInput();
 						CurrentCursor = 0;
 
 						if (!string.IsNullOrEmpty(message))
@@ -162,31 +164,88 @@ namespace MultiAdmin.ServerIO
 					#region Input Printing Management
 
 					// If the message has changed, re-write it to the console
-					if (CurrentInput != message)
+					if (CurrentMessage != message)
 					{
-						WriteInput(message, messageCursor);
+						if (message.Length > SectionBufferWidth)
+						{
+							curSections = GetStringSections(message);
+
+							StringSection? curSection = curSections.GetSection(IndexMinusOne(messageCursor), out int sectionIndex);
+
+							if (curSection != null)
+							{
+								lastSectionIndex = sectionIndex;
+
+								SetCurrentInput(curSection.Value.Section);
+								CurrentCursor = curSection.Value.GetRelativeIndex(messageCursor);
+
+								WriteInputAndSetCursor();
+							}
+							else
+							{
+								server.Write("Error while processing input string: curSection is null!", ConsoleColor.Red);
+							}
+						}
+						else
+						{
+							curSections = null;
+
+							SetCurrentInput(message);
+							CurrentCursor = messageCursor;
+
+							WriteInputAndSetCursor();
+						}
 					}
 					else if (CurrentCursor != messageCursor)
 					{
 						try
 						{
 							// If the message length is longer than the buffer width (being cut into sections), re-write the message
-							if (message.Length > Console.BufferWidth - (1 + InputPrefixLength))
-								WriteInput(message, messageCursor);
+							if (curSections != null)
+							{
+								StringSection? curSection = curSections.GetSection(IndexMinusOne(messageCursor), out int sectionIndex);
 
-							// Otherwise only set the cursor position
+								if (curSection != null)
+								{
+									CurrentCursor = curSection.Value.GetRelativeIndex(messageCursor);
+
+									// If the cursor index is in a different section from the last section, fully re-draw it
+									if (lastSectionIndex != sectionIndex)
+									{
+										lastSectionIndex = sectionIndex;
+
+										SetCurrentInput(curSection.Value.Section);
+
+										WriteInputAndSetCursor();
+									}
+
+									// Otherwise, if only the relative cursor index has changed, set only the cursor
+									else
+									{
+										SetCursor();
+									}
+								}
+								else
+								{
+									server.Write("Error while processing input string: curSection is null!", ConsoleColor.Red);
+								}
+							}
 							else
-								SetCursor(messageCursor);
+							{
+								CurrentCursor = messageCursor;
+								SetCursor();
+							}
 						}
 						catch (Exception e)
 						{
 							Program.LogDebugException("Write", e);
-							SetCursor(messageCursor);
+
+							CurrentCursor = messageCursor;
+							SetCursor();
 						}
 					}
 
-					CurrentInput = message;
-					CurrentCursor = messageCursor;
+					CurrentMessage = message;
 
 					#endregion
 				}
@@ -207,220 +266,89 @@ namespace MultiAdmin.ServerIO
 				if (callServer) server.SendMessage(message);
 			}
 
-			CurrentInput = null;
+			CurrentMessage = null;
+			SetCurrentInput();
 			CurrentCursor = 0;
 		}
 
-		#region String Modification Methods
-
-		private static string AddText(string origString, string textToAdd, int index = 0)
+		public static void SetCurrentInput(params ColoredMessage[] coloredMessages)
 		{
-			if (origString == null || textToAdd == null) return null;
+			List<ColoredMessage> message = new List<ColoredMessage> {InputPrefix};
 
-			if (!origString.Any())
-				return textToAdd;
+			if (coloredMessages != null)
+				message.AddRange(coloredMessages);
 
-			if (!textToAdd.Any())
-				return origString;
-
-			bool atEnd = index >= origString.Length;
-			bool atStart = index <= 0;
-
-			return (atStart ? string.Empty : atEnd ? origString : origString.Remove(index)) + textToAdd + (atEnd ? string.Empty : atStart ? origString : origString.Substring(index));
+			CurrentInput = message.ToArray();
 		}
 
-		private static string SubText(string origString, int index = 1, int count = 1)
+		public static void SetCurrentInput(string message)
 		{
-			if (origString == null) return null;
+			ColoredMessage baseSection = BaseSection?.Clone();
 
-			return index <= 0 ? origString : origString.Remove(index >= origString.Length ? origString.Length - 1 : index - 1, count);
+			if (baseSection == null)
+				baseSection = new ColoredMessage(message);
+			else
+				baseSection.text = message;
+
+			SetCurrentInput(baseSection);
 		}
 
-		#endregion
+		private static StringSections GetStringSections(string message)
+		{
+			return StringSections.FromString(message, SectionBufferWidth, LeftSideIndicator, RightSideIndicator, BaseSection);
+		}
+
+		private static int IndexMinusOne(int index)
+		{
+			// Get the current section that the cursor is in (-1 so that the text before the cursor is displayed at an indicator)
+			return Math.Max(index - 1, 0);
+		}
 
 		#region Console Management Methods
 
-		private static void SetCursor(int messageCursor)
+		public static void SetCursor(int messageCursor)
 		{
-			try
+			lock (ColoredConsole.WriteLock)
 			{
-				Console.CursorLeft = messageCursor + InputPrefixLength;
-			}
-			catch (Exception e)
-			{
-				Program.LogDebugException("SetCursor", e);
+				try
+				{
+					Console.CursorLeft = messageCursor + InputPrefixLength;
+				}
+				catch (Exception e)
+				{
+					Program.LogDebugException("SetCursor", e);
+				}
 			}
 		}
 
-		public static void WriteInput(string input, int messageCursor)
+		public static void SetCursor()
+		{
+			SetCursor(CurrentCursor);
+		}
+
+		public static void WriteInput(ColoredMessage[] message)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
 				if (Program.Headless) return;
 
-				List<ColoredMessage> output = new List<ColoredMessage> {InputPrefix};
+				ConsoleUtils.ClearConsoleLine(message)?.Write();
 
-				if (!string.IsNullOrEmpty(input))
-				{
-					bool displayTextSet = false;
-					try
-					{
-						if (input.Length > SectionBufferWidth)
-						{
-							// Split the string into sections with side indicators
-							StringSections stringSections = GetStringSections(input, SectionBufferWidth, LeftSideIndicator, RightSideIndicator, BaseSection);
-
-							// Get the current section that the cursor is in (-1 so that the text before the cursor is displayed at an indicator)
-							if (stringSections.GetSection(messageCursor <= 0 ? 0 : messageCursor - 1) is StringSection section)
-							{
-								// Set the displayed input text to the section text
-								output.AddRange(section.Section);
-								displayTextSet = true;
-								// Get the relative point in the console that the cursor would be at based on the string index
-								messageCursor = section.GetRelativeIndex(messageCursor);
-							}
-						}
-					}
-					catch (Exception e)
-					{
-						Program.LogDebugException("WriteInput", e);
-					}
-
-					if (!displayTextSet)
-					{
-						ColoredMessage section = BaseSection.Clone();
-						section.text = input;
-
-						output.Add(section);
-					}
-				}
-
-				ConsoleUtils.ClearConsoleLine(output).Write();
-
-				SetCursor(messageCursor);
+				CurrentInput = message;
 			}
 		}
 
 		public static void WriteInput()
 		{
-			WriteInput(CurrentInput, CurrentCursor);
+			WriteInput(CurrentInput);
 		}
 
-		#endregion
-
-		#region String Sectioning Methods & Structs
-
-		private static StringSections GetStringSections(string fullString, int sectionLength, ColoredMessage leftIndicator, ColoredMessage rightIndicator, ColoredMessage sectionBase)
+		public static void WriteInputAndSetCursor()
 		{
-			List<StringSection> sections = new List<StringSection>();
-
-			// If the section base message is null, create a default one
-			if (sectionBase == null)
-				sectionBase = new ColoredMessage(null);
-
-			// The starting index of the current section being created
-			int sectionStartIndex = 0;
-
-			// The text of the current section being created
-			string curSecString = string.Empty;
-
-			for (int i = 0; i < fullString.Length; i++)
+			lock (ColoredConsole.WriteLock)
 			{
-				curSecString += fullString[i];
-
-				// If the section is less than the smallest possible section size, skip processing
-				if (curSecString.Length < sectionLength - ((leftIndicator?.Length ?? 0) + (rightIndicator?.Length ?? 0))) continue;
-
-				// Decide what the left indicator text should be accounting for the leftmost section
-				ColoredMessage leftIndicatorSection = sections.Count > 0 ? leftIndicator : null;
-				// Decide what the right indicator text should be accounting for the rightmost section
-				ColoredMessage rightIndicatorSection = i < fullString.Length - (1 + (rightIndicator?.Length ?? 0)) ? rightIndicator : null;
-
-				// Check the section length against the final section length
-				if (curSecString.Length >= sectionLength - ((leftIndicatorSection?.Length ?? 0) + (rightIndicatorSection?.Length ?? 0)))
-				{
-					// Copy the section base message and replace the text
-					ColoredMessage section = sectionBase.Clone();
-					section.text = curSecString;
-
-					// Instantiate the section with the final parameters
-					sections.Add(new StringSection(section, leftIndicatorSection, rightIndicatorSection, sectionStartIndex, i));
-
-					// Reset the current section being worked on
-					curSecString = string.Empty;
-					sectionStartIndex = i + 1;
-				}
-			}
-
-			// If there's still text remaining in a section that hasn't been processed, add it as a section
-			if (curSecString.Any())
-			{
-				// Only decide for the left indicator, as this last section will always be the rightmost section
-				ColoredMessage leftIndicatorSection = sections.Count > 0 ? leftIndicator : null;
-
-				// Copy the section base message and replace the text
-				ColoredMessage section = sectionBase.Clone();
-				section.text = curSecString;
-
-				// Instantiate the section with the final parameters
-				sections.Add(new StringSection(section, leftIndicatorSection, null, sectionStartIndex, fullString.Length));
-			}
-
-			return new StringSections(sections.ToArray());
-		}
-
-		private struct StringSections
-		{
-			public StringSection[] Sections { get; }
-
-			public StringSections(StringSection[] sections)
-			{
-				Sections = sections;
-			}
-
-			public StringSection? GetSection(int index)
-			{
-				foreach (StringSection stringSection in Sections)
-				{
-					if (stringSection.IsWithinSection(index))
-						return stringSection;
-				}
-
-				return null;
-			}
-		}
-
-		private struct StringSection
-		{
-			public ColoredMessage Text { get; }
-
-			public ColoredMessage LeftIndicator { get; }
-			public ColoredMessage RightIndicator { get; }
-
-			public ColoredMessage[] Section => new ColoredMessage[] {LeftIndicator, Text, RightIndicator};
-
-			public int MinIndex { get; }
-			public int MaxIndex { get; }
-
-			public StringSection(ColoredMessage text, ColoredMessage leftIndicator, ColoredMessage rightIndicator, int minIndex, int maxIndex)
-			{
-				Text = text;
-
-				LeftIndicator = leftIndicator;
-				RightIndicator = rightIndicator;
-
-				MinIndex = minIndex;
-				MaxIndex = maxIndex;
-			}
-
-			public bool IsWithinSection(int index)
-			{
-				return index >= MinIndex && index <= MaxIndex;
-			}
-
-			public int GetRelativeIndex(int index)
-			{
-				return index - MinIndex + (LeftIndicator?.Length ?? 0);
+				WriteInput();
+				SetCursor();
 			}
 		}
 
@@ -446,56 +374,6 @@ namespace MultiAdmin.ServerIO
 			{
 				Program.LogDebugException("RandomizeInputColors", e);
 			}
-		}
-
-		public class ShiftingList : ReadOnlyCollection<string>
-		{
-			public int MaxCount { get; }
-
-			public ShiftingList(int maxCount) : base(new List<string>(maxCount))
-			{
-				if (maxCount <= 0)
-					throw new ArgumentException("The maximum index count can not be less than or equal to zero.");
-
-				MaxCount = maxCount;
-			}
-
-			private void LimitLength()
-			{
-				while (Items.Count > MaxCount)
-				{
-					Items.RemoveAt(Items.Count - 1);
-				}
-			}
-
-			public void Add(string item, int index = 0)
-			{
-				lock (Items)
-				{
-					Items.Insert(index, item);
-
-					LimitLength();
-				}
-			}
-
-			/*
-			public void Remove(int index)
-			{
-				lock (Items)
-				{
-					Items.RemoveAt(index);
-				}
-			}
-
-			public void Replace(string item, int index = 0)
-			{
-				lock (Items)
-				{
-					Remove(index);
-					Add(item, index);
-				}
-			}
-			*/
 		}
 	}
 }

@@ -20,18 +20,17 @@ namespace MultiAdmin.ConsoleTools
 
 				try
 				{
-					int lastCursor = returnCursorPos ? Console.CursorLeft : 0;
-					int newCursor = IsIndexWithinBuffer(index) ? index : 0;
+					int cursorReturnIndex = returnCursorPos ? Console.CursorLeft : 0;
 
-					if (newCursor != lastCursor)
-						Console.CursorLeft = newCursor;
+					Console.CursorLeft = IsIndexWithinBuffer(index) ? index : 0;
 
 					int charCount = Console.BufferWidth - Console.CursorLeft - 1;
 					if (charCount > 0)
+					{
 						Console.Write(new string(' ', charCount));
+					}
 
-					if (newCursor != lastCursor)
-						Console.CursorLeft = lastCursor;
+					Console.CursorLeft = cursorReturnIndex;
 				}
 				catch (Exception e)
 				{

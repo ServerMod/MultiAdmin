@@ -544,7 +544,7 @@ namespace MultiAdmin
 				ColoredMessage[] timeStampedMessage = Utils.TimeStampMessage(messages, timeStampColor);
 
 				ConsoleUtils.ClearConsoleLine(timeStampedMessage).WriteLine();
-				InputThread.WriteInput();
+				InputThread.WriteInputAndSetCursor();
 			}
 		}
 
