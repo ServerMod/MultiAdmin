@@ -71,18 +71,14 @@ namespace MultiAdmin.ServerIO
 					switch (key.Key)
 					{
 						case ConsoleKey.Backspace:
-							if (message.Any())
-							{
+							if (messageCursor > 0 && message.Any())
 								message = message.Remove(--messageCursor, 1);
-							}
 
 							break;
 
 						case ConsoleKey.Delete:
-							if (message.Any() && messageCursor < message.Length)
-							{
+							if (messageCursor >= 0 && messageCursor < message.Length)
 								message = message.Remove(messageCursor, 1);
-							}
 
 							break;
 
