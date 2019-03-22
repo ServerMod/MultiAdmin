@@ -91,4 +91,3 @@ start_config_on_full | String | **Empty** | Start server with this config folder
 
 ## Upcoming Features
 - Support for running multiple server instances in one MultiAdmin instance
-- Printing speed configuration option
