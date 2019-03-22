@@ -1,3 +1,4 @@
+using System.Linq;
 using MultiAdmin.Features.Attributes;
 
 namespace MultiAdmin.Features
@@ -13,7 +14,7 @@ namespace MultiAdmin.Features
 
 		public void OnCall(string[] args)
 		{
-			if (args.Length > 0)
+			if (args.Any())
 			{
 				string serverId = string.Join(" ", args);
 

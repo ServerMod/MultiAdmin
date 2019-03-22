@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using MultiAdmin.Features.Attributes;
 
 namespace MultiAdmin.Features
@@ -28,7 +29,7 @@ namespace MultiAdmin.Features
 			foreach (KeyValuePair<string, ICommand> command in Server.commands)
 			{
 				string usage = command.Value.GetUsage();
-				if (usage.Length > 0) usage = " " + usage;
+				if (usage.Any()) usage = " " + usage;
 				string output = $"{command.Key.ToUpper()}{usage}: {command.Value.GetCommandDescription()}";
 				helpOutput.Add(output);
 			}

@@ -35,6 +35,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -44,6 +45,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>MultiAdmin.Program</StartupObject>
@@ -51,6 +53,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -71,14 +74,17 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ColoredConsole.cs" />
-    <Compile Include="Config.cs" />
+    <Compile Include="ConsoleTools\ColoredConsole.cs" />
+    <Compile Include="Config\Config.cs" />
+    <Compile Include="ConsoleTools\ConsoleUtils.cs" />
+    <Compile Include="ServerIO\StringSections.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Feature.cs" />
     <Compile Include="Features\Attributes\FeatureAttribute.cs" />
     <Compile Include="Features\ConfigReload.cs" />
     <Compile Include="Features\EventTest.cs" />
     <Compile Include="Features\ExitCommand.cs" />
+    <Compile Include="Features\FolderCopyRoundQueue.cs" />
     <Compile Include="Features\GithubGenerator.cs" />
     <Compile Include="Features\HelpCommand.cs" />
     <Compile Include="Features\InactivityShutdown.cs" />
@@ -91,13 +97,15 @@
     <Compile Include="Features\RestartRoundCounter.cs" />
     <Compile Include="Features\StopNextRound.cs" />
     <Compile Include="Features\TitleBar.cs" />
-    <Compile Include="InputThread.cs" />
+    <Compile Include="ServerIO\InputThread.cs" />
     <Compile Include="Interfaces.cs" />
-    <Compile Include="MultiAdminConfig.cs" />
-    <Compile Include="OutputHandler.cs" />
+    <Compile Include="Config\MultiAdminConfig.cs" />
+    <Compile Include="ServerIO\OutputHandler.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Server.cs" />
+    <Compile Include="ServerIO\ShiftingList.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

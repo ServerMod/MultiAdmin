@@ -5,24 +5,32 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using MultiAdmin.Config;
+using MultiAdmin.ConsoleTools;
+using MultiAdmin.ServerIO;
 
 namespace MultiAdmin
 {
 	public static class Program
 	{
-		public const string MaVersion = "3.0.0";
+		public const string MaVersion = "3.1.0";
 
 		private static readonly List<Server> InstantiatedServers = new List<Server>();
 
+		private static readonly string MaDebugLogDir = Utils.GetFullPathSafe("logs");
+		private static readonly string MaDebugLogFile = !string.IsNullOrEmpty(MaDebugLogDir) ? Utils.GetFullPathSafe($"{MaDebugLogDir}{Path.DirectorySeparatorChar}{Utils.DateTime}_MA_{MaVersion}_debug_log.txt") : null;
+
+		private static uint? portArg;
+
 		#region Server Properties
 
-		public static Server[] Servers => ServerDirectories.Select(serverDir => new Server(Path.GetFileName(serverDir), serverDir)).ToArray();
+		public static Server[] Servers => ServerDirectories.Select(serverDir => new Server(Path.GetFileName(serverDir), serverDir, portArg)).ToArray();
 
 		public static string[] ServerDirectories
 		{
 			get
 			{
-				string globalServersFolder = MultiAdminConfig.GlobalServersFolder;
+				string globalServersFolder = MultiAdminConfig.GlobalConfig.ServersFolder;
 				return !Directory.Exists(globalServersFolder) ? new string[] { } : Directory.GetDirectories(globalServersFolder);
 			}
 		}
@@ -43,19 +51,56 @@ namespace MultiAdmin
 
 		public static bool Headless { get; private set; }
 
+		#region Output Printing & Logging
+
 		public static void Write(string message, ConsoleColor color = ConsoleColor.DarkYellow)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
 				if (Headless) return;
 
-				new ColoredMessage(Utils.TimeStampMessage(message), color).WriteLine();
+				ConsoleUtils.ClearConsoleLine(new ColoredMessage(Utils.TimeStampMessage(message), color)).WriteLine();
 			}
 		}
+
+		private static bool IsDebugLogTagAllowed(string tag)
+		{
+			return !MultiAdminConfig.GlobalConfig.DebugLogBlacklist.Contains(tag) && (!MultiAdminConfig.GlobalConfig.DebugLogWhitelist.Any() || MultiAdminConfig.GlobalConfig.DebugLogWhitelist.Contains(tag));
+		}
+
+		public static void LogDebugException(string tag, Exception exception)
+		{
+			lock (MaDebugLogFile)
+			{
+				if (tag == null || !IsDebugLogTagAllowed(tag)) return;
+
+				LogDebug($"Error in \"{tag}\":{Environment.NewLine}{exception}");
+			}
+		}
+
+		public static void LogDebug(string message)
+		{
+			lock (MaDebugLogFile)
+			{
+				if (!MultiAdminConfig.GlobalConfig.DebugLog || string.IsNullOrEmpty(MaDebugLogFile)) return;
+
+				Directory.CreateDirectory(MaDebugLogDir);
+
+				using (StreamWriter sw = File.AppendText(MaDebugLogFile))
+				{
+					message = Utils.TimeStampMessage(message);
+					sw.Write(message);
+					if (!message.EndsWith(Environment.NewLine)) sw.WriteLine();
+				}
+			}
+		}
+
+		#endregion
 
 		private static void OnExit(object sender, EventArgs e)
 		{
 			foreach (Server server in InstantiatedServers)
+			{
 				try
 				{
 					while (server.IsRunning)
@@ -64,54 +109,70 @@ namespace MultiAdmin
 						Thread.Sleep(10);
 					}
 				}
-				catch
+				catch (Exception ex)
 				{
-					// ignored
+					LogDebugException("OnExit", ex);
 				}
+			}
 		}
 
 		public static void Main()
 		{
 			AppDomain.CurrentDomain.ProcessExit += OnExit;
 
-			Headless = ArgsContainsParam("headless", "h");
+			Headless = GetFlagFromArgs("headless", "h");
 
 			string serverIdArg = GetParamFromArgs("server-id", "id");
 			string configArg = GetParamFromArgs("config", "c");
+			portArg = uint.TryParse(GetParamFromArgs("port", "p"), out uint port) ? (uint?)port : null;
 
 			Server server = null;
 
 			if (!string.IsNullOrEmpty(serverIdArg) || !string.IsNullOrEmpty(configArg))
 			{
-				server = new Server(serverIdArg, configArg);
+				server = new Server(serverIdArg, configArg, portArg);
 
 				InstantiatedServers.Add(server);
 			}
 			else
 			{
-				Server[] autoStartServers = AutoStartServers;
-
-				if (autoStartServers.Length <= 0)
+				if (Servers.Any())
 				{
-					server = new Server();
+					Server[] autoStartServers = AutoStartServers;
 
-					InstantiatedServers.Add(server);
+					if (autoStartServers.Any())
+					{
+						Write("Starting this instance in multi server mode...");
+
+						for (int i = 0; i < autoStartServers.Length; i++)
+						{
+							if (i == 0)
+							{
+								server = autoStartServers[i];
+
+								InstantiatedServers.Add(server);
+							}
+							else
+							{
+								StartServer(autoStartServers[i]);
+							}
+						}
+					}
+					else
+					{
+						Write("No servers are set to automatically start, please enter a Server ID to start:");
+						InputThread.InputPrefix?.Write();
+
+						server = new Server(Console.ReadLine(), port: portArg);
+
+						InstantiatedServers.Add(server);
+					}
 				}
 				else
 				{
-					Write("Starting this instance in multi server mode...");
+					server = new Server(port: portArg);
 
-					for (int i = 0; i < autoStartServers.Length; i++)
-						if (i == 0)
-						{
-							server = autoStartServers[i];
-
-							InstantiatedServers.Add(server);
-						}
-						else
-						{
-							StartServer(autoStartServers[i]);
-						}
+					InstantiatedServers.Add(server);
 				}
 			}
 
@@ -133,27 +194,91 @@ namespace MultiAdmin
 			}
 		}
 
-		public static string GetParamFromArgs(string key = null, string alias = null)
+		private static bool ArrayIsNullOrEmpty(ICollection<object> array)
 		{
-			if (string.IsNullOrEmpty(key) && string.IsNullOrEmpty(alias)) return null;
+			return array == null || !array.Any();
+		}
+
+		public static string GetParamFromArgs(string[] keys = null, string[] aliases = null)
+		{
+			if (ArrayIsNullOrEmpty(keys) && ArrayIsNullOrEmpty(aliases)) return null;
 
 			string[] args = Environment.GetCommandLineArgs();
 
 			for (int i = 0; i < args.Length - 1; i++)
 			{
-				string arg = args[i].ToLower();
+				string lowArg = args[i]?.ToLower();
 
-				if (!string.IsNullOrEmpty(key) && arg == $"--{key.ToLower()}" || !string.IsNullOrEmpty(alias) && arg == $"-{alias.ToLower()}") return args[i + 1];
+				if (string.IsNullOrEmpty(lowArg)) continue;
+
+				if (!ArrayIsNullOrEmpty(keys))
+				{
+					if (keys.Any(key => !string.IsNullOrEmpty(key) && lowArg == $"--{key.ToLower()}"))
+					{
+						return args[i + 1];
+					}
+				}
+
+				if (!ArrayIsNullOrEmpty(aliases))
+				{
+					if (aliases.Any(alias => !string.IsNullOrEmpty(alias) && lowArg == $"-{alias.ToLower()}"))
+					{
+						return args[i + 1];
+					}
+				}
 			}
 
 			return null;
 		}
 
+		public static bool ArgsContainsParam(string[] keys = null, string[] aliases = null)
+		{
+			foreach (string arg in Environment.GetCommandLineArgs())
+			{
+				string lowArg = arg?.ToLower();
+
+				if (string.IsNullOrEmpty(lowArg)) continue;
+
+				if (!ArrayIsNullOrEmpty(keys))
+				{
+					if (keys.Any(key => !string.IsNullOrEmpty(key) && lowArg == $"--{key.ToLower()}"))
+					{
+						return true;
+					}
+				}
+
+				if (!ArrayIsNullOrEmpty(aliases))
+				{
+					if (aliases.Any(alias => !string.IsNullOrEmpty(alias) && lowArg == $"-{alias.ToLower()}"))
+					{
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
+
+		public static bool GetFlagFromArgs(string[] keys = null, string[] aliases = null)
+		{
+			if (ArrayIsNullOrEmpty(keys) && ArrayIsNullOrEmpty(aliases)) return false;
+
+			return bool.TryParse(GetParamFromArgs(keys, aliases), out bool result) ? result : ArgsContainsParam(keys, aliases);
+		}
+
+		public static string GetParamFromArgs(string key = null, string alias = null)
+		{
+			return GetParamFromArgs(new string[] {key}, new string[] {alias});
+		}
+
 		public static bool ArgsContainsParam(string key = null, string alias = null)
 		{
-			if (string.IsNullOrEmpty(key) && string.IsNullOrEmpty(alias)) return false;
+			return ArgsContainsParam(new string[] {key}, new string[] {alias});
+		}
 
-			return Environment.GetCommandLineArgs().Select(arg => arg.ToLower()).Any(lowArg => !string.IsNullOrEmpty(key) && lowArg == $"--{key.ToLower()}" || !string.IsNullOrEmpty(alias) && lowArg == $"-{alias.ToLower()}");
+		public static bool GetFlagFromArgs(string key = null, string alias = null)
+		{
+			return GetFlagFromArgs(new string[] {key}, new string[] {alias});
 		}
 
 		public static void StartServer(Server server)

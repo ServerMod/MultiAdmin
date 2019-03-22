@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using MultiAdmin.ConsoleTools;
 
 namespace MultiAdmin
 {
@@ -29,30 +32,130 @@ namespace MultiAdmin
 			return string.IsNullOrEmpty(message) ? message : $"{TimeStamp} {message}";
 		}
 
-		public static ColoredMessage TimeStampMessage(ColoredMessage message)
-		{
-			if (message?.text == null) return null;
-
-			ColoredMessage clone = message.Clone();
-			clone.text = TimeStampMessage(clone.text);
-			return clone;
-		}
-
-		public static ColoredMessage[] TimeStampMessage(ColoredMessage[] message, ConsoleColor color = ConsoleColor.Black)
+		public static ColoredMessage[] TimeStampMessage(ColoredMessage[] message, ConsoleColor color = ConsoleColor.White)
 		{
 			if (message == null) return null;
 
 			ColoredMessage[] newMessage = new ColoredMessage[message.Length + 1];
 			newMessage[0] = new ColoredMessage($"{TimeStamp} ", color);
 
-			for (int i = 0; i < message.Length; i++) newMessage[i + 1] = message[i].Clone();
+			for (int i = 0; i < message.Length; i++)
+				newMessage[i + 1] = message[i]?.Clone();
 
 			return newMessage;
+		}
+
+		public static ColoredMessage[] TimeStampMessage(ColoredMessage message, ConsoleColor color = ConsoleColor.White)
+		{
+			return TimeStampMessage(new ColoredMessage[] {message}, color);
 		}
 
 		public static string GetFullPathSafe(string path)
 		{
 			return !string.IsNullOrEmpty(path) && !string.IsNullOrEmpty(path.Trim()) ? Path.GetFullPath(path) : null;
+		}
+
+		private const char WildCard = '*';
+
+		private static bool StringMatches(string input, string pattern)
+		{
+			if (input == null && pattern == null)
+				return true;
+
+			if (pattern == null)
+				return false;
+
+			if (pattern == new string(WildCard, pattern.Length))
+				return true;
+
+			if (input == null)
+				return false;
+
+			if (!input.Any() && !pattern.Any())
+				return true;
+
+			if (!input.Any() || !pattern.Any())
+				return false;
+
+			string[] wildCardSections = pattern.Split(WildCard);
+
+			int matchIndex = 0;
+			foreach (string wildCardSection in wildCardSections)
+			{
+				if (!wildCardSection.Any())
+					continue;
+
+				if (matchIndex < 0 || matchIndex >= pattern.Length)
+					return false;
+
+				try
+				{
+					// new ColoredMessage($"Debug: Matching \"{wildCardSection}\" with \"{input.Substring(matchIndex)}\"...").WriteLine();
+
+					matchIndex = input.IndexOf(wildCardSection, matchIndex);
+
+					if (matchIndex < 0)
+						return false;
+
+					matchIndex += wildCardSection.Length;
+
+					// new ColoredMessage($"Debug: Match found! Match end index at {matchIndex}.").WriteLine();
+				}
+				catch
+				{
+					return false;
+				}
+			}
+
+			// new ColoredMessage($"Debug: Done matching. Matches = {matchIndex == input.Length || !wildCardSections[wildCardSections.Length - 1].Any()}.").WriteLine();
+
+			return matchIndex == input.Length || !wildCardSections[wildCardSections.Length - 1].Any();
+		}
+
+		private static bool FileNamesContains(IEnumerable<string> namePatterns, string input)
+		{
+			return namePatterns != null && namePatterns.Any(namePattern => StringMatches(input, namePattern));
+		}
+
+		// Copied from https://docs.microsoft.com/en-us/dotnet/api/system.io.directoryinfo?view=netframework-4.7.2 with small modifications
+		public static void CopyAll(DirectoryInfo source, DirectoryInfo target, params string[] fileNames)
+		{
+			if (source.FullName == target.FullName)
+			{
+				return;
+			}
+
+			// Check if the target directory exists, if not, create it.
+			if (Directory.Exists(target.FullName) == false)
+			{
+				Directory.CreateDirectory(target.FullName);
+			}
+
+			// Copy each file into it's new directory.
+			foreach (FileInfo fi in source.GetFiles())
+			{
+				if (fileNames == null || !fileNames.Any() || FileNamesContains(fileNames, fi.Name))
+				{
+					// Console.WriteLine(@"Copying {0}\{1}", target.FullName, fi.Name);
+					fi.CopyTo(Path.Combine(target.ToString(), fi.Name), true);
+				}
+			}
+
+			// Copy each subdirectory using recursion.
+			foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
+			{
+				if (fileNames == null || !fileNames.Any() || FileNamesContains(fileNames, diSourceSubDir.Name))
+				{
+					DirectoryInfo nextTargetSubDir =
+						target.CreateSubdirectory(diSourceSubDir.Name);
+					CopyAll(diSourceSubDir, nextTargetSubDir);
+				}
+			}
+		}
+
+		public static void CopyAll(string source, string target, params string[] fileNames)
+		{
+			CopyAll(new DirectoryInfo(source), new DirectoryInfo(target), fileNames);
 		}
 	}
 }

@@ -2,8 +2,9 @@ using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
+using MultiAdmin.ConsoleTools;
 
-namespace MultiAdmin
+namespace MultiAdmin.ServerIO
 {
 	public class OutputHandler : IDisposable
 	{
@@ -19,18 +20,28 @@ namespace MultiAdmin
 		{
 			try
 			{
-				return (ConsoleColor) Enum.Parse(typeof(ConsoleColor), color);
+				return (ConsoleColor)Enum.Parse(typeof(ConsoleColor), color);
 			}
-			catch
+			catch (Exception e)
 			{
+				Program.LogDebugException("MapConsoleColor", e);
 				return def;
 			}
 		}
 
 		public OutputHandler(Server server)
 		{
-			if (string.IsNullOrEmpty(server.SessionDirectory))
+			if (server == null)
+			{
+				Program.Write("Error in OutputHandler - Server server is null!", ConsoleColor.Red);
 				return;
+			}
+
+			if (string.IsNullOrEmpty(server.SessionDirectory))
+			{
+				server.Write($"Missing session directory! Output is not being watched... (SessionDirectory = \"{server.SessionDirectory ?? "null"}\" SessionId = \"{server.SessionId ?? "null"}\" DedicatedDir = \"{Server.DedicatedDir ?? "null"}\")", ConsoleColor.Red);
+				return;
+			}
 
 			fsWatcher = new FileSystemWatcher {Path = server.SessionDirectory};
 
@@ -58,9 +69,9 @@ namespace MultiAdmin
 			{
 				ProcessFile(server, e.FullPath);
 			}
-			catch
+			catch (Exception ex)
 			{
-				// ignored
+				Program.LogDebugException("OnMapiCreated", ex);
 			}
 		}
 
@@ -75,35 +86,36 @@ namespace MultiAdmin
 			lock (this)
 			{
 				for (int attempts = 0; attempts < 100 && server.IsRunning; attempts++)
+				{
 					try
 					{
 						if (!File.Exists(file)) return;
 
 						// Lock the file to prevent it from being modified further, or read by another instance
-						using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None))
+						using (StreamReader sr = new StreamReader(new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None)))
 						{
-							using (StreamReader sr = new StreamReader(fs))
-							{
-								command = "read";
-								stream = sr.ReadToEnd();
-							}
-
-							command = "delete";
-							File.Delete(file);
+							command = "read";
+							stream = sr.ReadToEnd();
 
 							isRead = true;
 						}
 
+						command = "delete";
+						File.Delete(file);
+
 						break;
 					}
-					catch (UnauthorizedAccessException)
+					catch (UnauthorizedAccessException e)
 					{
+						Program.LogDebugException("ProcessFile", e);
 						Thread.Sleep(5);
 					}
-					catch
+					catch (Exception e)
 					{
+						Program.LogDebugException("ProcessFile", e);
 						Thread.Sleep(2);
 					}
+				}
 			}
 
 			if (!isRead)

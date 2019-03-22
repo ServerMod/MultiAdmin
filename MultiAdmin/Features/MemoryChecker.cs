@@ -8,65 +8,80 @@ namespace MultiAdmin.Features
 	{
 		private const long BytesInMegabyte = 1048576L;
 
-		private long lowBytes;
-		private long lowBytesSoft;
-
-		private long maxBytes;
-
 		private uint tickCount;
 		private uint tickCountSoft;
 
 		private const uint MaxTicks = 10;
 		private const uint MaxTicksSoft = 10;
 
-		// Memory Checker Soft
 		private bool restart;
-		private bool warnedSoft;
 
 		public MemoryChecker(Server server) : base(server)
 		{
 		}
 
-		private long LowMb
+		#region Memory Values
+
+		public long LowBytes { get; set; }
+		public long LowBytesSoft { get; set; }
+
+		public long MaxBytes { get; set; }
+
+		public long MemoryUsedBytes => Server.IsGameProcessRunning ? Server.GameProcess.WorkingSet64 : 0;
+		public long MemoryLeftBytes => MaxBytes - MemoryUsedBytes;
+
+		public float LowMb
 		{
-			get => lowBytes / BytesInMegabyte;
-			set => lowBytes = value * BytesInMegabyte;
+			get => LowBytes / (float) BytesInMegabyte;
+			set => LowBytes = (long) (value * BytesInMegabyte);
 		}
 
-		private long LowMbSoft
+		public float LowMbSoft
 		{
-			get => lowBytesSoft / BytesInMegabyte;
-			set => lowBytesSoft = value * BytesInMegabyte;
+			get => LowBytesSoft / (float) BytesInMegabyte;
+			set => LowBytesSoft = (long) (value * BytesInMegabyte);
 		}
 
-		private long MaxMb
+		public float MaxMb
 		{
-			get => maxBytes / BytesInMegabyte;
-			set => maxBytes = value * BytesInMegabyte;
+			get => MaxBytes / (float) BytesInMegabyte;
+			set => MaxBytes = (long) (value * BytesInMegabyte);
 		}
+
+		public float MemoryUsedMb => MemoryUsedBytes / (float) BytesInMegabyte;
+		public float MemoryLeftMb => MemoryLeftBytes / (float) BytesInMegabyte;
+
+		//public decimal DecimalMemoryUsedMb => DecimalDivide(MemoryUsedBytes, BytesInMegabyte, 2);
+		public decimal DecimalMemoryLeftMb => DecimalDivide(MemoryLeftBytes, BytesInMegabyte, 2);
+
+		private static decimal DecimalDivide(long numerator, long denominator, int decimals)
+		{
+			return decimal.Round(new decimal(numerator) / new decimal(denominator), decimals);
+		}
+
+		#endregion
 
 		public void OnRoundEnd()
 		{
-			if (!restart) return;
+			if (!restart || Server.Status == ServerStatus.Restarting) return;
 
 			Server.Write("Restarting due to low memory (Round End)...", ConsoleColor.Red);
 
 			Server.SoftRestartServer();
-			restart = false;
-			warnedSoft = false;
+
+			Init();
 		}
 
 		public void OnTick()
 		{
-			if (lowBytes < 0 && lowBytesSoft < 0 || maxBytes < 0) return;
+			if (LowBytes < 0 && LowBytesSoft < 0 || MaxBytes < 0) return;
 
-			Server.GameProcess.Refresh();
-			long workingMemory = Server.GameProcess.WorkingSet64; // Process memory in bytes
-			long memoryLeft = maxBytes - workingMemory;
+			if (Server.IsGameProcessRunning)
+				Server.GameProcess.Refresh();
 
-			if (memoryLeft <= lowBytes)
+			if (tickCount < MaxTicks && LowBytes >= 0 && MemoryLeftBytes <= LowBytes)
 			{
-				Server.Write($"Warning: Program is running low on memory ({memoryLeft / BytesInMegabyte} MB left), the server will restart if it continues",
+				Server.Write($"Warning: Program is running low on memory ({DecimalMemoryLeftMb} MB left), the server will restart if it continues",
 					ConsoleColor.Red);
 				tickCount++;
 			}
@@ -75,10 +90,10 @@ namespace MultiAdmin.Features
 				tickCount = 0;
 			}
 
-			if (memoryLeft <= lowBytesSoft && tickCount > 0)
+			if (!restart && tickCountSoft < MaxTicksSoft && LowBytesSoft >= 0 && MemoryLeftBytes <= LowBytesSoft)
 			{
 				Server.Write(
-					$"Warning: Program is running low on memory ({memoryLeft / BytesInMegabyte} MB left), the server will restart at the end of the round if it continues",
+					$"Warning: Program is running low on memory ({DecimalMemoryLeftMb} MB left), the server will restart at the end of the round if it continues",
 					ConsoleColor.Red);
 				tickCountSoft++;
 			}
@@ -87,6 +102,8 @@ namespace MultiAdmin.Features
 				tickCountSoft = 0;
 			}
 
+			if (Server.Status == ServerStatus.Restarting) return;
+
 			if (tickCount >= MaxTicks)
 			{
 				Server.Write("Restarting due to low memory...", ConsoleColor.Red);
@@ -94,18 +111,19 @@ namespace MultiAdmin.Features
 
 				restart = false;
 			}
-			else if (tickCountSoft >= MaxTicksSoft)
+			else if (!restart && tickCountSoft >= MaxTicksSoft)
 			{
-				if (!warnedSoft)
-					Server.Write("Server will restart at the end of the round due to low memory");
+				Server.Write("Server will restart at the end of the round due to low memory");
 
 				restart = true;
-				warnedSoft = true;
 			}
 		}
 
 		public override void Init()
 		{
+			tickCount = 0;
+			tickCountSoft = 0;
+
 			restart = false;
 		}
 

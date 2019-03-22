@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
-namespace MultiAdmin
+namespace MultiAdmin.ConsoleTools
 {
 	public class ColoredConsole
 	{
@@ -14,13 +15,16 @@ namespace MultiAdmin
 			{
 				if (text == null) return;
 
+				ConsoleColor lastFore = Console.ForegroundColor;
+				ConsoleColor lastBack = Console.BackgroundColor;
+
 				Console.ForegroundColor = textColor;
 				Console.BackgroundColor = backgroundColor;
 
 				Console.Write(text);
 
-				Console.ForegroundColor = ConsoleColor.White;
-				Console.BackgroundColor = ConsoleColor.Black;
+				Console.ForegroundColor = lastFore;
+				Console.BackgroundColor = lastBack;
 			}
 		}
 
@@ -28,8 +32,7 @@ namespace MultiAdmin
 		{
 			lock (WriteLock)
 			{
-				if (text != null)
-					Write(text, textColor, backgroundColor);
+				Write(text, textColor, backgroundColor);
 
 				Console.WriteLine();
 			}
@@ -39,7 +42,11 @@ namespace MultiAdmin
 		{
 			lock (WriteLock)
 			{
-				foreach (ColoredMessage coloredMessage in message) Write(coloredMessage.text, coloredMessage.textColor, coloredMessage.backgroundColor);
+				foreach (ColoredMessage coloredMessage in message)
+				{
+					if (coloredMessage != null)
+						Write(coloredMessage.text, coloredMessage.textColor, coloredMessage.backgroundColor);
+				}
 			}
 		}
 
@@ -68,6 +75,8 @@ namespace MultiAdmin
 		public ConsoleColor textColor;
 		public ConsoleColor backgroundColor;
 
+		public int Length => text?.Length ?? 0;
+
 		public ColoredMessage(string text, ConsoleColor textColor = ConsoleColor.White, ConsoleColor backgroundColor = ConsoleColor.Black)
 		{
 			this.text = text;
@@ -82,7 +91,7 @@ namespace MultiAdmin
 
 		public ColoredMessage Clone()
 		{
-			return new ColoredMessage(text.Clone() as string, textColor, backgroundColor);
+			return new ColoredMessage(text?.Clone() as string, textColor, backgroundColor);
 		}
 
 		object ICloneable.Clone()
@@ -103,9 +112,22 @@ namespace MultiAdmin
 
 	public static class ColoredMessageEnumerableExtensions
 	{
+		private static string JoinTextIgnoreNull(IEnumerable<object> objects)
+		{
+			StringBuilder builder = new StringBuilder(string.Empty);
+
+			foreach (object o in objects)
+			{
+				if (o != null)
+					builder.Append(o);
+			}
+
+			return builder.ToString();
+		}
+
 		public static string GetText(this IEnumerable<ColoredMessage> message)
 		{
-			return string.Join("", message);
+			return JoinTextIgnoreNull(message);
 		}
 
 		public static void Write(this IEnumerable<ColoredMessage> message)

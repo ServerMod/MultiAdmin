@@ -14,7 +14,7 @@ namespace MultiAdmin.Features
 
 		public void OnAdminAction(string message)
 		{
-			if (!logToOwnFile || string.IsNullOrEmpty(Server.ModLogFile)) return;
+			if (!logToOwnFile || string.IsNullOrEmpty(Server.ModLogFile) || Server.ServerConfig.NoLog) return;
 
 			lock (this)
 			{

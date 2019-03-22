@@ -16,7 +16,7 @@ namespace MultiAdmin.Features
 
 		public void OnWaitingForPlayers()
 		{
-			queueStartTime = DateTime.UtcNow;
+			queueStartTime = DateTime.Now;
 			waiting = true;
 		}
 
@@ -29,7 +29,7 @@ namespace MultiAdmin.Features
 		{
 			if (waitFor > 0 && waiting)
 			{
-				int elapsed = (DateTime.UtcNow - queueStartTime).Seconds;
+				int elapsed = (DateTime.Now - queueStartTime).Seconds;
 
 				if (elapsed >= waitFor)
 				{
@@ -41,7 +41,7 @@ namespace MultiAdmin.Features
 
 		public override void Init()
 		{
-			queueStartTime = DateTime.UtcNow;
+			queueStartTime = DateTime.Now;
 		}
 
 		public override void OnConfigReload()
