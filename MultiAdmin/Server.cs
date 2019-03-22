@@ -56,8 +56,6 @@ namespace MultiAdmin
 
 			// Register all features
 			RegisterFeatures();
-
-			ReloadConfig();
 		}
 
 		#region Server Status
@@ -222,6 +220,9 @@ namespace MultiAdmin
 
 				try
 				{
+					// Reload the config immediately as server is starting
+					ReloadConfig();
+
 					// Create session directory
 					PrepareSession();
 
@@ -543,8 +544,10 @@ namespace MultiAdmin
 
 				ColoredMessage[] timeStampedMessage = Utils.TimeStampMessage(messages, timeStampColor);
 
-				ConsoleUtils.ClearConsoleLine(timeStampedMessage).WriteLine();
-				InputThread.WriteInputAndSetCursor();
+				timeStampedMessage.WriteLine(ServerConfig.UseNewInputSystem);
+
+				if (ServerConfig.UseNewInputSystem)
+					InputThread.WriteInputAndSetCursor();
 			}
 		}
 
@@ -595,11 +598,6 @@ namespace MultiAdmin
 					if (!message.EndsWith(Environment.NewLine)) sw.WriteLine();
 				}
 			}
-		}
-
-		public void Log(ColoredMessage message)
-		{
-			Log(message?.text);
 		}
 
 		#endregion
