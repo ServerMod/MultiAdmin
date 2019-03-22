@@ -306,6 +306,8 @@ namespace MultiAdmin.ServerIO
 		{
 			lock (ColoredConsole.WriteLock)
 			{
+				if (Program.Headless) return;
+				
 				try
 				{
 					Console.CursorLeft = messageCursor + InputPrefixLength;
