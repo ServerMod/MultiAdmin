@@ -89,9 +89,9 @@ namespace MultiAdmin.Config
 		#endregion
 
 		public const string ConfigFileName = "scp_multiadmin.cfg";
-		public static readonly string ConfigFilePath = Utils.GetFullPathSafe(ConfigFileName);
+		public static readonly string GlobalConfigFilePath = Utils.GetFullPathSafe(ConfigFileName);
 
-		public static readonly MultiAdminConfig GlobalConfig = new MultiAdminConfig(ConfigFilePath, null);
+		public static readonly MultiAdminConfig GlobalConfig = new MultiAdminConfig(GlobalConfigFilePath, null);
 
 		public MultiAdminConfig ParentConfig { get; }
 		public Config Config { get; }

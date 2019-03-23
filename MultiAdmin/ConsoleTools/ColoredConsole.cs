@@ -103,9 +103,7 @@ namespace MultiAdmin.ConsoleTools
 		{
 			lock (ColoredConsole.WriteLock)
 			{
-				if (clearConsoleLine)
-
-					ColoredConsole.Write(this);
+				ColoredConsole.Write(clearConsoleLine ? ConsoleUtils.ClearConsoleLine(this) : this);
 			}
 		}
 

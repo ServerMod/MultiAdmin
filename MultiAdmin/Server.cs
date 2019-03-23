@@ -220,6 +220,16 @@ namespace MultiAdmin
 
 				try
 				{
+					#region Startup Info Printing & Logging
+
+					if (!string.IsNullOrEmpty(MultiAdminConfig.GlobalConfigFilePath))
+						Write($"Using global config \"{MultiAdminConfig.GlobalConfigFilePath}\"...");
+
+					if (!string.IsNullOrEmpty(configLocation) && !string.IsNullOrEmpty(ServerConfig?.Config?.ConfigPath))
+						Write($"Using server config \"{ServerConfig.Config.ConfigPath}\"...");
+
+					#endregion
+
 					// Reload the config immediately as server is starting
 					ReloadConfig();
 
