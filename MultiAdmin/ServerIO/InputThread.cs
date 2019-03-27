@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using MultiAdmin.Config;
 using MultiAdmin.ConsoleTools;
 
 namespace MultiAdmin.ServerIO
@@ -52,199 +53,9 @@ namespace MultiAdmin.ServerIO
 					continue;
 				}
 
-				if (server.ServerConfig.RandomInputColors)
-					RandomizeInputColors();
+				string message = server.ServerConfig.UseNewInputSystem ? GetInputLineNew(server, prevMessages) : Console.ReadLine();
 
-				string curMessage = string.Empty;
-				string message = string.Empty;
-				int messageCursor = 0;
-				int prevMessageCursor = -1;
-				StringSections curSections = null;
-				int lastSectionIndex = -1;
-				bool exitLoop = false;
-				while (!exitLoop)
-				{
-					#region Key Press Handling
-
-					ConsoleKeyInfo key = Console.ReadKey(true);
-
-					switch (key.Key)
-					{
-						case ConsoleKey.Backspace:
-							if (messageCursor > 0 && message.Any())
-								message = message.Remove(--messageCursor, 1);
-
-							break;
-
-						case ConsoleKey.Delete:
-							if (messageCursor >= 0 && messageCursor < message.Length)
-								message = message.Remove(messageCursor, 1);
-
-							break;
-
-						case ConsoleKey.Enter:
-							exitLoop = true;
-							break;
-
-						case ConsoleKey.UpArrow:
-							prevMessageCursor++;
-							if (prevMessageCursor >= prevMessages.Count)
-								prevMessageCursor = prevMessages.Count - 1;
-
-							message = prevMessageCursor < 0 ? curMessage : prevMessages[prevMessageCursor];
-
-							break;
-
-						case ConsoleKey.DownArrow:
-							prevMessageCursor--;
-							if (prevMessageCursor < -1)
-								prevMessageCursor = -1;
-
-							message = prevMessageCursor < 0 ? curMessage : prevMessages[prevMessageCursor];
-
-							break;
-
-						case ConsoleKey.LeftArrow:
-							messageCursor--;
-							break;
-
-						case ConsoleKey.RightArrow:
-							messageCursor++;
-							break;
-
-						case ConsoleKey.Home:
-							messageCursor = 0;
-							break;
-
-						case ConsoleKey.End:
-							messageCursor = message.Length;
-							break;
-
-						case ConsoleKey.PageUp:
-							messageCursor -= SectionBufferWidth - (LeftSideIndicatorLength + RightSideIndicatorLength);
-							break;
-
-						case ConsoleKey.PageDown:
-							messageCursor += SectionBufferWidth - (LeftSideIndicatorLength + RightSideIndicatorLength);
-							break;
-
-						default:
-							message = message.Insert(messageCursor++, key.KeyChar.ToString());
-							break;
-					}
-
-					#endregion
-
-					if (prevMessageCursor < 0)
-						curMessage = message;
-
-					// If the input is done and should exit the loop, this will cause the loop to be exited and the input to be processed
-					if (exitLoop)
-					{
-						// Reset the current input parameters
-						CurrentMessage = null;
-						SetCurrentInput();
-						CurrentCursor = 0;
-
-						if (!string.IsNullOrEmpty(message))
-							prevMessages.Add(message);
-
-						break;
-					}
-
-					if (messageCursor < 0)
-						messageCursor = 0;
-					else if (messageCursor > message.Length)
-						messageCursor = message.Length;
-
-					#region Input Printing Management
-
-					// If the message has changed, re-write it to the console
-					if (CurrentMessage != message)
-					{
-						if (message.Length > SectionBufferWidth)
-						{
-							curSections = GetStringSections(message);
-
-							StringSection? curSection = curSections.GetSection(IndexMinusOne(messageCursor), out int sectionIndex);
-
-							if (curSection != null)
-							{
-								lastSectionIndex = sectionIndex;
-
-								SetCurrentInput(curSection.Value.Section);
-								CurrentCursor = curSection.Value.GetRelativeIndex(messageCursor);
-
-								WriteInputAndSetCursor();
-							}
-							else
-							{
-								server.Write("Error while processing input string: curSection is null!", ConsoleColor.Red);
-							}
-						}
-						else
-						{
-							curSections = null;
-
-							SetCurrentInput(message);
-							CurrentCursor = messageCursor;
-
-							WriteInputAndSetCursor();
-						}
-					}
-					else if (CurrentCursor != messageCursor)
-					{
-						try
-						{
-							// If the message length is longer than the buffer width (being cut into sections), re-write the message
-							if (curSections != null)
-							{
-								StringSection? curSection = curSections.GetSection(IndexMinusOne(messageCursor), out int sectionIndex);
-
-								if (curSection != null)
-								{
-									CurrentCursor = curSection.Value.GetRelativeIndex(messageCursor);
-
-									// If the cursor index is in a different section from the last section, fully re-draw it
-									if (lastSectionIndex != sectionIndex)
-									{
-										lastSectionIndex = sectionIndex;
-
-										SetCurrentInput(curSection.Value.Section);
-
-										WriteInputAndSetCursor();
-									}
-
-									// Otherwise, if only the relative cursor index has changed, set only the cursor
-									else
-									{
-										SetCursor();
-									}
-								}
-								else
-								{
-									server.Write("Error while processing input string: curSection is null!", ConsoleColor.Red);
-								}
-							}
-							else
-							{
-								CurrentCursor = messageCursor;
-								SetCursor();
-							}
-						}
-						catch (Exception e)
-						{
-							Program.LogDebugException("Write", e);
-
-							CurrentCursor = messageCursor;
-							SetCursor();
-						}
-					}
-
-					CurrentMessage = message;
-
-					#endregion
-				}
+				if (string.IsNullOrEmpty(message)) continue;
 
 				server.Write($">>> {message}", ConsoleColor.DarkMagenta);
 
@@ -262,6 +73,208 @@ namespace MultiAdmin.ServerIO
 				if (callServer) server.SendMessage(message);
 			}
 
+			ResetInputParams();
+		}
+
+		public static string GetInputLineNew(Server server, ShiftingList prevMessages)
+		{
+			if (server.ServerConfig.RandomInputColors)
+				RandomizeInputColors();
+
+			string curMessage = string.Empty;
+			string message = string.Empty;
+			int messageCursor = 0;
+			int prevMessageCursor = -1;
+			StringSections curSections = null;
+			int lastSectionIndex = -1;
+			bool exitLoop = false;
+			while (!exitLoop)
+			{
+				#region Key Press Handling
+
+				ConsoleKeyInfo key = Console.ReadKey(true);
+
+				switch (key.Key)
+				{
+					case ConsoleKey.Backspace:
+						if (messageCursor > 0 && message.Any())
+							message = message.Remove(--messageCursor, 1);
+
+						break;
+
+					case ConsoleKey.Delete:
+						if (messageCursor >= 0 && messageCursor < message.Length)
+							message = message.Remove(messageCursor, 1);
+
+						break;
+
+					case ConsoleKey.Enter:
+						exitLoop = true;
+						break;
+
+					case ConsoleKey.UpArrow:
+						prevMessageCursor++;
+						if (prevMessageCursor >= prevMessages.Count)
+							prevMessageCursor = prevMessages.Count - 1;
+
+						message = prevMessageCursor < 0 ? curMessage : prevMessages[prevMessageCursor];
+
+						break;
+
+					case ConsoleKey.DownArrow:
+						prevMessageCursor--;
+						if (prevMessageCursor < -1)
+							prevMessageCursor = -1;
+
+						message = prevMessageCursor < 0 ? curMessage : prevMessages[prevMessageCursor];
+
+						break;
+
+					case ConsoleKey.LeftArrow:
+						messageCursor--;
+						break;
+
+					case ConsoleKey.RightArrow:
+						messageCursor++;
+						break;
+
+					case ConsoleKey.Home:
+						messageCursor = 0;
+						break;
+
+					case ConsoleKey.End:
+						messageCursor = message.Length;
+						break;
+
+					case ConsoleKey.PageUp:
+						messageCursor -= SectionBufferWidth - (LeftSideIndicatorLength + RightSideIndicatorLength);
+						break;
+
+					case ConsoleKey.PageDown:
+						messageCursor += SectionBufferWidth - (LeftSideIndicatorLength + RightSideIndicatorLength);
+						break;
+
+					default:
+						message = message.Insert(messageCursor++, key.KeyChar.ToString());
+						break;
+				}
+
+				#endregion
+
+				if (prevMessageCursor < 0)
+					curMessage = message;
+
+				// If the input is done and should exit the loop, this will cause the loop to be exited and the input to be processed
+				if (exitLoop)
+				{
+					// Reset the current input parameters
+					ResetInputParams();
+
+					if (!string.IsNullOrEmpty(message))
+						prevMessages.Add(message);
+
+					return message;
+				}
+
+				if (messageCursor < 0)
+					messageCursor = 0;
+				else if (messageCursor > message.Length)
+					messageCursor = message.Length;
+
+				#region Input Printing Management
+
+				// If the message has changed, re-write it to the console
+				if (CurrentMessage != message)
+				{
+					if (message.Length > SectionBufferWidth)
+					{
+						curSections = GetStringSections(message);
+
+						StringSection? curSection = curSections.GetSection(IndexMinusOne(messageCursor), out int sectionIndex);
+
+						if (curSection != null)
+						{
+							lastSectionIndex = sectionIndex;
+
+							SetCurrentInput(curSection.Value.Section);
+							CurrentCursor = curSection.Value.GetRelativeIndex(messageCursor);
+
+							WriteInputAndSetCursor();
+						}
+						else
+						{
+							server.Write("Error while processing input string: curSection is null!", ConsoleColor.Red);
+						}
+					}
+					else
+					{
+						curSections = null;
+
+						SetCurrentInput(message);
+						CurrentCursor = messageCursor;
+
+						WriteInputAndSetCursor();
+					}
+				}
+				else if (CurrentCursor != messageCursor)
+				{
+					try
+					{
+						// If the message length is longer than the buffer width (being cut into sections), re-write the message
+						if (curSections != null)
+						{
+							StringSection? curSection = curSections.GetSection(IndexMinusOne(messageCursor), out int sectionIndex);
+
+							if (curSection != null)
+							{
+								CurrentCursor = curSection.Value.GetRelativeIndex(messageCursor);
+
+								// If the cursor index is in a different section from the last section, fully re-draw it
+								if (lastSectionIndex != sectionIndex)
+								{
+									lastSectionIndex = sectionIndex;
+
+									SetCurrentInput(curSection.Value.Section);
+
+									WriteInputAndSetCursor();
+								}
+
+								// Otherwise, if only the relative cursor index has changed, set only the cursor
+								else
+								{
+									SetCursor();
+								}
+							}
+							else
+							{
+								server.Write("Error while processing input string: curSection is null!", ConsoleColor.Red);
+							}
+						}
+						else
+						{
+							CurrentCursor = messageCursor;
+							SetCursor();
+						}
+					}
+					catch (Exception e)
+					{
+						Program.LogDebugException("Write", e);
+
+						CurrentCursor = messageCursor;
+						SetCursor();
+					}
+				}
+
+				CurrentMessage = message;
+
+				#endregion
+			}
+
+			return null;
+		}
+
+		public static void ResetInputParams()
+		{
 			CurrentMessage = null;
 			SetCurrentInput();
 			CurrentCursor = 0;
@@ -307,7 +320,7 @@ namespace MultiAdmin.ServerIO
 			lock (ColoredConsole.WriteLock)
 			{
 				if (Program.Headless) return;
-				
+
 				try
 				{
 					Console.CursorLeft = messageCursor + InputPrefixLength;
@@ -330,7 +343,7 @@ namespace MultiAdmin.ServerIO
 			{
 				if (Program.Headless) return;
 
-				ConsoleUtils.ClearConsoleLine(message)?.Write();
+				message?.Write(MultiAdminConfig.GlobalConfig.UseNewInputSystem);
 
 				CurrentInput = message;
 			}

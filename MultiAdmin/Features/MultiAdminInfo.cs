@@ -50,13 +50,13 @@ namespace MultiAdmin.Features
 
 		public void PrintInfo()
 		{
-			Server.Write("MultiAdmin (https://github.com/Grover-c13/MultiAdmin/)", ConsoleColor.DarkMagenta);
+			Server.Write($"MultiAdmin v{Program.MaVersion} (https://github.com/Grover-c13/MultiAdmin/)", ConsoleColor.DarkMagenta);
 			Server.Write("Released under CC-BY-SA 4.0", ConsoleColor.DarkMagenta);
 		}
 
 		public override string GetFeatureDescription()
 		{
-			return "Prints MultiAdmin license information";
+			return "Prints MultiAdmin license and version information";
 		}
 
 		public override string GetFeatureName()

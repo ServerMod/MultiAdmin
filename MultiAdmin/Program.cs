@@ -13,7 +13,7 @@ namespace MultiAdmin
 {
 	public static class Program
 	{
-		public const string MaVersion = "3.1.0";
+		public const string MaVersion = "3.1.1";
 
 		private static readonly List<Server> InstantiatedServers = new List<Server>();
 
@@ -59,7 +59,7 @@ namespace MultiAdmin
 			{
 				if (Headless) return;
 
-				ConsoleUtils.ClearConsoleLine(new ColoredMessage(Utils.TimeStampMessage(message), color)).WriteLine();
+				new ColoredMessage(Utils.TimeStampMessage(message), color).WriteLine(MultiAdminConfig.GlobalConfig.UseNewInputSystem);
 			}
 		}
 
@@ -74,21 +74,21 @@ namespace MultiAdmin
 			{
 				if (tag == null || !IsDebugLogTagAllowed(tag)) return;
 
-				LogDebug($"Error in \"{tag}\":{Environment.NewLine}{exception}");
+				LogDebug(tag, $"Error in \"{tag}\":{Environment.NewLine}{exception}");
 			}
 		}
 
-		public static void LogDebug(string message)
+		public static void LogDebug(string tag, string message)
 		{
 			lock (MaDebugLogFile)
 			{
-				if (!MultiAdminConfig.GlobalConfig.DebugLog || string.IsNullOrEmpty(MaDebugLogFile)) return;
+				if (!MultiAdminConfig.GlobalConfig.DebugLog || string.IsNullOrEmpty(MaDebugLogFile) || tag == null || !IsDebugLogTagAllowed(tag)) return;
 
 				Directory.CreateDirectory(MaDebugLogDir);
 
 				using (StreamWriter sw = File.AppendText(MaDebugLogFile))
 				{
-					message = Utils.TimeStampMessage(message);
+					message = Utils.TimeStampMessage($"[{tag}] {message}");
 					sw.Write(message);
 					if (!message.EndsWith(Environment.NewLine)) sw.WriteLine();
 				}

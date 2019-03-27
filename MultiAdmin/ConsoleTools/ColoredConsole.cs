@@ -99,14 +99,20 @@ namespace MultiAdmin.ConsoleTools
 			return Clone();
 		}
 
-		public void Write()
+		public void Write(bool clearConsoleLine = false)
 		{
-			ColoredConsole.Write(this);
+			lock (ColoredConsole.WriteLock)
+			{
+				ColoredConsole.Write(clearConsoleLine ? ConsoleUtils.ClearConsoleLine(this) : this);
+			}
 		}
 
-		public void WriteLine()
+		public void WriteLine(bool clearConsoleLine = false)
 		{
-			ColoredConsole.WriteLine(this);
+			lock (ColoredConsole.WriteLock)
+			{
+				ColoredConsole.WriteLine(clearConsoleLine ? ConsoleUtils.ClearConsoleLine(this) : this);
+			}
 		}
 	}
 
@@ -130,19 +136,28 @@ namespace MultiAdmin.ConsoleTools
 			return JoinTextIgnoreNull(message);
 		}
 
-		public static void Write(this IEnumerable<ColoredMessage> message)
+		public static void Write(this IEnumerable<ColoredMessage> message, bool clearConsoleLine = false)
 		{
-			ColoredConsole.Write(message.ToArray());
+			lock (ColoredConsole.WriteLock)
+			{
+				ColoredConsole.Write(clearConsoleLine ? ConsoleUtils.ClearConsoleLine(message.ToArray()) : message.ToArray());
+			}
 		}
 
-		public static void WriteLine(this IEnumerable<ColoredMessage> message)
+		public static void WriteLine(this IEnumerable<ColoredMessage> message, bool clearConsoleLine = false)
 		{
-			ColoredConsole.WriteLine(message.ToArray());
+			lock (ColoredConsole.WriteLock)
+			{
+				ColoredConsole.WriteLine(clearConsoleLine ? ConsoleUtils.ClearConsoleLine(message.ToArray()) : message.ToArray());
+			}
 		}
 
-		public static void WriteLines(this IEnumerable<ColoredMessage> message)
+		public static void WriteLines(this IEnumerable<ColoredMessage> message, bool clearConsoleLine = false)
 		{
-			ColoredConsole.WriteLines(message.ToArray());
+			lock (ColoredConsole.WriteLock)
+			{
+				ColoredConsole.WriteLines(clearConsoleLine ? ConsoleUtils.ClearConsoleLine(message.ToArray()) : message.ToArray());
+			}
 		}
 	}
 }

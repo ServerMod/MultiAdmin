@@ -67,9 +67,10 @@ config_location | String | **Empty** | The default location for the game to use 
 disable_config_validation | Boolean | False | Disable the config validator
 share_non_configs | Boolean | True | Makes all files other than the config files store in AppData
 multiadmin_nolog | Boolean | False | Disable logging to file
-multiadmin_debug_log | Boolean | False | Enables MultiAdmin debug logging, this logs to a separate file than any other logs
-multiadmin_debug_log_blacklist | String List | **Empty** | Which tags to block for MultiAdmin debug logging
+multiadmin_debug_log | Boolean | True | Enables MultiAdmin debug logging, this logs to a separate file than any other logs
+multiadmin_debug_log_blacklist | String List | ProcessFile | Which tags to block for MultiAdmin debug logging
 multiadmin_debug_log_whitelist | String List | **Empty** | Which tags to log for MultiAdmin debug logging (Defaults to logging all if none are provided)
+use_new_input_system | Boolean | True | Whether to use the new input system, if false, the original input system will be used
 port | Unsigned Integer | 7777 | The port for the server to use (Preparing for next game release, currently does nothing)
 copy_from_folder_on_reload | String | **Empty** | The location of a folder to copy files from into the folder defined by `config_location` whenever the configuration file is reloaded
 files_to_copy_from_folder | String List | **Empty** | The list of filenames to copy from the folder defined by `copy_from_folder_on_reload` (accepts `*` wildcards)
@@ -90,5 +91,3 @@ start_config_on_full | String | **Empty** | Start server with this config folder
 
 ## Upcoming Features
 - Support for running multiple server instances in one MultiAdmin instance
-- Printing speed configuration option
-- Exit timeout before killing the server process

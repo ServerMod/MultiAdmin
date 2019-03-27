@@ -29,6 +29,9 @@ namespace MultiAdmin.Config
 		public const string DebugLogWhitelistKey = "multiadmin_debug_log_whitelist";
 		public string[] DebugLogWhitelist { get; private set; }
 
+		public const string UseNewInputSystemKey = "use_new_input_system";
+		public bool UseNewInputSystem { get; private set; }
+
 		public const string PortKey = "port";
 		public uint Port { get; private set; }
 
@@ -86,9 +89,9 @@ namespace MultiAdmin.Config
 		#endregion
 
 		public const string ConfigFileName = "scp_multiadmin.cfg";
-		public static readonly string ConfigFilePath = Utils.GetFullPathSafe(ConfigFileName);
+		public static readonly string GlobalConfigFilePath = Utils.GetFullPathSafe(ConfigFileName);
 
-		public static readonly MultiAdminConfig GlobalConfig = new MultiAdminConfig(ConfigFilePath, null);
+		public static readonly MultiAdminConfig GlobalConfig = new MultiAdminConfig(GlobalConfigFilePath, null);
 
 		public MultiAdminConfig ParentConfig { get; }
 		public Config Config { get; }
@@ -139,9 +142,10 @@ namespace MultiAdmin.Config
 			DisableConfigValidation = ShouldGetFromConfig(DisableConfigValidationKey) ? Config.GetBool(DisableConfigValidationKey, false) : ParentConfig.DisableConfigValidation;
 			ShareNonConfigs = ShouldGetFromConfig(ShareNonConfigsKey) ? Config.GetBool(ShareNonConfigsKey, true) : ParentConfig.ShareNonConfigs;
 			NoLog = ShouldGetFromConfig(NoLogKey) ? Config.GetBool(NoLogKey, false) : ParentConfig.NoLog;
-			DebugLog = ShouldGetFromConfig(DebugLogKey) ? Config.GetBool(DebugLogKey, false) : ParentConfig.DebugLog;
+			DebugLog = ShouldGetFromConfig(DebugLogKey) ? Config.GetBool(DebugLogKey, true) : ParentConfig.DebugLog;
 			DebugLogBlacklist = ShouldGetFromConfig(DebugLogBlacklistKey) ? Config.GetStringList(DebugLogBlacklistKey, new string[] {"ProcessFile"}) : ParentConfig.DebugLogBlacklist;
 			DebugLogWhitelist = ShouldGetFromConfig(DebugLogWhitelistKey) ? Config.GetStringList(DebugLogWhitelistKey, new string[0]) : ParentConfig.DebugLogWhitelist;
+			UseNewInputSystem = ShouldGetFromConfig(UseNewInputSystemKey) ? Config.GetBool(UseNewInputSystemKey, true) : ParentConfig.UseNewInputSystem;
 			Port = ShouldGetFromConfig(PortKey) ? Config.GetUInt(PortKey, 7777) : ParentConfig.Port;
 			CopyFromFolderOnReload = ShouldGetFromConfig(CopyFromFolderOnReloadKey) ? Config.GetString(CopyFromFolderOnReloadKey, "") : ParentConfig.CopyFromFolderOnReload;
 			FilesToCopyFromFolder = ShouldGetFromConfig(FilesToCopyFromFolderKey) ? Config.GetStringList(FilesToCopyFromFolderKey, new string[0]) : ParentConfig.FilesToCopyFromFolder;
