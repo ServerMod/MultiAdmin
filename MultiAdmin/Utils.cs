@@ -65,7 +65,7 @@ namespace MultiAdmin
 			if (pattern == null)
 				return false;
 
-			if (pattern == new string(WildCard, pattern.Length))
+			if (pattern.Any() && pattern == new string(WildCard, pattern.Length))
 				return true;
 
 			if (input == null)

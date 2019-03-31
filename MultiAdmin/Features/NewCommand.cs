@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Linq;
 using MultiAdmin.Features.Attributes;
 
@@ -7,6 +8,7 @@ namespace MultiAdmin.Features
 	internal class NewCommand : Feature, ICommand, IEventServerFull
 	{
 		private string onFullServerId;
+		private Process onFullServerInstance;
 
 		public NewCommand(Server server) : base(server)
 		{
@@ -73,9 +75,17 @@ namespace MultiAdmin.Features
 		{
 			if (string.IsNullOrEmpty(onFullServerId)) return;
 
+			// If a server instance has been started
+			if (onFullServerInstance != null)
+			{
+				onFullServerInstance.Refresh();
+
+				if (!onFullServerInstance.HasExited) return;
+			}
+
 			Server.Write($"Launching new server with Server ID: \"{onFullServerId}\" due to this server being full...");
 
-			Program.StartServer(new Server(onFullServerId));
+			onFullServerInstance = Program.StartServer(new Server(onFullServerId));
 		}
 	}
 }
