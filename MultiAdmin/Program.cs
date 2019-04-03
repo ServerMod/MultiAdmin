@@ -13,7 +13,7 @@ namespace MultiAdmin
 {
 	public static class Program
 	{
-		public const string MaVersion = "3.1.1";
+		public const string MaVersion = "3.1.2";
 
 		private static readonly List<Server> InstantiatedServers = new List<Server>();
 
@@ -281,7 +281,7 @@ namespace MultiAdmin
 			return GetFlagFromArgs(new string[] {key}, new string[] {alias});
 		}
 
-		public static void StartServer(Server server)
+		public static Process StartServer(Server server)
 		{
 			string assemblyLocation = Assembly.GetEntryAssembly().Location;
 
@@ -304,7 +304,11 @@ namespace MultiAdmin
 
 			Write($"Launching \"{startInfo.FileName}\" with arguments \"{startInfo.Arguments}\"...");
 
-			Process.Start(startInfo);
+			Process serverProcess = Process.Start(startInfo);
+
+			InstantiatedServers.Add(server);
+
+			return serverProcess;
 		}
 	}
 }
