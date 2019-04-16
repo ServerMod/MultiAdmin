@@ -1,90 +1,44 @@
 using System;
 using System.IO;
+using System.Reflection;
+using MultiAdmin.Config.ConfigHandler;
 using MultiAdmin.ConsoleTools;
 
 namespace MultiAdmin.Config
 {
-	public class MultiAdminConfig
+	public class MultiAdminConfig : ConfigRegister
 	{
 		#region Config Keys and Values
 
-		public const string ConfigLocationKey = "config_location";
-		public string ConfigLocation { get; private set; }
-
-		public const string DisableConfigValidationKey = "disable_config_validation";
-		public bool DisableConfigValidation { get; private set; }
-
-		public const string ShareNonConfigsKey = "share_non_configs";
-		public bool ShareNonConfigs { get; private set; }
-
-		public const string NoLogKey = "multiadmin_nolog";
-		public bool NoLog { get; private set; }
-
-		public const string DebugLogKey = "multiadmin_debug_log";
-		public bool DebugLog { get; private set; }
-
-		public const string DebugLogBlacklistKey = "multiadmin_debug_log_blacklist";
-		public string[] DebugLogBlacklist { get; private set; }
-
-		public const string DebugLogWhitelistKey = "multiadmin_debug_log_whitelist";
-		public string[] DebugLogWhitelist { get; private set; }
-
-		public const string UseNewInputSystemKey = "use_new_input_system";
-		public bool UseNewInputSystem { get; private set; }
-
-		public const string PortKey = "port";
-		public uint Port { get; private set; }
-
-		public const string CopyFromFolderOnReloadKey = "copy_from_folder_on_reload";
-		public string CopyFromFolderOnReload { get; private set; }
-
-		public const string FilesToCopyFromFolderKey = "files_to_copy_from_folder";
-		public string[] FilesToCopyFromFolder { get; private set; }
-
-		public const string FolderCopyRoundQueueKey = "folder_copy_round_queue";
-		public string[] FolderCopyRoundQueue { get; private set; }
-
-		public const string RandomizeFolderCopyRoundQueueKey = "randomize_folder_copy_round_queue";
-		public bool RandomizeFolderCopyRoundQueue { get; private set; }
-
-		public const string LogModActionsToOwnFileKey = "log_mod_actions_to_own_file";
-		public bool LogModActionsToOwnFile { get; private set; }
-
-		public const string ManualStartKey = "manual_start";
-		public bool ManualStart { get; private set; }
-
-		public const string MaxMemoryKey = "max_memory";
-		public float MaxMemory { get; private set; }
-
-		public const string RestartLowMemoryKey = "restart_low_memory";
-		public float RestartLowMemory { get; private set; }
-
-		public const string RestartLowMemoryRoundEndKey = "restart_low_memory_roundend";
-		public float RestartLowMemoryRoundEnd { get; private set; }
-
-		public const string MaxPlayersKey = "max_players";
-		public int MaxPlayers { get; private set; }
-
-		public const string RandomInputColorsKey = "random_input_colors";
-		public bool RandomInputColors { get; private set; }
-
-		public const string RestartEveryNumRoundsKey = "restart_every_num_rounds";
-		public int RestartEveryNumRounds { get; private set; }
-
-		public const string ServerRestartTimeoutKey = "server_restart_timeout";
-		public float ServerRestartTimeout { get; private set; }
-
-		public const string ServerStopTimeoutKey = "server_stop_timeout";
-		public float ServerStopTimeout { get; private set; }
-
-		public const string ServersFolderKey = "servers_folder";
-		public string ServersFolder { get; private set; }
-
-		public const string ShutdownWhenEmptyForKey = "shutdown_when_empty_for";
-		public int ShutdownWhenEmptyFor { get; private set; }
-
-		public const string StartConfigOnFullKey = "start_config_on_full";
-		public string StartConfigOnFull { get; private set; }
+		public ConfigEntry<string> ConfigLocation { get; } = new ConfigEntry<string>("config_location", "", "Config Location", "The default location for the game to use for storing configuration files (a directory)");
+		public ConfigEntry<bool> DisableConfigValidation { get; } = new ConfigEntry<bool>("disable_config_validation", false, "Disable Config Validation", "Disable the config validator");
+		public ConfigEntry<bool> ShareNonConfigs { get; } = new ConfigEntry<bool>("share_non_configs", true, "Share Non-Configs", "Makes all files other than the config files store in AppData");
+		public ConfigEntry<bool> NoLog { get; } = new ConfigEntry<bool>("multiadmin_nolog", false, "MultiAdmin No-Logging", "Disable logging to file");
+		public ConfigEntry<bool> DebugLog { get; } = new ConfigEntry<bool>("multiadmin_debug_log", true, "MultiAdmin Debug Logging", "Enables MultiAdmin debug logging, this logs to a separate file than any other logs");
+		public ConfigEntry<string[]> DebugLogBlacklist { get; } = new ConfigEntry<string[]>("multiadmin_debug_log_blacklist", new string[] {"ProcessFile"}, "MultiAdmin Debug Logging Blacklist", "Which tags to block for MultiAdmin debug logging");
+		public ConfigEntry<string[]> DebugLogWhitelist { get; } = new ConfigEntry<string[]>("multiadmin_debug_log_whitelist", new string[0], "MultiAdmin Debug Logging Whitelist", "Which tags to log for MultiAdmin debug logging (Defaults to logging all if none are provided)");
+		public ConfigEntry<bool> UseNewInputSystem { get; } = new ConfigEntry<bool>("use_new_input_system", true, "Use New Input System", "Whether to use the new input system, if false, the original input system will be used");
+		public ConfigEntry<uint> Port { get; } = new ConfigEntry<uint>("port", 7777, "Game Port", "The port for the server to use");
+		public ConfigEntry<string> CopyFromFolderOnReload { get; } = new ConfigEntry<string>("copy_from_folder_on_reload", "", "Copy from Folder on Reload", "The location of a folder to copy files from into the folder defined by \"config_location\" whenever the configuration file is reloaded");
+		public ConfigEntry<string[]> FolderCopyWhitelist { get; } = new ConfigEntry<string[]>("folder_copy_whitelist", new string[0], "Folder Copy Whitelist", "The list of file names to copy from the folder defined by \"copy_from_folder_on_reload\" (accepts \"*\" wildcards)");
+		public ConfigEntry<string[]> FolderCopyBlacklist { get; } = new ConfigEntry<string[]>("folder_copy_blacklist", new string[0], "Folder Copy Blacklist", "The list of file names to not copy from the folder defined by \"copy_from_folder_on_reload\" (accepts \"*\" wildcards)");
+		public ConfigEntry<string[]> FolderCopyRoundQueue { get; } = new ConfigEntry<string[]>("folder_copy_round_queue", new string[0], "Folder Copy Round Queue", "The location of a folder to copy files from into the folder defined by \"config_location\" after each round, looping through the locations");
+		public ConfigEntry<string[]> FolderCopyRoundQueueWhitelist { get; } = new ConfigEntry<string[]>("folder_copy_round_queue_whitelist", new string[0], "Folder Copy Round Queue Whitelist", "The list of file names to copy from the folders defined by \"folder_copy_round_queue\" (accepts \"*\" wildcards)");
+		public ConfigEntry<string[]> FolderCopyRoundQueueBlacklist { get; } = new ConfigEntry<string[]>("folder_copy_round_queue_blacklist", new string[0], "Folder Copy Round Queue Blacklist", "The list of file names to not copy from the folders defined by \"folder_copy_round_queue\" (accepts \"*\" wildcards)");
+		public ConfigEntry<bool> RandomizeFolderCopyRoundQueue { get; } = new ConfigEntry<bool>("randomize_folder_copy_round_queue", false, "Randomize Folder Copy Round Queue", "Whether to randomize the order of entries in \"folder_copy_round_queue\"");
+		public ConfigEntry<bool> LogModActionsToOwnFile { get; } = new ConfigEntry<bool>("log_mod_actions_to_own_file", false, "Log Mod Actions to Own File", "Logs admin messages to separate file");
+		public ConfigEntry<bool> ManualStart { get; } = new ConfigEntry<bool>("manual_start", false, "Manual Start", "Whether or not to start the server automatically when launching MultiAdmin");
+		public ConfigEntry<float> MaxMemory { get; } = new ConfigEntry<float>("max_memory", 2048, "Max Memory", "The amount of memory in megabytes for MultiAdmin to check against");
+		public ConfigEntry<float> RestartLowMemory { get; } = new ConfigEntry<float>("restart_low_memory", 400, "Restart Low Memory", "Restart if the game's remaining memory falls below this value in megabytes");
+		public ConfigEntry<float> RestartLowMemoryRoundEnd { get; } = new ConfigEntry<float>("restart_low_memory_roundend", 450, "Restart Low Memory Round-End", "Restart at the end of the round if the game's remaining memory falls below this value in megabytes");
+		public ConfigEntry<int> MaxPlayers { get; } = new ConfigEntry<int>("max_players", 20, "Max Players", "The number of players to display as the maximum for the server (within MultiAdmin, not in-game)");
+		public ConfigEntry<bool> RandomInputColors { get; } = new ConfigEntry<bool>("random_input_colors", false, "Random Input Colors", "Randomize the new input system's colors every time a message is input");
+		public ConfigEntry<int> RestartEveryNumRounds { get; } = new ConfigEntry<int>("restart_every_num_rounds", -1, "Restart Every Number of Rounds", "Restart the server every number of rounds");
+		public ConfigEntry<float> ServerRestartTimeout { get; } = new ConfigEntry<float>("server_restart_timeout", 10, "Server Restart Timeout", "The time in seconds before MultiAdmin forces a server restart if it doesn't respond to the regular restart command");
+		public ConfigEntry<float> ServerStopTimeout { get; } = new ConfigEntry<float>("server_stop_timeout", 10, "Server Stop Timeout", "The time in seconds before MultiAdmin forces a server shutdown if it doesn't respond to the regular shutdown command");
+		public ConfigEntry<string> ServersFolder { get; } = new ConfigEntry<string>("servers_folder", "servers", "Servers Folder", "The location of the \"servers\" folder for MultiAdmin to load multiple server configurations from");
+		public ConfigEntry<int> ShutdownWhenEmptyFor { get; } = new ConfigEntry<int>("shutdown_when_empty_for", -1, "Shutdown When Empty For", "Shutdown the server once a round hasn't started in a number of seconds");
+		public ConfigEntry<string> StartConfigOnFull { get; } = new ConfigEntry<string>("start_config_on_full", "", "Start Config on Full", "Start server with this config folder once the server becomes full [Requires ServerMod]");
 
 		#endregion
 
@@ -118,6 +72,18 @@ namespace MultiAdmin.Config
 				}
 			}
 
+			#region MultiAdmin Config Register
+
+			foreach (PropertyInfo property in GetType().GetProperties())
+			{
+				if (property.GetValue(this) is ConfigEntry entry)
+				{
+					RegisterConfig(entry);
+				}
+			}
+
+			#endregion
+
 			ReloadConfig();
 		}
 
@@ -133,37 +99,72 @@ namespace MultiAdmin.Config
 		{
 		}
 
+		#region Config Registration
+
+		public override void UpdateConfigValue(ConfigEntry configEntry)
+		{
+			if (configEntry == null)
+				throw new NullReferenceException("Config type unsupported (Config: Null).");
+
+			if (!ShouldGetFromConfig(configEntry.Key))
+			{
+				ParentConfig.UpdateConfigValue(configEntry);
+				return;
+			}
+
+			switch (configEntry)
+			{
+				case ConfigEntry<string> config:
+				{
+					config.Value = Config.GetString(config.Key, config.Default);
+					break;
+				}
+
+				case ConfigEntry<string[]> config:
+				{
+					config.Value = Config.GetStringArray(config.Key, config.Default);
+					break;
+				}
+
+				case ConfigEntry<int> config:
+				{
+					config.Value = Config.GetInt(config.Key, config.Default);
+					break;
+				}
+
+				case ConfigEntry<uint> config:
+				{
+					config.Value = Config.GetUInt(config.Key, config.Default);
+					break;
+				}
+
+				case ConfigEntry<float> config:
+				{
+					config.Value = Config.GetFloat(config.Key, config.Default);
+					break;
+				}
+
+				case ConfigEntry<bool> config:
+				{
+					config.Value = Config.GetBool(config.Key, config.Default);
+					break;
+				}
+
+				default:
+				{
+					throw new Exception($"Config type unsupported (Config: Key = \"{configEntry.Key ?? "Null"}\" Type = \"{configEntry.ValueType.FullName ?? "Null"}\" Name = \"{configEntry.Name ?? "Null"}\" Description = \"{configEntry.Description ?? "Null"}\").");
+				}
+			}
+		}
+
+		#endregion
+
 		public void ReloadConfig()
 		{
 			ParentConfig?.ReloadConfig();
 			Config?.ReadConfigFile();
 
-			ConfigLocation = ShouldGetFromConfig(ConfigLocationKey) ? Config.GetString(ConfigLocationKey, "") : ParentConfig.ConfigLocation;
-			DisableConfigValidation = ShouldGetFromConfig(DisableConfigValidationKey) ? Config.GetBool(DisableConfigValidationKey, false) : ParentConfig.DisableConfigValidation;
-			ShareNonConfigs = ShouldGetFromConfig(ShareNonConfigsKey) ? Config.GetBool(ShareNonConfigsKey, true) : ParentConfig.ShareNonConfigs;
-			NoLog = ShouldGetFromConfig(NoLogKey) ? Config.GetBool(NoLogKey, false) : ParentConfig.NoLog;
-			DebugLog = ShouldGetFromConfig(DebugLogKey) ? Config.GetBool(DebugLogKey, true) : ParentConfig.DebugLog;
-			DebugLogBlacklist = ShouldGetFromConfig(DebugLogBlacklistKey) ? Config.GetStringList(DebugLogBlacklistKey, new string[] {"ProcessFile"}) : ParentConfig.DebugLogBlacklist;
-			DebugLogWhitelist = ShouldGetFromConfig(DebugLogWhitelistKey) ? Config.GetStringList(DebugLogWhitelistKey, new string[0]) : ParentConfig.DebugLogWhitelist;
-			UseNewInputSystem = ShouldGetFromConfig(UseNewInputSystemKey) ? Config.GetBool(UseNewInputSystemKey, true) : ParentConfig.UseNewInputSystem;
-			Port = ShouldGetFromConfig(PortKey) ? Config.GetUInt(PortKey, 7777) : ParentConfig.Port;
-			CopyFromFolderOnReload = ShouldGetFromConfig(CopyFromFolderOnReloadKey) ? Config.GetString(CopyFromFolderOnReloadKey, "") : ParentConfig.CopyFromFolderOnReload;
-			FilesToCopyFromFolder = ShouldGetFromConfig(FilesToCopyFromFolderKey) ? Config.GetStringList(FilesToCopyFromFolderKey, new string[0]) : ParentConfig.FilesToCopyFromFolder;
-			FolderCopyRoundQueue = ShouldGetFromConfig(FolderCopyRoundQueueKey) ? Config.GetStringList(FolderCopyRoundQueueKey, new string[0]) : ParentConfig.FolderCopyRoundQueue;
-			RandomizeFolderCopyRoundQueue = ShouldGetFromConfig(RandomizeFolderCopyRoundQueueKey) ? Config.GetBool(RandomizeFolderCopyRoundQueueKey, false) : ParentConfig.RandomizeFolderCopyRoundQueue;
-			LogModActionsToOwnFile = ShouldGetFromConfig(LogModActionsToOwnFileKey) ? Config.GetBool(LogModActionsToOwnFileKey, false) : ParentConfig.LogModActionsToOwnFile;
-			ManualStart = ShouldGetFromConfig(ManualStartKey) ? Config.GetBool(ManualStartKey, false) : ParentConfig.ManualStart;
-			MaxMemory = ShouldGetFromConfig(MaxMemoryKey) ? Config.GetFloat(MaxMemoryKey, 2048) : ParentConfig.MaxMemory;
-			RestartLowMemory = ShouldGetFromConfig(RestartLowMemoryKey) ? Config.GetFloat(RestartLowMemoryKey, 400) : ParentConfig.RestartLowMemory;
-			RestartLowMemoryRoundEnd = ShouldGetFromConfig(RestartLowMemoryRoundEndKey) ? Config.GetFloat(RestartLowMemoryRoundEndKey, 450) : ParentConfig.RestartLowMemoryRoundEnd;
-			MaxPlayers = ShouldGetFromConfig(MaxPlayersKey) ? Config.GetInt(MaxPlayersKey, 20) : ParentConfig.MaxPlayers;
-			RandomInputColors = ShouldGetFromConfig(RandomInputColorsKey) ? Config.GetBool(RandomInputColorsKey, false) : ParentConfig.RandomInputColors;
-			RestartEveryNumRounds = ShouldGetFromConfig(RestartEveryNumRoundsKey) ? Config.GetInt(RestartEveryNumRoundsKey, -1) : ParentConfig.RestartEveryNumRounds;
-			ServerRestartTimeout = ShouldGetFromConfig(ServerRestartTimeoutKey) ? Config.GetFloat(ServerRestartTimeoutKey, 10) : ParentConfig.ServerRestartTimeout;
-			ServerStopTimeout = ShouldGetFromConfig(ServerStopTimeoutKey) ? Config.GetFloat(ServerStopTimeoutKey, 10) : ParentConfig.ServerStopTimeout;
-			ServersFolder = ShouldGetFromConfig(ServersFolderKey) ? Config.GetString(ServersFolderKey, "servers") : ParentConfig.ServersFolder;
-			ShutdownWhenEmptyFor = ShouldGetFromConfig(ShutdownWhenEmptyForKey) ? Config.GetInt(ShutdownWhenEmptyForKey, -1) : ParentConfig.ShutdownWhenEmptyFor;
-			StartConfigOnFull = ShouldGetFromConfig(StartConfigOnFullKey) ? Config.GetString(StartConfigOnFullKey, "") : ParentConfig.StartConfigOnFull;
+			UpdateRegisteredConfigValues();
 		}
 
 		private bool ShouldGetFromConfig(string key)

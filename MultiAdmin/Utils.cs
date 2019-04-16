@@ -117,8 +117,13 @@ namespace MultiAdmin
 			return namePatterns != null && namePatterns.Any(namePattern => StringMatches(input, namePattern));
 		}
 
+		private static bool IsArrayNullOrEmpty(string[] array)
+		{
+			return array == null || !array.Any();
+		}
+
 		// Copied from https://docs.microsoft.com/en-us/dotnet/api/system.io.directoryinfo?view=netframework-4.7.2 with small modifications
-		public static void CopyAll(DirectoryInfo source, DirectoryInfo target, params string[] fileNames)
+		public static void CopyAll(DirectoryInfo source, DirectoryInfo target, string[] fileWhitelist = null, string[] fileBlacklist = null)
 		{
 			if (source.FullName == target.FullName)
 			{
@@ -131,10 +136,13 @@ namespace MultiAdmin
 				Directory.CreateDirectory(target.FullName);
 			}
 
+			bool useWhitelist = !IsArrayNullOrEmpty(fileWhitelist);
+			bool useBlacklist = !IsArrayNullOrEmpty(fileBlacklist);
+
 			// Copy each file into it's new directory.
 			foreach (FileInfo fi in source.GetFiles())
 			{
-				if (fileNames == null || !fileNames.Any() || FileNamesContains(fileNames, fi.Name))
+				if ((!useWhitelist || FileNamesContains(fileWhitelist, fi.Name)) && (!useBlacklist || !FileNamesContains(fileBlacklist, fi.Name)))
 				{
 					// Console.WriteLine(@"Copying {0}\{1}", target.FullName, fi.Name);
 					fi.CopyTo(Path.Combine(target.ToString(), fi.Name), true);
@@ -144,7 +152,7 @@ namespace MultiAdmin
 			// Copy each subdirectory using recursion.
 			foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
 			{
-				if (fileNames == null || !fileNames.Any() || FileNamesContains(fileNames, diSourceSubDir.Name))
+				if ((!useWhitelist || FileNamesContains(fileWhitelist, diSourceSubDir.Name)) && (!useBlacklist || !FileNamesContains(fileBlacklist, diSourceSubDir.Name)))
 				{
 					DirectoryInfo nextTargetSubDir =
 						target.CreateSubdirectory(diSourceSubDir.Name);
@@ -153,9 +161,9 @@ namespace MultiAdmin
 			}
 		}
 
-		public static void CopyAll(string source, string target, params string[] fileNames)
+		public static void CopyAll(string source, string target, string[] fileWhitelist = null, string[] fileBlacklist = null)
 		{
-			CopyAll(new DirectoryInfo(source), new DirectoryInfo(target), fileNames);
+			CopyAll(new DirectoryInfo(source), new DirectoryInfo(target), fileWhitelist, fileBlacklist);
 		}
 	}
 }

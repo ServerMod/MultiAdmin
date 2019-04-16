@@ -100,7 +100,7 @@ namespace MultiAdmin.Config
 			return def;
 		}
 
-		public string[] GetStringList(string key, string[] def = null)
+		public string[] GetStringArray(string key, string[] def = null)
 		{
 			try
 			{
@@ -114,13 +114,13 @@ namespace MultiAdmin.Config
 					}
 					catch (Exception e)
 					{
-						Program.LogDebugException("GetStringList", e);
+						Program.LogDebugException("GetStringArray", e);
 					}
 				}
 			}
 			catch (Exception e)
 			{
-				Program.LogDebugException("GetStringList", e);
+				Program.LogDebugException("GetStringArray", e);
 			}
 
 			return def;

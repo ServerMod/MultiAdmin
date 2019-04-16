@@ -8,6 +8,8 @@ namespace MultiAdmin.Features
 	internal class FileCopyRoundQueue : Feature, IEventRoundEnd
 	{
 		private string[] queue;
+		private string[] whitelist;
+		private string[] blacklist;
 		private bool randomizeQueue;
 		private int queueIndex;
 
@@ -36,7 +38,7 @@ namespace MultiAdmin.Features
 
 			if (string.IsNullOrEmpty(copyFrom)) return;
 
-			Server.CopyFromDir(copyFrom);
+			Server.CopyFromDir(copyFrom, whitelist, blacklist);
 
 			queueIndex = randomizeQueue ? GetNextRandomIndex() : LoopingLimitIndex(queueIndex + 1);
 		}
@@ -78,8 +80,10 @@ namespace MultiAdmin.Features
 
 		public override void OnConfigReload()
 		{
-			queue = Server.ServerConfig.FolderCopyRoundQueue;
-			randomizeQueue = Server.ServerConfig.RandomizeFolderCopyRoundQueue;
+			queue = Server.ServerConfig.FolderCopyRoundQueue.Value;
+			whitelist = Server.ServerConfig.FolderCopyRoundQueueWhitelist.Value;
+			blacklist = Server.ServerConfig.FolderCopyRoundQueueBlacklist.Value;
+			randomizeQueue = Server.ServerConfig.RandomizeFolderCopyRoundQueue.Value;
 		}
 
 		public override string GetFeatureDescription()

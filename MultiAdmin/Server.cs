@@ -43,9 +43,9 @@ namespace MultiAdmin
 		public Server(string serverId = null, string configLocation = null, uint? port = null)
 		{
 			this.serverId = serverId;
-			serverDir = string.IsNullOrEmpty(this.serverId) ? null : Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.ServersFolder + Path.DirectorySeparatorChar + this.serverId);
+			serverDir = string.IsNullOrEmpty(this.serverId) ? null : Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.ServersFolder.Value + Path.DirectorySeparatorChar + this.serverId);
 
-			this.configLocation = Utils.GetFullPathSafe(configLocation) ?? Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.ConfigLocation) ?? Utils.GetFullPathSafe(serverDir);
+			this.configLocation = Utils.GetFullPathSafe(configLocation) ?? Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.ConfigLocation.Value) ?? Utils.GetFullPathSafe(serverDir);
 
 			this.port = port;
 
@@ -105,8 +105,8 @@ namespace MultiAdmin
 			}
 		}
 
-		public bool CheckStopTimeout => (DateTime.Now - initStopTimeoutTime).Seconds > ServerConfig.ServerStopTimeout;
-		public bool CheckRestartTimeout => (DateTime.Now - initRestartTimeoutTime).Seconds > ServerConfig.ServerRestartTimeout;
+		public bool CheckStopTimeout => (DateTime.Now - initStopTimeoutTime).Seconds > ServerConfig.ServerStopTimeout.Value;
+		public bool CheckRestartTimeout => (DateTime.Now - initRestartTimeoutTime).Seconds > ServerConfig.ServerRestartTimeout.Value;
 
 		public string LogDirFile { get; private set; }
 		public string MaLogFile { get; private set; }
@@ -261,10 +261,10 @@ namespace MultiAdmin
 						"-nodedicateddelete",
 						$"-key{SessionId}",
 						$"-id{Process.GetCurrentProcess().Id}",
-						$"-port{port ?? ServerConfig.Port}"
+						$"-port{port ?? ServerConfig.Port.Value}"
 					});
 
-					if (string.IsNullOrEmpty(ScpLogFile) || ServerConfig.NoLog)
+					if (string.IsNullOrEmpty(ScpLogFile) || ServerConfig.NoLog.Value)
 					{
 						scpslArgs.Add("-nolog");
 
@@ -278,12 +278,12 @@ namespace MultiAdmin
 						scpslArgs.Add($"-logFile \"{ScpLogFile}\"");
 					}
 
-					if (ServerConfig.DisableConfigValidation)
+					if (ServerConfig.DisableConfigValidation.Value)
 					{
 						scpslArgs.Add("-disableconfigvalidation");
 					}
 
-					if (ServerConfig.ShareNonConfigs)
+					if (ServerConfig.ShareNonConfigs.Value)
 					{
 						scpslArgs.Add("-sharenonconfigs");
 					}
@@ -554,9 +554,9 @@ namespace MultiAdmin
 
 				ColoredMessage[] timeStampedMessage = Utils.TimeStampMessage(messages, timeStampColor);
 
-				timeStampedMessage.WriteLine(ServerConfig.UseNewInputSystem);
+				timeStampedMessage.WriteLine(ServerConfig.UseNewInputSystem.Value);
 
-				if (ServerConfig.UseNewInputSystem)
+				if (ServerConfig.UseNewInputSystem.Value)
 					InputThread.WriteInputAndSetCursor();
 			}
 		}
@@ -597,7 +597,7 @@ namespace MultiAdmin
 		{
 			lock (ColoredConsole.WriteLock)
 			{
-				if (message == null || string.IsNullOrEmpty(MaLogFile) || ServerConfig.NoLog) return;
+				if (message == null || string.IsNullOrEmpty(MaLogFile) || ServerConfig.NoLog.Value) return;
 
 				Directory.CreateDirectory(logDir);
 
@@ -647,9 +647,9 @@ namespace MultiAdmin
 
 			// Handle directory copying
 			string copyFromDir;
-			if (copyFiles && !string.IsNullOrEmpty(configLocation) && !string.IsNullOrEmpty(copyFromDir = ServerConfig.CopyFromFolderOnReload))
+			if (copyFiles && !string.IsNullOrEmpty(configLocation) && !string.IsNullOrEmpty(copyFromDir = ServerConfig.CopyFromFolderOnReload.Value))
 			{
-				CopyFromDir(copyFromDir, ServerConfig.FilesToCopyFromFolder);
+				CopyFromDir(copyFromDir, ServerConfig.FolderCopyWhitelist.Value, ServerConfig.FolderCopyBlacklist.Value);
 			}
 
 			// Handle each config reload event
@@ -658,7 +658,7 @@ namespace MultiAdmin
 					feature.OnConfigReload();
 		}
 
-		public bool CopyFromDir(string sourceDir, string[] files = null)
+		public bool CopyFromDir(string sourceDir, string[] fileWhitelist = null, string[] fileBlacklist = null)
 		{
 			if (string.IsNullOrEmpty(configLocation) || string.IsNullOrEmpty(sourceDir)) return false;
 
@@ -669,7 +669,7 @@ namespace MultiAdmin
 				if (!string.IsNullOrEmpty(sourceDir))
 				{
 					Write($"Copying files and folders from \"{sourceDir}\" into \"{configLocation}\"...");
-					Utils.CopyAll(sourceDir, configLocation, files);
+					Utils.CopyAll(sourceDir, configLocation, fileWhitelist, fileBlacklist);
 					Write("Done copying files and folders!");
 
 					return true;

@@ -30,7 +30,7 @@ namespace MultiAdmin
 		{
 			get
 			{
-				string globalServersFolder = MultiAdminConfig.GlobalConfig.ServersFolder;
+				string globalServersFolder = MultiAdminConfig.GlobalConfig.ServersFolder.Value;
 				return !Directory.Exists(globalServersFolder) ? new string[] { } : Directory.GetDirectories(globalServersFolder);
 			}
 		}
@@ -41,7 +41,7 @@ namespace MultiAdmin
 
 		#region Auto-Start Server Properties
 
-		public static Server[] AutoStartServers => Servers.Where(server => !server.ServerConfig.ManualStart).ToArray();
+		public static Server[] AutoStartServers => Servers.Where(server => !server.ServerConfig.ManualStart.Value).ToArray();
 
 		public static string[] AutoStartServerDirectories => AutoStartServers.Select(autoStartServer => autoStartServer.serverDir).ToArray();
 
@@ -59,13 +59,13 @@ namespace MultiAdmin
 			{
 				if (Headless) return;
 
-				new ColoredMessage(Utils.TimeStampMessage(message), color).WriteLine(MultiAdminConfig.GlobalConfig.UseNewInputSystem);
+				new ColoredMessage(Utils.TimeStampMessage(message), color).WriteLine(MultiAdminConfig.GlobalConfig.UseNewInputSystem.Value);
 			}
 		}
 
 		private static bool IsDebugLogTagAllowed(string tag)
 		{
-			return !MultiAdminConfig.GlobalConfig.DebugLogBlacklist.Contains(tag) && (!MultiAdminConfig.GlobalConfig.DebugLogWhitelist.Any() || MultiAdminConfig.GlobalConfig.DebugLogWhitelist.Contains(tag));
+			return !MultiAdminConfig.GlobalConfig.DebugLogBlacklist.Value.Contains(tag) && (!MultiAdminConfig.GlobalConfig.DebugLogWhitelist.Value.Any() || MultiAdminConfig.GlobalConfig.DebugLogWhitelist.Value.Contains(tag));
 		}
 
 		public static void LogDebugException(string tag, Exception exception)
@@ -82,7 +82,7 @@ namespace MultiAdmin
 		{
 			lock (MaDebugLogFile)
 			{
-				if (!MultiAdminConfig.GlobalConfig.DebugLog || string.IsNullOrEmpty(MaDebugLogFile) || tag == null || !IsDebugLogTagAllowed(tag)) return;
+				if (!MultiAdminConfig.GlobalConfig.DebugLog.Value || string.IsNullOrEmpty(MaDebugLogFile) || tag == null || !IsDebugLogTagAllowed(tag)) return;
 
 				Directory.CreateDirectory(MaDebugLogDir);
 

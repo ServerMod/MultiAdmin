@@ -53,7 +53,7 @@ namespace MultiAdmin.ServerIO
 					continue;
 				}
 
-				string message = server.ServerConfig.UseNewInputSystem ? GetInputLineNew(server, prevMessages) : Console.ReadLine();
+				string message = server.ServerConfig.UseNewInputSystem.Value ? GetInputLineNew(server, prevMessages) : Console.ReadLine();
 
 				if (string.IsNullOrEmpty(message)) continue;
 
@@ -78,7 +78,7 @@ namespace MultiAdmin.ServerIO
 
 		public static string GetInputLineNew(Server server, ShiftingList prevMessages)
 		{
-			if (server.ServerConfig.RandomInputColors)
+			if (server.ServerConfig.RandomInputColors.Value)
 				RandomizeInputColors();
 
 			string curMessage = string.Empty;
@@ -343,7 +343,7 @@ namespace MultiAdmin.ServerIO
 			{
 				if (Program.Headless) return;
 
-				message?.Write(MultiAdminConfig.GlobalConfig.UseNewInputSystem);
+				message?.Write(MultiAdminConfig.GlobalConfig.UseNewInputSystem.Value);
 
 				CurrentInput = message;
 			}

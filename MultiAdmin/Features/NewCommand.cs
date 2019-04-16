@@ -58,7 +58,7 @@ namespace MultiAdmin.Features
 
 		public override void OnConfigReload()
 		{
-			onFullServerId = Server.ServerConfig.StartConfigOnFull;
+			onFullServerId = Server.ServerConfig.StartConfigOnFull.Value;
 		}
 
 		public override string GetFeatureDescription()

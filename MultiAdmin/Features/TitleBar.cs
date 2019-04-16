@@ -44,14 +44,13 @@ namespace MultiAdmin.Features
 
 		public override void Init()
 		{
-			maxPlayers = Server.ServerConfig.MaxPlayers;
 			playerCount = -1; // -1 for the "server" player, once the server starts this will increase to 0.
 			UpdateTitlebar();
 		}
 
 		public override void OnConfigReload()
 		{
-			maxPlayers = Server.ServerConfig.MaxPlayers;
+			maxPlayers = Server.ServerConfig.MaxPlayers.Value;
 			UpdateTitlebar();
 		}
 

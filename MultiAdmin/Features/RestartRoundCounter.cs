@@ -33,7 +33,7 @@ namespace MultiAdmin.Features
 
 		public override void OnConfigReload()
 		{
-			restartAfter = Server.ServerConfig.RestartEveryNumRounds;
+			restartAfter = Server.ServerConfig.RestartEveryNumRounds.Value;
 		}
 
 		public override string GetFeatureDescription()
