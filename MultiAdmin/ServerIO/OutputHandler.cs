@@ -53,7 +53,7 @@ namespace MultiAdmin.ServerIO
 		/* Old Windows MAPI Watching Code
 		private void OnDirectoryChanged(FileSystemEventArgs e, Server server)
 		{
-			if (server.Stopping || string.IsNullOrEmpty(server.SessionId) || !e.FullPath.Contains(server.SessionId) || !Directory.Exists(e.FullPath)) return;
+			if (!Directory.Exists(e.FullPath)) return;
 
 			string[] files = Directory.GetFiles(e.FullPath, "sl*.mapi", SearchOption.TopDirectoryOnly).OrderBy(f => f)
 				.ToArray();
@@ -63,7 +63,7 @@ namespace MultiAdmin.ServerIO
 
 		private void OnMapiCreated(FileSystemEventArgs e, Server server)
 		{
-			if (!server.IsRunning || string.IsNullOrEmpty(server.SessionId) || !e.FullPath.Contains(server.SessionId) || !File.Exists(e.FullPath)) return;
+			if (!File.Exists(e.FullPath)) return;
 
 			try
 			{
@@ -85,7 +85,7 @@ namespace MultiAdmin.ServerIO
 			// Lock this object to wait for this event to finish before trying to read another file
 			lock (this)
 			{
-				for (int attempts = 0; attempts < 100 && server.IsRunning; attempts++)
+				for (int attempts = 0; attempts < 100; attempts++)
 				{
 					try
 					{
@@ -127,8 +127,6 @@ namespace MultiAdmin.ServerIO
 				return;
 			}
 
-			if (!server.IsRunning) return;
-
 			bool display = true;
 			ConsoleColor color = ConsoleColor.Cyan;
 
@@ -160,6 +158,7 @@ namespace MultiAdmin.ServerIO
 			// Smod2 loggers pretty printing
 			Match match = SmodRegex.Match(stream);
 			if (match.Success)
+			{
 				if (match.Groups.Count >= 3)
 				{
 					ConsoleColor levelColor = ConsoleColor.Cyan;
@@ -198,6 +197,7 @@ namespace MultiAdmin.ServerIO
 					// This return should be here
 					return;
 				}
+			}
 
 			if (stream.Contains("Mod Log:"))
 				foreach (Feature f in server.features)
@@ -242,23 +242,23 @@ namespace MultiAdmin.ServerIO
 					if (f is IEventServerStart serverStart)
 						serverStart.OnServerStart();
 
-
 			if (stream.Contains("Server full"))
 				foreach (Feature f in server.features)
 					if (f is IEventServerFull serverFull)
 						serverFull.OnServerFull();
-
 
 			if (stream.Contains("Player connect"))
 			{
 				display = false;
 				server.Log("Player connect event");
 				foreach (Feature f in server.features)
+				{
 					if (f is IEventPlayerConnect playerConnect)
 					{
 						string name = stream.Substring(stream.IndexOf(":"));
 						playerConnect.OnPlayerConnect(name);
 					}
+				}
 			}
 
 			if (stream.Contains("Player disconnect"))
@@ -266,11 +266,13 @@ namespace MultiAdmin.ServerIO
 				display = false;
 				server.Log("Player disconnect event");
 				foreach (Feature f in server.features)
+				{
 					if (f is IEventPlayerDisconnect playerDisconnect)
 					{
 						string name = stream.Substring(stream.IndexOf(":"));
 						playerDisconnect.OnPlayerDisconnect(name);
 					}
+				}
 			}
 
 			if (stream.Contains("Player has connected before load is complete"))
@@ -282,6 +284,7 @@ namespace MultiAdmin.ServerIO
 		public void Dispose()
 		{
 			fsWatcher?.Dispose();
+			GC.SuppressFinalize(this);
 		}
 	}
 }
