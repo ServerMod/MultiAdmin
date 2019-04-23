@@ -450,7 +450,7 @@ namespace MultiAdmin
 				}
 				catch (Exception e)
 				{
-					Program.LogDebugException("RegisterFeatures", e);
+					Program.LogDebugException(nameof(RegisterFeatures), e);
 				}
 			}
 		}
@@ -500,12 +500,12 @@ namespace MultiAdmin
 					}
 					catch (UnauthorizedAccessException e)
 					{
-						Program.LogDebugException("CleanSession", e);
+						Program.LogDebugException(nameof(CleanSession), e);
 						Thread.Sleep(5);
 					}
 					catch (Exception e)
 					{
-						Program.LogDebugException("CleanSession", e);
+						Program.LogDebugException(nameof(CleanSession), e);
 						Thread.Sleep(2);
 					}
 				}
@@ -527,12 +527,12 @@ namespace MultiAdmin
 				}
 				catch (UnauthorizedAccessException e)
 				{
-					Program.LogDebugException("DeleteSession", e);
+					Program.LogDebugException(nameof(DeleteSession), e);
 					Thread.Sleep(5);
 				}
 				catch (Exception e)
 				{
-					Program.LogDebugException("DeleteSession", e);
+					Program.LogDebugException(nameof(DeleteSession), e);
 					Thread.Sleep(2);
 				}
 			}

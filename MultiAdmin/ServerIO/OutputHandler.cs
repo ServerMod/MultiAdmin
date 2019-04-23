@@ -24,7 +24,7 @@ namespace MultiAdmin.ServerIO
 			}
 			catch (Exception e)
 			{
-				Program.LogDebugException("MapConsoleColor", e);
+				Program.LogDebugException(nameof(MapConsoleColor), e);
 				return def;
 			}
 		}
@@ -71,7 +71,7 @@ namespace MultiAdmin.ServerIO
 			}
 			catch (Exception ex)
 			{
-				Program.LogDebugException("OnMapiCreated", ex);
+				Program.LogDebugException(nameof(OnMapiCreated), ex);
 			}
 		}
 
@@ -107,12 +107,12 @@ namespace MultiAdmin.ServerIO
 					}
 					catch (UnauthorizedAccessException e)
 					{
-						Program.LogDebugException("ProcessFile", e);
+						Program.LogDebugException(nameof(ProcessFile), e);
 						Thread.Sleep(5);
 					}
 					catch (Exception e)
 					{
-						Program.LogDebugException("ProcessFile", e);
+						Program.LogDebugException(nameof(ProcessFile), e);
 						Thread.Sleep(2);
 					}
 				}

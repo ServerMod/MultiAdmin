@@ -31,7 +31,7 @@ namespace MultiAdmin.ServerIO
 				}
 				catch (Exception e)
 				{
-					Program.LogDebugException("SectionBufferWidth", e);
+					Program.LogDebugException(nameof(SectionBufferWidth), e);
 					return 0;
 				}
 			}
@@ -258,7 +258,7 @@ namespace MultiAdmin.ServerIO
 					}
 					catch (Exception e)
 					{
-						Program.LogDebugException("Write", e);
+						Program.LogDebugException(nameof(Write), e);
 
 						CurrentCursor = messageCursor;
 						SetCursor();
@@ -327,7 +327,7 @@ namespace MultiAdmin.ServerIO
 				}
 				catch (Exception e)
 				{
-					Program.LogDebugException("SetCursor", e);
+					Program.LogDebugException(nameof(SetCursor), e);
 				}
 			}
 		}
@@ -383,7 +383,7 @@ namespace MultiAdmin.ServerIO
 			}
 			catch (Exception e)
 			{
-				Program.LogDebugException("RandomizeInputColors", e);
+				Program.LogDebugException(nameof(RandomizeInputColors), e);
 			}
 		}
 	}

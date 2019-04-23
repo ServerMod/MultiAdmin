@@ -90,7 +90,7 @@ namespace MultiAdmin.Features
 			}
 			catch (Exception e)
 			{
-				Program.LogDebugException("UpdateTitlebar", e);
+				Program.LogDebugException(nameof(UpdateTitlebar), e);
 			}
 		}
 	}

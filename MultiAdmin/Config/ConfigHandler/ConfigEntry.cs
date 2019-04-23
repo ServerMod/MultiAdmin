@@ -70,13 +70,13 @@ namespace MultiAdmin.Config.ConfigHandler
 		public override object ObjectValue
 		{
 			get => Value;
-			set => Value = (T) value;
+			set => Value = (T)value;
 		}
 
 		public override object ObjectDefault
 		{
 			get => Default;
-			set => Default = (T) value;
+			set => Default = (T)value;
 		}
 
 		/// <inheritdoc />

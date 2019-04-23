@@ -59,13 +59,13 @@ namespace MultiAdmin
 			{
 				if (Headless) return;
 
-				new ColoredMessage(Utils.TimeStampMessage(message), color).WriteLine(MultiAdminConfig.GlobalConfig.UseNewInputSystem.Value);
+				new ColoredMessage(Utils.TimeStampMessage(message), color).WriteLine(MultiAdminConfig.GlobalConfig?.UseNewInputSystem?.Value ?? true);
 			}
 		}
 
 		private static bool IsDebugLogTagAllowed(string tag)
 		{
-			return !MultiAdminConfig.GlobalConfig.DebugLogBlacklist.Value.Contains(tag) && (!MultiAdminConfig.GlobalConfig.DebugLogWhitelist.Value.Any() || MultiAdminConfig.GlobalConfig.DebugLogWhitelist.Value.Contains(tag));
+			return (!MultiAdminConfig.GlobalConfig?.DebugLogBlacklist?.Value?.Contains(tag) ?? true) && ((!MultiAdminConfig.GlobalConfig?.DebugLogWhitelist?.Value?.Any() ?? true) || MultiAdminConfig.GlobalConfig.DebugLogWhitelist.Value.Contains(tag));
 		}
 
 		public static void LogDebugException(string tag, Exception exception)
@@ -82,7 +82,7 @@ namespace MultiAdmin
 		{
 			lock (MaDebugLogFile)
 			{
-				if (!MultiAdminConfig.GlobalConfig.DebugLog.Value || string.IsNullOrEmpty(MaDebugLogFile) || tag == null || !IsDebugLogTagAllowed(tag)) return;
+				if ((!MultiAdminConfig.GlobalConfig?.DebugLog?.Value ?? true) || string.IsNullOrEmpty(MaDebugLogFile) || tag == null || !IsDebugLogTagAllowed(tag)) return;
 
 				Directory.CreateDirectory(MaDebugLogDir);
 

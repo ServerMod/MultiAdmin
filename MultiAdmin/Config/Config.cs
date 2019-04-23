@@ -28,7 +28,7 @@ namespace MultiAdmin.Config
 			}
 			catch (Exception e)
 			{
-				Program.LogDebugException("ReadConfigFile", e);
+				Program.LogDebugException(nameof(ReadConfigFile), e);
 			}
 
 			try
@@ -68,7 +68,7 @@ namespace MultiAdmin.Config
 			}
 			catch (Exception e)
 			{
-				Program.LogDebugException("CleanValue", e);
+				Program.LogDebugException(nameof(CleanValue), e);
 			}
 
 			return newValue;
@@ -88,13 +88,13 @@ namespace MultiAdmin.Config
 					}
 					catch (Exception e)
 					{
-						Program.LogDebugException("GetString", e);
+						Program.LogDebugException(nameof(GetString), e);
 					}
 				}
 			}
 			catch (Exception e)
 			{
-				Program.LogDebugException("GetString", e);
+				Program.LogDebugException(nameof(GetString), e);
 			}
 
 			return def;
@@ -114,13 +114,13 @@ namespace MultiAdmin.Config
 					}
 					catch (Exception e)
 					{
-						Program.LogDebugException("GetStringArray", e);
+						Program.LogDebugException(nameof(GetStringArray), e);
 					}
 				}
 			}
 			catch (Exception e)
 			{
-				Program.LogDebugException("GetStringArray", e);
+				Program.LogDebugException(nameof(GetStringArray), e);
 			}
 
 			return def;
@@ -137,7 +137,7 @@ namespace MultiAdmin.Config
 			}
 			catch (Exception e)
 			{
-				Program.LogDebugException("GetInt", e);
+				Program.LogDebugException(nameof(GetInt), e);
 			}
 
 			return def;
@@ -154,7 +154,7 @@ namespace MultiAdmin.Config
 			}
 			catch (Exception e)
 			{
-				Program.LogDebugException("GetUInt", e);
+				Program.LogDebugException(nameof(GetUInt), e);
 			}
 
 			return def;
@@ -171,7 +171,7 @@ namespace MultiAdmin.Config
 			}
 			catch (Exception e)
 			{
-				Program.LogDebugException("GetFloat", e);
+				Program.LogDebugException(nameof(GetFloat), e);
 			}
 
 			return def;
@@ -188,7 +188,7 @@ namespace MultiAdmin.Config
 			}
 			catch (Exception e)
 			{
-				Program.LogDebugException("GetBool", e);
+				Program.LogDebugException(nameof(GetBool), e);
 			}
 
 			return def;
