@@ -10,6 +10,19 @@ namespace MultiAdmin.Features
 		private int maxPlayers;
 		private int playerCount;
 
+		private int ServerProcessId
+		{
+			get
+			{
+				if (Server.GameProcess == null)
+					return -1;
+
+				Server.GameProcess.Refresh();
+
+				return Server.GameProcess.Id;
+			}
+		}
+
 		public Titlebar(Server server) : base(server)
 		{
 		}
@@ -74,7 +87,7 @@ namespace MultiAdmin.Features
 
 			if (Server.IsGameProcessRunning)
 			{
-				titleBar.Add($"PID: {Server.GameProcess.Id}");
+				titleBar.Add($"PID: {ServerProcessId}");
 			}
 
 			titleBar.Add($"{displayPlayerCount}/{maxPlayers}");

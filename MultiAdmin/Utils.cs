@@ -122,41 +122,35 @@ namespace MultiAdmin
 			return array == null || !array.Any();
 		}
 
-		// Copied from https://docs.microsoft.com/en-us/dotnet/api/system.io.directoryinfo?view=netframework-4.7.2 with small modifications
+		private static bool PassesWhitelistAndBlacklist(string toCheck, string[] whitelist = null, string[] blacklist = null)
+		{
+			return (IsArrayNullOrEmpty(whitelist) || FileNamesContains(whitelist, toCheck)) && (IsArrayNullOrEmpty(blacklist) || !FileNamesContains(blacklist, toCheck));
+		}
+
 		public static void CopyAll(DirectoryInfo source, DirectoryInfo target, string[] fileWhitelist = null, string[] fileBlacklist = null)
 		{
+			// If the target directory is the same as the source directory 
 			if (source.FullName == target.FullName)
-			{
 				return;
-			}
 
-			// Check if the target directory exists, if not, create it.
-			if (Directory.Exists(target.FullName) == false)
+			Directory.CreateDirectory(target.FullName);
+
+			// Copy each file
+			foreach (FileInfo file in source.GetFiles())
 			{
-				Directory.CreateDirectory(target.FullName);
-			}
-
-			bool useWhitelist = !IsArrayNullOrEmpty(fileWhitelist);
-			bool useBlacklist = !IsArrayNullOrEmpty(fileBlacklist);
-
-			// Copy each file into it's new directory.
-			foreach (FileInfo fi in source.GetFiles())
-			{
-				if ((!useWhitelist || FileNamesContains(fileWhitelist, fi.Name)) && (!useBlacklist || !FileNamesContains(fileBlacklist, fi.Name)))
+				if (PassesWhitelistAndBlacklist(file.Name, fileWhitelist, fileBlacklist))
 				{
-					// Console.WriteLine(@"Copying {0}\{1}", target.FullName, fi.Name);
-					fi.CopyTo(Path.Combine(target.ToString(), fi.Name), true);
+					file.CopyTo(Path.Combine(target.ToString(), file.Name), true);
 				}
 			}
 
-			// Copy each subdirectory using recursion.
-			foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
+			// Copy each sub-directory using recursion
+			foreach (DirectoryInfo sourceSubDir in source.GetDirectories())
 			{
-				if ((!useWhitelist || FileNamesContains(fileWhitelist, diSourceSubDir.Name)) && (!useBlacklist || !FileNamesContains(fileBlacklist, diSourceSubDir.Name)))
+				if (PassesWhitelistAndBlacklist(sourceSubDir.Name, fileWhitelist, fileBlacklist))
 				{
-					DirectoryInfo nextTargetSubDir =
-						target.CreateSubdirectory(diSourceSubDir.Name);
-					CopyAll(diSourceSubDir, nextTargetSubDir);
+					// Begin copying sub-directory
+					CopyAll(sourceSubDir, target.CreateSubdirectory(sourceSubDir.Name));
 				}
 			}
 		}

@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Threading;
 using MultiAdmin.Config;
 using MultiAdmin.ConsoleTools;
+using MultiAdmin.NativeExitSignal;
 using MultiAdmin.ServerIO;
 
 namespace MultiAdmin
@@ -21,6 +22,10 @@ namespace MultiAdmin
 		private static readonly string MaDebugLogFile = !string.IsNullOrEmpty(MaDebugLogDir) ? Utils.GetFullPathSafe($"{MaDebugLogDir}{Path.DirectorySeparatorChar}{Utils.DateTime}_MA_{MaVersion}_debug_log.txt") : null;
 
 		private static uint? portArg;
+
+		private static IExitSignal exitSignalListener;
+
+		private static readonly object ExitLock = new object();
 
 		#region Server Properties
 
@@ -99,26 +104,49 @@ namespace MultiAdmin
 
 		private static void OnExit(object sender, EventArgs e)
 		{
-			foreach (Server server in InstantiatedServers)
+			lock (ExitLock)
 			{
-				try
+				Write("Stopping servers and exiting MultiAdmin...", ConsoleColor.DarkMagenta);
+
+				foreach (Server server in InstantiatedServers)
 				{
-					while (server.IsRunning)
+					if (!server.IsGameProcessRunning)
+						continue;
+
+					try
 					{
-						server.StopServer(true);
-						Thread.Sleep(10);
+						if (!string.IsNullOrEmpty(server.serverId))
+							Write($"Stopping server with ID \"{server.serverId}\"...", ConsoleColor.DarkMagenta);
+
+						server.StopServer();
+
+						// Wait for server to exit
+						while (server.IsGameProcessRunning)
+						{
+							Thread.Sleep(100);
+						}
+					}
+					catch (Exception ex)
+					{
+						LogDebugException(nameof(OnExit), ex);
 					}
 				}
-				catch (Exception ex)
-				{
-					LogDebugException("OnExit", ex);
-				}
+
+				Environment.Exit(0);
 			}
 		}
 
 		public static void Main()
 		{
 			AppDomain.CurrentDomain.ProcessExit += OnExit;
+
+			if (Utils.IsUnix)
+				exitSignalListener = new UnixExitSignal();
+			else if (Utils.IsWindows)
+				exitSignalListener = new WinExitSignal();
+
+			if (exitSignalListener != null)
+				exitSignalListener.Exit += OnExit;
 
 			Headless = GetFlagFromArgs("headless", "h");
 

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using MultiAdmin.ConsoleTools;
@@ -209,8 +210,12 @@ namespace MultiAdmin.ServerIO
 				server.hasServerMod = true;
 				// This should work fine with older ServerMod versions too
 				string[] streamSplit = stream.Replace("ServerMod - Version", string.Empty).Split('-');
-				server.serverModVersion = streamSplit[0].Trim();
-				server.serverModBuild = (streamSplit.Length > 1 ? streamSplit[1] : "A").Trim();
+
+				if (streamSplit.Any())
+				{
+					server.serverModVersion = streamSplit[0].Trim();
+					server.serverModBuild = (streamSplit.Length > 1 ? streamSplit[1] : "A").Trim();
+				}
 			}
 
 			if (stream.Contains("Round restarting"))
@@ -220,6 +225,8 @@ namespace MultiAdmin.ServerIO
 
 			if (stream.Contains("Waiting for players"))
 			{
+				server.IsLoading = false;
+
 				foreach (Feature f in server.features)
 					if (f is IEventWaitingForPlayers waitingForPlayers)
 						waitingForPlayers.OnWaitingForPlayers();
@@ -230,7 +237,6 @@ namespace MultiAdmin.ServerIO
 					fixBuggedPlayers = false;
 				}
 			}
-
 
 			if (stream.Contains("New round has been started"))
 				foreach (Feature f in server.features)

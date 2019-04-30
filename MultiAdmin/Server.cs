@@ -81,6 +81,8 @@ namespace MultiAdmin
 		public bool IsStarting => Status == ServerStatus.Starting;
 		public bool IsStopping => Status == ServerStatus.Stopping || Status == ServerStatus.ForceStopping || Status == ServerStatus.Restarting;
 
+		public bool IsLoading { get; set; }
+
 		#endregion
 
 		private string startDateTime;
@@ -115,7 +117,19 @@ namespace MultiAdmin
 
 		public Process GameProcess { get; private set; }
 
-		public bool IsGameProcessRunning => GameProcess != null && !GameProcess.HasExited;
+		public bool IsGameProcessRunning
+		{
+			get
+			{
+				if (GameProcess == null)
+					return false;
+
+				GameProcess.Refresh();
+
+				return !GameProcess.HasExited;
+			}
+		}
+
 
 		public static readonly string DedicatedDir = Utils.GetFullPathSafe("SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated");
 
@@ -214,6 +228,7 @@ namespace MultiAdmin
 			do
 			{
 				Status = ServerStatus.Starting;
+				IsLoading = true;
 
 				SessionId = DateTime.Now.Ticks.ToString();
 				StartDateTime = Utils.DateTime;
@@ -375,6 +390,9 @@ namespace MultiAdmin
 		public void StopServer(bool killGame = false)
 		{
 			if (!IsRunning) throw new Exceptions.ServerNotRunningException();
+
+			if (IsLoading)
+				killGame = true;
 
 			initStopTimeoutTime = DateTime.Now;
 			Status = killGame ? ServerStatus.ForceStopping : ServerStatus.Stopping;
@@ -614,28 +632,23 @@ namespace MultiAdmin
 
 		public bool ServerModCheck(int major, int minor, int fix)
 		{
-			if (serverModVersion == null) return false;
+			if (string.IsNullOrEmpty(serverModVersion))
+				return false;
 
 			string[] parts = serverModVersion.Split('.');
-			int verMajor;
-			int verMinor;
-			int verFix = 0;
-			switch (parts.Length)
-			{
-				case 3:
-					int.TryParse(parts[0], out verMajor);
-					int.TryParse(parts[1], out verMinor);
-					int.TryParse(parts[2], out verFix);
-					break;
-				case 2:
-					int.TryParse(parts[0], out verMajor);
-					int.TryParse(parts[1], out verMinor);
-					break;
-				default:
-					return false;
-			}
 
-			if (major == 0 && minor == 0 && verFix == 0) return false;
+			if (!parts.Any())
+				return false;
+
+			int.TryParse(parts[0], out int verMajor);
+
+			int verMinor = 0;
+			if (parts.Length >= 2)
+				int.TryParse(parts[1], out verMinor);
+
+			int verFix = 0;
+			if (parts.Length >= 3)
+				int.TryParse(parts[2], out verFix);
 
 			return verMajor > major || verMajor >= major && verMinor > minor ||
 			       verMajor >= major && verMinor >= minor && verFix >= fix;

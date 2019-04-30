@@ -27,7 +27,19 @@ namespace MultiAdmin.Features
 
 		public long MaxBytes { get; set; }
 
-		public long MemoryUsedBytes => Server.IsGameProcessRunning ? Server.GameProcess.WorkingSet64 : 0;
+		public long MemoryUsedBytes
+		{
+			get
+			{
+				if (Server.GameProcess == null)
+					return 0;
+
+				Server.GameProcess.Refresh();
+
+				return Server.GameProcess.WorkingSet64;
+			}
+		}
+
 		public long MemoryLeftBytes => MaxBytes - MemoryUsedBytes;
 
 		public float LowMb
@@ -75,9 +87,6 @@ namespace MultiAdmin.Features
 		public void OnTick()
 		{
 			if (LowBytes < 0 && LowBytesSoft < 0 || MaxBytes < 0) return;
-
-			if (Server.IsGameProcessRunning)
-				Server.GameProcess.Refresh();
 
 			if (tickCount < MaxTicks && LowBytes >= 0 && MemoryLeftBytes <= LowBytes)
 			{
