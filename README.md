@@ -88,6 +88,7 @@ restart_low_memory | Float | 400.0 | Restart if the games memory falls below thi
 restart_low_memory_roundend | Float | 450.0 | Restart at the end of the round if the game's memory falls below this value in megabytes
 max_players | Integer | 20 | The number of players to display as the maximum for the server (within MultiAdmin, not in-game)
 restart_every_num_rounds | Integer | -1 | Restart the server every number rounds
+safe_server_shutdown | Boolean | True | When MultiAdmin closes, if this is true, MultiAdmin will attempt to safely shutdown all the servers
 server_restart_timeout | Float | 10.0 | The time in seconds before MultiAdmin forces a server restart if it doesn't respond to the regular restart command
 server_stop_timeout | Float | 10.0 | The time in seconds before MultiAdmin forces a server shutdown if it doesn't respond to the regular shutdown command
 servers_folder | String | servers | The location of the "servers" folder for MultiAdmin to load multiple server configurations from

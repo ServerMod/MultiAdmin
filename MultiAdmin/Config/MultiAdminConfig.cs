@@ -34,6 +34,7 @@ namespace MultiAdmin.Config
 		public ConfigEntry<int> MaxPlayers { get; } = new ConfigEntry<int>("max_players", 20, "Max Players", "The number of players to display as the maximum for the server (within MultiAdmin, not in-game)");
 		public ConfigEntry<bool> RandomInputColors { get; } = new ConfigEntry<bool>("random_input_colors", false, "Random Input Colors", "Randomize the new input system's colors every time a message is input");
 		public ConfigEntry<int> RestartEveryNumRounds { get; } = new ConfigEntry<int>("restart_every_num_rounds", -1, "Restart Every Number of Rounds", "Restart the server every number of rounds");
+		public ConfigEntry<bool> SafeServerShutdown { get; } = new ConfigEntry<bool>("safe_server_shutdown", true, "Safe Server Shutdown", "When MultiAdmin closes, if this is true, MultiAdmin will attempt to safely shutdown all the servers");
 		public ConfigEntry<float> ServerRestartTimeout { get; } = new ConfigEntry<float>("server_restart_timeout", 10, "Server Restart Timeout", "The time in seconds before MultiAdmin forces a server restart if it doesn't respond to the regular restart command");
 		public ConfigEntry<float> ServerStopTimeout { get; } = new ConfigEntry<float>("server_stop_timeout", 10, "Server Stop Timeout", "The time in seconds before MultiAdmin forces a server shutdown if it doesn't respond to the regular shutdown command");
 		public ConfigEntry<string> ServersFolder { get; } = new ConfigEntry<string>("servers_folder", "servers", "Servers Folder", "The location of the \"servers\" folder for MultiAdmin to load multiple server configurations from");
@@ -64,11 +65,7 @@ namespace MultiAdmin.Config
 				}
 				catch (Exception e)
 				{
-					new ColoredMessage[]
-					{
-						new ColoredMessage($"Error while creating config (Path = {Config?.ConfigPath ?? "Null"}):", ConsoleColor.Red),
-						new ColoredMessage(e.ToString(), ConsoleColor.Red)
-					}.WriteLines();
+					new ColoredMessage[] {new ColoredMessage($"Error while creating config (Path = {Config?.ConfigPath ?? "Null"}):", ConsoleColor.Red), new ColoredMessage(e.ToString(), ConsoleColor.Red)}.WriteLines();
 				}
 			}
 

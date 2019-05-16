@@ -268,7 +268,7 @@ namespace MultiAdmin
 
 					Write($"Executing \"{scpslExe}\"...", ConsoleColor.DarkGreen);
 
-					List<string> scpslArgs = new List<string>(new[]
+					List<string> scpslArgs = new List<string>(new string[]
 					{
 						"-batchmode",
 						"-nographics",
@@ -617,13 +617,22 @@ namespace MultiAdmin
 			{
 				if (message == null || string.IsNullOrEmpty(MaLogFile) || ServerConfig.NoLog.Value) return;
 
-				Directory.CreateDirectory(logDir);
-
-				using (StreamWriter sw = File.AppendText(MaLogFile))
+				try
 				{
-					message = Utils.TimeStampMessage(message);
-					sw.Write(message);
-					if (!message.EndsWith(Environment.NewLine)) sw.WriteLine();
+					Directory.CreateDirectory(logDir);
+
+					using (StreamWriter sw = File.AppendText(MaLogFile))
+					{
+						message = Utils.TimeStampMessage(message);
+						sw.Write(message);
+						if (!message.EndsWith(Environment.NewLine)) sw.WriteLine();
+					}
+				}
+				catch (Exception e)
+				{
+					Program.LogDebugException(nameof(Log), e);
+
+					new ColoredMessage[] {new ColoredMessage("Error while logging for MultiAdmin:", ConsoleColor.Red), new ColoredMessage(e.ToString(), ConsoleColor.Red)}.WriteLines();
 				}
 			}
 		}
@@ -690,11 +699,7 @@ namespace MultiAdmin
 			}
 			catch (Exception e)
 			{
-				Write(new ColoredMessage[]
-				{
-					new ColoredMessage("Error while copying files and folders:", ConsoleColor.Red),
-					new ColoredMessage(e.ToString(), ConsoleColor.Red)
-				});
+				Write(new ColoredMessage[] {new ColoredMessage("Error while copying files and folders:", ConsoleColor.Red), new ColoredMessage(e.ToString(), ConsoleColor.Red)});
 			}
 
 			return false;

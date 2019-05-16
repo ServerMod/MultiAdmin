@@ -87,15 +87,22 @@ namespace MultiAdmin
 		{
 			lock (MaDebugLogFile)
 			{
-				if ((!MultiAdminConfig.GlobalConfig?.DebugLog?.Value ?? true) || string.IsNullOrEmpty(MaDebugLogFile) || tag == null || !IsDebugLogTagAllowed(tag)) return;
-
-				Directory.CreateDirectory(MaDebugLogDir);
-
-				using (StreamWriter sw = File.AppendText(MaDebugLogFile))
+				try
 				{
-					message = Utils.TimeStampMessage($"[{tag}] {message}");
-					sw.Write(message);
-					if (!message.EndsWith(Environment.NewLine)) sw.WriteLine();
+					if ((!MultiAdminConfig.GlobalConfig?.DebugLog?.Value ?? true) || string.IsNullOrEmpty(MaDebugLogFile) || tag == null || !IsDebugLogTagAllowed(tag)) return;
+
+					Directory.CreateDirectory(MaDebugLogDir);
+
+					using (StreamWriter sw = File.AppendText(MaDebugLogFile))
+					{
+						message = Utils.TimeStampMessage($"[{tag}] {message}");
+						sw.Write(message);
+						if (!message.EndsWith(Environment.NewLine)) sw.WriteLine();
+					}
+				}
+				catch (Exception e)
+				{
+					new ColoredMessage[] {new ColoredMessage("Error while logging for MultiAdmin debug:", ConsoleColor.Red), new ColoredMessage(e.ToString(), ConsoleColor.Red)}.WriteLines();
 				}
 			}
 		}
@@ -104,49 +111,55 @@ namespace MultiAdmin
 
 		private static void OnExit(object sender, EventArgs e)
 		{
-			lock (ExitLock)
+			if (MultiAdminConfig.GlobalConfig.SafeServerShutdown.Value)
 			{
-				Write("Stopping servers and exiting MultiAdmin...", ConsoleColor.DarkMagenta);
-
-				foreach (Server server in InstantiatedServers)
+				lock (ExitLock)
 				{
-					if (!server.IsGameProcessRunning)
-						continue;
+					Write("Stopping servers and exiting MultiAdmin...", ConsoleColor.DarkMagenta);
 
-					try
+					foreach (Server server in InstantiatedServers)
 					{
-						if (!string.IsNullOrEmpty(server.serverId))
-							Write($"Stopping server with ID \"{server.serverId}\"...", ConsoleColor.DarkMagenta);
+						if (!server.IsGameProcessRunning)
+							continue;
 
-						server.StopServer();
-
-						// Wait for server to exit
-						while (server.IsGameProcessRunning)
+						try
 						{
-							Thread.Sleep(100);
+							if (!string.IsNullOrEmpty(server.serverId))
+								Write($"Stopping server with ID \"{server.serverId}\"...", ConsoleColor.DarkMagenta);
+
+							server.StopServer();
+
+							// Wait for server to exit
+							while (server.IsGameProcessRunning)
+							{
+								Thread.Sleep(100);
+							}
+						}
+						catch (Exception ex)
+						{
+							LogDebugException(nameof(OnExit), ex);
 						}
 					}
-					catch (Exception ex)
-					{
-						LogDebugException(nameof(OnExit), ex);
-					}
 				}
-
-				Environment.Exit(0);
 			}
+
+			Process.GetCurrentProcess().Kill();
 		}
 
 		public static void Main()
 		{
-			AppDomain.CurrentDomain.ProcessExit += OnExit;
+			if (MultiAdminConfig.GlobalConfig.SafeServerShutdown.Value)
+			{
+				AppDomain.CurrentDomain.ProcessExit += OnExit;
 
-			if (Utils.IsUnix)
-				exitSignalListener = new UnixExitSignal();
-			else if (Utils.IsWindows)
-				exitSignalListener = new WinExitSignal();
+				if (Utils.IsUnix)
+					exitSignalListener = new UnixExitSignal();
+				else if (Utils.IsWindows)
+					exitSignalListener = new WinExitSignal();
 
-			if (exitSignalListener != null)
-				exitSignalListener.Exit += OnExit;
+				if (exitSignalListener != null)
+					exitSignalListener.Exit += OnExit;
+			}
 
 			Headless = GetFlagFromArgs("headless", "h");
 
