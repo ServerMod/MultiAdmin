@@ -143,7 +143,9 @@ namespace MultiAdmin
 				}
 			}
 
-			Process.GetCurrentProcess().Kill();
+			// For some reason Mono hangs on this, but it works perfectly without it
+			if (Utils.IsWindows)
+				Environment.Exit(0);
 		}
 
 		public static void Main()

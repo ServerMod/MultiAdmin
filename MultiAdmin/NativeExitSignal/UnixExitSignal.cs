@@ -1,5 +1,5 @@
 using System;
-using System.Threading;
+using System.Threading.Tasks;
 using Mono.Unix;
 using Mono.Unix.Native;
 
@@ -11,24 +11,15 @@ namespace MultiAdmin.NativeExitSignal
 
 		private readonly UnixSignal[] signals = {new UnixSignal(Signum.SIGTERM), new UnixSignal(Signum.SIGINT), new UnixSignal(Signum.SIGUSR1)};
 
-		public readonly Thread exitSignalThread;
-
 		public UnixExitSignal()
 		{
-			exitSignalThread = new Thread(() =>
+			Task.Factory.StartNew(() =>
 			{
 				// blocking call to wait for any kill signal
 				UnixSignal.WaitAny(signals, -1);
 
 				Exit?.Invoke(this, EventArgs.Empty);
 			});
-
-			RunListener();
-		}
-
-		public void RunListener()
-		{
-			exitSignalThread.Start();
 		}
 	}
 }
