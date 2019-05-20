@@ -47,12 +47,23 @@ namespace MultiAdmin
 
 			this.configLocation = Utils.GetFullPathSafe(configLocation) ?? Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.ConfigLocation.Value) ?? Utils.GetFullPathSafe(serverDir);
 
+			// Load config
+			serverConfig = MultiAdminConfig.GlobalConfig;
+
+			string serverConfigLocation = this.configLocation;
+			while (!string.IsNullOrEmpty(serverConfigLocation))
+			{
+				this.configLocation = serverConfigLocation;
+
+				serverConfig = new MultiAdminConfig(serverConfigLocation + Path.DirectorySeparatorChar + MultiAdminConfig.ConfigFileName, serverConfig);
+
+				serverConfigLocation = Utils.GetFullPathSafe(serverConfig.ConfigLocation.Value);
+			}
+
+			// Set port
 			this.port = port;
 
 			logDir = Utils.GetFullPathSafe((string.IsNullOrEmpty(serverDir) ? string.Empty : serverDir + Path.DirectorySeparatorChar) + "logs");
-
-			// Load config
-			serverConfig = string.IsNullOrEmpty(this.configLocation) ? MultiAdminConfig.GlobalConfig : new MultiAdminConfig(this.configLocation + Path.DirectorySeparatorChar + MultiAdminConfig.ConfigFileName);
 
 			// Register all features
 			RegisterFeatures();

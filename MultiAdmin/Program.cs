@@ -111,9 +111,9 @@ namespace MultiAdmin
 
 		private static void OnExit(object sender, EventArgs e)
 		{
-			if (MultiAdminConfig.GlobalConfig.SafeServerShutdown.Value)
+			lock (ExitLock)
 			{
-				lock (ExitLock)
+				if (MultiAdminConfig.GlobalConfig.SafeServerShutdown.Value)
 				{
 					Write("Stopping servers and exiting MultiAdmin...", ConsoleColor.DarkMagenta);
 
@@ -141,11 +141,11 @@ namespace MultiAdmin
 						}
 					}
 				}
-			}
 
-			// For some reason Mono hangs on this, but it works perfectly without it
-			if (Utils.IsWindows)
-				Environment.Exit(0);
+				// For some reason Mono hangs on this, but it works perfectly without it
+				if (Utils.IsWindows)
+					Environment.Exit(0);
+			}
 		}
 
 		public static void Main()
