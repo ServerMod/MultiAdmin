@@ -57,7 +57,7 @@ The arguments available for running MultiAdmin with
 - `--headless` or `-h`: Runs MultiAdmin in headless mode, this makes MultiAdmin not accept any input at all and only output to log files, not in console (Note: This argument is inherited by processes started by this MultiAdmin process)
 - `--server-id <Server ID>` or `-id <Server ID>`: The Server ID to run this MultiAdmin instance with a config location (`--config` or `-c`) so that it reads the configs from the location, but stores the logs in the Server ID's folder
 - `--config <Config Location>` or `-c <Config Location>`: The config location to use for this MultiAdmin instance (Note: This is used over the config option `config_location`)
-- `--port <Server Port>` or `-p <Server Port>`: The port to use for this MultiAdmin instance (Note: This is used over the config option `config_location` and is inherited by processes started by this MultiAdmin process)
+- `--port <Server Port>` or `-p <Server Port>`: The port to use for this MultiAdmin instance (Preparing for next game release, currently does nothing) (Note: This is used over the config option `port` and is inherited by processes started by this MultiAdmin process)
 
 ## Config Settings
 All configuration settings go into a file named `scp_multiadmin.cfg` in the same directory as MultiAdmin.exe or in your server directory within the `servers_folder` value defined in the global configuration file
