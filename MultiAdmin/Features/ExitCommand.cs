@@ -3,10 +3,8 @@ using MultiAdmin.Features.Attributes;
 namespace MultiAdmin.Features
 {
 	[Feature]
-	internal class ExitCommand : Feature, ICommand, IEventWaitingForPlayers
+	internal class ExitCommand : Feature, ICommand
 	{
-		private bool initialRoundStarted;
-
 		public ExitCommand(Server server) : base(server)
 		{
 		}
@@ -28,7 +26,7 @@ namespace MultiAdmin.Features
 
 		public void OnCall(string[] args)
 		{
-			Server.StopServer(!initialRoundStarted);
+			Server.StopServer();
 		}
 
 		public bool PassToGame()
@@ -52,12 +50,6 @@ namespace MultiAdmin.Features
 
 		public override void Init()
 		{
-			initialRoundStarted = false;
-		}
-
-		public void OnWaitingForPlayers()
-		{
-			initialRoundStarted = true;
 		}
 	}
 }

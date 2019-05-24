@@ -9,26 +9,36 @@ namespace MultiAdmin.ConsoleTools
 	{
 		public static readonly object WriteLock = new object();
 
-		public static void Write(string text, ConsoleColor textColor = ConsoleColor.White, ConsoleColor backgroundColor = ConsoleColor.Black)
+		public static void Write(string text, ConsoleColor? textColor = null, ConsoleColor? backgroundColor = null)
 		{
 			lock (WriteLock)
 			{
 				if (text == null) return;
 
-				ConsoleColor lastFore = Console.ForegroundColor;
-				ConsoleColor lastBack = Console.BackgroundColor;
+				ConsoleColor? lastFore = null;
+				if (textColor != null)
+				{
+					lastFore = Console.ForegroundColor;
+					Console.ForegroundColor = textColor.Value;
+				}
 
-				Console.ForegroundColor = textColor;
-				Console.BackgroundColor = backgroundColor;
+				ConsoleColor? lastBack = null;
+				if (backgroundColor != null)
+				{
+					lastBack = Console.BackgroundColor;
+					Console.BackgroundColor = backgroundColor.Value;
+				}
 
 				Console.Write(text);
 
-				Console.ForegroundColor = lastFore;
-				Console.BackgroundColor = lastBack;
+				if (lastFore != null)
+					Console.ForegroundColor = lastFore.Value;
+				if (lastBack != null)
+					Console.BackgroundColor = lastBack.Value;
 			}
 		}
 
-		public static void WriteLine(string text, ConsoleColor textColor = ConsoleColor.White, ConsoleColor backgroundColor = ConsoleColor.Black)
+		public static void WriteLine(string text, ConsoleColor? textColor = null, ConsoleColor? backgroundColor = null)
 		{
 			lock (WriteLock)
 			{
@@ -72,12 +82,12 @@ namespace MultiAdmin.ConsoleTools
 	public class ColoredMessage : ICloneable
 	{
 		public string text;
-		public ConsoleColor textColor;
-		public ConsoleColor backgroundColor;
+		public ConsoleColor? textColor;
+		public ConsoleColor? backgroundColor;
 
 		public int Length => text?.Length ?? 0;
 
-		public ColoredMessage(string text, ConsoleColor textColor = ConsoleColor.White, ConsoleColor backgroundColor = ConsoleColor.Black)
+		public ColoredMessage(string text, ConsoleColor? textColor = null, ConsoleColor? backgroundColor = null)
 		{
 			this.text = text;
 			this.textColor = textColor;

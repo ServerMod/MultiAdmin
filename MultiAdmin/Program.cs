@@ -7,13 +7,14 @@ using System.Reflection;
 using System.Threading;
 using MultiAdmin.Config;
 using MultiAdmin.ConsoleTools;
+using MultiAdmin.NativeExitSignal;
 using MultiAdmin.ServerIO;
 
 namespace MultiAdmin
 {
 	public static class Program
 	{
-		public const string MaVersion = "3.1.2";
+		public const string MaVersion = "3.2.0";
 
 		private static readonly List<Server> InstantiatedServers = new List<Server>();
 
@@ -21,6 +22,10 @@ namespace MultiAdmin
 		private static readonly string MaDebugLogFile = !string.IsNullOrEmpty(MaDebugLogDir) ? Utils.GetFullPathSafe($"{MaDebugLogDir}{Path.DirectorySeparatorChar}{Utils.DateTime}_MA_{MaVersion}_debug_log.txt") : null;
 
 		private static uint? portArg;
+
+		private static IExitSignal exitSignalListener;
+
+		private static readonly object ExitLock = new object();
 
 		#region Server Properties
 
@@ -30,7 +35,7 @@ namespace MultiAdmin
 		{
 			get
 			{
-				string globalServersFolder = MultiAdminConfig.GlobalConfig.ServersFolder;
+				string globalServersFolder = MultiAdminConfig.GlobalConfig.ServersFolder.Value;
 				return !Directory.Exists(globalServersFolder) ? new string[] { } : Directory.GetDirectories(globalServersFolder);
 			}
 		}
@@ -41,7 +46,7 @@ namespace MultiAdmin
 
 		#region Auto-Start Server Properties
 
-		public static Server[] AutoStartServers => Servers.Where(server => !server.ServerConfig.ManualStart).ToArray();
+		public static Server[] AutoStartServers => Servers.Where(server => !server.ServerConfig.ManualStart.Value).ToArray();
 
 		public static string[] AutoStartServerDirectories => AutoStartServers.Select(autoStartServer => autoStartServer.serverDir).ToArray();
 
@@ -59,13 +64,13 @@ namespace MultiAdmin
 			{
 				if (Headless) return;
 
-				new ColoredMessage(Utils.TimeStampMessage(message), color).WriteLine(MultiAdminConfig.GlobalConfig.UseNewInputSystem);
+				new ColoredMessage(Utils.TimeStampMessage(message), color).WriteLine(MultiAdminConfig.GlobalConfig?.UseNewInputSystem?.Value ?? false);
 			}
 		}
 
 		private static bool IsDebugLogTagAllowed(string tag)
 		{
-			return !MultiAdminConfig.GlobalConfig.DebugLogBlacklist.Contains(tag) && (!MultiAdminConfig.GlobalConfig.DebugLogWhitelist.Any() || MultiAdminConfig.GlobalConfig.DebugLogWhitelist.Contains(tag));
+			return (!MultiAdminConfig.GlobalConfig?.DebugLogBlacklist?.Value?.Contains(tag) ?? true) && ((!MultiAdminConfig.GlobalConfig?.DebugLogWhitelist?.Value?.Any() ?? true) || MultiAdminConfig.GlobalConfig.DebugLogWhitelist.Value.Contains(tag));
 		}
 
 		public static void LogDebugException(string tag, Exception exception)
@@ -82,15 +87,22 @@ namespace MultiAdmin
 		{
 			lock (MaDebugLogFile)
 			{
-				if (!MultiAdminConfig.GlobalConfig.DebugLog || string.IsNullOrEmpty(MaDebugLogFile) || tag == null || !IsDebugLogTagAllowed(tag)) return;
-
-				Directory.CreateDirectory(MaDebugLogDir);
-
-				using (StreamWriter sw = File.AppendText(MaDebugLogFile))
+				try
 				{
-					message = Utils.TimeStampMessage($"[{tag}] {message}");
-					sw.Write(message);
-					if (!message.EndsWith(Environment.NewLine)) sw.WriteLine();
+					if ((!MultiAdminConfig.GlobalConfig?.DebugLog?.Value ?? true) || string.IsNullOrEmpty(MaDebugLogFile) || tag == null || !IsDebugLogTagAllowed(tag)) return;
+
+					Directory.CreateDirectory(MaDebugLogDir);
+
+					using (StreamWriter sw = File.AppendText(MaDebugLogFile))
+					{
+						message = Utils.TimeStampMessage($"[{tag}] {message}");
+						sw.Write(message);
+						if (!message.EndsWith(Environment.NewLine)) sw.WriteLine();
+					}
+				}
+				catch (Exception e)
+				{
+					new ColoredMessage[] {new ColoredMessage("Error while logging for MultiAdmin debug:", ConsoleColor.Red), new ColoredMessage(e.ToString(), ConsoleColor.Red)}.WriteLines();
 				}
 			}
 		}
@@ -99,26 +111,57 @@ namespace MultiAdmin
 
 		private static void OnExit(object sender, EventArgs e)
 		{
-			foreach (Server server in InstantiatedServers)
+			lock (ExitLock)
 			{
-				try
+				if (MultiAdminConfig.GlobalConfig.SafeServerShutdown.Value)
 				{
-					while (server.IsRunning)
+					Write("Stopping servers and exiting MultiAdmin...", ConsoleColor.DarkMagenta);
+
+					foreach (Server server in InstantiatedServers)
 					{
-						server.StopServer(true);
-						Thread.Sleep(10);
+						if (!server.IsGameProcessRunning)
+							continue;
+
+						try
+						{
+							if (!string.IsNullOrEmpty(server.serverId))
+								Write($"Stopping server with ID \"{server.serverId}\"...", ConsoleColor.DarkMagenta);
+
+							server.StopServer();
+
+							// Wait for server to exit
+							while (server.IsGameProcessRunning)
+							{
+								Thread.Sleep(100);
+							}
+						}
+						catch (Exception ex)
+						{
+							LogDebugException(nameof(OnExit), ex);
+						}
 					}
 				}
-				catch (Exception ex)
-				{
-					LogDebugException("OnExit", ex);
-				}
+
+				// For some reason Mono hangs on this, but it works perfectly without it
+				if (Utils.IsWindows)
+					Environment.Exit(0);
 			}
 		}
 
 		public static void Main()
 		{
-			AppDomain.CurrentDomain.ProcessExit += OnExit;
+			if (MultiAdminConfig.GlobalConfig.SafeServerShutdown.Value)
+			{
+				AppDomain.CurrentDomain.ProcessExit += OnExit;
+
+				if (Utils.IsUnix)
+					exitSignalListener = new UnixExitSignal();
+				else if (Utils.IsWindows)
+					exitSignalListener = new WinExitSignal();
+
+				if (exitSignalListener != null)
+					exitSignalListener.Exit += OnExit;
+			}
 
 			Headless = GetFlagFromArgs("headless", "h");
 

@@ -10,6 +10,19 @@ namespace MultiAdmin.Features
 		private int maxPlayers;
 		private int playerCount;
 
+		private int ServerProcessId
+		{
+			get
+			{
+				if (Server.GameProcess == null)
+					return -1;
+
+				Server.GameProcess.Refresh();
+
+				return Server.GameProcess.Id;
+			}
+		}
+
 		public Titlebar(Server server) : base(server)
 		{
 		}
@@ -44,20 +57,19 @@ namespace MultiAdmin.Features
 
 		public override void Init()
 		{
-			maxPlayers = Server.ServerConfig.MaxPlayers;
 			playerCount = -1; // -1 for the "server" player, once the server starts this will increase to 0.
 			UpdateTitlebar();
 		}
 
 		public override void OnConfigReload()
 		{
-			maxPlayers = Server.ServerConfig.MaxPlayers;
+			maxPlayers = Server.ServerConfig.MaxPlayers.Value;
 			UpdateTitlebar();
 		}
 
 		private void UpdateTitlebar()
 		{
-			if (Program.Headless) return;
+			if (Program.Headless || !Server.ServerConfig.SetTitleBar.Value) return;
 
 			int displayPlayerCount = playerCount < 0 ? 0 : playerCount;
 
@@ -75,7 +87,7 @@ namespace MultiAdmin.Features
 
 			if (Server.IsGameProcessRunning)
 			{
-				titleBar.Add($"PID: {Server.GameProcess.Id}");
+				titleBar.Add($"PID: {ServerProcessId}");
 			}
 
 			titleBar.Add($"{displayPlayerCount}/{maxPlayers}");
@@ -91,7 +103,7 @@ namespace MultiAdmin.Features
 			}
 			catch (Exception e)
 			{
-				Program.LogDebugException("UpdateTitlebar", e);
+				Program.LogDebugException(nameof(UpdateTitlebar), e);
 			}
 		}
 	}

@@ -31,7 +31,7 @@ namespace MultiAdmin.ServerIO
 				}
 				catch (Exception e)
 				{
-					Program.LogDebugException("SectionBufferWidth", e);
+					Program.LogDebugException(nameof(SectionBufferWidth), e);
 					return 0;
 				}
 			}
@@ -53,7 +53,7 @@ namespace MultiAdmin.ServerIO
 					continue;
 				}
 
-				string message = server.ServerConfig.UseNewInputSystem ? GetInputLineNew(server, prevMessages) : Console.ReadLine();
+				string message = server.ServerConfig.UseNewInputSystem.Value ? GetInputLineNew(server, prevMessages) : Console.ReadLine();
 
 				if (string.IsNullOrEmpty(message)) continue;
 
@@ -78,7 +78,7 @@ namespace MultiAdmin.ServerIO
 
 		public static string GetInputLineNew(Server server, ShiftingList prevMessages)
 		{
-			if (server.ServerConfig.RandomInputColors)
+			if (server.ServerConfig.RandomInputColors.Value)
 				RandomizeInputColors();
 
 			string curMessage = string.Empty;
@@ -258,7 +258,7 @@ namespace MultiAdmin.ServerIO
 					}
 					catch (Exception e)
 					{
-						Program.LogDebugException("Write", e);
+						Program.LogDebugException(nameof(Write), e);
 
 						CurrentCursor = messageCursor;
 						SetCursor();
@@ -327,7 +327,7 @@ namespace MultiAdmin.ServerIO
 				}
 				catch (Exception e)
 				{
-					Program.LogDebugException("SetCursor", e);
+					Program.LogDebugException(nameof(SetCursor), e);
 				}
 			}
 		}
@@ -343,7 +343,7 @@ namespace MultiAdmin.ServerIO
 			{
 				if (Program.Headless) return;
 
-				message?.Write(MultiAdminConfig.GlobalConfig.UseNewInputSystem);
+				message?.Write(MultiAdminConfig.GlobalConfig.UseNewInputSystem.Value);
 
 				CurrentInput = message;
 			}
@@ -383,7 +383,7 @@ namespace MultiAdmin.ServerIO
 			}
 			catch (Exception e)
 			{
-				Program.LogDebugException("RandomizeInputColors", e);
+				Program.LogDebugException(nameof(RandomizeInputColors), e);
 			}
 		}
 	}

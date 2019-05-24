@@ -27,29 +27,41 @@ namespace MultiAdmin.Features
 
 		public long MaxBytes { get; set; }
 
-		public long MemoryUsedBytes => Server.IsGameProcessRunning ? Server.GameProcess.WorkingSet64 : 0;
+		public long MemoryUsedBytes
+		{
+			get
+			{
+				if (Server.GameProcess == null)
+					return 0;
+
+				Server.GameProcess.Refresh();
+
+				return Server.GameProcess.WorkingSet64;
+			}
+		}
+
 		public long MemoryLeftBytes => MaxBytes - MemoryUsedBytes;
 
 		public float LowMb
 		{
-			get => LowBytes / (float) BytesInMegabyte;
-			set => LowBytes = (long) (value * BytesInMegabyte);
+			get => LowBytes / (float)BytesInMegabyte;
+			set => LowBytes = (long)(value * BytesInMegabyte);
 		}
 
 		public float LowMbSoft
 		{
-			get => LowBytesSoft / (float) BytesInMegabyte;
-			set => LowBytesSoft = (long) (value * BytesInMegabyte);
+			get => LowBytesSoft / (float)BytesInMegabyte;
+			set => LowBytesSoft = (long)(value * BytesInMegabyte);
 		}
 
 		public float MaxMb
 		{
-			get => MaxBytes / (float) BytesInMegabyte;
-			set => MaxBytes = (long) (value * BytesInMegabyte);
+			get => MaxBytes / (float)BytesInMegabyte;
+			set => MaxBytes = (long)(value * BytesInMegabyte);
 		}
 
-		public float MemoryUsedMb => MemoryUsedBytes / (float) BytesInMegabyte;
-		public float MemoryLeftMb => MemoryLeftBytes / (float) BytesInMegabyte;
+		public float MemoryUsedMb => MemoryUsedBytes / (float)BytesInMegabyte;
+		public float MemoryLeftMb => MemoryLeftBytes / (float)BytesInMegabyte;
 
 		//public decimal DecimalMemoryUsedMb => DecimalDivide(MemoryUsedBytes, BytesInMegabyte, 2);
 		public decimal DecimalMemoryLeftMb => DecimalDivide(MemoryLeftBytes, BytesInMegabyte, 2);
@@ -75,9 +87,6 @@ namespace MultiAdmin.Features
 		public void OnTick()
 		{
 			if (LowBytes < 0 && LowBytesSoft < 0 || MaxBytes < 0) return;
-
-			if (Server.IsGameProcessRunning)
-				Server.GameProcess.Refresh();
 
 			if (tickCount < MaxTicks && LowBytes >= 0 && MemoryLeftBytes <= LowBytes)
 			{
@@ -139,9 +148,9 @@ namespace MultiAdmin.Features
 
 		public override void OnConfigReload()
 		{
-			LowMb = Server.ServerConfig.RestartLowMemory;
-			LowMbSoft = Server.ServerConfig.RestartLowMemoryRoundEnd;
-			MaxMb = Server.ServerConfig.MaxMemory;
+			LowMb = Server.ServerConfig.RestartLowMemory.Value;
+			LowMbSoft = Server.ServerConfig.RestartLowMemoryRoundEnd.Value;
+			MaxMb = Server.ServerConfig.MaxMemory.Value;
 		}
 	}
 }

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using MultiAdmin.ConsoleTools;
@@ -10,8 +11,6 @@ namespace MultiAdmin.ServerIO
 	{
 		public static readonly Regex SmodRegex =
 			new Regex(@"\[(DEBUG|INFO|WARN|ERROR)\] (\[.*?\]) (.*)", RegexOptions.Compiled | RegexOptions.Singleline);
-
-		public const ConsoleColor DefaultBackground = ConsoleColor.Black;
 
 		private readonly FileSystemWatcher fsWatcher;
 		private bool fixBuggedPlayers;
@@ -24,7 +23,7 @@ namespace MultiAdmin.ServerIO
 			}
 			catch (Exception e)
 			{
-				Program.LogDebugException("MapConsoleColor", e);
+				Program.LogDebugException(nameof(MapConsoleColor), e);
 				return def;
 			}
 		}
@@ -53,7 +52,7 @@ namespace MultiAdmin.ServerIO
 		/* Old Windows MAPI Watching Code
 		private void OnDirectoryChanged(FileSystemEventArgs e, Server server)
 		{
-			if (server.Stopping || string.IsNullOrEmpty(server.SessionId) || !e.FullPath.Contains(server.SessionId) || !Directory.Exists(e.FullPath)) return;
+			if (!Directory.Exists(e.FullPath)) return;
 
 			string[] files = Directory.GetFiles(e.FullPath, "sl*.mapi", SearchOption.TopDirectoryOnly).OrderBy(f => f)
 				.ToArray();
@@ -63,7 +62,7 @@ namespace MultiAdmin.ServerIO
 
 		private void OnMapiCreated(FileSystemEventArgs e, Server server)
 		{
-			if (!server.IsRunning || string.IsNullOrEmpty(server.SessionId) || !e.FullPath.Contains(server.SessionId) || !File.Exists(e.FullPath)) return;
+			if (!File.Exists(e.FullPath)) return;
 
 			try
 			{
@@ -71,7 +70,7 @@ namespace MultiAdmin.ServerIO
 			}
 			catch (Exception ex)
 			{
-				Program.LogDebugException("OnMapiCreated", ex);
+				Program.LogDebugException(nameof(OnMapiCreated), ex);
 			}
 		}
 
@@ -85,7 +84,7 @@ namespace MultiAdmin.ServerIO
 			// Lock this object to wait for this event to finish before trying to read another file
 			lock (this)
 			{
-				for (int attempts = 0; attempts < 100 && server.IsRunning; attempts++)
+				for (int attempts = 0; attempts < 100; attempts++)
 				{
 					try
 					{
@@ -107,12 +106,12 @@ namespace MultiAdmin.ServerIO
 					}
 					catch (UnauthorizedAccessException e)
 					{
-						Program.LogDebugException("ProcessFile", e);
+						Program.LogDebugException(nameof(ProcessFile), e);
 						Thread.Sleep(5);
 					}
 					catch (Exception e)
 					{
-						Program.LogDebugException("ProcessFile", e);
+						Program.LogDebugException(nameof(ProcessFile), e);
 						Thread.Sleep(2);
 					}
 				}
@@ -126,8 +125,6 @@ namespace MultiAdmin.ServerIO
 
 				return;
 			}
-
-			if (!server.IsRunning) return;
 
 			bool display = true;
 			ConsoleColor color = ConsoleColor.Cyan;
@@ -160,6 +157,7 @@ namespace MultiAdmin.ServerIO
 			// Smod2 loggers pretty printing
 			Match match = SmodRegex.Match(stream);
 			if (match.Success)
+			{
 				if (match.Groups.Count >= 3)
 				{
 					ConsoleColor levelColor = ConsoleColor.Cyan;
@@ -187,9 +185,9 @@ namespace MultiAdmin.ServerIO
 
 					server.Write(new ColoredMessage[]
 					{
-						new ColoredMessage($"[{match.Groups[1].Value}] ", levelColor, DefaultBackground),
-						new ColoredMessage($"{match.Groups[2].Value} ", tagColor, DefaultBackground),
-						new ColoredMessage(match.Groups[3].Value, msgColor, DefaultBackground)
+						new ColoredMessage($"[{match.Groups[1].Value}] ", levelColor),
+						new ColoredMessage($"{match.Groups[2].Value} ", tagColor),
+						new ColoredMessage(match.Groups[3].Value, msgColor)
 					}, ConsoleColor.Cyan);
 
 					// P.S. the format is [Info] [courtney.exampleplugin] Something interesting happened
@@ -198,6 +196,7 @@ namespace MultiAdmin.ServerIO
 					// This return should be here
 					return;
 				}
+			}
 
 			if (stream.Contains("Mod Log:"))
 				foreach (Feature f in server.features)
@@ -209,8 +208,12 @@ namespace MultiAdmin.ServerIO
 				server.hasServerMod = true;
 				// This should work fine with older ServerMod versions too
 				string[] streamSplit = stream.Replace("ServerMod - Version", string.Empty).Split('-');
-				server.serverModVersion = streamSplit[0].Trim();
-				server.serverModBuild = (streamSplit.Length > 1 ? streamSplit[1] : "A").Trim();
+
+				if (streamSplit.Any())
+				{
+					server.serverModVersion = streamSplit[0].Trim();
+					server.serverModBuild = (streamSplit.Length > 1 ? streamSplit[1] : "A").Trim();
+				}
 			}
 
 			if (stream.Contains("Round restarting"))
@@ -220,6 +223,8 @@ namespace MultiAdmin.ServerIO
 
 			if (stream.Contains("Waiting for players"))
 			{
+				server.IsLoading = false;
+
 				foreach (Feature f in server.features)
 					if (f is IEventWaitingForPlayers waitingForPlayers)
 						waitingForPlayers.OnWaitingForPlayers();
@@ -231,7 +236,6 @@ namespace MultiAdmin.ServerIO
 				}
 			}
 
-
 			if (stream.Contains("New round has been started"))
 				foreach (Feature f in server.features)
 					if (f is IEventRoundStart roundStart)
@@ -242,23 +246,23 @@ namespace MultiAdmin.ServerIO
 					if (f is IEventServerStart serverStart)
 						serverStart.OnServerStart();
 
-
 			if (stream.Contains("Server full"))
 				foreach (Feature f in server.features)
 					if (f is IEventServerFull serverFull)
 						serverFull.OnServerFull();
-
 
 			if (stream.Contains("Player connect"))
 			{
 				display = false;
 				server.Log("Player connect event");
 				foreach (Feature f in server.features)
+				{
 					if (f is IEventPlayerConnect playerConnect)
 					{
 						string name = stream.Substring(stream.IndexOf(":"));
 						playerConnect.OnPlayerConnect(name);
 					}
+				}
 			}
 
 			if (stream.Contains("Player disconnect"))
@@ -266,11 +270,13 @@ namespace MultiAdmin.ServerIO
 				display = false;
 				server.Log("Player disconnect event");
 				foreach (Feature f in server.features)
+				{
 					if (f is IEventPlayerDisconnect playerDisconnect)
 					{
 						string name = stream.Substring(stream.IndexOf(":"));
 						playerDisconnect.OnPlayerDisconnect(name);
 					}
+				}
 			}
 
 			if (stream.Contains("Player has connected before load is complete"))
@@ -282,6 +288,7 @@ namespace MultiAdmin.ServerIO
 		public void Dispose()
 		{
 			fsWatcher?.Dispose();
+			GC.SuppressFinalize(this);
 		}
 	}
 }

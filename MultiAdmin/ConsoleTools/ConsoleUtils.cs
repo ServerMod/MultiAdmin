@@ -41,7 +41,7 @@ namespace MultiAdmin.ConsoleTools
 				}
 				catch (Exception e)
 				{
-					Program.LogDebugException("ClearConsoleLine", e);
+					Program.LogDebugException(nameof(ClearConsoleLine), e);
 				}
 			}
 		}

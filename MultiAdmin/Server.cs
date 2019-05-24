@@ -43,16 +43,27 @@ namespace MultiAdmin
 		public Server(string serverId = null, string configLocation = null, uint? port = null)
 		{
 			this.serverId = serverId;
-			serverDir = string.IsNullOrEmpty(this.serverId) ? null : Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.ServersFolder + Path.DirectorySeparatorChar + this.serverId);
+			serverDir = string.IsNullOrEmpty(this.serverId) ? null : Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.ServersFolder.Value + Path.DirectorySeparatorChar + this.serverId);
 
-			this.configLocation = Utils.GetFullPathSafe(configLocation) ?? Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.ConfigLocation) ?? Utils.GetFullPathSafe(serverDir);
+			this.configLocation = Utils.GetFullPathSafe(configLocation) ?? Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.ConfigLocation.Value) ?? Utils.GetFullPathSafe(serverDir);
 
+			// Load config
+			serverConfig = MultiAdminConfig.GlobalConfig;
+
+			string serverConfigLocation = this.configLocation;
+			while (!string.IsNullOrEmpty(serverConfigLocation))
+			{
+				this.configLocation = serverConfigLocation;
+
+				serverConfig = new MultiAdminConfig(serverConfigLocation + Path.DirectorySeparatorChar + MultiAdminConfig.ConfigFileName, serverConfig);
+
+				serverConfigLocation = Utils.GetFullPathSafe(serverConfig.ConfigLocation.Value);
+			}
+
+			// Set port
 			this.port = port;
 
 			logDir = Utils.GetFullPathSafe((string.IsNullOrEmpty(serverDir) ? string.Empty : serverDir + Path.DirectorySeparatorChar) + "logs");
-
-			// Load config
-			serverConfig = string.IsNullOrEmpty(this.configLocation) ? MultiAdminConfig.GlobalConfig : new MultiAdminConfig(this.configLocation + Path.DirectorySeparatorChar + MultiAdminConfig.ConfigFileName);
 
 			// Register all features
 			RegisterFeatures();
@@ -81,6 +92,8 @@ namespace MultiAdmin
 		public bool IsStarting => Status == ServerStatus.Starting;
 		public bool IsStopping => Status == ServerStatus.Stopping || Status == ServerStatus.ForceStopping || Status == ServerStatus.Restarting;
 
+		public bool IsLoading { get; set; }
+
 		#endregion
 
 		private string startDateTime;
@@ -105,8 +118,8 @@ namespace MultiAdmin
 			}
 		}
 
-		public bool CheckStopTimeout => (DateTime.Now - initStopTimeoutTime).Seconds > ServerConfig.ServerStopTimeout;
-		public bool CheckRestartTimeout => (DateTime.Now - initRestartTimeoutTime).Seconds > ServerConfig.ServerRestartTimeout;
+		public bool CheckStopTimeout => (DateTime.Now - initStopTimeoutTime).Seconds > ServerConfig.ServerStopTimeout.Value;
+		public bool CheckRestartTimeout => (DateTime.Now - initRestartTimeoutTime).Seconds > ServerConfig.ServerRestartTimeout.Value;
 
 		public string LogDirFile { get; private set; }
 		public string MaLogFile { get; private set; }
@@ -115,7 +128,19 @@ namespace MultiAdmin
 
 		public Process GameProcess { get; private set; }
 
-		public bool IsGameProcessRunning => GameProcess != null && !GameProcess.HasExited;
+		public bool IsGameProcessRunning
+		{
+			get
+			{
+				if (GameProcess == null)
+					return false;
+
+				GameProcess.Refresh();
+
+				return !GameProcess.HasExited;
+			}
+		}
+
 
 		public static readonly string DedicatedDir = Utils.GetFullPathSafe("SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated");
 
@@ -214,6 +239,7 @@ namespace MultiAdmin
 			do
 			{
 				Status = ServerStatus.Starting;
+				IsLoading = true;
 
 				SessionId = DateTime.Now.Ticks.ToString();
 				StartDateTime = Utils.DateTime;
@@ -253,7 +279,7 @@ namespace MultiAdmin
 
 					Write($"Executing \"{scpslExe}\"...", ConsoleColor.DarkGreen);
 
-					List<string> scpslArgs = new List<string>(new[]
+					List<string> scpslArgs = new List<string>(new string[]
 					{
 						"-batchmode",
 						"-nographics",
@@ -261,10 +287,10 @@ namespace MultiAdmin
 						"-nodedicateddelete",
 						$"-key{SessionId}",
 						$"-id{Process.GetCurrentProcess().Id}",
-						$"-port{port ?? ServerConfig.Port}"
+						$"-port{port ?? ServerConfig.Port.Value}"
 					});
 
-					if (string.IsNullOrEmpty(ScpLogFile) || ServerConfig.NoLog)
+					if (string.IsNullOrEmpty(ScpLogFile) || ServerConfig.NoLog.Value)
 					{
 						scpslArgs.Add("-nolog");
 
@@ -278,12 +304,12 @@ namespace MultiAdmin
 						scpslArgs.Add($"-logFile \"{ScpLogFile}\"");
 					}
 
-					if (ServerConfig.DisableConfigValidation)
+					if (ServerConfig.DisableConfigValidation.Value)
 					{
 						scpslArgs.Add("-disableconfigvalidation");
 					}
 
-					if (ServerConfig.ShareNonConfigs)
+					if (ServerConfig.ShareNonConfigs.Value)
 					{
 						scpslArgs.Add("-sharenonconfigs");
 					}
@@ -376,6 +402,9 @@ namespace MultiAdmin
 		{
 			if (!IsRunning) throw new Exceptions.ServerNotRunningException();
 
+			if (IsLoading)
+				killGame = true;
+
 			initStopTimeoutTime = DateTime.Now;
 			Status = killGame ? ServerStatus.ForceStopping : ServerStatus.Stopping;
 
@@ -450,7 +479,7 @@ namespace MultiAdmin
 				}
 				catch (Exception e)
 				{
-					Program.LogDebugException("RegisterFeatures", e);
+					Program.LogDebugException(nameof(RegisterFeatures), e);
 				}
 			}
 		}
@@ -500,12 +529,12 @@ namespace MultiAdmin
 					}
 					catch (UnauthorizedAccessException e)
 					{
-						Program.LogDebugException("CleanSession", e);
+						Program.LogDebugException(nameof(CleanSession), e);
 						Thread.Sleep(5);
 					}
 					catch (Exception e)
 					{
-						Program.LogDebugException("CleanSession", e);
+						Program.LogDebugException(nameof(CleanSession), e);
 						Thread.Sleep(2);
 					}
 				}
@@ -527,12 +556,12 @@ namespace MultiAdmin
 				}
 				catch (UnauthorizedAccessException e)
 				{
-					Program.LogDebugException("DeleteSession", e);
+					Program.LogDebugException(nameof(DeleteSession), e);
 					Thread.Sleep(5);
 				}
 				catch (Exception e)
 				{
-					Program.LogDebugException("DeleteSession", e);
+					Program.LogDebugException(nameof(DeleteSession), e);
 					Thread.Sleep(2);
 				}
 			}
@@ -542,7 +571,7 @@ namespace MultiAdmin
 
 		#region Console Output and Logging
 
-		public void Write(ColoredMessage[] messages, ConsoleColor timeStampColor = ConsoleColor.White)
+		public void Write(ColoredMessage[] messages, ConsoleColor? timeStampColor = null)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
@@ -554,30 +583,22 @@ namespace MultiAdmin
 
 				ColoredMessage[] timeStampedMessage = Utils.TimeStampMessage(messages, timeStampColor);
 
-				timeStampedMessage.WriteLine(ServerConfig.UseNewInputSystem);
+				timeStampedMessage.WriteLine(ServerConfig.UseNewInputSystem.Value);
 
-				if (ServerConfig.UseNewInputSystem)
+				if (ServerConfig.UseNewInputSystem.Value)
 					InputThread.WriteInputAndSetCursor();
 			}
 		}
 
-		public void Write(ColoredMessage message, ConsoleColor timeStampColor)
+		public void Write(ColoredMessage message, ConsoleColor? timeStampColor = null)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
-				Write(new ColoredMessage[] {message}, timeStampColor);
+				Write(new ColoredMessage[] {message}, timeStampColor ?? message.textColor);
 			}
 		}
 
-		public void Write(ColoredMessage message)
-		{
-			lock (ColoredConsole.WriteLock)
-			{
-				Write(message, message.textColor);
-			}
-		}
-
-		public void Write(string message, ConsoleColor color, ConsoleColor timeStampColor)
+		public void Write(string message, ConsoleColor? color = ConsoleColor.Yellow, ConsoleColor? timeStampColor = null)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
@@ -585,27 +606,28 @@ namespace MultiAdmin
 			}
 		}
 
-		public void Write(string message, ConsoleColor color = ConsoleColor.Yellow)
-		{
-			lock (ColoredConsole.WriteLock)
-			{
-				Write(new ColoredMessage(message, color));
-			}
-		}
-
 		public void Log(string message)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
-				if (message == null || string.IsNullOrEmpty(MaLogFile) || ServerConfig.NoLog) return;
+				if (message == null || string.IsNullOrEmpty(MaLogFile) || ServerConfig.NoLog.Value) return;
 
-				Directory.CreateDirectory(logDir);
-
-				using (StreamWriter sw = File.AppendText(MaLogFile))
+				try
 				{
-					message = Utils.TimeStampMessage(message);
-					sw.Write(message);
-					if (!message.EndsWith(Environment.NewLine)) sw.WriteLine();
+					Directory.CreateDirectory(logDir);
+
+					using (StreamWriter sw = File.AppendText(MaLogFile))
+					{
+						message = Utils.TimeStampMessage(message);
+						sw.Write(message);
+						if (!message.EndsWith(Environment.NewLine)) sw.WriteLine();
+					}
+				}
+				catch (Exception e)
+				{
+					Program.LogDebugException(nameof(Log), e);
+
+					new ColoredMessage[] {new ColoredMessage("Error while logging for MultiAdmin:", ConsoleColor.Red), new ColoredMessage(e.ToString(), ConsoleColor.Red)}.WriteLines();
 				}
 			}
 		}
@@ -614,28 +636,23 @@ namespace MultiAdmin
 
 		public bool ServerModCheck(int major, int minor, int fix)
 		{
-			if (serverModVersion == null) return false;
+			if (string.IsNullOrEmpty(serverModVersion))
+				return false;
 
 			string[] parts = serverModVersion.Split('.');
-			int verMajor;
-			int verMinor;
-			int verFix = 0;
-			switch (parts.Length)
-			{
-				case 3:
-					int.TryParse(parts[0], out verMajor);
-					int.TryParse(parts[1], out verMinor);
-					int.TryParse(parts[2], out verFix);
-					break;
-				case 2:
-					int.TryParse(parts[0], out verMajor);
-					int.TryParse(parts[1], out verMinor);
-					break;
-				default:
-					return false;
-			}
 
-			if (major == 0 && minor == 0 && verFix == 0) return false;
+			if (!parts.Any())
+				return false;
+
+			int.TryParse(parts[0], out int verMajor);
+
+			int verMinor = 0;
+			if (parts.Length >= 2)
+				int.TryParse(parts[1], out verMinor);
+
+			int verFix = 0;
+			if (parts.Length >= 3)
+				int.TryParse(parts[2], out verFix);
 
 			return verMajor > major || verMajor >= major && verMinor > minor ||
 			       verMajor >= major && verMinor >= minor && verFix >= fix;
@@ -647,9 +664,9 @@ namespace MultiAdmin
 
 			// Handle directory copying
 			string copyFromDir;
-			if (copyFiles && !string.IsNullOrEmpty(configLocation) && !string.IsNullOrEmpty(copyFromDir = ServerConfig.CopyFromFolderOnReload))
+			if (copyFiles && !string.IsNullOrEmpty(configLocation) && !string.IsNullOrEmpty(copyFromDir = ServerConfig.CopyFromFolderOnReload.Value))
 			{
-				CopyFromDir(copyFromDir, ServerConfig.FilesToCopyFromFolder);
+				CopyFromDir(copyFromDir, ServerConfig.FolderCopyWhitelist.Value, ServerConfig.FolderCopyBlacklist.Value);
 			}
 
 			// Handle each config reload event
@@ -658,7 +675,7 @@ namespace MultiAdmin
 					feature.OnConfigReload();
 		}
 
-		public bool CopyFromDir(string sourceDir, string[] files = null)
+		public bool CopyFromDir(string sourceDir, string[] fileWhitelist = null, string[] fileBlacklist = null)
 		{
 			if (string.IsNullOrEmpty(configLocation) || string.IsNullOrEmpty(sourceDir)) return false;
 
@@ -669,7 +686,7 @@ namespace MultiAdmin
 				if (!string.IsNullOrEmpty(sourceDir))
 				{
 					Write($"Copying files and folders from \"{sourceDir}\" into \"{configLocation}\"...");
-					Utils.CopyAll(sourceDir, configLocation, files);
+					Utils.CopyAll(sourceDir, configLocation, fileWhitelist, fileBlacklist);
 					Write("Done copying files and folders!");
 
 					return true;
@@ -677,11 +694,7 @@ namespace MultiAdmin
 			}
 			catch (Exception e)
 			{
-				Write(new ColoredMessage[]
-				{
-					new ColoredMessage("Error while copying files and folders:", ConsoleColor.Red),
-					new ColoredMessage(e.ToString(), ConsoleColor.Red)
-				});
+				Write(new ColoredMessage[] {new ColoredMessage("Error while copying files and folders:", ConsoleColor.Red), new ColoredMessage(e.ToString(), ConsoleColor.Red)});
 			}
 
 			return false;

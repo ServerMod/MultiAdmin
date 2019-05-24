@@ -32,7 +32,7 @@ namespace MultiAdmin
 			return string.IsNullOrEmpty(message) ? message : $"{TimeStamp} {message}";
 		}
 
-		public static ColoredMessage[] TimeStampMessage(ColoredMessage[] message, ConsoleColor color = ConsoleColor.White)
+		public static ColoredMessage[] TimeStampMessage(ColoredMessage[] message, ConsoleColor? color = null)
 		{
 			if (message == null) return null;
 
@@ -45,7 +45,7 @@ namespace MultiAdmin
 			return newMessage;
 		}
 
-		public static ColoredMessage[] TimeStampMessage(ColoredMessage message, ConsoleColor color = ConsoleColor.White)
+		public static ColoredMessage[] TimeStampMessage(ColoredMessage message, ConsoleColor? color = null)
 		{
 			return TimeStampMessage(new ColoredMessage[] {message}, color);
 		}
@@ -117,45 +117,47 @@ namespace MultiAdmin
 			return namePatterns != null && namePatterns.Any(namePattern => StringMatches(input, namePattern));
 		}
 
-		// Copied from https://docs.microsoft.com/en-us/dotnet/api/system.io.directoryinfo?view=netframework-4.7.2 with small modifications
-		public static void CopyAll(DirectoryInfo source, DirectoryInfo target, params string[] fileNames)
+		private static bool IsArrayNullOrEmpty(string[] array)
 		{
+			return array == null || !array.Any();
+		}
+
+		private static bool PassesWhitelistAndBlacklist(string toCheck, string[] whitelist = null, string[] blacklist = null)
+		{
+			return (IsArrayNullOrEmpty(whitelist) || FileNamesContains(whitelist, toCheck)) && (IsArrayNullOrEmpty(blacklist) || !FileNamesContains(blacklist, toCheck));
+		}
+
+		public static void CopyAll(DirectoryInfo source, DirectoryInfo target, string[] fileWhitelist = null, string[] fileBlacklist = null)
+		{
+			// If the target directory is the same as the source directory 
 			if (source.FullName == target.FullName)
-			{
 				return;
-			}
 
-			// Check if the target directory exists, if not, create it.
-			if (Directory.Exists(target.FullName) == false)
-			{
-				Directory.CreateDirectory(target.FullName);
-			}
+			Directory.CreateDirectory(target.FullName);
 
-			// Copy each file into it's new directory.
-			foreach (FileInfo fi in source.GetFiles())
+			// Copy each file
+			foreach (FileInfo file in source.GetFiles())
 			{
-				if (fileNames == null || !fileNames.Any() || FileNamesContains(fileNames, fi.Name))
+				if (PassesWhitelistAndBlacklist(file.Name, fileWhitelist, fileBlacklist))
 				{
-					// Console.WriteLine(@"Copying {0}\{1}", target.FullName, fi.Name);
-					fi.CopyTo(Path.Combine(target.ToString(), fi.Name), true);
+					file.CopyTo(Path.Combine(target.ToString(), file.Name), true);
 				}
 			}
 
-			// Copy each subdirectory using recursion.
-			foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
+			// Copy each sub-directory using recursion
+			foreach (DirectoryInfo sourceSubDir in source.GetDirectories())
 			{
-				if (fileNames == null || !fileNames.Any() || FileNamesContains(fileNames, diSourceSubDir.Name))
+				if (PassesWhitelistAndBlacklist(sourceSubDir.Name, fileWhitelist, fileBlacklist))
 				{
-					DirectoryInfo nextTargetSubDir =
-						target.CreateSubdirectory(diSourceSubDir.Name);
-					CopyAll(diSourceSubDir, nextTargetSubDir);
+					// Begin copying sub-directory
+					CopyAll(sourceSubDir, target.CreateSubdirectory(sourceSubDir.Name));
 				}
 			}
 		}
 
-		public static void CopyAll(string source, string target, params string[] fileNames)
+		public static void CopyAll(string source, string target, string[] fileWhitelist = null, string[] fileBlacklist = null)
 		{
-			CopyAll(new DirectoryInfo(source), new DirectoryInfo(target), fileNames);
+			CopyAll(new DirectoryInfo(source), new DirectoryInfo(target), fileWhitelist, fileBlacklist);
 		}
 	}
 }
