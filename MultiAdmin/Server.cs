@@ -571,7 +571,7 @@ namespace MultiAdmin
 
 		#region Console Output and Logging
 
-		public void Write(ColoredMessage[] messages, ConsoleColor timeStampColor = ConsoleColor.White)
+		public void Write(ColoredMessage[] messages, ConsoleColor? timeStampColor = null)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
@@ -590,35 +590,19 @@ namespace MultiAdmin
 			}
 		}
 
-		public void Write(ColoredMessage message, ConsoleColor timeStampColor)
+		public void Write(ColoredMessage message, ConsoleColor? timeStampColor = null)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
-				Write(new ColoredMessage[] {message}, timeStampColor);
+				Write(new ColoredMessage[] {message}, timeStampColor ?? message.textColor);
 			}
 		}
 
-		public void Write(ColoredMessage message)
-		{
-			lock (ColoredConsole.WriteLock)
-			{
-				Write(message, message.textColor);
-			}
-		}
-
-		public void Write(string message, ConsoleColor color, ConsoleColor timeStampColor)
+		public void Write(string message, ConsoleColor? color = ConsoleColor.Yellow, ConsoleColor? timeStampColor = null)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
 				Write(new ColoredMessage(message, color), timeStampColor);
-			}
-		}
-
-		public void Write(string message, ConsoleColor color = ConsoleColor.Yellow)
-		{
-			lock (ColoredConsole.WriteLock)
-			{
-				Write(new ColoredMessage(message, color));
 			}
 		}
 

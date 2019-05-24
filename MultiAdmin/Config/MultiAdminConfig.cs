@@ -38,6 +38,7 @@ namespace MultiAdmin.Config
 		public ConfigEntry<float> ServerRestartTimeout { get; } = new ConfigEntry<float>("server_restart_timeout", 10, "Server Restart Timeout", "The time in seconds before MultiAdmin forces a server restart if it doesn't respond to the regular restart command");
 		public ConfigEntry<float> ServerStopTimeout { get; } = new ConfigEntry<float>("server_stop_timeout", 10, "Server Stop Timeout", "The time in seconds before MultiAdmin forces a server shutdown if it doesn't respond to the regular shutdown command");
 		public ConfigEntry<string> ServersFolder { get; } = new ConfigEntry<string>("servers_folder", "servers", "Servers Folder", "The location of the \"servers\" folder for MultiAdmin to load multiple server configurations from");
+		public ConfigEntry<bool> SetTitleBar { get; } = new ConfigEntry<bool>("set_title_bar", true, "Set Title Bar", "Whether to set the console window's titlebar, if false, this feature won't be used");
 		public ConfigEntry<int> ShutdownWhenEmptyFor { get; } = new ConfigEntry<int>("shutdown_when_empty_for", -1, "Shutdown When Empty For", "Shutdown the server once a round hasn't started in a number of seconds");
 		public ConfigEntry<string> StartConfigOnFull { get; } = new ConfigEntry<string>("start_config_on_full", "", "Start Config on Full", "Start server with this config folder once the server becomes full [Requires ServerMod]");
 
@@ -51,12 +52,12 @@ namespace MultiAdmin.Config
 		public MultiAdminConfig ParentConfig { get; }
 		public Config Config { get; }
 
-		public MultiAdminConfig(Config config, MultiAdminConfig parentConfig)
+		public MultiAdminConfig(Config config, MultiAdminConfig parentConfig, bool createConfig = true)
 		{
 			Config = config;
 			ParentConfig = parentConfig;
 
-			if (!File.Exists(Config?.ConfigPath))
+			if (createConfig && !File.Exists(Config?.ConfigPath))
 			{
 				try
 				{
@@ -84,15 +85,15 @@ namespace MultiAdmin.Config
 			ReloadConfig();
 		}
 
-		public MultiAdminConfig(Config config) : this(config, GlobalConfig)
+		public MultiAdminConfig(Config config, bool createConfig = true) : this(config, GlobalConfig, createConfig)
 		{
 		}
 
-		public MultiAdminConfig(string path, MultiAdminConfig parentConfig) : this(new Config(path), parentConfig)
+		public MultiAdminConfig(string path, MultiAdminConfig parentConfig, bool createConfig = true) : this(new Config(path), parentConfig, createConfig)
 		{
 		}
 
-		public MultiAdminConfig(string path) : this(path, GlobalConfig)
+		public MultiAdminConfig(string path, bool createConfig = true) : this(path, GlobalConfig, createConfig)
 		{
 		}
 
@@ -106,6 +107,12 @@ namespace MultiAdmin.Config
 			if (!ShouldGetFromConfig(configEntry.Key))
 			{
 				ParentConfig.UpdateConfigValue(configEntry);
+				return;
+			}
+
+			if (Config == null)
+			{
+				configEntry.ObjectValue = configEntry.ObjectDefault;
 				return;
 			}
 

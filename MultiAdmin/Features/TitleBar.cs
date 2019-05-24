@@ -69,7 +69,7 @@ namespace MultiAdmin.Features
 
 		private void UpdateTitlebar()
 		{
-			if (Program.Headless) return;
+			if (Program.Headless || !Server.ServerConfig.SetTitleBar.Value) return;
 
 			int displayPlayerCount = playerCount < 0 ? 0 : playerCount;
 

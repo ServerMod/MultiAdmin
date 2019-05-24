@@ -32,7 +32,7 @@ namespace MultiAdmin
 			return string.IsNullOrEmpty(message) ? message : $"{TimeStamp} {message}";
 		}
 
-		public static ColoredMessage[] TimeStampMessage(ColoredMessage[] message, ConsoleColor color = ConsoleColor.White)
+		public static ColoredMessage[] TimeStampMessage(ColoredMessage[] message, ConsoleColor? color = null)
 		{
 			if (message == null) return null;
 
@@ -45,7 +45,7 @@ namespace MultiAdmin
 			return newMessage;
 		}
 
-		public static ColoredMessage[] TimeStampMessage(ColoredMessage message, ConsoleColor color = ConsoleColor.White)
+		public static ColoredMessage[] TimeStampMessage(ColoredMessage message, ConsoleColor? color = null)
 		{
 			return TimeStampMessage(new ColoredMessage[] {message}, color);
 		}
