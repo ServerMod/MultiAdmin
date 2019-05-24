@@ -12,8 +12,6 @@ namespace MultiAdmin.ServerIO
 		public static readonly Regex SmodRegex =
 			new Regex(@"\[(DEBUG|INFO|WARN|ERROR)\] (\[.*?\]) (.*)", RegexOptions.Compiled | RegexOptions.Singleline);
 
-		public const ConsoleColor DefaultBackground = ConsoleColor.Black;
-
 		private readonly FileSystemWatcher fsWatcher;
 		private bool fixBuggedPlayers;
 
@@ -187,9 +185,9 @@ namespace MultiAdmin.ServerIO
 
 					server.Write(new ColoredMessage[]
 					{
-						new ColoredMessage($"[{match.Groups[1].Value}] ", levelColor, DefaultBackground),
-						new ColoredMessage($"{match.Groups[2].Value} ", tagColor, DefaultBackground),
-						new ColoredMessage(match.Groups[3].Value, msgColor, DefaultBackground)
+						new ColoredMessage($"[{match.Groups[1].Value}] ", levelColor),
+						new ColoredMessage($"{match.Groups[2].Value} ", tagColor),
+						new ColoredMessage(match.Groups[3].Value, msgColor)
 					}, ConsoleColor.Cyan);
 
 					// P.S. the format is [Info] [courtney.exampleplugin] Something interesting happened
