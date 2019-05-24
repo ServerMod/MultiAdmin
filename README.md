@@ -92,6 +92,7 @@ safe_server_shutdown | Boolean | True | When MultiAdmin closes, if this is true,
 server_restart_timeout | Float | 10.0 | The time in seconds before MultiAdmin forces a server restart if it doesn't respond to the regular restart command
 server_stop_timeout | Float | 10.0 | The time in seconds before MultiAdmin forces a server shutdown if it doesn't respond to the regular shutdown command
 servers_folder | String | servers | The location of the "servers" folder for MultiAdmin to load multiple server configurations from
+set_title_bar | Boolean | True | Whether to set the console window's titlebar, if false, this feature won't be used
 shutdown_when_empty_for | Seconds | -1 | Shutdown the server once a round hasn't started in a number of seconds
 start_config_on_full | String | **Empty** | Start server with this config folder once the server becomes full [Requires ServerMod]
 
