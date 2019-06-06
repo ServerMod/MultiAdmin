@@ -7,6 +7,7 @@ using MultiAdmin;
 [assembly: AssemblyTitle(nameof(MultiAdmin) + " v" + Program.MaVersion)]
 [assembly: AssemblyDescription("A program for running a SCP: Secret Laboratory server with additional functionality")]
 [assembly: AssemblyProduct(nameof(MultiAdmin))]
+[assembly: AssemblyCopyright("Copyright © Grover 2019")]
 
 // Version information for an assembly consists of the following four values:
 //
