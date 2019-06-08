@@ -50,14 +50,23 @@ namespace MultiAdmin
 			// Load config
 			serverConfig = MultiAdminConfig.GlobalConfig;
 
+			// Load config hierarchy
 			string serverConfigLocation = this.configLocation;
 			while (!string.IsNullOrEmpty(serverConfigLocation))
 			{
+				// Update the Server object's config location with the valid config location
 				this.configLocation = serverConfigLocation;
 
+				// Load the child MultiAdminConfig
 				serverConfig = new MultiAdminConfig(serverConfigLocation + Path.DirectorySeparatorChar + MultiAdminConfig.ConfigFileName, serverConfig);
 
+				// Set the server config location to the value from the config, this should be empty or null if there is no valid value
 				serverConfigLocation = Utils.GetFullPathSafe(serverConfig.ConfigLocation.Value);
+
+				// If the config hierarchy already contains the MultiAdmin config from the target path, stop looping
+				// Without this, a user could unintentionally cause a lockup when their server starts up due to infinite looping
+				if (serverConfig.ConfigHierarchyContainsPath(serverConfigLocation))
+					break;
 			}
 
 			// Set port

@@ -185,5 +185,24 @@ namespace MultiAdmin.Config
 		{
 			return ConfigContains(key) || GlobalConfig.ConfigContains(key);
 		}
+
+		public bool ConfigHierarchyContainsPath(string path)
+		{
+			string fullPath = Utils.GetFullPathSafe(path);
+
+			if (!string.IsNullOrEmpty(fullPath))
+			{
+				MultiAdminConfig config = this;
+				while (config != null)
+				{
+					if (config.Config?.ConfigPath == path)
+						return true;
+
+					config = config.ParentConfig;
+				}
+			}
+
+			return false;
+		}
 	}
 }
