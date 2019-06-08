@@ -288,7 +288,7 @@ namespace MultiAdmin
 
 					Write($"Executing \"{scpslExe}\"...", ConsoleColor.DarkGreen);
 
-					List<string> scpslArgs = new List<string>(new string[]
+					List<string> scpslArgs = new List<string>
 					{
 						"-batchmode",
 						"-nographics",
@@ -297,7 +297,7 @@ namespace MultiAdmin
 						$"-key{SessionId}",
 						$"-id{Process.GetCurrentProcess().Id}",
 						$"-port{port ?? ServerConfig.Port.Value}"
-					});
+					};
 
 					if (string.IsNullOrEmpty(ScpLogFile) || ServerConfig.NoLog.Value)
 					{
