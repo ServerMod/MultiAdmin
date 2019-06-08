@@ -6,12 +6,13 @@ MultiAdmin is a replacement server tool for SCP: Secret Laboratory, which was bu
 
 The latest release can be found here: [Release link](https://github.com/Grover-c13/MultiAdmin/releases/latest)
 
-A quick note about running MultiAdmin, if you're on a Mono version lower than Mono 5.18.0, you might have issues. The latest Mono release can be found here: https://www.mono-project.com/download/stable
+Please check the [Installation Instructions](https://github.com/Grover-c13/MultiAdmin#installation-instructions) for information about installing and running MultiAdmin.
 
 ## Discord
-You can join our discord here: https://discord.gg/8nvmMTr
+You can join our Discord server here: https://discord.gg/8nvmMTr
 
 ## Installation Instructions:
+Make sure that you are running Mono 5.18.0 or higher, otherwise you might have issues. The latest Mono release can be found here: https://www.mono-project.com/download/stable.
 ### Running a Single Server with MultiAdmin
 1. Place MultiAdmin.exe in your root server directory (next to LocalAdmin.exe)
 
