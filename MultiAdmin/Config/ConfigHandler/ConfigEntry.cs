@@ -13,16 +13,6 @@ namespace MultiAdmin.Config.ConfigHandler
 		public string Key { get; }
 
 		/// <summary>
-		/// The name of the <see cref="ConfigEntry"/>.
-		/// </summary>
-		public string Name { get; }
-
-		/// <summary>
-		/// The description of the <see cref="ConfigEntry"/>.
-		/// </summary>
-		public string Description { get; }
-
-		/// <summary>
 		/// The type of the value of the <see cref="ConfigEntry"/>.
 		/// </summary>
 		public abstract Type ValueType { get; }
@@ -38,14 +28,38 @@ namespace MultiAdmin.Config.ConfigHandler
 		public abstract object ObjectDefault { get; set; }
 
 		/// <summary>
-		/// Creates a basic <see cref="ConfigEntry"/> with no values.
+		/// Whether to inherit this config value from the <see cref="ConfigRegister"/>'s parent <see cref="ConfigRegister"/>s if they support value inheritance.
 		/// </summary>
-		public ConfigEntry(string key, string name = null, string description = null)
+		public bool Inherit { get; }
+
+		/// <summary>
+		/// The name of the <see cref="ConfigEntry"/>.
+		/// </summary>
+		public string Name { get; }
+
+		/// <summary>
+		/// The description of the <see cref="ConfigEntry"/>.
+		/// </summary>
+		public string Description { get; }
+
+		/// <summary>
+		/// Creates a basic <see cref="ConfigEntry"/> with no values and indication for whether to inherit the value.
+		/// </summary>
+		public ConfigEntry(string key, bool inherit = true, string name = null, string description = null)
 		{
 			Key = key;
-			Name = name;
 
+			Inherit = inherit;
+
+			Name = name;
 			Description = description;
+		}
+
+		/// <summary>
+		/// Creates a basic <see cref="ConfigEntry"/> with no values.
+		/// </summary>
+		public ConfigEntry(string key, string name = null, string description = null) : this(key, true, name, description)
+		{
 		}
 	}
 
@@ -81,11 +95,19 @@ namespace MultiAdmin.Config.ConfigHandler
 
 		/// <inheritdoc />
 		/// <summary>
-		/// Creates a <see cref="ConfigEntry{T}" /> with the provided type and provided default value.
+		/// Creates a <see cref="ConfigEntry{T}" /> with the provided type, default value, and indication for whether to inherit the value.
 		/// </summary>
-		public ConfigEntry(string key, T defaultValue = default, string name = null, string description = null) : base(key, name, description)
+		public ConfigEntry(string key, T defaultValue = default, bool inherit = true, string name = null, string description = null) : base(key, inherit, name, description)
 		{
 			Default = defaultValue;
+		}
+
+		/// <inheritdoc />
+		/// <summary>
+		/// Creates a <see cref="ConfigEntry{T}" /> with the provided type and default value.
+		/// </summary>
+		public ConfigEntry(string key, T defaultValue = default, string name = null, string description = null) : this(key, defaultValue, true, name, description)
+		{
 		}
 	}
 }

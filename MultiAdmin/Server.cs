@@ -260,8 +260,14 @@ namespace MultiAdmin
 					if (!string.IsNullOrEmpty(MultiAdminConfig.GlobalConfigFilePath))
 						Write($"Using global config \"{MultiAdminConfig.GlobalConfigFilePath}\"...");
 
-					if (!string.IsNullOrEmpty(configLocation) && !string.IsNullOrEmpty(ServerConfig?.Config?.ConfigPath))
-						Write($"Using server config \"{ServerConfig.Config.ConfigPath}\"...");
+					if (ServerConfig != null)
+					{
+						foreach (MultiAdminConfig config in ServerConfig.GetConfigHierarchy())
+						{
+							if (!string.IsNullOrEmpty(config?.Config?.ConfigPath) && MultiAdminConfig.GlobalConfigFilePath != config.Config.ConfigPath)
+								Write($"Using server config \"{config.Config.ConfigPath}\"...");
+						}
+					}
 
 					#endregion
 

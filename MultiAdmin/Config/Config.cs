@@ -15,21 +15,30 @@ namespace MultiAdmin.Config
 			ReadConfigFile(path);
 		}
 
-		public string ConfigPath { get; private set; }
+		private string internalConfigPath;
+
+		public string ConfigPath
+		{
+			get => internalConfigPath;
+			private set
+			{
+				try
+				{
+					internalConfigPath = Utils.GetFullPathSafe(value);
+				}
+				catch (Exception e)
+				{
+					internalConfigPath = value;
+					Program.LogDebugException(nameof(ConfigPath), e);
+				}
+			}
+		}
 
 		public void ReadConfigFile(string configPath)
 		{
 			if (string.IsNullOrEmpty(configPath)) return;
 
 			ConfigPath = configPath;
-			try
-			{
-				ConfigPath = Utils.GetFullPathSafe(ConfigPath);
-			}
-			catch (Exception e)
-			{
-				Program.LogDebugException(nameof(ReadConfigFile), e);
-			}
 
 			try
 			{
@@ -37,11 +46,9 @@ namespace MultiAdmin.Config
 			}
 			catch (Exception e)
 			{
-				new ColoredMessage[]
-				{
-					new ColoredMessage($"Error while reading config (Path = {ConfigPath ?? "Null"}):", ConsoleColor.Red),
-					new ColoredMessage(e.ToString(), ConsoleColor.Red)
-				}.WriteLines();
+				Program.LogDebugException(nameof(ReadConfigFile), e);
+
+				new ColoredMessage[] {new ColoredMessage($"Error while reading config (Path = {ConfigPath ?? "Null"}):", ConsoleColor.Red), new ColoredMessage(e.ToString(), ConsoleColor.Red)}.WriteLines();
 			}
 		}
 

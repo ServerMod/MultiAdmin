@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using MultiAdmin.Config.ConfigHandler;
 using MultiAdmin.ConsoleTools;
@@ -10,37 +12,129 @@ namespace MultiAdmin.Config
 	{
 		#region Config Keys and Values
 
-		public ConfigEntry<string> ConfigLocation { get; } = new ConfigEntry<string>("config_location", "", "Config Location", "The default location for the game to use for storing configuration files (a directory)");
-		public ConfigEntry<bool> DisableConfigValidation { get; } = new ConfigEntry<bool>("disable_config_validation", false, "Disable Config Validation", "Disable the config validator");
-		public ConfigEntry<bool> ShareNonConfigs { get; } = new ConfigEntry<bool>("share_non_configs", true, "Share Non-Configs", "Makes all files other than the config files store in AppData");
-		public ConfigEntry<bool> NoLog { get; } = new ConfigEntry<bool>("multiadmin_nolog", false, "MultiAdmin No-Logging", "Disable logging to file");
-		public ConfigEntry<bool> DebugLog { get; } = new ConfigEntry<bool>("multiadmin_debug_log", true, "MultiAdmin Debug Logging", "Enables MultiAdmin debug logging, this logs to a separate file than any other logs");
-		public ConfigEntry<string[]> DebugLogBlacklist { get; } = new ConfigEntry<string[]>("multiadmin_debug_log_blacklist", new string[] {"ProcessFile"}, "MultiAdmin Debug Logging Blacklist", "Which tags to block for MultiAdmin debug logging");
-		public ConfigEntry<string[]> DebugLogWhitelist { get; } = new ConfigEntry<string[]>("multiadmin_debug_log_whitelist", new string[0], "MultiAdmin Debug Logging Whitelist", "Which tags to log for MultiAdmin debug logging (Defaults to logging all if none are provided)");
-		public ConfigEntry<bool> UseNewInputSystem { get; } = new ConfigEntry<bool>("use_new_input_system", true, "Use New Input System", "Whether to use the new input system, if false, the original input system will be used");
-		public ConfigEntry<uint> Port { get; } = new ConfigEntry<uint>("port", 7777, "Game Port", "The port for the server to use");
-		public ConfigEntry<string> CopyFromFolderOnReload { get; } = new ConfigEntry<string>("copy_from_folder_on_reload", "", "Copy from Folder on Reload", "The location of a folder to copy files from into the folder defined by \"config_location\" whenever the configuration file is reloaded");
-		public ConfigEntry<string[]> FolderCopyWhitelist { get; } = new ConfigEntry<string[]>("folder_copy_whitelist", new string[0], "Folder Copy Whitelist", "The list of file names to copy from the folder defined by \"copy_from_folder_on_reload\" (accepts \"*\" wildcards)");
-		public ConfigEntry<string[]> FolderCopyBlacklist { get; } = new ConfigEntry<string[]>("folder_copy_blacklist", new string[0], "Folder Copy Blacklist", "The list of file names to not copy from the folder defined by \"copy_from_folder_on_reload\" (accepts \"*\" wildcards)");
-		public ConfigEntry<string[]> FolderCopyRoundQueue { get; } = new ConfigEntry<string[]>("folder_copy_round_queue", new string[0], "Folder Copy Round Queue", "The location of a folder to copy files from into the folder defined by \"config_location\" after each round, looping through the locations");
-		public ConfigEntry<string[]> FolderCopyRoundQueueWhitelist { get; } = new ConfigEntry<string[]>("folder_copy_round_queue_whitelist", new string[0], "Folder Copy Round Queue Whitelist", "The list of file names to copy from the folders defined by \"folder_copy_round_queue\" (accepts \"*\" wildcards)");
-		public ConfigEntry<string[]> FolderCopyRoundQueueBlacklist { get; } = new ConfigEntry<string[]>("folder_copy_round_queue_blacklist", new string[0], "Folder Copy Round Queue Blacklist", "The list of file names to not copy from the folders defined by \"folder_copy_round_queue\" (accepts \"*\" wildcards)");
-		public ConfigEntry<bool> RandomizeFolderCopyRoundQueue { get; } = new ConfigEntry<bool>("randomize_folder_copy_round_queue", false, "Randomize Folder Copy Round Queue", "Whether to randomize the order of entries in \"folder_copy_round_queue\"");
-		public ConfigEntry<bool> LogModActionsToOwnFile { get; } = new ConfigEntry<bool>("log_mod_actions_to_own_file", false, "Log Mod Actions to Own File", "Logs admin messages to separate file");
-		public ConfigEntry<bool> ManualStart { get; } = new ConfigEntry<bool>("manual_start", false, "Manual Start", "Whether or not to start the server automatically when launching MultiAdmin");
-		public ConfigEntry<float> MaxMemory { get; } = new ConfigEntry<float>("max_memory", 2048, "Max Memory", "The amount of memory in megabytes for MultiAdmin to check against");
-		public ConfigEntry<float> RestartLowMemory { get; } = new ConfigEntry<float>("restart_low_memory", 400, "Restart Low Memory", "Restart if the game's remaining memory falls below this value in megabytes");
-		public ConfigEntry<float> RestartLowMemoryRoundEnd { get; } = new ConfigEntry<float>("restart_low_memory_roundend", 450, "Restart Low Memory Round-End", "Restart at the end of the round if the game's remaining memory falls below this value in megabytes");
-		public ConfigEntry<int> MaxPlayers { get; } = new ConfigEntry<int>("max_players", 20, "Max Players", "The number of players to display as the maximum for the server (within MultiAdmin, not in-game)");
-		public ConfigEntry<bool> RandomInputColors { get; } = new ConfigEntry<bool>("random_input_colors", false, "Random Input Colors", "Randomize the new input system's colors every time a message is input");
-		public ConfigEntry<int> RestartEveryNumRounds { get; } = new ConfigEntry<int>("restart_every_num_rounds", -1, "Restart Every Number of Rounds", "Restart the server every number of rounds");
-		public ConfigEntry<bool> SafeServerShutdown { get; } = new ConfigEntry<bool>("safe_server_shutdown", true, "Safe Server Shutdown", "When MultiAdmin closes, if this is true, MultiAdmin will attempt to safely shutdown all the servers");
-		public ConfigEntry<float> ServerRestartTimeout { get; } = new ConfigEntry<float>("server_restart_timeout", 10, "Server Restart Timeout", "The time in seconds before MultiAdmin forces a server restart if it doesn't respond to the regular restart command");
-		public ConfigEntry<float> ServerStopTimeout { get; } = new ConfigEntry<float>("server_stop_timeout", 10, "Server Stop Timeout", "The time in seconds before MultiAdmin forces a server shutdown if it doesn't respond to the regular shutdown command");
-		public ConfigEntry<string> ServersFolder { get; } = new ConfigEntry<string>("servers_folder", "servers", "Servers Folder", "The location of the \"servers\" folder for MultiAdmin to load multiple server configurations from");
-		public ConfigEntry<bool> SetTitleBar { get; } = new ConfigEntry<bool>("set_title_bar", true, "Set Title Bar", "Whether to set the console window's titlebar, if false, this feature won't be used");
-		public ConfigEntry<int> ShutdownWhenEmptyFor { get; } = new ConfigEntry<int>("shutdown_when_empty_for", -1, "Shutdown When Empty For", "Shutdown the server once a round hasn't started in a number of seconds");
-		public ConfigEntry<string> StartConfigOnFull { get; } = new ConfigEntry<string>("start_config_on_full", "", "Start Config on Full", "Start server with this config folder once the server becomes full [Requires ServerMod]");
+		public ConfigEntry<string> ConfigLocation { get; } =
+			new ConfigEntry<string>("config_location", "", false,
+				"Config Location", "The default location for the game to use for storing configuration files (a directory)");
+
+		public ConfigEntry<bool> DisableConfigValidation { get; } =
+			new ConfigEntry<bool>("disable_config_validation", false,
+				"Disable Config Validation", "Disable the config validator");
+
+		public ConfigEntry<bool> ShareNonConfigs { get; } =
+			new ConfigEntry<bool>("share_non_configs", true,
+				"Share Non-Configs", "Makes all files other than the config files store in AppData");
+
+		public ConfigEntry<bool> NoLog { get; } =
+			new ConfigEntry<bool>("multiadmin_nolog", false,
+				"MultiAdmin No-Logging", "Disable logging to file");
+
+		public ConfigEntry<bool> DebugLog { get; } =
+			new ConfigEntry<bool>("multiadmin_debug_log", true,
+				"MultiAdmin Debug Logging", "Enables MultiAdmin debug logging, this logs to a separate file than any other logs");
+
+		public ConfigEntry<string[]> DebugLogBlacklist { get; } =
+			new ConfigEntry<string[]>("multiadmin_debug_log_blacklist", new string[] {"ProcessFile"},
+				"MultiAdmin Debug Logging Blacklist", "Which tags to block for MultiAdmin debug logging");
+
+		public ConfigEntry<string[]> DebugLogWhitelist { get; } =
+			new ConfigEntry<string[]>("multiadmin_debug_log_whitelist", new string[0],
+				"MultiAdmin Debug Logging Whitelist", "Which tags to log for MultiAdmin debug logging (Defaults to logging all if none are provided)");
+
+		public ConfigEntry<bool> UseNewInputSystem { get; } =
+			new ConfigEntry<bool>("use_new_input_system", true,
+				"Use New Input System", "Whether to use the new input system, if false, the original input system will be used");
+
+		public ConfigEntry<uint> Port { get; } =
+			new ConfigEntry<uint>("port", 7777,
+				"Game Port", "The port for the server to use");
+
+		public ConfigEntry<string> CopyFromFolderOnReload { get; } =
+			new ConfigEntry<string>("copy_from_folder_on_reload", "",
+				"Copy from Folder on Reload", "The location of a folder to copy files from into the folder defined by \"config_location\" whenever the configuration file is reloaded");
+
+		public ConfigEntry<string[]> FolderCopyWhitelist { get; } =
+			new ConfigEntry<string[]>("folder_copy_whitelist", new string[0],
+				"Folder Copy Whitelist", "The list of file names to copy from the folder defined by \"copy_from_folder_on_reload\" (accepts \"*\" wildcards)");
+
+		public ConfigEntry<string[]> FolderCopyBlacklist { get; } =
+			new ConfigEntry<string[]>("folder_copy_blacklist", new string[0],
+				"Folder Copy Blacklist", "The list of file names to not copy from the folder defined by \"copy_from_folder_on_reload\" (accepts \"*\" wildcards)");
+
+		public ConfigEntry<string[]> FolderCopyRoundQueue { get; } =
+			new ConfigEntry<string[]>("folder_copy_round_queue", new string[0],
+				"Folder Copy Round Queue", "The location of a folder to copy files from into the folder defined by \"config_location\" after each round, looping through the locations");
+
+		public ConfigEntry<string[]> FolderCopyRoundQueueWhitelist { get; } =
+			new ConfigEntry<string[]>("folder_copy_round_queue_whitelist", new string[0],
+				"Folder Copy Round Queue Whitelist", "The list of file names to copy from the folders defined by \"folder_copy_round_queue\" (accepts \"*\" wildcards)");
+
+		public ConfigEntry<string[]> FolderCopyRoundQueueBlacklist { get; } =
+			new ConfigEntry<string[]>("folder_copy_round_queue_blacklist", new string[0],
+				"Folder Copy Round Queue Blacklist", "The list of file names to not copy from the folders defined by \"folder_copy_round_queue\" (accepts \"*\" wildcards)");
+
+		public ConfigEntry<bool> RandomizeFolderCopyRoundQueue { get; } =
+			new ConfigEntry<bool>("randomize_folder_copy_round_queue", false,
+				"Randomize Folder Copy Round Queue", "Whether to randomize the order of entries in \"folder_copy_round_queue\"");
+
+		public ConfigEntry<bool> LogModActionsToOwnFile { get; } =
+			new ConfigEntry<bool>("log_mod_actions_to_own_file", false,
+				"Log Mod Actions to Own File", "Logs admin messages to separate file");
+
+		public ConfigEntry<bool> ManualStart { get; } =
+			new ConfigEntry<bool>("manual_start", false,
+				"Manual Start", "Whether or not to start the server automatically when launching MultiAdmin");
+
+		public ConfigEntry<float> MaxMemory { get; } =
+			new ConfigEntry<float>("max_memory", 2048,
+				"Max Memory", "The amount of memory in megabytes for MultiAdmin to check against");
+
+		public ConfigEntry<float> RestartLowMemory { get; } =
+			new ConfigEntry<float>("restart_low_memory", 400,
+				"Restart Low Memory", "Restart if the game's remaining memory falls below this value in megabytes");
+
+		public ConfigEntry<float> RestartLowMemoryRoundEnd { get; } =
+			new ConfigEntry<float>("restart_low_memory_roundend", 450,
+				"Restart Low Memory Round-End", "Restart at the end of the round if the game's remaining memory falls below this value in megabytes");
+
+		public ConfigEntry<int> MaxPlayers { get; } =
+			new ConfigEntry<int>("max_players", 20,
+				"Max Players", "The number of players to display as the maximum for the server (within MultiAdmin, not in-game)");
+
+		public ConfigEntry<bool> RandomInputColors { get; } =
+			new ConfigEntry<bool>("random_input_colors", false,
+				"Random Input Colors", "Randomize the new input system's colors every time a message is input");
+
+		public ConfigEntry<int> RestartEveryNumRounds { get; } =
+			new ConfigEntry<int>("restart_every_num_rounds", -1,
+				"Restart Every Number of Rounds", "Restart the server every number of rounds");
+
+		public ConfigEntry<bool> SafeServerShutdown { get; } =
+			new ConfigEntry<bool>("safe_server_shutdown", true,
+				"Safe Server Shutdown", "When MultiAdmin closes, if this is true, MultiAdmin will attempt to safely shutdown all the servers");
+
+		public ConfigEntry<float> ServerRestartTimeout { get; } =
+			new ConfigEntry<float>("server_restart_timeout", 10,
+				"Server Restart Timeout", "The time in seconds before MultiAdmin forces a server restart if it doesn't respond to the regular restart command");
+
+		public ConfigEntry<float> ServerStopTimeout { get; } =
+			new ConfigEntry<float>("server_stop_timeout", 10,
+				"Server Stop Timeout", "The time in seconds before MultiAdmin forces a server shutdown if it doesn't respond to the regular shutdown command");
+
+		public ConfigEntry<string> ServersFolder { get; } =
+			new ConfigEntry<string>("servers_folder", "servers",
+				"Servers Folder", "The location of the \"servers\" folder for MultiAdmin to load multiple server configurations from");
+
+		public ConfigEntry<bool> SetTitleBar { get; } =
+			new ConfigEntry<bool>("set_title_bar", true,
+				"Set Title Bar", "Whether to set the console window's titlebar, if false, this feature won't be used");
+
+		public ConfigEntry<int> ShutdownWhenEmptyFor { get; } =
+			new ConfigEntry<int>("shutdown_when_empty_for", -1,
+				"Shutdown When Empty For", "Shutdown the server once a round hasn't started in a number of seconds");
+
+		public ConfigEntry<string> StartConfigOnFull { get; } =
+			new ConfigEntry<string>("start_config_on_full", "",
+				"Start Config on Full", "Start server with this config folder once the server becomes full [Requires ServerMod]");
 
 		#endregion
 
@@ -104,7 +198,7 @@ namespace MultiAdmin.Config
 			if (configEntry == null)
 				throw new NullReferenceException("Config type unsupported (Config: Null).");
 
-			if (!ShouldGetFromConfig(configEntry.Key))
+			if (configEntry.Inherit && !ShouldGetFromConfig(configEntry.Key))
 			{
 				ParentConfig.UpdateConfigValue(configEntry);
 				return;
@@ -186,23 +280,28 @@ namespace MultiAdmin.Config
 			return ConfigContains(key) || GlobalConfig.ConfigContains(key);
 		}
 
+		public MultiAdminConfig[] GetConfigHierarchy(bool highestToLowest = true)
+		{
+			List<MultiAdminConfig> configHierarchy = new List<MultiAdminConfig>();
+
+			MultiAdminConfig config = this;
+			while (config != null && !configHierarchy.Contains(config))
+			{
+				configHierarchy.Add(config);
+				config = config.ParentConfig;
+			}
+
+			if (highestToLowest)
+				configHierarchy.Reverse();
+
+			return configHierarchy.ToArray();
+		}
+
 		public bool ConfigHierarchyContainsPath(string path)
 		{
 			string fullPath = Utils.GetFullPathSafe(path);
 
-			if (!string.IsNullOrEmpty(fullPath))
-			{
-				MultiAdminConfig config = this;
-				while (config != null)
-				{
-					if (config.Config?.ConfigPath == path)
-						return true;
-
-					config = config.ParentConfig;
-				}
-			}
-
-			return false;
+			return !string.IsNullOrEmpty(fullPath) && GetConfigHierarchy().Any(config => config.Config?.ConfigPath == path);
 		}
 	}
 }
