@@ -8,7 +8,7 @@ using MultiAdmin.ConsoleTools;
 
 namespace MultiAdmin.Config
 {
-	public class MultiAdminConfig : ConfigRegister
+	public class MultiAdminConfig : InheritableConfigRegister
 	{
 		#region Config Keys and Values
 
@@ -143,7 +143,12 @@ namespace MultiAdmin.Config
 
 		public static readonly MultiAdminConfig GlobalConfig = new MultiAdminConfig(GlobalConfigFilePath, null);
 
-		public MultiAdminConfig ParentConfig { get; }
+		public MultiAdminConfig ParentConfig
+		{
+			get => ParentConfigRegister as MultiAdminConfig;
+			protected set => ParentConfigRegister = value;
+		}
+
 		public Config Config { get; }
 
 		public MultiAdminConfig(Config config, MultiAdminConfig parentConfig, bool createConfig = true)
@@ -193,16 +198,10 @@ namespace MultiAdmin.Config
 
 		#region Config Registration
 
-		public override void UpdateConfigValue(ConfigEntry configEntry)
+		public override void UpdateConfigValueInheritable(ConfigEntry configEntry)
 		{
 			if (configEntry == null)
 				throw new NullReferenceException("Config type unsupported (Config: Null).");
-
-			if (configEntry.Inherit && !ShouldGetFromConfig(configEntry.Key))
-			{
-				ParentConfig.UpdateConfigValue(configEntry);
-				return;
-			}
 
 			if (Config == null)
 			{
@@ -250,9 +249,14 @@ namespace MultiAdmin.Config
 
 				default:
 				{
-					throw new Exception($"Config type unsupported (Config: Key = \"{configEntry.Key ?? "Null"}\" Type = \"{configEntry.ValueType.FullName ?? "Null"}\" Name = \"{configEntry.Name ?? "Null"}\" Description = \"{configEntry.Description ?? "Null"}\").");
+					throw new ArgumentException($"Config type unsupported (Config: Key = \"{configEntry.Key ?? "Null"}\" Type = \"{configEntry.ValueType.FullName ?? "Null"}\" Name = \"{configEntry.Name ?? "Null"}\" Description = \"{configEntry.Description ?? "Null"}\").", nameof(configEntry));
 				}
 			}
+		}
+
+		public override bool ShouldInheritConfigEntry(ConfigEntry configEntry)
+		{
+			return !ConfigContains(configEntry.Key);
 		}
 
 		#endregion
@@ -263,11 +267,6 @@ namespace MultiAdmin.Config
 			Config?.ReadConfigFile();
 
 			UpdateRegisteredConfigValues();
-		}
-
-		private bool ShouldGetFromConfig(string key)
-		{
-			return ParentConfig == null || ConfigContains(key);
 		}
 
 		public bool ConfigContains(string key)
@@ -284,15 +283,11 @@ namespace MultiAdmin.Config
 		{
 			List<MultiAdminConfig> configHierarchy = new List<MultiAdminConfig>();
 
-			MultiAdminConfig config = this;
-			while (config != null && !configHierarchy.Contains(config))
+			foreach (InheritableConfigRegister configRegister in GetConfigRegisterHierarchy(highestToLowest))
 			{
-				configHierarchy.Add(config);
-				config = config.ParentConfig;
+				if (configRegister is MultiAdminConfig config)
+					configHierarchy.Add(config);
 			}
-
-			if (highestToLowest)
-				configHierarchy.Reverse();
 
 			return configHierarchy.ToArray();
 		}
