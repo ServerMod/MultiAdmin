@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using MultiAdmin.Config;
+using MultiAdmin.Config.ConfigHandler;
 using MultiAdmin.Features.Attributes;
 
 namespace MultiAdmin.Features
@@ -8,6 +11,9 @@ namespace MultiAdmin.Features
 	[Feature]
 	internal class GithubGenerator : Feature, ICommand
 	{
+		public const string EmptyIndicator = "**Empty**";
+		public const string ColumnSeparator = " | ";
+
 		public GithubGenerator(Server server) : base(server)
 		{
 		}
@@ -37,28 +43,81 @@ namespace MultiAdmin.Features
 
 			string dir = string.Join(" ", args);
 
-			List<string> lines = new List<string>
-			{
-				"# MultiAdmin",
-				string.Empty,
-				"## Features"
-			};
+			List<string> lines = new List<string> {"# MultiAdmin", string.Empty, "## Features"};
 
 			foreach (Feature feature in Server.features)
 			{
 				if (feature.Equals(this)) continue;
-				lines.Add("- " + feature.GetFeatureName() + ": " + feature.GetFeatureDescription());
+
+				lines.Add($"- {feature.GetFeatureName()}: {feature.GetFeatureDescription()}");
 			}
 
 			lines.Add(string.Empty);
 			lines.Add("## MultiAdmin Commands");
-			lines.Add(
-				"This does not include ServerMod or in-game commands, for a full list type `HELP` in MultiAdmin which will produce all commands.");
 			lines.Add(string.Empty);
 			foreach (ICommand comm in Server.commands.Values)
 			{
-				string commandString = (comm.GetCommand() + " " + comm.GetUsage()).Trim();
-				lines.Add("- " + commandString + ": " + comm.GetCommandDescription());
+				lines.Add($"- {(comm.GetCommand() + " " + comm.GetUsage()).Trim()}: {comm.GetCommandDescription()}");
+			}
+
+			lines.Add(string.Empty);
+			lines.Add("## Config Settings");
+			lines.Add(string.Empty);
+			lines.Add($"Config Option{ColumnSeparator}Value Type{ColumnSeparator}Default Value{ColumnSeparator}Description");
+			lines.Add($"---{ColumnSeparator}:---:{ColumnSeparator}:---:{ColumnSeparator}:------:");
+
+			foreach (ConfigEntry configEntry in MultiAdminConfig.GlobalConfig.GetRegisteredConfigs())
+			{
+				StringBuilder stringBuilder = new StringBuilder($"{configEntry.Key ?? EmptyIndicator}{ColumnSeparator}");
+
+				switch (configEntry)
+				{
+					case ConfigEntry<string> config:
+					{
+						stringBuilder.Append($"String{ColumnSeparator}{(string.IsNullOrEmpty(config.Default) ? EmptyIndicator : config.Default)}");
+						break;
+					}
+
+					case ConfigEntry<string[]> config:
+					{
+						stringBuilder.Append($"String List{ColumnSeparator}{(!config.Default?.Any() ?? true ? EmptyIndicator : string.Join(", ", config.Default))}");
+						break;
+					}
+
+					case ConfigEntry<int> config:
+					{
+						stringBuilder.Append($"Integer{ColumnSeparator}{config.Default}");
+						break;
+					}
+
+					case ConfigEntry<uint> config:
+					{
+						stringBuilder.Append($"Unsigned Integer{ColumnSeparator}{config.Default}");
+						break;
+					}
+
+					case ConfigEntry<float> config:
+					{
+						stringBuilder.Append($"Float{ColumnSeparator}{config.Default}");
+						break;
+					}
+
+					case ConfigEntry<bool> config:
+					{
+						stringBuilder.Append($"Boolean{ColumnSeparator}{config.Default}");
+						break;
+					}
+
+					default:
+					{
+						stringBuilder.Append($"{configEntry.ValueType?.Name ?? EmptyIndicator}{ColumnSeparator}{configEntry.ObjectDefault ?? EmptyIndicator}");
+						break;
+					}
+				}
+
+				stringBuilder.Append($"{ColumnSeparator}{configEntry.Description ?? EmptyIndicator}");
+
+				lines.Add(stringBuilder.ToString());
 			}
 
 			File.WriteAllLines(dir, lines);

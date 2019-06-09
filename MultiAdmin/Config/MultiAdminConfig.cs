@@ -50,31 +50,31 @@ namespace MultiAdmin.Config
 
 		public ConfigEntry<string> CopyFromFolderOnReload { get; } =
 			new ConfigEntry<string>("copy_from_folder_on_reload", "",
-				"Copy from Folder on Reload", "The location of a folder to copy files from into the folder defined by \"config_location\" whenever the configuration file is reloaded");
+				"Copy from Folder on Reload", "The location of a folder to copy files from into the folder defined by `config_location` whenever the configuration file is reloaded");
 
 		public ConfigEntry<string[]> FolderCopyWhitelist { get; } =
 			new ConfigEntry<string[]>("folder_copy_whitelist", new string[0],
-				"Folder Copy Whitelist", "The list of file names to copy from the folder defined by \"copy_from_folder_on_reload\" (accepts \"*\" wildcards)");
+				"Folder Copy Whitelist", "The list of file names to copy from the folder defined by `copy_from_folder_on_reload` (accepts `*` wildcards)");
 
 		public ConfigEntry<string[]> FolderCopyBlacklist { get; } =
 			new ConfigEntry<string[]>("folder_copy_blacklist", new string[0],
-				"Folder Copy Blacklist", "The list of file names to not copy from the folder defined by \"copy_from_folder_on_reload\" (accepts \"*\" wildcards)");
+				"Folder Copy Blacklist", "The list of file names to not copy from the folder defined by `copy_from_folder_on_reload` (accepts `*` wildcards)");
 
 		public ConfigEntry<string[]> FolderCopyRoundQueue { get; } =
 			new ConfigEntry<string[]>("folder_copy_round_queue", new string[0],
-				"Folder Copy Round Queue", "The location of a folder to copy files from into the folder defined by \"config_location\" after each round, looping through the locations");
+				"Folder Copy Round Queue", "The location of a folder to copy files from into the folder defined by `config_location` after each round, looping through the locations");
 
 		public ConfigEntry<string[]> FolderCopyRoundQueueWhitelist { get; } =
 			new ConfigEntry<string[]>("folder_copy_round_queue_whitelist", new string[0],
-				"Folder Copy Round Queue Whitelist", "The list of file names to copy from the folders defined by \"folder_copy_round_queue\" (accepts \"*\" wildcards)");
+				"Folder Copy Round Queue Whitelist", "The list of file names to copy from the folders defined by `folder_copy_round_queue` (accepts `*` wildcards)");
 
 		public ConfigEntry<string[]> FolderCopyRoundQueueBlacklist { get; } =
 			new ConfigEntry<string[]>("folder_copy_round_queue_blacklist", new string[0],
-				"Folder Copy Round Queue Blacklist", "The list of file names to not copy from the folders defined by \"folder_copy_round_queue\" (accepts \"*\" wildcards)");
+				"Folder Copy Round Queue Blacklist", "The list of file names to not copy from the folders defined by `folder_copy_round_queue` (accepts `*` wildcards)");
 
 		public ConfigEntry<bool> RandomizeFolderCopyRoundQueue { get; } =
 			new ConfigEntry<bool>("randomize_folder_copy_round_queue", false,
-				"Randomize Folder Copy Round Queue", "Whether to randomize the order of entries in \"folder_copy_round_queue\"");
+				"Randomize Folder Copy Round Queue", "Whether to randomize the order of entries in `folder_copy_round_queue`");
 
 		public ConfigEntry<bool> LogModActionsToOwnFile { get; } =
 			new ConfigEntry<bool>("log_mod_actions_to_own_file", false,
@@ -122,7 +122,7 @@ namespace MultiAdmin.Config
 
 		public ConfigEntry<string> ServersFolder { get; } =
 			new ConfigEntry<string>("servers_folder", "servers",
-				"Servers Folder", "The location of the \"servers\" folder for MultiAdmin to load multiple server configurations from");
+				"Servers Folder", "The location of the `servers` folder for MultiAdmin to load multiple server configurations from");
 
 		public ConfigEntry<bool> SetTitleBar { get; } =
 			new ConfigEntry<bool>("set_title_bar", true,

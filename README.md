@@ -82,19 +82,20 @@ folder_copy_round_queue | String List | **Empty** | The location of a folder to 
 folder_copy_round_queue_whitelist | String List | **Empty** | The list of file names to copy from the folders defined by `folder_copy_round_queue` (accepts `*` wildcards)
 folder_copy_round_queue_blacklist | String List | **Empty** | The list of file names to not copy from the folders defined by `folder_copy_round_queue` (accepts `*` wildcards)
 randomize_folder_copy_round_queue | Boolean | False | Whether to randomize the order of entries in `folder_copy_round_queue`
-log_mod_actions_to_own_file | Boolean | False | Logs admin messages to seperate file
+log_mod_actions_to_own_file | Boolean | False | Logs admin messages to separate file
 manual_start | Boolean | False | Whether or not to start the server automatically when launching MultiAdmin
-max_memory | Float | 2048.0 | The amount of memory in megabytes for MultiAdmin to check against
-restart_low_memory | Float | 400.0 | Restart if the games memory falls below this value in megabytes
-restart_low_memory_roundend | Float | 450.0 | Restart at the end of the round if the game's memory falls below this value in megabytes
+max_memory | Float | 2048 | The amount of memory in megabytes for MultiAdmin to check against
+restart_low_memory | Float | 400 | Restart if the game's remaining memory falls below this value in megabytes
+restart_low_memory_roundend | Float | 450 | Restart at the end of the round if the game's remaining memory falls below this value in megabytes
 max_players | Integer | 20 | The number of players to display as the maximum for the server (within MultiAdmin, not in-game)
-restart_every_num_rounds | Integer | -1 | Restart the server every number rounds
+random_input_colors | Boolean | False | Randomize the new input system's colors every time a message is input
+restart_every_num_rounds | Integer | -1 | Restart the server every number of rounds
 safe_server_shutdown | Boolean | True | When MultiAdmin closes, if this is true, MultiAdmin will attempt to safely shutdown all the servers
-server_restart_timeout | Float | 10.0 | The time in seconds before MultiAdmin forces a server restart if it doesn't respond to the regular restart command
-server_stop_timeout | Float | 10.0 | The time in seconds before MultiAdmin forces a server shutdown if it doesn't respond to the regular shutdown command
-servers_folder | String | servers | The location of the "servers" folder for MultiAdmin to load multiple server configurations from
+server_restart_timeout | Float | 10 | The time in seconds before MultiAdmin forces a server restart if it doesn't respond to the regular restart command
+server_stop_timeout | Float | 10 | The time in seconds before MultiAdmin forces a server shutdown if it doesn't respond to the regular shutdown command
+servers_folder | String | servers | The location of the `servers` folder for MultiAdmin to load multiple server configurations from
 set_title_bar | Boolean | True | Whether to set the console window's titlebar, if false, this feature won't be used
-shutdown_when_empty_for | Seconds | -1 | Shutdown the server once a round hasn't started in a number of seconds
+shutdown_when_empty_for | Integer | -1 | Shutdown the server once a round hasn't started in a number of seconds
 start_config_on_full | String | **Empty** | Start server with this config folder once the server becomes full [Requires ServerMod]
 
 ## Upcoming Features
