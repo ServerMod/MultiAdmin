@@ -10,25 +10,25 @@ namespace MultiAdmin.Config.ConfigHandler
 		/// <summary>
 		/// Creates an <see cref="InheritableConfigRegister"/> with the parent <paramref name="parentConfigRegister"/> to inherit unset config values from.
 		/// </summary>
-		/// <param name="parentConfigRegister">The <see cref="InheritableConfigRegister"/> to inherit unset config values from.</param>
-		protected InheritableConfigRegister(InheritableConfigRegister parentConfigRegister = null)
+		/// <param name="parentConfigRegister">The <see cref="ConfigRegister"/> to inherit unset config values from.</param>
+		protected InheritableConfigRegister(ConfigRegister parentConfigRegister = null)
 		{
 			ParentConfigRegister = parentConfigRegister;
 		}
 
 		/// <summary>
-		/// The parent <see cref="InheritableConfigRegister"/> to inherit from.
+		/// The parent <see cref="ConfigRegister"/> to inherit from.
 		/// </summary>
-		public InheritableConfigRegister ParentConfigRegister { get; protected set; }
+		public ConfigRegister ParentConfigRegister { get; protected set; }
 
 		/// <summary>
-		/// Returns whether <paramref name="configEntry"/> should be inherited from the parent <see cref="InheritableConfigRegister"/>.
+		/// Returns whether <paramref name="configEntry"/> should be inherited from the parent <see cref="ConfigRegister"/>.
 		/// </summary>
 		/// <param name="configEntry">The <see cref="ConfigEntry"/> to decide whether to inherit.</param>
 		public abstract bool ShouldInheritConfigEntry(ConfigEntry configEntry);
 
 		/// <summary>
-		/// Updates the value of <paramref name="configEntry"/> which could be provided by another <see cref="InheritableConfigRegister"/>.
+		/// Updates the value of <paramref name="configEntry"/>.
 		/// </summary>
 		/// <param name="configEntry">The <see cref="ConfigEntry"/> to be assigned a value.</param>
 		public abstract void UpdateConfigValueInheritable(ConfigEntry configEntry);
@@ -50,18 +50,27 @@ namespace MultiAdmin.Config.ConfigHandler
 		}
 
 		/// <summary>
-		/// Returns an array of the hierarchy of <see cref="InheritableConfigRegister"/>s.
+		/// Returns an array of the hierarchy of <see cref="ConfigRegister"/>s.
 		/// </summary>
-		/// <param name="highestToLowest">Whether to order the returned array from highest <see cref="InheritableConfigRegister"/> in the hierarchy to the lowest.</param>
-		public InheritableConfigRegister[] GetConfigRegisterHierarchy(bool highestToLowest = true)
+		/// <param name="highestToLowest">Whether to order the returned array from highest <see cref="ConfigRegister"/> in the hierarchy to the lowest.</param>
+		public ConfigRegister[] GetConfigRegisterHierarchy(bool highestToLowest = true)
 		{
-			List<InheritableConfigRegister> configRegisterHierarchy = new List<InheritableConfigRegister>();
+			List<ConfigRegister> configRegisterHierarchy = new List<ConfigRegister>();
 
-			InheritableConfigRegister configRegister = this;
+			ConfigRegister configRegister = this;
 			while (configRegister != null && !configRegisterHierarchy.Contains(configRegister))
 			{
 				configRegisterHierarchy.Add(configRegister);
-				configRegister = configRegister.ParentConfigRegister;
+
+				// If there's another InheritableConfigRegister as a parent, then get the parent of that, otherwise, break the loop as there are no more parents
+				if (configRegister is InheritableConfigRegister inheritableConfigRegister)
+				{
+					configRegister = inheritableConfigRegister.ParentConfigRegister;
+				}
+				else
+				{
+					break;
+				}
 			}
 
 			if (highestToLowest)
