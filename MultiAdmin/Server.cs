@@ -406,9 +406,12 @@ namespace MultiAdmin
 				{
 					Write("Failed - Executable file not found or config issue!", ConsoleColor.Red);
 					Write(e.Message, ConsoleColor.Red);
-					Write("Press any key to close...", ConsoleColor.DarkGray);
-					Console.ReadKey(true);
-					Process.GetCurrentProcess().Kill();
+
+					shouldRestart = false;
+				}
+				finally
+				{
+					DeleteSession();
 				}
 			} while (shouldRestart);
 		}
@@ -558,27 +561,34 @@ namespace MultiAdmin
 
 		public void DeleteSession()
 		{
-			CleanSession();
-
-			if (!Directory.Exists(SessionDirectory)) return;
-
-			for (int i = 0; i < 20; i++)
+			try
 			{
-				try
+				CleanSession();
+
+				if (!Directory.Exists(SessionDirectory)) return;
+
+				for (int i = 0; i < 20; i++)
 				{
-					Directory.Delete(SessionDirectory);
-					break;
+					try
+					{
+						Directory.Delete(SessionDirectory);
+						break;
+					}
+					catch (UnauthorizedAccessException e)
+					{
+						Program.LogDebugException(nameof(DeleteSession), e);
+						Thread.Sleep(5);
+					}
+					catch (Exception e)
+					{
+						Program.LogDebugException(nameof(DeleteSession), e);
+						Thread.Sleep(2);
+					}
 				}
-				catch (UnauthorizedAccessException e)
-				{
-					Program.LogDebugException(nameof(DeleteSession), e);
-					Thread.Sleep(5);
-				}
-				catch (Exception e)
-				{
-					Program.LogDebugException(nameof(DeleteSession), e);
-					Thread.Sleep(2);
-				}
+			}
+			catch (Exception e)
+			{
+				Program.LogDebugException(nameof(DeleteSession), e);
 			}
 		}
 

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 using MultiAdmin.Config;
 using MultiAdmin.ConsoleTools;
@@ -15,6 +16,7 @@ namespace MultiAdmin
 	public static class Program
 	{
 		public const string MaVersion = "3.2.1";
+		public const string RecommendedMonoVersion = "5.18.0";
 
 		private static readonly List<Server> InstantiatedServers = new List<Server>();
 
@@ -142,7 +144,8 @@ namespace MultiAdmin
 					}
 				}
 
-				// For some reason Mono hangs on this, but it works perfectly without it
+				// For some reason Mono hangs on this, but it works perfectly without it,
+				// but on Windows it doesn't close immediately unless this is here
 				if (Utils.IsWindows)
 					Environment.Exit(0);
 			}
@@ -164,6 +167,8 @@ namespace MultiAdmin
 			}
 
 			Headless = GetFlagFromArgs("headless", "h");
+
+			CheckMonoVersion();
 
 			string serverIdArg = GetParamFromArgs("server-id", "id");
 			string configArg = GetParamFromArgs("config", "c");
@@ -326,7 +331,12 @@ namespace MultiAdmin
 
 		public static Process StartServer(Server server)
 		{
-			string assemblyLocation = Assembly.GetEntryAssembly().Location;
+			string assemblyLocation = Assembly.GetEntryAssembly()?.Location;
+
+			if (string.IsNullOrEmpty(assemblyLocation))
+			{
+				Write("Error while starting new server: Could not find the executable location!", ConsoleColor.Red);
+			}
 
 			List<string> args = new List<string>();
 
@@ -352,6 +362,73 @@ namespace MultiAdmin
 			InstantiatedServers.Add(server);
 
 			return serverProcess;
+		}
+
+		private static bool IsVersionFormat(string input)
+		{
+			foreach (char character in input)
+			{
+				if (!char.IsNumber(character) && character != '.')
+					return false;
+			}
+
+			return true;
+		}
+
+		private static int CompareVersionStrings(string firstVersion, string secondVersion)
+		{
+			if (firstVersion == null || secondVersion == null)
+				return -1;
+
+			string[] firstVersionNums = firstVersion.Split('.');
+			string[] secondVersionNums = secondVersion.Split('.');
+
+			int returnValue = 0;
+
+			for (int i = 0; i < Math.Min(firstVersionNums.Length, secondVersionNums.Length); i++)
+			{
+				if (!int.TryParse(firstVersionNums[i], out int current) || !int.TryParse(secondVersionNums[i], out int recommended))
+					continue;
+
+				if (current > recommended)
+				{
+					returnValue = 1;
+				}
+				else if (current < recommended)
+				{
+					return -1;
+				}
+			}
+
+			return returnValue;
+		}
+
+		public static void CheckMonoVersion()
+		{
+			try
+			{
+				if (!RuntimeInformation.FrameworkDescription.StartsWith("Mono"))
+				{
+					return;
+				}
+
+				string monoVersion = RuntimeInformation.FrameworkDescription?.Split(' ').FirstOrDefault(IsVersionFormat);
+
+				if (string.IsNullOrEmpty(monoVersion))
+					return;
+
+				int versionDifference = CompareVersionStrings(monoVersion, RecommendedMonoVersion);
+
+				if (versionDifference >= 0 && (versionDifference != 0 || monoVersion.Length >= RecommendedMonoVersion.Length))
+					return;
+
+				Write($"Warning: Your Mono version ({monoVersion}) is below the recommended version ({RecommendedMonoVersion})", ConsoleColor.Red);
+				Write("Please update your Mono installation: https://www.mono-project.com/download/stable/", ConsoleColor.Red);
+			}
+			catch (Exception e)
+			{
+				LogDebugException(nameof(CheckMonoVersion), e);
+			}
 		}
 	}
 }
