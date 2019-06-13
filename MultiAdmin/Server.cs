@@ -50,14 +50,23 @@ namespace MultiAdmin
 			// Load config
 			serverConfig = MultiAdminConfig.GlobalConfig;
 
+			// Load config hierarchy
 			string serverConfigLocation = this.configLocation;
 			while (!string.IsNullOrEmpty(serverConfigLocation))
 			{
+				// Update the Server object's config location with the valid config location
 				this.configLocation = serverConfigLocation;
 
+				// Load the child MultiAdminConfig
 				serverConfig = new MultiAdminConfig(serverConfigLocation + Path.DirectorySeparatorChar + MultiAdminConfig.ConfigFileName, serverConfig);
 
+				// Set the server config location to the value from the config, this should be empty or null if there is no valid value
 				serverConfigLocation = Utils.GetFullPathSafe(serverConfig.ConfigLocation.Value);
+
+				// If the config hierarchy already contains the MultiAdmin config from the target path, stop looping
+				// Without this, a user could unintentionally cause a lockup when their server starts up due to infinite looping
+				if (serverConfig.ConfigHierarchyContainsPath(serverConfigLocation))
+					break;
 			}
 
 			// Set port
@@ -251,8 +260,14 @@ namespace MultiAdmin
 					if (!string.IsNullOrEmpty(MultiAdminConfig.GlobalConfigFilePath))
 						Write($"Using global config \"{MultiAdminConfig.GlobalConfigFilePath}\"...");
 
-					if (!string.IsNullOrEmpty(configLocation) && !string.IsNullOrEmpty(ServerConfig?.Config?.ConfigPath))
-						Write($"Using server config \"{ServerConfig.Config.ConfigPath}\"...");
+					if (ServerConfig != null)
+					{
+						foreach (MultiAdminConfig config in ServerConfig.GetConfigHierarchy())
+						{
+							if (!string.IsNullOrEmpty(config?.Config?.ConfigPath) && MultiAdminConfig.GlobalConfigFilePath != config.Config.ConfigPath)
+								Write($"Using server config \"{config.Config.ConfigPath}\"...");
+						}
+					}
 
 					#endregion
 
@@ -279,7 +294,7 @@ namespace MultiAdmin
 
 					Write($"Executing \"{scpslExe}\"...", ConsoleColor.DarkGreen);
 
-					List<string> scpslArgs = new List<string>(new string[]
+					List<string> scpslArgs = new List<string>
 					{
 						"-batchmode",
 						"-nographics",
@@ -288,7 +303,7 @@ namespace MultiAdmin
 						$"-key{SessionId}",
 						$"-id{Process.GetCurrentProcess().Id}",
 						$"-port{port ?? ServerConfig.Port.Value}"
-					});
+					};
 
 					if (string.IsNullOrEmpty(ScpLogFile) || ServerConfig.NoLog.Value)
 					{
@@ -391,9 +406,12 @@ namespace MultiAdmin
 				{
 					Write("Failed - Executable file not found or config issue!", ConsoleColor.Red);
 					Write(e.Message, ConsoleColor.Red);
-					Write("Press any key to close...", ConsoleColor.DarkGray);
-					Console.ReadKey(true);
-					Process.GetCurrentProcess().Kill();
+
+					shouldRestart = false;
+				}
+				finally
+				{
+					DeleteSession();
 				}
 			} while (shouldRestart);
 		}
@@ -543,27 +561,34 @@ namespace MultiAdmin
 
 		public void DeleteSession()
 		{
-			CleanSession();
-
-			if (!Directory.Exists(SessionDirectory)) return;
-
-			for (int i = 0; i < 20; i++)
+			try
 			{
-				try
+				CleanSession();
+
+				if (!Directory.Exists(SessionDirectory)) return;
+
+				for (int i = 0; i < 20; i++)
 				{
-					Directory.Delete(SessionDirectory);
-					break;
+					try
+					{
+						Directory.Delete(SessionDirectory);
+						break;
+					}
+					catch (UnauthorizedAccessException e)
+					{
+						Program.LogDebugException(nameof(DeleteSession), e);
+						Thread.Sleep(5);
+					}
+					catch (Exception e)
+					{
+						Program.LogDebugException(nameof(DeleteSession), e);
+						Thread.Sleep(2);
+					}
 				}
-				catch (UnauthorizedAccessException e)
-				{
-					Program.LogDebugException(nameof(DeleteSession), e);
-					Thread.Sleep(5);
-				}
-				catch (Exception e)
-				{
-					Program.LogDebugException(nameof(DeleteSession), e);
-					Thread.Sleep(2);
-				}
+			}
+			catch (Exception e)
+			{
+				Program.LogDebugException(nameof(DeleteSession), e);
 			}
 		}
 

@@ -75,6 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Config\ConfigHandler\ConfigEntry.cs" />
+    <Compile Include="Config\ConfigHandler\InheritableConfigRegister.cs" />
     <Compile Include="Config\ConfigHandler\ConfigRegister.cs" />
     <Compile Include="ConsoleTools\ColoredConsole.cs" />
     <Compile Include="Config\Config.cs" />
