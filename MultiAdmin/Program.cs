@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Threading;
 using MultiAdmin.Config;
 using MultiAdmin.ConsoleTools;
@@ -407,12 +406,8 @@ namespace MultiAdmin
 		{
 			try
 			{
-				if (!RuntimeInformation.FrameworkDescription.StartsWith("Mono"))
-				{
-					return;
-				}
-
-				string monoVersion = RuntimeInformation.FrameworkDescription?.Split(' ').FirstOrDefault(IsVersionFormat);
+				string monoVersionRaw = Type.GetType("Mono.Runtime")?.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static)?.Invoke(null, null)?.ToString();
+				string monoVersion = monoVersionRaw?.Split(' ').FirstOrDefault(IsVersionFormat);
 
 				if (string.IsNullOrEmpty(monoVersion))
 					return;
