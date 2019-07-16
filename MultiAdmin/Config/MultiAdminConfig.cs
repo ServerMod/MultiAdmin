@@ -84,16 +84,16 @@ namespace MultiAdmin.Config
 			new ConfigEntry<bool>("manual_start", false,
 				"Manual Start", "Whether or not to start the server automatically when launching MultiAdmin");
 
-		public ConfigEntry<float> MaxMemory { get; } =
-			new ConfigEntry<float>("max_memory", 2048,
+		public ConfigEntry<decimal> MaxMemory { get; } =
+			new ConfigEntry<decimal>("max_memory", 2048,
 				"Max Memory", "The amount of memory in megabytes for MultiAdmin to check against");
 
-		public ConfigEntry<float> RestartLowMemory { get; } =
-			new ConfigEntry<float>("restart_low_memory", 400,
+		public ConfigEntry<decimal> RestartLowMemory { get; } =
+			new ConfigEntry<decimal>("restart_low_memory", 400,
 				"Restart Low Memory", "Restart if the game's remaining memory falls below this value in megabytes");
 
-		public ConfigEntry<float> RestartLowMemoryRoundEnd { get; } =
-			new ConfigEntry<float>("restart_low_memory_roundend", 450,
+		public ConfigEntry<decimal> RestartLowMemoryRoundEnd { get; } =
+			new ConfigEntry<decimal>("restart_low_memory_roundend", 450,
 				"Restart Low Memory Round-End", "Restart at the end of the round if the game's remaining memory falls below this value in megabytes");
 
 		public ConfigEntry<int> MaxPlayers { get; } =
@@ -112,12 +112,12 @@ namespace MultiAdmin.Config
 			new ConfigEntry<bool>("safe_server_shutdown", true,
 				"Safe Server Shutdown", "When MultiAdmin closes, if this is true, MultiAdmin will attempt to safely shutdown all the servers");
 
-		public ConfigEntry<float> ServerRestartTimeout { get; } =
-			new ConfigEntry<float>("server_restart_timeout", 10,
+		public ConfigEntry<double> ServerRestartTimeout { get; } =
+			new ConfigEntry<double>("server_restart_timeout", 10,
 				"Server Restart Timeout", "The time in seconds before MultiAdmin forces a server restart if it doesn't respond to the regular restart command");
 
-		public ConfigEntry<float> ServerStopTimeout { get; } =
-			new ConfigEntry<float>("server_stop_timeout", 10,
+		public ConfigEntry<double> ServerStopTimeout { get; } =
+			new ConfigEntry<double>("server_stop_timeout", 10,
 				"Server Stop Timeout", "The time in seconds before MultiAdmin forces a server shutdown if it doesn't respond to the regular shutdown command");
 
 		public ConfigEntry<string> ServersFolder { get; } =
@@ -238,6 +238,18 @@ namespace MultiAdmin.Config
 				case ConfigEntry<float> config:
 				{
 					config.Value = Config.GetFloat(config.Key, config.Default);
+					break;
+				}
+
+				case ConfigEntry<double> config:
+				{
+					config.Value = Config.GetDouble(config.Key, config.Default);
+					break;
+				}
+
+				case ConfigEntry<decimal> config:
+				{
+					config.Value = Config.GetDecimal(config.Key, config.Default);
 					break;
 				}
 

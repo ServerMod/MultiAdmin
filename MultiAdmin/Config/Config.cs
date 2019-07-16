@@ -184,6 +184,40 @@ namespace MultiAdmin.Config
 			return def;
 		}
 
+		public double GetDouble(string key, double def = 0)
+		{
+			try
+			{
+				string value = GetString(key);
+
+				if (!string.IsNullOrEmpty(value) && double.TryParse(value, out double parsedValue))
+					return parsedValue;
+			}
+			catch (Exception e)
+			{
+				Program.LogDebugException(nameof(GetDouble), e);
+			}
+
+			return def;
+		}
+
+		public decimal GetDecimal(string key, decimal def = 0)
+		{
+			try
+			{
+				string value = GetString(key);
+
+				if (!string.IsNullOrEmpty(value) && decimal.TryParse(value, out decimal parsedValue))
+					return parsedValue;
+			}
+			catch (Exception e)
+			{
+				Program.LogDebugException(nameof(GetDecimal), e);
+			}
+
+			return def;
+		}
+
 		public bool GetBool(string key, bool def = false)
 		{
 			try

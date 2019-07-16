@@ -102,6 +102,18 @@ namespace MultiAdmin.Features
 						break;
 					}
 
+					case ConfigEntry<double> config:
+					{
+						stringBuilder.Append($"Double{ColumnSeparator}{config.Default}");
+						break;
+					}
+
+					case ConfigEntry<decimal> config:
+					{
+						stringBuilder.Append($"Decimal{ColumnSeparator}{config.Default}");
+						break;
+					}
+
 					case ConfigEntry<bool> config:
 					{
 						stringBuilder.Append($"Boolean{ColumnSeparator}{config.Default}");

@@ -8,6 +8,8 @@ namespace MultiAdmin.Features
 	{
 		private const long BytesInMegabyte = 1048576L;
 
+		private const int OutputPrecision = 2;
+
 		private uint tickCount;
 		private uint tickCountSoft;
 
@@ -42,34 +44,26 @@ namespace MultiAdmin.Features
 
 		public long MemoryLeftBytes => MaxBytes - MemoryUsedBytes;
 
-		public float LowMb
+		public decimal LowMb
 		{
-			get => LowBytes / (float)BytesInMegabyte;
+			get => LowBytes / new decimal(BytesInMegabyte);
 			set => LowBytes = (long)(value * BytesInMegabyte);
 		}
 
-		public float LowMbSoft
+		public decimal LowMbSoft
 		{
-			get => LowBytesSoft / (float)BytesInMegabyte;
+			get => LowBytesSoft / new decimal(BytesInMegabyte);
 			set => LowBytesSoft = (long)(value * BytesInMegabyte);
 		}
 
-		public float MaxMb
+		public decimal MaxMb
 		{
-			get => MaxBytes / (float)BytesInMegabyte;
+			get => MaxBytes / new decimal(BytesInMegabyte);
 			set => MaxBytes = (long)(value * BytesInMegabyte);
 		}
 
-		public float MemoryUsedMb => MemoryUsedBytes / (float)BytesInMegabyte;
-		public float MemoryLeftMb => MemoryLeftBytes / (float)BytesInMegabyte;
-
-		//public decimal DecimalMemoryUsedMb => DecimalDivide(MemoryUsedBytes, BytesInMegabyte, 2);
-		public decimal DecimalMemoryLeftMb => DecimalDivide(MemoryLeftBytes, BytesInMegabyte, 2);
-
-		private static decimal DecimalDivide(long numerator, long denominator, int decimals)
-		{
-			return decimal.Round(new decimal(numerator) / new decimal(denominator), decimals);
-		}
+		public decimal MemoryUsedMb => new decimal(MemoryUsedBytes) / new decimal(BytesInMegabyte);
+		public decimal MemoryLeftMb => new decimal(MemoryLeftBytes) / new decimal(BytesInMegabyte);
 
 		#endregion
 
@@ -86,11 +80,13 @@ namespace MultiAdmin.Features
 
 		public void OnTick()
 		{
+			float.MaxValue
+
 			if (LowBytes < 0 && LowBytesSoft < 0 || MaxBytes < 0) return;
 
 			if (tickCount < MaxTicks && LowBytes >= 0 && MemoryLeftBytes <= LowBytes)
 			{
-				Server.Write($"Warning: Program is running low on memory ({DecimalMemoryLeftMb} MB left), the server will restart if it continues",
+				Server.Write($"Warning: Program is running low on memory ({decimal.Round(MemoryLeftMb, OutputPrecision)} MB left), the server will restart if it continues",
 					ConsoleColor.Red);
 				tickCount++;
 			}
@@ -102,7 +98,7 @@ namespace MultiAdmin.Features
 			if (!restart && tickCountSoft < MaxTicksSoft && LowBytesSoft >= 0 && MemoryLeftBytes <= LowBytesSoft)
 			{
 				Server.Write(
-					$"Warning: Program is running low on memory ({DecimalMemoryLeftMb} MB left), the server will restart at the end of the round if it continues",
+					$"Warning: Program is running low on memory ({decimal.Round(MemoryLeftMb, OutputPrecision)} MB left), the server will restart at the end of the round if it continues",
 					ConsoleColor.Red);
 				tickCountSoft++;
 			}
@@ -148,9 +144,9 @@ namespace MultiAdmin.Features
 
 		public override void OnConfigReload()
 		{
-			LowMb = Server.ServerConfig.RestartLowMemory.Value;
-			LowMbSoft = Server.ServerConfig.RestartLowMemoryRoundEnd.Value;
-			MaxMb = Server.ServerConfig.MaxMemory.Value;
+			LowMb = new decimal(Server.ServerConfig.RestartLowMemory.Value);
+			LowMbSoft = new decimal(Server.ServerConfig.RestartLowMemoryRoundEnd.Value);
+			MaxMb = new decimal(Server.ServerConfig.MaxMemory.Value);
 		}
 	}
 }
