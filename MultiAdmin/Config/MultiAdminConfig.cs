@@ -295,7 +295,7 @@ namespace MultiAdmin.Config
 		{
 			List<MultiAdminConfig> configHierarchy = new List<MultiAdminConfig>();
 
-			foreach (InheritableConfigRegister configRegister in GetConfigRegisterHierarchy(highestToLowest))
+			foreach (ConfigRegister configRegister in GetConfigRegisterHierarchy(highestToLowest))
 			{
 				if (configRegister is MultiAdminConfig config)
 					configHierarchy.Add(config);
