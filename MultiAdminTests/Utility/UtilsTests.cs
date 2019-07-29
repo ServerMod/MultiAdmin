@@ -36,9 +36,35 @@ namespace MultiAdminTests.Utility
 		}
 
 		[TestMethod]
+		public void GetFullPathSafeTest()
+		{
+			string result = Utils.GetFullPathSafe(" ");
+			Assert.IsNull(result, $"Expected result \"null\", got \"{result}\"");
+		}
+
+		[TestMethod]
 		public void CompareVersionStringsTest()
 		{
-			CompareVersionTemplate[] versionTests = {new CompareVersionTemplate("1.0.0.0", "2.0.0.0", -1), new CompareVersionTemplate("1.0.0.0", "1.0.0.0", 0), new CompareVersionTemplate("2.0.0.0", "1.0.0.0", 1), new CompareVersionTemplate("1.0", "2.0.0.0", -1), new CompareVersionTemplate("1.0", "1.0.0.0", 0), new CompareVersionTemplate("2.0", "1.0.0.0", 1), new CompareVersionTemplate("1.0.0.0", "2.0", -1), new CompareVersionTemplate("1.0.0.0", "1.0", 0), new CompareVersionTemplate("2.0.0.0", "1.0", 1), new CompareVersionTemplate("6.0.0.313", "5.18.0", 1), new CompareVersionTemplate("5.18.0", "6.0.0.313", -1), new CompareVersionTemplate("5.18.0", "5.18.0", 0), new CompareVersionTemplate("5.18", "5.18.0", 0)};
+			CompareVersionTemplate[] versionTests =
+			{
+				new CompareVersionTemplate("1.0.0.0", "2.0.0.0", -1),
+				new CompareVersionTemplate("1.0.0.0", "1.0.0.0", 0),
+				new CompareVersionTemplate("2.0.0.0", "1.0.0.0", 1),
+
+				new CompareVersionTemplate("1.0", "2.0.0.0", -1),
+				new CompareVersionTemplate("1.0", "1.0.0.0", 0),
+				new CompareVersionTemplate("2.0", "1.0.0.0", 1),
+
+				new CompareVersionTemplate("1.0.0.0", "2.0", -1),
+				new CompareVersionTemplate("1.0.0.0", "1.0", 0),
+				new CompareVersionTemplate("2.0.0.0", "1.0", 1),
+
+				new CompareVersionTemplate("6.0.0.313", "5.18.0", 1),
+				new CompareVersionTemplate("5.18.0", "6.0.0.313", -1),
+
+				new CompareVersionTemplate("5.18.0", "5.18.0", 0),
+				new CompareVersionTemplate("5.18", "5.18.0", 0)
+			};
 
 			for (int i = 0; i < versionTests.Length; i++)
 			{
@@ -46,7 +72,7 @@ namespace MultiAdminTests.Utility
 
 				int result = Utils.CompareVersionStrings(test.firstVersion, test.secondVersion);
 
-				Assert.IsTrue(test.CheckResult(result), $"{nameof(Utils.CompareVersionStrings)} failed on test index {i}: Expected result \"{test.expectedResult}\", got \"{result}\"");
+				Assert.IsTrue(test.CheckResult(result), $"Failed on test index {i}: Expected result \"{test.expectedResult}\", got \"{result}\"");
 			}
 		}
 	}

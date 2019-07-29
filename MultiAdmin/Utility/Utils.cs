@@ -52,7 +52,7 @@ namespace MultiAdmin.Utility
 
 		public static string GetFullPathSafe(string path)
 		{
-			return !string.IsNullOrWhiteSpace(path) ? Path.GetFullPath(path) : null;
+			return string.IsNullOrWhiteSpace(path) ? null : Path.GetFullPath(path);
 		}
 
 		private const char WildCard = '*';

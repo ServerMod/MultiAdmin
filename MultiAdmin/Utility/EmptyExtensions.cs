@@ -1,19 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace MultiAdmin.Utility
 {
 	public static class EmptyExtensions
 	{
-		public static bool IsEmpty<T>(this IEnumerable<T> iEnumerable)
+		public static bool IsEmpty<T>(this IEnumerable<T> enumerable)
 		{
-			return !iEnumerable.Any();
+			return !enumerable.Any();
 		}
 
-		public static bool IsNullOrEmpty<T>(this IEnumerable<T> iEnumerable)
+		public static bool IsNullOrEmpty<T>(this IEnumerable<T> enumerable)
 		{
-			return iEnumerable?.IsEmpty() ?? true;
+			return enumerable?.IsEmpty() ?? true;
 		}
 
 		public static bool IsEmpty(this Array array)
@@ -64,6 +65,16 @@ namespace MultiAdmin.Utility
 		public static bool IsNullOrEmpty<TKey, TValue>(this Dictionary<TKey, TValue> dictionary)
 		{
 			return dictionary?.IsEmpty() ?? true;
+		}
+
+		public static bool IsEmpty(this StringBuilder stringBuilder)
+		{
+			return stringBuilder.Length <= 0;
+		}
+
+		public static bool IsNullOrEmpty(this StringBuilder stringBuilder)
+		{
+			return stringBuilder?.IsEmpty() ?? true;
 		}
 	}
 }
