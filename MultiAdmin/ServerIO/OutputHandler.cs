@@ -1,9 +1,9 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using MultiAdmin.ConsoleTools;
+using MultiAdmin.Utility;
 
 namespace MultiAdmin.ServerIO
 {
@@ -209,7 +209,7 @@ namespace MultiAdmin.ServerIO
 				// This should work fine with older ServerMod versions too
 				string[] streamSplit = stream.Replace("ServerMod - Version", string.Empty).Split('-');
 
-				if (streamSplit.Any())
+				if (!streamSplit.IsEmpty())
 				{
 					server.serverModVersion = streamSplit[0].Trim();
 					server.serverModBuild = (streamSplit.Length > 1 ? streamSplit[1] : "A").Trim();

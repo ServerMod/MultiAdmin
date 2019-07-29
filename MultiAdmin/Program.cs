@@ -9,6 +9,7 @@ using MultiAdmin.Config;
 using MultiAdmin.ConsoleTools;
 using MultiAdmin.NativeExitSignal;
 using MultiAdmin.ServerIO;
+using MultiAdmin.Utility;
 
 namespace MultiAdmin
 {
@@ -71,7 +72,7 @@ namespace MultiAdmin
 
 		private static bool IsDebugLogTagAllowed(string tag)
 		{
-			return (!MultiAdminConfig.GlobalConfig?.DebugLogBlacklist?.Value?.Contains(tag) ?? true) && ((!MultiAdminConfig.GlobalConfig?.DebugLogWhitelist?.Value?.Any() ?? true) || MultiAdminConfig.GlobalConfig.DebugLogWhitelist.Value.Contains(tag));
+			return (!MultiAdminConfig.GlobalConfig?.DebugLogBlacklist?.Value?.Contains(tag) ?? true) && ((MultiAdminConfig.GlobalConfig?.DebugLogWhitelist?.Value?.IsEmpty() ?? true) || MultiAdminConfig.GlobalConfig.DebugLogWhitelist.Value.Contains(tag));
 		}
 
 		public static void LogDebugException(string tag, Exception exception)
@@ -183,11 +184,26 @@ namespace MultiAdmin
 			}
 			else
 			{
-				if (Servers.Any())
+				if (Servers.IsEmpty())
+				{
+					server = new Server(port: portArg);
+
+					InstantiatedServers.Add(server);
+				}
+				else
 				{
 					Server[] autoStartServers = AutoStartServers;
 
-					if (autoStartServers.Any())
+					if (autoStartServers.IsEmpty())
+					{
+						Write("No servers are set to automatically start, please enter a Server ID to start:");
+						InputThread.InputPrefix?.Write();
+
+						server = new Server(Console.ReadLine(), port: portArg);
+
+						InstantiatedServers.Add(server);
+					}
+					else
 					{
 						Write("Starting this instance in multi server mode...");
 
@@ -205,21 +221,6 @@ namespace MultiAdmin
 							}
 						}
 					}
-					else
-					{
-						Write("No servers are set to automatically start, please enter a Server ID to start:");
-						InputThread.InputPrefix?.Write();
-
-						server = new Server(Console.ReadLine(), port: portArg);
-
-						InstantiatedServers.Add(server);
-					}
-				}
-				else
-				{
-					server = new Server(port: portArg);
-
-					InstantiatedServers.Add(server);
 				}
 			}
 
@@ -241,14 +242,12 @@ namespace MultiAdmin
 			}
 		}
 
-		private static bool ArrayIsNullOrEmpty(ICollection<object> array)
-		{
-			return array == null || !array.Any();
-		}
-
 		public static string GetParamFromArgs(string[] keys = null, string[] aliases = null)
 		{
-			if (ArrayIsNullOrEmpty(keys) && ArrayIsNullOrEmpty(aliases)) return null;
+			bool hasKeys = !Utils.IsCollectionNullOrEmpty(keys);
+			bool hasAliases = !Utils.IsCollectionNullOrEmpty(aliases);
+
+			if (!hasKeys && !hasAliases) return null;
 
 			string[] args = Environment.GetCommandLineArgs();
 
@@ -258,7 +257,7 @@ namespace MultiAdmin
 
 				if (string.IsNullOrEmpty(lowArg)) continue;
 
-				if (!ArrayIsNullOrEmpty(keys))
+				if (hasKeys)
 				{
 					if (keys.Any(key => !string.IsNullOrEmpty(key) && lowArg == $"--{key.ToLower()}"))
 					{
@@ -266,7 +265,7 @@ namespace MultiAdmin
 					}
 				}
 
-				if (!ArrayIsNullOrEmpty(aliases))
+				if (hasAliases)
 				{
 					if (aliases.Any(alias => !string.IsNullOrEmpty(alias) && lowArg == $"-{alias.ToLower()}"))
 					{
@@ -286,7 +285,7 @@ namespace MultiAdmin
 
 				if (string.IsNullOrEmpty(lowArg)) continue;
 
-				if (!ArrayIsNullOrEmpty(keys))
+				if (!Utils.IsCollectionNullOrEmpty(keys))
 				{
 					if (keys.Any(key => !string.IsNullOrEmpty(key) && lowArg == $"--{key.ToLower()}"))
 					{
@@ -294,7 +293,7 @@ namespace MultiAdmin
 					}
 				}
 
-				if (!ArrayIsNullOrEmpty(aliases))
+				if (!Utils.IsCollectionNullOrEmpty(aliases))
 				{
 					if (aliases.Any(alias => !string.IsNullOrEmpty(alias) && lowArg == $"-{alias.ToLower()}"))
 					{
@@ -308,7 +307,7 @@ namespace MultiAdmin
 
 		public static bool GetFlagFromArgs(string[] keys = null, string[] aliases = null)
 		{
-			if (ArrayIsNullOrEmpty(keys) && ArrayIsNullOrEmpty(aliases)) return false;
+			if (Utils.IsCollectionNullOrEmpty(keys) && Utils.IsCollectionNullOrEmpty(aliases)) return false;
 
 			return bool.TryParse(GetParamFromArgs(keys, aliases), out bool result) ? result : ArgsContainsParam(keys, aliases);
 		}

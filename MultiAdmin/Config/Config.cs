@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using MultiAdmin.ConsoleTools;
+using MultiAdmin.Utility;
 
 namespace MultiAdmin.Config
 {
@@ -59,7 +60,7 @@ namespace MultiAdmin.Config
 
 		public bool Contains(string key)
 		{
-			return rawData != null && rawData.Any(entry => entry.ToLower().StartsWith(key.ToLower() + ":"));
+			return rawData != null && rawData.Any(entry => entry.StartsWith($"{key}:", StringComparison.CurrentCultureIgnoreCase));
 		}
 
 		private static string CleanValue(string value)

@@ -6,7 +6,7 @@ namespace MultiAdmin.Features
 	[Feature]
 	internal class MemoryChecker : Feature, IEventTick, IEventRoundEnd
 	{
-		private const long BytesInMegabyte = 1048576L;
+		private const decimal BytesInMegabyte = 1048576;
 
 		private const int OutputPrecision = 2;
 
@@ -46,24 +46,24 @@ namespace MultiAdmin.Features
 
 		public decimal LowMb
 		{
-			get => LowBytes / new decimal(BytesInMegabyte);
-			set => LowBytes = (long)(value * BytesInMegabyte);
+			get => decimal.Divide(LowBytes, BytesInMegabyte);
+			set => LowBytes = (long)decimal.Multiply(value, BytesInMegabyte);
 		}
 
 		public decimal LowMbSoft
 		{
-			get => LowBytesSoft / new decimal(BytesInMegabyte);
-			set => LowBytesSoft = (long)(value * BytesInMegabyte);
+			get => decimal.Divide(LowBytesSoft, BytesInMegabyte);
+			set => LowBytesSoft = (long)decimal.Multiply(value, BytesInMegabyte);
 		}
 
 		public decimal MaxMb
 		{
-			get => MaxBytes / new decimal(BytesInMegabyte);
-			set => MaxBytes = (long)(value * BytesInMegabyte);
+			get => decimal.Divide(MaxBytes, BytesInMegabyte);
+			set => MaxBytes = (long)decimal.Multiply(value, BytesInMegabyte);
 		}
 
-		public decimal MemoryUsedMb => new decimal(MemoryUsedBytes) / new decimal(BytesInMegabyte);
-		public decimal MemoryLeftMb => new decimal(MemoryLeftBytes) / new decimal(BytesInMegabyte);
+		public decimal MemoryUsedMb => decimal.Divide(MemoryUsedBytes, BytesInMegabyte);
+		public decimal MemoryLeftMb => decimal.Divide(MemoryLeftBytes, BytesInMegabyte);
 
 		#endregion
 
@@ -80,8 +80,6 @@ namespace MultiAdmin.Features
 
 		public void OnTick()
 		{
-			float.MaxValue
-
 			if (LowBytes < 0 && LowBytesSoft < 0 || MaxBytes < 0) return;
 
 			if (tickCount < MaxTicks && LowBytes >= 0 && MemoryLeftBytes <= LowBytes)
@@ -144,9 +142,9 @@ namespace MultiAdmin.Features
 
 		public override void OnConfigReload()
 		{
-			LowMb = new decimal(Server.ServerConfig.RestartLowMemory.Value);
-			LowMbSoft = new decimal(Server.ServerConfig.RestartLowMemoryRoundEnd.Value);
-			MaxMb = new decimal(Server.ServerConfig.MaxMemory.Value);
+			LowMb = Server.ServerConfig.RestartLowMemory.Value;
+			LowMbSoft = Server.ServerConfig.RestartLowMemoryRoundEnd.Value;
+			MaxMb = Server.ServerConfig.MaxMemory.Value;
 		}
 	}
 }

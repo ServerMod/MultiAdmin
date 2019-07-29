@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using MultiAdmin.ConsoleTools;
 
-namespace MultiAdmin
+namespace MultiAdmin.Utility
 {
 	public static class Utils
 	{
@@ -55,6 +55,11 @@ namespace MultiAdmin
 			return !string.IsNullOrWhiteSpace(path) ? Path.GetFullPath(path) : null;
 		}
 
+		public static bool IsCollectionNullOrEmpty(ICollection<object> collection)
+		{
+			return collection?.IsEmpty() ?? true;
+		}
+
 		private const char WildCard = '*';
 
 		private static bool StringMatches(string input, string pattern)
@@ -65,16 +70,16 @@ namespace MultiAdmin
 			if (pattern == null)
 				return false;
 
-			if (pattern.Any() && pattern == new string(WildCard, pattern.Length))
+			if (!pattern.IsEmpty() && pattern == new string(WildCard, pattern.Length))
 				return true;
 
 			if (input == null)
 				return false;
 
-			if (!input.Any() && !pattern.Any())
+			if (input.IsEmpty() && pattern.IsEmpty())
 				return true;
 
-			if (!input.Any() || !pattern.Any())
+			if (input.IsEmpty() || pattern.IsEmpty())
 				return false;
 
 			string[] wildCardSections = pattern.Split(WildCard);
@@ -82,7 +87,7 @@ namespace MultiAdmin
 			int matchIndex = 0;
 			foreach (string wildCardSection in wildCardSections)
 			{
-				if (!wildCardSection.Any())
+				if (wildCardSection.IsEmpty())
 					continue;
 
 				if (matchIndex < 0 || matchIndex >= pattern.Length)
@@ -107,9 +112,9 @@ namespace MultiAdmin
 				}
 			}
 
-			// new ColoredMessage($"Debug: Done matching. Matches = {matchIndex == input.Length || !wildCardSections[wildCardSections.Length - 1].Any()}.").WriteLine();
+			// new ColoredMessage($"Debug: Done matching. Matches = {matchIndex == input.Length || wildCardSections[wildCardSections.Length - 1].IsEmpty()}.").WriteLine();
 
-			return matchIndex == input.Length || !wildCardSections[wildCardSections.Length - 1].Any();
+			return matchIndex == input.Length || wildCardSections[wildCardSections.Length - 1].IsEmpty();
 		}
 
 		private static bool FileNamesContains(IEnumerable<string> namePatterns, string input)
@@ -117,14 +122,9 @@ namespace MultiAdmin
 			return namePatterns != null && namePatterns.Any(namePattern => StringMatches(input, namePattern));
 		}
 
-		private static bool IsArrayNullOrEmpty(string[] array)
-		{
-			return array == null || !array.Any();
-		}
-
 		private static bool PassesWhitelistAndBlacklist(string toCheck, string[] whitelist = null, string[] blacklist = null)
 		{
-			return (IsArrayNullOrEmpty(whitelist) || FileNamesContains(whitelist, toCheck)) && (IsArrayNullOrEmpty(blacklist) || !FileNamesContains(blacklist, toCheck));
+			return (IsCollectionNullOrEmpty(whitelist) || FileNamesContains(whitelist, toCheck)) && (IsCollectionNullOrEmpty(blacklist) || !FileNamesContains(blacklist, toCheck));
 		}
 
 		public static void CopyAll(DirectoryInfo source, DirectoryInfo target, string[] fileWhitelist = null, string[] fileBlacklist = null)

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using MultiAdmin.Config;
 using MultiAdmin.ConsoleTools;
+using MultiAdmin.Utility;
 
 namespace MultiAdmin.ServerIO
 {
@@ -60,7 +61,7 @@ namespace MultiAdmin.ServerIO
 				server.Write($">>> {message}", ConsoleColor.DarkMagenta);
 
 				string[] messageSplit = message.Split(Separator, StringSplitOptions.RemoveEmptyEntries);
-				if (!messageSplit.Any()) continue;
+				if (messageSplit.IsEmpty()) continue;
 
 				bool callServer = true;
 				server.commands.TryGetValue(messageSplit[0].ToLower().Trim(), out ICommand command);
@@ -97,7 +98,7 @@ namespace MultiAdmin.ServerIO
 				switch (key.Key)
 				{
 					case ConsoleKey.Backspace:
-						if (messageCursor > 0 && message.Any())
+						if (messageCursor > 0 && !message.IsEmpty())
 							message = message.Remove(--messageCursor, 1);
 
 						break;

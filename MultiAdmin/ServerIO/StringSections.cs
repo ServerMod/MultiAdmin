@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using System.Linq;
 using MultiAdmin.ConsoleTools;
+using MultiAdmin.Utility;
 
 namespace MultiAdmin.ServerIO
 {
@@ -88,7 +88,7 @@ namespace MultiAdmin.ServerIO
 			}
 
 			// If there's still text remaining in a section that hasn't been processed, add it as a section
-			if (curSecString.Any())
+			if (!curSecString.IsEmpty())
 			{
 				// Only decide for the left indicator, as this last section will always be the rightmost section
 				ColoredMessage leftIndicatorSection = sections.Count > 0 ? leftIndicator : null;

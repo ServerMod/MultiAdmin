@@ -9,6 +9,7 @@ using MultiAdmin.Config;
 using MultiAdmin.ConsoleTools;
 using MultiAdmin.Features.Attributes;
 using MultiAdmin.ServerIO;
+using MultiAdmin.Utility;
 
 namespace MultiAdmin
 {
@@ -392,7 +393,7 @@ namespace MultiAdmin
 					GameProcess.Dispose();
 					GameProcess = null;
 
-					inputReaderThread.Abort();
+					inputReaderThread.Join();
 					outputHandler.Dispose();
 
 					DeleteSession();
@@ -479,8 +480,8 @@ namespace MultiAdmin
 			{
 				foreach (Type type in assembly.GetTypes())
 				{
-					object[] attributes = type.GetCustomAttributes(attribute, false);
-					if (attributes.Any()) yield return type;
+					object[] attributes = type.GetCustomAttributes(attribute, true);
+					if (!attributes.IsEmpty()) yield return type;
 				}
 			}
 		}
@@ -666,7 +667,7 @@ namespace MultiAdmin
 
 			string[] parts = serverModVersion.Split('.');
 
-			if (!parts.Any())
+			if (parts.IsEmpty())
 				return false;
 
 			int.TryParse(parts[0], out int verMajor);
