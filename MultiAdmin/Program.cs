@@ -373,34 +373,6 @@ namespace MultiAdmin
 			return true;
 		}
 
-		private static int CompareVersionStrings(string firstVersion, string secondVersion)
-		{
-			if (firstVersion == null || secondVersion == null)
-				return -1;
-
-			string[] firstVersionNums = firstVersion.Split('.');
-			string[] secondVersionNums = secondVersion.Split('.');
-
-			int returnValue = 0;
-
-			for (int i = 0; i < Math.Min(firstVersionNums.Length, secondVersionNums.Length); i++)
-			{
-				if (!int.TryParse(firstVersionNums[i], out int first) || !int.TryParse(secondVersionNums[i], out int second))
-					continue;
-
-				if (first > second)
-				{
-					returnValue = 1;
-				}
-				else if (first < second)
-				{
-					return -1;
-				}
-			}
-
-			return returnValue;
-		}
-
 		public static void CheckMonoVersion()
 		{
 			try
@@ -411,7 +383,7 @@ namespace MultiAdmin
 				if (string.IsNullOrEmpty(monoVersion))
 					return;
 
-				int versionDifference = CompareVersionStrings(monoVersion, RecommendedMonoVersion);
+				int versionDifference = Utils.CompareVersionStrings(monoVersion, RecommendedMonoVersion);
 
 				if (versionDifference >= 0 && (versionDifference != 0 || monoVersion.Length >= RecommendedMonoVersion.Length))
 					return;

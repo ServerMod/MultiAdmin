@@ -154,5 +154,33 @@ namespace MultiAdmin.Utility
 		{
 			CopyAll(new DirectoryInfo(source), new DirectoryInfo(target), fileWhitelist, fileBlacklist);
 		}
+
+		public static int CompareVersionStrings(string firstVersion, string secondVersion)
+		{
+			if (firstVersion == null || secondVersion == null)
+				return -1;
+
+			string[] firstVersionNums = firstVersion.Split('.');
+			string[] secondVersionNums = secondVersion.Split('.');
+			int minVersionLength = Math.Min(firstVersionNums.Length, secondVersionNums.Length);
+
+			for (int i = 0; i < minVersionLength; i++)
+			{
+				if (!int.TryParse(firstVersionNums[i], out int first) || !int.TryParse(secondVersionNums[i], out int second))
+					continue;
+
+				if (first > second)
+				{
+					return 1;
+				}
+
+				if (first < second)
+				{
+					return -1;
+				}
+			}
+
+			return 0;
+		}
 	}
 }
