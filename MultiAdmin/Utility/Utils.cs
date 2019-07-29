@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MultiAdmin.ConsoleTools;
@@ -57,7 +56,7 @@ namespace MultiAdmin.Utility
 
 		private const char WildCard = '*';
 
-		private static bool StringMatches(string input, string pattern)
+		public static bool StringMatches(string input, string pattern)
 		{
 			if (input == null && pattern == null)
 				return true;
@@ -82,44 +81,59 @@ namespace MultiAdmin.Utility
 			int matchIndex = 0;
 			foreach (string wildCardSection in wildCardSections)
 			{
+				// If there's a wildcard with nothing on the other side
 				if (wildCardSection.IsEmpty())
+				{
 					continue;
+				}
 
-				if (matchIndex < 0 || matchIndex >= pattern.Length)
+				if (matchIndex < 0 || matchIndex >= input.Length)
 					return false;
 
-				try
+				new ColoredMessage($"Debug: Matching \"{wildCardSection}\" with \"{input.Substring(matchIndex)}\"...").WriteLine();
+
+				if (matchIndex <= 0 && pattern[0] != WildCard)
 				{
-					// new ColoredMessage($"Debug: Matching \"{wildCardSection}\" with \"{input.Substring(matchIndex)}\"...").WriteLine();
-
-					matchIndex = input.IndexOf(wildCardSection, matchIndex);
-
-					if (matchIndex < 0)
+					if (!input.Equals(wildCardSection, matchIndex, wildCardSection.Length))
 						return false;
 
 					matchIndex += wildCardSection.Length;
 
-					// new ColoredMessage($"Debug: Match found! Match end index at {matchIndex}.").WriteLine();
+					new ColoredMessage($"Debug: Match found! Match end index at {matchIndex}.").WriteLine();
 				}
-				catch
+				else
 				{
-					return false;
+					try
+					{
+						matchIndex = input.IndexOf(wildCardSection, matchIndex);
+
+						if (matchIndex < 0)
+							return false;
+
+						matchIndex += wildCardSection.Length;
+
+						new ColoredMessage($"Debug: Match found! Match end index at {matchIndex}.").WriteLine();
+					}
+					catch
+					{
+						return false;
+					}
 				}
 			}
 
-			// new ColoredMessage($"Debug: Done matching. Matches = {matchIndex == input.Length || wildCardSections[wildCardSections.Length - 1].IsEmpty()}.").WriteLine();
+			new ColoredMessage($"Debug: Done matching. Matches = {matchIndex == input.Length || wildCardSections[wildCardSections.Length - 1].IsEmpty()}.").WriteLine();
 
 			return matchIndex == input.Length || wildCardSections[wildCardSections.Length - 1].IsEmpty();
 		}
 
-		private static bool FileNamesContains(IEnumerable<string> namePatterns, string input)
+		public static bool InputMatchesAnyPattern(string input, params string[] namePatterns)
 		{
-			return namePatterns != null && namePatterns.Any(namePattern => StringMatches(input, namePattern));
+			return !namePatterns.IsNullOrEmpty() && namePatterns.Any(namePattern => StringMatches(input, namePattern));
 		}
 
 		private static bool PassesWhitelistAndBlacklist(string toCheck, string[] whitelist = null, string[] blacklist = null)
 		{
-			return (whitelist.IsNullOrEmpty() || FileNamesContains(whitelist, toCheck)) && (blacklist.IsNullOrEmpty() || !FileNamesContains(blacklist, toCheck));
+			return (whitelist.IsNullOrEmpty() || InputMatchesAnyPattern(toCheck, whitelist)) && (blacklist.IsNullOrEmpty() || !InputMatchesAnyPattern(toCheck, blacklist));
 		}
 
 		public static void CopyAll(DirectoryInfo source, DirectoryInfo target, string[] fileWhitelist = null, string[] fileBlacklist = null)

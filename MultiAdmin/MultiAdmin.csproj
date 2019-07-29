@@ -112,6 +112,7 @@
     <Compile Include="Server.cs" />
     <Compile Include="ServerIO\ShiftingList.cs" />
     <Compile Include="Utility\EmptyExtensions.cs" />
+    <Compile Include="Utility\StringExtensions.cs" />
     <Compile Include="Utility\Utils.cs" />
   </ItemGroup>
   <ItemGroup>

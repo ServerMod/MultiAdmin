@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServerIO\StringSectionsTests.cs" />
+    <Compile Include="Utility\StringExtensionsTests.cs" />
     <Compile Include="Utility\UtilsTests.cs" />
   </ItemGroup>
   <ItemGroup>
