@@ -43,7 +43,7 @@ namespace MultiAdmin.Features
 
 			string dir = string.Join(" ", args);
 
-			List<string> lines = new List<string> {"# MultiAdmin", string.Empty, "## Features"};
+			List<string> lines = new List<string> {"# MultiAdmin", string.Empty, "## Features", string.Empty};
 
 			foreach (Feature feature in Server.features)
 			{

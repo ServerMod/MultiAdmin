@@ -74,7 +74,7 @@ namespace MultiAdmin.ServerIO
 			}
 		}
 
-		private void ProcessFile(Server server, string file)
+		public void ProcessFile(Server server, string file)
 		{
 			string stream = string.Empty;
 			string command = "open";

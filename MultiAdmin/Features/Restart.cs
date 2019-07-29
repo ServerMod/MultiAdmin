@@ -11,7 +11,7 @@ namespace MultiAdmin.Features
 
 		public string GetCommand()
 		{
-			return "restart";
+			return "RESTART";
 		}
 
 		public string GetCommandDescription()

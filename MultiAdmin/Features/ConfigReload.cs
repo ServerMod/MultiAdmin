@@ -48,7 +48,7 @@ namespace MultiAdmin.Features
 
 		public override string GetFeatureName()
 		{
-			return "Config reload";
+			return "Config Reload";
 		}
 
 		public override void Init()

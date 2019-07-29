@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using MultiAdmin.Config.ConfigHandler;
 using MultiAdmin.ConsoleTools;
+using MultiAdmin.ServerIO;
 using MultiAdmin.Utility;
 
 namespace MultiAdmin.Config
@@ -34,7 +35,7 @@ namespace MultiAdmin.Config
 				"MultiAdmin Debug Logging", "Enables MultiAdmin debug logging, this logs to a separate file than any other logs");
 
 		public ConfigEntry<string[]> DebugLogBlacklist { get; } =
-			new ConfigEntry<string[]>("multiadmin_debug_log_blacklist", new string[] {"ProcessFile"},
+			new ConfigEntry<string[]>("multiadmin_debug_log_blacklist", new string[] {nameof(OutputHandler.ProcessFile), nameof(Utils.StringMatches)},
 				"MultiAdmin Debug Logging Blacklist", "Which tags to block for MultiAdmin debug logging");
 
 		public ConfigEntry<string[]> DebugLogWhitelist { get; } =

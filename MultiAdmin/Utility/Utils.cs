@@ -90,7 +90,7 @@ namespace MultiAdmin.Utility
 				if (matchIndex < 0 || matchIndex >= input.Length)
 					return false;
 
-				new ColoredMessage($"Debug: Matching \"{wildCardSection}\" with \"{input.Substring(matchIndex)}\"...").WriteLine();
+				Program.LogDebug(nameof(StringMatches), $"Matching \"{wildCardSection}\" with \"{input.Substring(matchIndex)}\"...");;
 
 				if (matchIndex <= 0 && pattern[0] != WildCard)
 				{
@@ -99,7 +99,7 @@ namespace MultiAdmin.Utility
 
 					matchIndex += wildCardSection.Length;
 
-					new ColoredMessage($"Debug: Match found! Match end index at {matchIndex}.").WriteLine();
+					Program.LogDebug(nameof(StringMatches), $"Exact match found! Match end index at {matchIndex}.");
 				}
 				else
 				{
@@ -112,7 +112,7 @@ namespace MultiAdmin.Utility
 
 						matchIndex += wildCardSection.Length;
 
-						new ColoredMessage($"Debug: Match found! Match end index at {matchIndex}.").WriteLine();
+						Program.LogDebug(nameof(StringMatches), $"Match found! Match end index at {matchIndex}.");
 					}
 					catch
 					{
@@ -121,7 +121,7 @@ namespace MultiAdmin.Utility
 				}
 			}
 
-			new ColoredMessage($"Debug: Done matching. Matches = {matchIndex == input.Length || wildCardSections[wildCardSections.Length - 1].IsEmpty()}.").WriteLine();
+			Program.LogDebug(nameof(StringMatches), $"Done matching. Matches = {matchIndex == input.Length || wildCardSections[wildCardSections.Length - 1].IsEmpty()}.");
 
 			return matchIndex == input.Length || wildCardSections[wildCardSections.Length - 1].IsEmpty();
 		}
