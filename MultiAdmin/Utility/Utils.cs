@@ -55,11 +55,6 @@ namespace MultiAdmin.Utility
 			return !string.IsNullOrWhiteSpace(path) ? Path.GetFullPath(path) : null;
 		}
 
-		public static bool IsCollectionNullOrEmpty(ICollection<object> collection)
-		{
-			return collection?.IsEmpty() ?? true;
-		}
-
 		private const char WildCard = '*';
 
 		private static bool StringMatches(string input, string pattern)
@@ -124,7 +119,7 @@ namespace MultiAdmin.Utility
 
 		private static bool PassesWhitelistAndBlacklist(string toCheck, string[] whitelist = null, string[] blacklist = null)
 		{
-			return (IsCollectionNullOrEmpty(whitelist) || FileNamesContains(whitelist, toCheck)) && (IsCollectionNullOrEmpty(blacklist) || !FileNamesContains(blacklist, toCheck));
+			return (whitelist.IsNullOrEmpty() || FileNamesContains(whitelist, toCheck)) && (blacklist.IsNullOrEmpty() || !FileNamesContains(blacklist, toCheck));
 		}
 
 		public static void CopyAll(DirectoryInfo source, DirectoryInfo target, string[] fileWhitelist = null, string[] fileBlacklist = null)

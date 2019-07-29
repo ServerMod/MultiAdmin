@@ -27,7 +27,7 @@ namespace MultiAdmin.Features
 
 		public void OnCall(string[] args)
 		{
-			if (args.IsEmpty() || !args[0].ToLower().Equals("reload")) return;
+			if (args.IsNullOrEmpty() || !args[0].ToLower().Equals("reload")) return;
 
 			Server.Write("Reloading configs...");
 

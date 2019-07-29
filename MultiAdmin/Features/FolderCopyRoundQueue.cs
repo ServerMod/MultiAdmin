@@ -17,7 +17,7 @@ namespace MultiAdmin.Features
 		{
 		}
 
-		public bool HasValidQueue => queue != null && !queue.IsEmpty();
+		public bool HasValidQueue => !queue.IsNullOrEmpty();
 
 		public void OnRoundEnd()
 		{

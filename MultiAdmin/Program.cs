@@ -244,8 +244,8 @@ namespace MultiAdmin
 
 		public static string GetParamFromArgs(string[] keys = null, string[] aliases = null)
 		{
-			bool hasKeys = !Utils.IsCollectionNullOrEmpty(keys);
-			bool hasAliases = !Utils.IsCollectionNullOrEmpty(aliases);
+			bool hasKeys = !keys.IsNullOrEmpty();
+			bool hasAliases = !aliases.IsNullOrEmpty();
 
 			if (!hasKeys && !hasAliases) return null;
 
@@ -285,7 +285,7 @@ namespace MultiAdmin
 
 				if (string.IsNullOrEmpty(lowArg)) continue;
 
-				if (!Utils.IsCollectionNullOrEmpty(keys))
+				if (!keys.IsNullOrEmpty())
 				{
 					if (keys.Any(key => !string.IsNullOrEmpty(key) && lowArg == $"--{key.ToLower()}"))
 					{
@@ -293,7 +293,7 @@ namespace MultiAdmin
 					}
 				}
 
-				if (!Utils.IsCollectionNullOrEmpty(aliases))
+				if (!aliases.IsNullOrEmpty())
 				{
 					if (aliases.Any(alias => !string.IsNullOrEmpty(alias) && lowArg == $"-{alias.ToLower()}"))
 					{
@@ -307,7 +307,7 @@ namespace MultiAdmin
 
 		public static bool GetFlagFromArgs(string[] keys = null, string[] aliases = null)
 		{
-			if (Utils.IsCollectionNullOrEmpty(keys) && Utils.IsCollectionNullOrEmpty(aliases)) return false;
+			if (keys.IsNullOrEmpty() && aliases.IsNullOrEmpty()) return false;
 
 			return bool.TryParse(GetParamFromArgs(keys, aliases), out bool result) ? result : ArgsContainsParam(keys, aliases);
 		}
@@ -385,14 +385,14 @@ namespace MultiAdmin
 
 			for (int i = 0; i < Math.Min(firstVersionNums.Length, secondVersionNums.Length); i++)
 			{
-				if (!int.TryParse(firstVersionNums[i], out int current) || !int.TryParse(secondVersionNums[i], out int recommended))
+				if (!int.TryParse(firstVersionNums[i], out int first) || !int.TryParse(secondVersionNums[i], out int second))
 					continue;
 
-				if (current > recommended)
+				if (first > second)
 				{
 					returnValue = 1;
 				}
-				else if (current < recommended)
+				else if (first < second)
 				{
 					return -1;
 				}
