@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MultiAdmin.ConsoleTools
 {
-	public class ColoredConsole
+	public static class ColoredConsole
 	{
 		public static readonly object WriteLock = new object();
 
@@ -92,6 +92,58 @@ namespace MultiAdmin.ConsoleTools
 			this.text = text;
 			this.textColor = textColor;
 			this.backgroundColor = backgroundColor;
+		}
+
+		public bool Equals(ColoredMessage other)
+		{
+			return string.Equals(text, other.text) && textColor == other.textColor && backgroundColor == other.backgroundColor;
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (ReferenceEquals(null, obj))
+			{
+				return false;
+			}
+
+			if (ReferenceEquals(this, obj))
+			{
+				return true;
+			}
+
+			if (obj.GetType() != GetType())
+			{
+				return false;
+			}
+
+			return Equals((ColoredMessage)obj);
+		}
+
+		public override int GetHashCode()
+		{
+			unchecked
+			{
+				int hashCode = text != null ? text.GetHashCode() : 0;
+				hashCode = (hashCode * 397) ^ textColor.GetHashCode();
+				hashCode = (hashCode * 397) ^ backgroundColor.GetHashCode();
+				return hashCode;
+			}
+		}
+
+		public static bool operator ==(ColoredMessage firstMessage, ColoredMessage secondMessage)
+		{
+			if (ReferenceEquals(firstMessage, secondMessage))
+				return true;
+
+			if (ReferenceEquals(firstMessage, null) || ReferenceEquals(secondMessage, null))
+				return false;
+
+			return firstMessage.Equals(secondMessage);
+		}
+
+		public static bool operator !=(ColoredMessage firstMessage, ColoredMessage secondMessage)
+		{
+			return !(firstMessage == secondMessage);
 		}
 
 		public override string ToString()
