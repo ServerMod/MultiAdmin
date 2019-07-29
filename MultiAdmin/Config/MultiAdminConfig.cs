@@ -111,7 +111,15 @@ namespace MultiAdmin.Config
 
 		public ConfigEntry<bool> SafeServerShutdown { get; } =
 			new ConfigEntry<bool>("safe_server_shutdown", true,
-				"Safe Server Shutdown", "When MultiAdmin closes, if this is true, MultiAdmin will attempt to safely shutdown all the servers");
+				"Safe Server Shutdown", "When MultiAdmin closes, if this is true, MultiAdmin will attempt to safely shutdown all servers");
+
+		public ConfigEntry<int> SafeShutdownCheckDelay { get; } =
+			new ConfigEntry<int>("safe_shutdown_check_delay", 100,
+				"Safe Shutdown Check Delay", "The time in milliseconds between checking if a server is still running when safely shutting down");
+
+		public ConfigEntry<int> SafeShutdownTimeout { get; } =
+			new ConfigEntry<int>("safe_shutdown_timeout", 10000,
+				"Safe Shutdown Timeout", "The time in milliseconds before MultiAdmin gives up on safely shutting down a server");
 
 		public ConfigEntry<double> ServerRestartTimeout { get; } =
 			new ConfigEntry<double>("server_restart_timeout", 10,

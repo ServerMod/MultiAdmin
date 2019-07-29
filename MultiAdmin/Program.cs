@@ -132,9 +132,19 @@ namespace MultiAdmin
 							server.StopServer();
 
 							// Wait for server to exit
+							int timeToWait = Math.Max(MultiAdminConfig.GlobalConfig.SafeShutdownCheckDelay.Value, 0);
+							int timeWaited = 0;
+
 							while (server.IsGameProcessRunning)
 							{
-								Thread.Sleep(100);
+								Thread.Sleep(timeToWait);
+								timeWaited += timeToWait;
+
+								if (timeWaited >= MultiAdminConfig.GlobalConfig.SafeShutdownTimeout.Value)
+								{
+									Write($"Failed to server with ID \"{server.serverId}\" within {timeWaited} ms, giving up...", ConsoleColor.Red);
+									break;
+								}
 							}
 						}
 						catch (Exception ex)

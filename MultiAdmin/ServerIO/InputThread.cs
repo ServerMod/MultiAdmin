@@ -19,8 +19,11 @@ namespace MultiAdmin.ServerIO
 		public static readonly ColoredMessage RightSideIndicator = new ColoredMessage("...", ConsoleColor.Yellow);
 
 		public static int InputPrefixLength => InputPrefix?.Length ?? 0;
+
 		public static int LeftSideIndicatorLength => LeftSideIndicator?.Length ?? 0;
 		public static int RightSideIndicatorLength => RightSideIndicator?.Length ?? 0;
+
+		public static int TotalIndicatorLength => LeftSideIndicatorLength + RightSideIndicatorLength;
 
 		public static int SectionBufferWidth
 		{
@@ -148,11 +151,11 @@ namespace MultiAdmin.ServerIO
 						break;
 
 					case ConsoleKey.PageUp:
-						messageCursor -= SectionBufferWidth - (LeftSideIndicatorLength + RightSideIndicatorLength);
+						messageCursor -= SectionBufferWidth - TotalIndicatorLength;
 						break;
 
 					case ConsoleKey.PageDown:
-						messageCursor += SectionBufferWidth - (LeftSideIndicatorLength + RightSideIndicatorLength);
+						messageCursor += SectionBufferWidth - TotalIndicatorLength;
 						break;
 
 					default:
