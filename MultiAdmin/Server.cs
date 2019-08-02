@@ -393,6 +393,7 @@ namespace MultiAdmin
 					GameProcess.Dispose();
 					GameProcess = null;
 
+					inputReaderThread.Interrupt();
 					inputReaderThread.Join();
 					outputHandler.Dispose();
 

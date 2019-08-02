@@ -47,37 +47,44 @@ namespace MultiAdmin.ServerIO
 
 		public static void Write(Server server)
 		{
-			ShiftingList prevMessages = new ShiftingList(25);
-
-			while (server.IsRunning && !server.IsStopping)
+			try
 			{
-				if (Program.Headless)
+				ShiftingList prevMessages = new ShiftingList(25);
+
+				while (server.IsRunning && !server.IsStopping)
 				{
-					Thread.Sleep(5000);
-					continue;
+					if (Program.Headless)
+					{
+						Thread.Sleep(5000);
+						continue;
+					}
+
+					string message = server.ServerConfig.UseNewInputSystem.Value ? GetInputLineNew(server, prevMessages) : Console.ReadLine();
+
+					if (string.IsNullOrEmpty(message)) continue;
+
+					server.Write($">>> {message}", ConsoleColor.DarkMagenta);
+
+					string[] messageSplit = message.Split(Separator, StringSplitOptions.RemoveEmptyEntries);
+					if (messageSplit.IsEmpty()) continue;
+
+					bool callServer = true;
+					server.commands.TryGetValue(messageSplit[0].ToLower().Trim(), out ICommand command);
+					if (command != null)
+					{
+						command.OnCall(messageSplit.Skip(1).Take(messageSplit.Length - 1).ToArray());
+						callServer = command.PassToGame();
+					}
+
+					if (callServer) server.SendMessage(message);
 				}
 
-				string message = server.ServerConfig.UseNewInputSystem.Value ? GetInputLineNew(server, prevMessages) : Console.ReadLine();
-
-				if (string.IsNullOrEmpty(message)) continue;
-
-				server.Write($">>> {message}", ConsoleColor.DarkMagenta);
-
-				string[] messageSplit = message.Split(Separator, StringSplitOptions.RemoveEmptyEntries);
-				if (messageSplit.IsEmpty()) continue;
-
-				bool callServer = true;
-				server.commands.TryGetValue(messageSplit[0].ToLower().Trim(), out ICommand command);
-				if (command != null)
-				{
-					command.OnCall(messageSplit.Skip(1).Take(messageSplit.Length - 1).ToArray());
-					callServer = command.PassToGame();
-				}
-
-				if (callServer) server.SendMessage(message);
+				ResetInputParams();
 			}
-
-			ResetInputParams();
+			catch (ThreadInterruptedException)
+			{
+				// Exit the Thread immediately if interrupted
+			}
 		}
 
 		public static string GetInputLineNew(Server server, ShiftingList prevMessages)
