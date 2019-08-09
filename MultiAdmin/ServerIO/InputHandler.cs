@@ -8,7 +8,7 @@ using MultiAdmin.Utility;
 
 namespace MultiAdmin.ServerIO
 {
-	public static class InputThread
+	public static class InputHandler
 	{
 		private static readonly char[] Separator = {' '};
 
@@ -45,7 +45,7 @@ namespace MultiAdmin.ServerIO
 		public static ColoredMessage[] CurrentInput { get; private set; } = {InputPrefix};
 		public static int CurrentCursor { get; private set; }
 
-		public static void Write(Server server)
+		public static void Write(Server server, CancellationToken cancellationToken = default)
 		{
 			try
 			{
@@ -53,6 +53,8 @@ namespace MultiAdmin.ServerIO
 
 				while (server.IsRunning && !server.IsStopping)
 				{
+					cancellationToken.ThrowIfCancellationRequested();
+
 					if (Program.Headless)
 					{
 						Thread.Sleep(5000);

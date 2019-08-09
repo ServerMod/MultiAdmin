@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using MultiAdmin.Config;
 using MultiAdmin.ConsoleTools;
 using MultiAdmin.Features.Attributes;
@@ -349,9 +350,12 @@ namespace MultiAdmin
 							eventPreStart.OnServerPreStart();
 
 					// Start the input reader
-					Thread inputReaderThread = new Thread(() => InputThread.Write(this));
+					CancellationTokenSource inputHandlerCancellationTokenSource = new CancellationTokenSource();
+					CancellationToken inputHandlerCancellationToken = inputHandlerCancellationTokenSource.Token;
+					Task inputHandlerTask = new Task(() => InputHandler.Write(this, inputHandlerCancellationToken), inputHandlerCancellationToken);
+
 					if (!Program.Headless)
-						inputReaderThread.Start();
+						inputHandlerTask.Start();
 
 					// Start the output reader
 					OutputHandler outputHandler = new OutputHandler(this);
@@ -393,8 +397,22 @@ namespace MultiAdmin
 					GameProcess.Dispose();
 					GameProcess = null;
 
-					inputReaderThread.Interrupt();
-					inputReaderThread.Join();
+					// Try to stop the input reader
+					try
+					{
+						inputHandlerCancellationTokenSource.Cancel();
+						inputHandlerTask.Wait(inputHandlerCancellationToken);
+					}
+					catch (OperationCanceledException e)
+					{
+						Program.LogDebugException(nameof(StartServer), e);
+					}
+					finally
+					{
+						inputHandlerTask.Dispose();
+						inputHandlerCancellationTokenSource.Dispose();
+					}
+
 					outputHandler.Dispose();
 
 					DeleteSession();
@@ -613,7 +631,7 @@ namespace MultiAdmin
 				timeStampedMessage.WriteLine(ServerConfig.UseNewInputSystem.Value);
 
 				if (ServerConfig.UseNewInputSystem.Value)
-					InputThread.WriteInputAndSetCursor();
+					InputHandler.WriteInputAndSetCursor();
 			}
 		}
 

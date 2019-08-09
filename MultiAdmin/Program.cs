@@ -207,7 +207,7 @@ namespace MultiAdmin
 					if (autoStartServers.IsEmpty())
 					{
 						Write("No servers are set to automatically start, please enter a Server ID to start:");
-						InputThread.InputPrefix?.Write();
+						InputHandler.InputPrefix?.Write();
 
 						server = new Server(Console.ReadLine(), port: portArg);
 

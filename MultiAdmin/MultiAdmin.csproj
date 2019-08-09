@@ -104,7 +104,7 @@
     <Compile Include="Features\RestartRoundCounter.cs" />
     <Compile Include="Features\StopNextRound.cs" />
     <Compile Include="Features\TitleBar.cs" />
-    <Compile Include="ServerIO\InputThread.cs" />
+    <Compile Include="ServerIO\InputHandler.cs" />
     <Compile Include="EventInterfaces.cs" />
     <Compile Include="Config\MultiAdminConfig.cs" />
     <Compile Include="ServerIO\OutputHandler.cs" />
