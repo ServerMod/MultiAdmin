@@ -409,8 +409,23 @@ namespace MultiAdmin
 					}
 					finally
 					{
-						inputHandlerTask.Dispose();
-						inputHandlerCancellationTokenSource.Dispose();
+						try
+						{
+							inputHandlerTask.Dispose();
+						}
+						catch (Exception e)
+						{
+							Program.LogDebugException(nameof(StartServer), e);
+						}
+
+						try
+						{
+							inputHandlerCancellationTokenSource.Dispose();
+						}
+						catch (Exception e)
+						{
+							Program.LogDebugException(nameof(StartServer), e);
+						}
 					}
 
 					outputHandler.Dispose();
