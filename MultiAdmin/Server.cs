@@ -439,10 +439,12 @@ namespace MultiAdmin
 				}
 				catch (Exception e)
 				{
-					Write("Failed - Executable file not found or config issue!", ConsoleColor.Red);
+					Write("Failed - Executable file not found or config issue! Waiting for 1 second before continuing...", ConsoleColor.Red);
 					Write(e.Message, ConsoleColor.Red);
 
-					shouldRestart = false;
+					Program.LogDebugException(nameof(StartServer), e);
+
+					Thread.Sleep(1000);
 				}
 				finally
 				{
