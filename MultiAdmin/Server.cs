@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks;
 using MultiAdmin.Config;
 using MultiAdmin.ConsoleTools;
 using MultiAdmin.Features.Attributes;
@@ -350,12 +349,10 @@ namespace MultiAdmin
 							eventPreStart.OnServerPreStart();
 
 					// Start the input reader
-					CancellationTokenSource inputHandlerCancellationTokenSource = new CancellationTokenSource();
-					CancellationToken inputHandlerCancellationToken = inputHandlerCancellationTokenSource.Token;
-					Task inputHandlerTask = new Task(() => InputHandler.Write(this, inputHandlerCancellationToken), inputHandlerCancellationToken);
+					Thread inputHandlerThread = new Thread(() => InputHandler.Write(this));
 
 					if (!Program.Headless)
-						inputHandlerTask.Start();
+						inputHandlerThread.Start();
 
 					// Start the output reader
 					OutputHandler outputHandler = new OutputHandler(this);
@@ -397,35 +394,11 @@ namespace MultiAdmin
 					GameProcess.Dispose();
 					GameProcess = null;
 
-					// Try to stop the input reader
-					try
+					// Stop the input handler if it's running
+					if (inputHandlerThread.IsAlive)
 					{
-						inputHandlerCancellationTokenSource.Cancel();
-						inputHandlerTask.Wait(inputHandlerCancellationToken);
-					}
-					catch (OperationCanceledException e)
-					{
-						Program.LogDebugException(nameof(StartServer), e);
-					}
-					finally
-					{
-						try
-						{
-							inputHandlerTask.Dispose();
-						}
-						catch (Exception e)
-						{
-							Program.LogDebugException(nameof(StartServer), e);
-						}
-
-						try
-						{
-							inputHandlerCancellationTokenSource.Dispose();
-						}
-						catch (Exception e)
-						{
-							Program.LogDebugException(nameof(StartServer), e);
-						}
+						inputHandlerThread.Abort();
+						inputHandlerThread.Join();
 					}
 
 					outputHandler.Dispose();

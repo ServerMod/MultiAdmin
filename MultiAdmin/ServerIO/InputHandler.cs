@@ -45,7 +45,7 @@ namespace MultiAdmin.ServerIO
 		public static ColoredMessage[] CurrentInput { get; private set; } = {InputPrefix};
 		public static int CurrentCursor { get; private set; }
 
-		public static void Write(Server server, CancellationToken cancellationToken = default)
+		public static void Write(Server server)
 		{
 			try
 			{
@@ -53,8 +53,6 @@ namespace MultiAdmin.ServerIO
 
 				while (server.IsRunning && !server.IsStopping)
 				{
-					cancellationToken.ThrowIfCancellationRequested();
-
 					if (Program.Headless)
 					{
 						Thread.Sleep(5000);
