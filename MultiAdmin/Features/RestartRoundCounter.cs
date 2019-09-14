@@ -1,3 +1,4 @@
+using System;
 using MultiAdmin.Features.Attributes;
 
 namespace MultiAdmin.Features
@@ -14,16 +15,23 @@ namespace MultiAdmin.Features
 
 		public void OnRoundEnd()
 		{
-			count++;
-
 			// If the config value is set to an invalid value, disable this feature
-			// Or if the count is less than the set number of rounds to go through
-			if (restartAfter <= 0 || count < restartAfter) return;
+			if (restartAfter <= 0)
+				return;
 
-			Server.Write($"{count}/{restartAfter} rounds have passed, restarting...");
+			// If the count is less than the set number of rounds to go through
+			if (++count < restartAfter)
+			{
+				if (Server.ServerConfig.RestartEveryNumRoundsCounting.Value)
+					Server.Write($"{count}/{restartAfter} rounds have passed...");
+			}
+			else
+			{
+				Server.Write($"{count}/{restartAfter} rounds have passed, restarting...");
 
-			Server.SoftRestartServer();
-			count = 0;
+				Server.SoftRestartServer();
+				count = 0;
+			}
 		}
 
 		public override void Init()

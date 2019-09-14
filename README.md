@@ -89,6 +89,7 @@ restart_low_memory_roundend | Decimal | 450 | Restart at the end of the round if
 max_players | Integer | 20 | The number of players to display as the maximum for the server (within MultiAdmin, not in-game)
 random_input_colors | Boolean | False | Randomize the new input system's colors every time a message is input
 restart_every_num_rounds | Integer | -1 | Restart the server every number of rounds
+restart_every_num_rounds_counting | Boolean | False | Whether to print the count of rounds passed after each round if the server is set to restart after a number of rounds
 safe_server_shutdown | Boolean | True | When MultiAdmin closes, if this is true, MultiAdmin will attempt to safely shutdown all servers
 safe_shutdown_check_delay | Integer | 100 | The time in milliseconds between checking if a server is still running when safely shutting down
 safe_shutdown_timeout | Integer | 10000 | The time in milliseconds before MultiAdmin gives up on safely shutting down a server

@@ -110,6 +110,10 @@ namespace MultiAdmin.Config
 			new ConfigEntry<int>("restart_every_num_rounds", -1,
 				"Restart Every Number of Rounds", "Restart the server every number of rounds");
 
+		public ConfigEntry<bool> RestartEveryNumRoundsCounting { get; } =
+			new ConfigEntry<bool>("restart_every_num_rounds_counting", false,
+				"Restart Every Number of Rounds Counting", "Whether to print the count of rounds passed after each round if the server is set to restart after a number of rounds");
+
 		public ConfigEntry<bool> SafeServerShutdown { get; } =
 			new ConfigEntry<bool>("safe_server_shutdown", true,
 				"Safe Server Shutdown", "When MultiAdmin closes, if this is true, MultiAdmin will attempt to safely shutdown all servers");
