@@ -102,6 +102,10 @@ namespace MultiAdmin.Config
 			new ConfigEntry<int>("max_players", 20,
 				"Max Players", "The number of players to display as the maximum for the server (within MultiAdmin, not in-game)");
 
+		public ConfigEntry<int> OutputReadAttempts { get; } =
+			new ConfigEntry<int>("output_read_attempts", 100,
+				"Output Read Attempts", "The number of times to attempt reading a message from the server before giving up");
+
 		public ConfigEntry<bool> RandomInputColors { get; } =
 			new ConfigEntry<bool>("random_input_colors", false,
 				"Random Input Colors", "Randomize the new input system's colors every time a message is input");

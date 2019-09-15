@@ -84,7 +84,7 @@ namespace MultiAdmin.ServerIO
 			// Lock this object to wait for this event to finish before trying to read another file
 			lock (this)
 			{
-				for (int attempts = 0; attempts < 100; attempts++)
+				for (int attempts = 0; attempts < server.ServerConfig.OutputReadAttempts.Value; attempts++)
 				{
 					try
 					{
@@ -107,12 +107,12 @@ namespace MultiAdmin.ServerIO
 					catch (UnauthorizedAccessException e)
 					{
 						Program.LogDebugException(nameof(ProcessFile), e);
-						Thread.Sleep(5);
+						Thread.Sleep(8);
 					}
 					catch (Exception e)
 					{
 						Program.LogDebugException(nameof(ProcessFile), e);
-						Thread.Sleep(2);
+						Thread.Sleep(5);
 					}
 				}
 			}
