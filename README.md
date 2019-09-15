@@ -87,6 +87,7 @@ max_memory | Decimal | 2048 | The amount of memory in megabytes for MultiAdmin t
 restart_low_memory | Decimal | 400 | Restart if the game's remaining memory falls below this value in megabytes
 restart_low_memory_roundend | Decimal | 450 | Restart at the end of the round if the game's remaining memory falls below this value in megabytes
 max_players | Integer | 20 | The number of players to display as the maximum for the server (within MultiAdmin, not in-game)
+output_read_attempts | Integer | 100 | The number of times to attempt reading a message from the server before giving up
 random_input_colors | Boolean | False | Randomize the new input system's colors every time a message is input
 restart_every_num_rounds | Integer | -1 | Restart the server every number of rounds
 restart_every_num_rounds_counting | Boolean | False | Whether to print the count of rounds passed after each round if the server is set to restart after a number of rounds
