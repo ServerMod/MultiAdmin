@@ -1,6 +1,7 @@
 using System.Collections.Generic;
-using System.Linq;
+using System.Text;
 using MultiAdmin.ConsoleTools;
+using MultiAdmin.Utility;
 
 namespace MultiAdmin.ServerIO
 {
@@ -42,7 +43,7 @@ namespace MultiAdmin.ServerIO
 			return null;
 		}
 
-		public static StringSections FromString(string fullString, int sectionLength, ColoredMessage leftIndicator, ColoredMessage rightIndicator, ColoredMessage sectionBase)
+		public static StringSections FromString(string fullString, int sectionLength, ColoredMessage leftIndicator = null, ColoredMessage rightIndicator = null, ColoredMessage sectionBase = null)
 		{
 			List<StringSection> sections = new List<StringSection>();
 
@@ -57,14 +58,14 @@ namespace MultiAdmin.ServerIO
 			int sectionStartIndex = 0;
 
 			// The text of the current section being created
-			string curSecString = string.Empty;
+			StringBuilder curSecBuilder = new StringBuilder();
 
 			for (int i = 0; i < fullString.Length; i++)
 			{
-				curSecString += fullString[i];
+				curSecBuilder.Append(fullString[i]);
 
 				// If the section is less than the smallest possible section size, skip processing
-				if (curSecString.Length < sectionLength - ((leftIndicator?.Length ?? 0) + (rightIndicator?.Length ?? 0))) continue;
+				if (curSecBuilder.Length < sectionLength - ((leftIndicator?.Length ?? 0) + (rightIndicator?.Length ?? 0))) continue;
 
 				// Decide what the left indicator text should be accounting for the leftmost section
 				ColoredMessage leftIndicatorSection = sections.Count > 0 ? leftIndicator : null;
@@ -72,30 +73,30 @@ namespace MultiAdmin.ServerIO
 				ColoredMessage rightIndicatorSection = i < fullString.Length - (1 + (rightIndicator?.Length ?? 0)) ? rightIndicator : null;
 
 				// Check the section length against the final section length
-				if (curSecString.Length >= sectionLength - ((leftIndicatorSection?.Length ?? 0) + (rightIndicatorSection?.Length ?? 0)))
+				if (curSecBuilder.Length >= sectionLength - ((leftIndicatorSection?.Length ?? 0) + (rightIndicatorSection?.Length ?? 0)))
 				{
 					// Copy the section base message and replace the text
 					ColoredMessage section = sectionBase.Clone();
-					section.text = curSecString;
+					section.text = curSecBuilder.ToString();
 
 					// Instantiate the section with the final parameters
 					sections.Add(new StringSection(section, leftIndicatorSection, rightIndicatorSection, sectionStartIndex, i));
 
 					// Reset the current section being worked on
-					curSecString = string.Empty;
+					curSecBuilder.Clear();
 					sectionStartIndex = i + 1;
 				}
 			}
 
 			// If there's still text remaining in a section that hasn't been processed, add it as a section
-			if (curSecString.Any())
+			if (!curSecBuilder.IsEmpty())
 			{
 				// Only decide for the left indicator, as this last section will always be the rightmost section
 				ColoredMessage leftIndicatorSection = sections.Count > 0 ? leftIndicator : null;
 
 				// Copy the section base message and replace the text
 				ColoredMessage section = sectionBase.Clone();
-				section.text = curSecString;
+				section.text = curSecBuilder.ToString();
 
 				// Instantiate the section with the final parameters
 				sections.Add(new StringSection(section, leftIndicatorSection, null, sectionStartIndex, fullString.Length));

@@ -1,10 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MultiAdmin.ConsoleTools;
 
-namespace MultiAdmin
+namespace MultiAdmin.Utility
 {
 	public static class Utils
 	{
@@ -52,12 +51,12 @@ namespace MultiAdmin
 
 		public static string GetFullPathSafe(string path)
 		{
-			return !string.IsNullOrEmpty(path) && !string.IsNullOrEmpty(path.Trim()) ? Path.GetFullPath(path) : null;
+			return string.IsNullOrWhiteSpace(path) ? null : Path.GetFullPath(path);
 		}
 
 		private const char WildCard = '*';
 
-		private static bool StringMatches(string input, string pattern)
+		public static bool StringMatches(string input, string pattern)
 		{
 			if (input == null && pattern == null)
 				return true;
@@ -65,16 +64,16 @@ namespace MultiAdmin
 			if (pattern == null)
 				return false;
 
-			if (pattern.Any() && pattern == new string(WildCard, pattern.Length))
+			if (!pattern.IsEmpty() && pattern == new string(WildCard, pattern.Length))
 				return true;
 
 			if (input == null)
 				return false;
 
-			if (!input.Any() && !pattern.Any())
+			if (input.IsEmpty() && pattern.IsEmpty())
 				return true;
 
-			if (!input.Any() || !pattern.Any())
+			if (input.IsEmpty() || pattern.IsEmpty())
 				return false;
 
 			string[] wildCardSections = pattern.Split(WildCard);
@@ -82,49 +81,59 @@ namespace MultiAdmin
 			int matchIndex = 0;
 			foreach (string wildCardSection in wildCardSections)
 			{
-				if (!wildCardSection.Any())
+				// If there's a wildcard with nothing on the other side
+				if (wildCardSection.IsEmpty())
+				{
 					continue;
+				}
 
-				if (matchIndex < 0 || matchIndex >= pattern.Length)
+				if (matchIndex < 0 || matchIndex >= input.Length)
 					return false;
 
-				try
+				Program.LogDebug(nameof(StringMatches), $"Matching \"{wildCardSection}\" with \"{input.Substring(matchIndex)}\"...");;
+
+				if (matchIndex <= 0 && pattern[0] != WildCard)
 				{
-					// new ColoredMessage($"Debug: Matching \"{wildCardSection}\" with \"{input.Substring(matchIndex)}\"...").WriteLine();
-
-					matchIndex = input.IndexOf(wildCardSection, matchIndex);
-
-					if (matchIndex < 0)
+					if (!input.Equals(wildCardSection, matchIndex, wildCardSection.Length))
 						return false;
 
 					matchIndex += wildCardSection.Length;
 
-					// new ColoredMessage($"Debug: Match found! Match end index at {matchIndex}.").WriteLine();
+					Program.LogDebug(nameof(StringMatches), $"Exact match found! Match end index at {matchIndex}.");
 				}
-				catch
+				else
 				{
-					return false;
+					try
+					{
+						matchIndex = input.IndexOf(wildCardSection, matchIndex);
+
+						if (matchIndex < 0)
+							return false;
+
+						matchIndex += wildCardSection.Length;
+
+						Program.LogDebug(nameof(StringMatches), $"Match found! Match end index at {matchIndex}.");
+					}
+					catch
+					{
+						return false;
+					}
 				}
 			}
 
-			// new ColoredMessage($"Debug: Done matching. Matches = {matchIndex == input.Length || !wildCardSections[wildCardSections.Length - 1].Any()}.").WriteLine();
+			Program.LogDebug(nameof(StringMatches), $"Done matching. Matches = {matchIndex == input.Length || wildCardSections[wildCardSections.Length - 1].IsEmpty()}.");
 
-			return matchIndex == input.Length || !wildCardSections[wildCardSections.Length - 1].Any();
+			return matchIndex == input.Length || wildCardSections[wildCardSections.Length - 1].IsEmpty();
 		}
 
-		private static bool FileNamesContains(IEnumerable<string> namePatterns, string input)
+		public static bool InputMatchesAnyPattern(string input, params string[] namePatterns)
 		{
-			return namePatterns != null && namePatterns.Any(namePattern => StringMatches(input, namePattern));
-		}
-
-		private static bool IsArrayNullOrEmpty(string[] array)
-		{
-			return array == null || !array.Any();
+			return !namePatterns.IsNullOrEmpty() && namePatterns.Any(namePattern => StringMatches(input, namePattern));
 		}
 
 		private static bool PassesWhitelistAndBlacklist(string toCheck, string[] whitelist = null, string[] blacklist = null)
 		{
-			return (IsArrayNullOrEmpty(whitelist) || FileNamesContains(whitelist, toCheck)) && (IsArrayNullOrEmpty(blacklist) || !FileNamesContains(blacklist, toCheck));
+			return (whitelist.IsNullOrEmpty() || InputMatchesAnyPattern(toCheck, whitelist)) && (blacklist.IsNullOrEmpty() || !InputMatchesAnyPattern(toCheck, blacklist));
 		}
 
 		public static void CopyAll(DirectoryInfo source, DirectoryInfo target, string[] fileWhitelist = null, string[] fileBlacklist = null)
@@ -158,6 +167,34 @@ namespace MultiAdmin
 		public static void CopyAll(string source, string target, string[] fileWhitelist = null, string[] fileBlacklist = null)
 		{
 			CopyAll(new DirectoryInfo(source), new DirectoryInfo(target), fileWhitelist, fileBlacklist);
+		}
+
+		public static int CompareVersionStrings(string firstVersion, string secondVersion)
+		{
+			if (firstVersion == null || secondVersion == null)
+				return -1;
+
+			string[] firstVersionNums = firstVersion.Split('.');
+			string[] secondVersionNums = secondVersion.Split('.');
+			int minVersionLength = Math.Min(firstVersionNums.Length, secondVersionNums.Length);
+
+			for (int i = 0; i < minVersionLength; i++)
+			{
+				if (!int.TryParse(firstVersionNums[i], out int first) || !int.TryParse(secondVersionNums[i], out int second))
+					continue;
+
+				if (first > second)
+				{
+					return 1;
+				}
+
+				if (first < second)
+				{
+					return -1;
+				}
+			}
+
+			return 0;
 		}
 	}
 }

@@ -1,6 +1,6 @@
 using System.Diagnostics;
-using System.Linq;
 using MultiAdmin.Features.Attributes;
+using MultiAdmin.Utility;
 
 namespace MultiAdmin.Features
 {
@@ -16,7 +16,11 @@ namespace MultiAdmin.Features
 
 		public void OnCall(string[] args)
 		{
-			if (args.Any())
+			if (args.IsEmpty())
+			{
+				Server.Write("Error: Missing Server ID!");
+			}
+			else
 			{
 				string serverId = string.Join(" ", args);
 
@@ -25,10 +29,6 @@ namespace MultiAdmin.Features
 				Server.Write($"Launching new server with Server ID: \"{serverId}\"...");
 
 				Program.StartServer(new Server(serverId));
-			}
-			else
-			{
-				Server.Write("Error: Missing Server ID!");
 			}
 		}
 

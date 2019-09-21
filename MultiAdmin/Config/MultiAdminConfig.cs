@@ -5,6 +5,8 @@ using System.Linq;
 using System.Reflection;
 using MultiAdmin.Config.ConfigHandler;
 using MultiAdmin.ConsoleTools;
+using MultiAdmin.ServerIO;
+using MultiAdmin.Utility;
 
 namespace MultiAdmin.Config
 {
@@ -33,7 +35,7 @@ namespace MultiAdmin.Config
 				"MultiAdmin Debug Logging", "Enables MultiAdmin debug logging, this logs to a separate file than any other logs");
 
 		public ConfigEntry<string[]> DebugLogBlacklist { get; } =
-			new ConfigEntry<string[]>("multiadmin_debug_log_blacklist", new string[] {"ProcessFile"},
+			new ConfigEntry<string[]>("multiadmin_debug_log_blacklist", new string[] {nameof(OutputHandler.ProcessFile), nameof(Utils.StringMatches)},
 				"MultiAdmin Debug Logging Blacklist", "Which tags to block for MultiAdmin debug logging");
 
 		public ConfigEntry<string[]> DebugLogWhitelist { get; } =
@@ -84,21 +86,25 @@ namespace MultiAdmin.Config
 			new ConfigEntry<bool>("manual_start", false,
 				"Manual Start", "Whether or not to start the server automatically when launching MultiAdmin");
 
-		public ConfigEntry<float> MaxMemory { get; } =
-			new ConfigEntry<float>("max_memory", 2048,
+		public ConfigEntry<decimal> MaxMemory { get; } =
+			new ConfigEntry<decimal>("max_memory", 2048,
 				"Max Memory", "The amount of memory in megabytes for MultiAdmin to check against");
 
-		public ConfigEntry<float> RestartLowMemory { get; } =
-			new ConfigEntry<float>("restart_low_memory", 400,
+		public ConfigEntry<decimal> RestartLowMemory { get; } =
+			new ConfigEntry<decimal>("restart_low_memory", 400,
 				"Restart Low Memory", "Restart if the game's remaining memory falls below this value in megabytes");
 
-		public ConfigEntry<float> RestartLowMemoryRoundEnd { get; } =
-			new ConfigEntry<float>("restart_low_memory_roundend", 450,
+		public ConfigEntry<decimal> RestartLowMemoryRoundEnd { get; } =
+			new ConfigEntry<decimal>("restart_low_memory_roundend", 450,
 				"Restart Low Memory Round-End", "Restart at the end of the round if the game's remaining memory falls below this value in megabytes");
 
 		public ConfigEntry<int> MaxPlayers { get; } =
 			new ConfigEntry<int>("max_players", 20,
 				"Max Players", "The number of players to display as the maximum for the server (within MultiAdmin, not in-game)");
+
+		public ConfigEntry<int> OutputReadAttempts { get; } =
+			new ConfigEntry<int>("output_read_attempts", 100,
+				"Output Read Attempts", "The number of times to attempt reading a message from the server before giving up");
 
 		public ConfigEntry<bool> RandomInputColors { get; } =
 			new ConfigEntry<bool>("random_input_colors", false,
@@ -108,16 +114,28 @@ namespace MultiAdmin.Config
 			new ConfigEntry<int>("restart_every_num_rounds", -1,
 				"Restart Every Number of Rounds", "Restart the server every number of rounds");
 
+		public ConfigEntry<bool> RestartEveryNumRoundsCounting { get; } =
+			new ConfigEntry<bool>("restart_every_num_rounds_counting", false,
+				"Restart Every Number of Rounds Counting", "Whether to print the count of rounds passed after each round if the server is set to restart after a number of rounds");
+
 		public ConfigEntry<bool> SafeServerShutdown { get; } =
 			new ConfigEntry<bool>("safe_server_shutdown", true,
-				"Safe Server Shutdown", "When MultiAdmin closes, if this is true, MultiAdmin will attempt to safely shutdown all the servers");
+				"Safe Server Shutdown", "When MultiAdmin closes, if this is true, MultiAdmin will attempt to safely shutdown all servers");
 
-		public ConfigEntry<float> ServerRestartTimeout { get; } =
-			new ConfigEntry<float>("server_restart_timeout", 10,
+		public ConfigEntry<int> SafeShutdownCheckDelay { get; } =
+			new ConfigEntry<int>("safe_shutdown_check_delay", 100,
+				"Safe Shutdown Check Delay", "The time in milliseconds between checking if a server is still running when safely shutting down");
+
+		public ConfigEntry<int> SafeShutdownTimeout { get; } =
+			new ConfigEntry<int>("safe_shutdown_timeout", 10000,
+				"Safe Shutdown Timeout", "The time in milliseconds before MultiAdmin gives up on safely shutting down a server");
+
+		public ConfigEntry<double> ServerRestartTimeout { get; } =
+			new ConfigEntry<double>("server_restart_timeout", 10,
 				"Server Restart Timeout", "The time in seconds before MultiAdmin forces a server restart if it doesn't respond to the regular restart command");
 
-		public ConfigEntry<float> ServerStopTimeout { get; } =
-			new ConfigEntry<float>("server_stop_timeout", 10,
+		public ConfigEntry<double> ServerStopTimeout { get; } =
+			new ConfigEntry<double>("server_stop_timeout", 10,
 				"Server Stop Timeout", "The time in seconds before MultiAdmin forces a server shutdown if it doesn't respond to the regular shutdown command");
 
 		public ConfigEntry<string> ServersFolder { get; } =
@@ -241,6 +259,18 @@ namespace MultiAdmin.Config
 					break;
 				}
 
+				case ConfigEntry<double> config:
+				{
+					config.Value = Config.GetDouble(config.Key, config.Default);
+					break;
+				}
+
+				case ConfigEntry<decimal> config:
+				{
+					config.Value = Config.GetDecimal(config.Key, config.Default);
+					break;
+				}
+
 				case ConfigEntry<bool> config:
 				{
 					config.Value = Config.GetBool(config.Key, config.Default);
@@ -283,7 +313,7 @@ namespace MultiAdmin.Config
 		{
 			List<MultiAdminConfig> configHierarchy = new List<MultiAdminConfig>();
 
-			foreach (InheritableConfigRegister configRegister in GetConfigRegisterHierarchy(highestToLowest))
+			foreach (ConfigRegister configRegister in GetConfigRegisterHierarchy(highestToLowest))
 			{
 				if (configRegister is MultiAdminConfig config)
 					configHierarchy.Add(config);

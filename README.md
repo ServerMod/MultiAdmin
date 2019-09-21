@@ -23,15 +23,14 @@ Make sure that you are running Mono 5.18.0 or higher, otherwise you might have i
 4. Optional: Create a file named `scp_multiadmin.cfg` within your server's folder for configuring MultiAdmin specifically for that server
 
 ## Features
-- Autoscale: Auto-starts a new server once this one becomes full (Requires ServerMod to function fully)
 - Config Reload: Reloads the MultiAdmin configuration file
 - Exit Command: Adds a graceful exit command
+- Folder Copy Round Queue: Copies files from folders in a queue
 - Help: Display a full list of MultiAdmin commands and in game commands
 - Stop Server When Inactive: Stops the server after a period inactivity
 - Restart On Low Memory: Restarts the server if the working memory becomes too low
-- Restart On Low Memory at Round End: Restarts the server if the working memory becomes too low at the end of the round
 - ModLog: Logs admin messages to separate file, or prints them
-- MultiAdminInfo: Prints MultiAdmin license information
+- MultiAdminInfo: Prints MultiAdmin license and version information
 - New: Adds a command to start a new server given a config folder
 - Restart Command: Allows the game to be restarted without restarting MultiAdmin
 - Restart Next Round: Restarts the server after the current round ends
@@ -46,7 +45,7 @@ This does not include ServerMod or ingame commands, for a full list type `HELP` 
 - EXIT: Exits the server
 - GITHUBGEN [FILE LOCATION]: Generates a github .md file outlining all the features/commands
 - HELP: Prints out available commands and their function
-- INFO: Prints MultiAdmin license information
+- INFO: Prints MultiAdmin license and version information
 - NEW <SERVER ID>: Starts a new server with the given Server ID
 - RESTART: Restarts the game server (MultiAdmin will not restart, just the game)
 - RESTARTNEXTROUND: Restarts the server at the end of this round
@@ -71,7 +70,7 @@ disable_config_validation | Boolean | False | Disable the config validator
 share_non_configs | Boolean | True | Makes all files other than the config files store in AppData
 multiadmin_nolog | Boolean | False | Disable logging to file
 multiadmin_debug_log | Boolean | True | Enables MultiAdmin debug logging, this logs to a separate file than any other logs
-multiadmin_debug_log_blacklist | String List | ProcessFile | Which tags to block for MultiAdmin debug logging
+multiadmin_debug_log_blacklist | String List | ProcessFile, StringMatches | Which tags to block for MultiAdmin debug logging
 multiadmin_debug_log_whitelist | String List | **Empty** | Which tags to log for MultiAdmin debug logging (Defaults to logging all if none are provided)
 use_new_input_system | Boolean | True | Whether to use the new input system, if false, the original input system will be used
 port | Unsigned Integer | 7777 | The port for the server to use (Preparing for next game release, currently does nothing)
@@ -84,15 +83,19 @@ folder_copy_round_queue_blacklist | String List | **Empty** | The list of file n
 randomize_folder_copy_round_queue | Boolean | False | Whether to randomize the order of entries in `folder_copy_round_queue`
 log_mod_actions_to_own_file | Boolean | False | Logs admin messages to separate file
 manual_start | Boolean | False | Whether or not to start the server automatically when launching MultiAdmin
-max_memory | Float | 2048 | The amount of memory in megabytes for MultiAdmin to check against
-restart_low_memory | Float | 400 | Restart if the game's remaining memory falls below this value in megabytes
-restart_low_memory_roundend | Float | 450 | Restart at the end of the round if the game's remaining memory falls below this value in megabytes
+max_memory | Decimal | 2048 | The amount of memory in megabytes for MultiAdmin to check against
+restart_low_memory | Decimal | 400 | Restart if the game's remaining memory falls below this value in megabytes
+restart_low_memory_roundend | Decimal | 450 | Restart at the end of the round if the game's remaining memory falls below this value in megabytes
 max_players | Integer | 20 | The number of players to display as the maximum for the server (within MultiAdmin, not in-game)
+output_read_attempts | Integer | 100 | The number of times to attempt reading a message from the server before giving up
 random_input_colors | Boolean | False | Randomize the new input system's colors every time a message is input
 restart_every_num_rounds | Integer | -1 | Restart the server every number of rounds
-safe_server_shutdown | Boolean | True | When MultiAdmin closes, if this is true, MultiAdmin will attempt to safely shutdown all the servers
-server_restart_timeout | Float | 10 | The time in seconds before MultiAdmin forces a server restart if it doesn't respond to the regular restart command
-server_stop_timeout | Float | 10 | The time in seconds before MultiAdmin forces a server shutdown if it doesn't respond to the regular shutdown command
+restart_every_num_rounds_counting | Boolean | False | Whether to print the count of rounds passed after each round if the server is set to restart after a number of rounds
+safe_server_shutdown | Boolean | True | When MultiAdmin closes, if this is true, MultiAdmin will attempt to safely shutdown all servers
+safe_shutdown_check_delay | Integer | 100 | The time in milliseconds between checking if a server is still running when safely shutting down
+safe_shutdown_timeout | Integer | 10000 | The time in milliseconds before MultiAdmin gives up on safely shutting down a server
+server_restart_timeout | Double | 10 | The time in seconds before MultiAdmin forces a server restart if it doesn't respond to the regular restart command
+server_stop_timeout | Double | 10 | The time in seconds before MultiAdmin forces a server shutdown if it doesn't respond to the regular shutdown command
 servers_folder | String | servers | The location of the `servers` folder for MultiAdmin to load multiple server configurations from
 set_title_bar | Boolean | True | Whether to set the console window's titlebar, if false, this feature won't be used
 shutdown_when_empty_for | Integer | -1 | Shutdown the server once a round hasn't started in a number of seconds

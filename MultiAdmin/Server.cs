@@ -9,6 +9,7 @@ using MultiAdmin.Config;
 using MultiAdmin.ConsoleTools;
 using MultiAdmin.Features.Attributes;
 using MultiAdmin.ServerIO;
+using MultiAdmin.Utility;
 
 namespace MultiAdmin
 {
@@ -348,9 +349,10 @@ namespace MultiAdmin
 							eventPreStart.OnServerPreStart();
 
 					// Start the input reader
-					Thread inputReaderThread = new Thread(() => InputThread.Write(this));
+					Thread inputHandlerThread = new Thread(() => InputHandler.Write(this));
+
 					if (!Program.Headless)
-						inputReaderThread.Start();
+						inputHandlerThread.Start();
 
 					// Start the output reader
 					OutputHandler outputHandler = new OutputHandler(this);
@@ -392,7 +394,13 @@ namespace MultiAdmin
 					GameProcess.Dispose();
 					GameProcess = null;
 
-					inputReaderThread.Abort();
+					// Stop the input handler if it's running
+					if (inputHandlerThread.IsAlive)
+					{
+						inputHandlerThread.Abort();
+						inputHandlerThread.Join();
+					}
+
 					outputHandler.Dispose();
 
 					DeleteSession();
@@ -404,10 +412,12 @@ namespace MultiAdmin
 				}
 				catch (Exception e)
 				{
-					Write("Failed - Executable file not found or config issue!", ConsoleColor.Red);
+					Write("Failed - Executable file not found or config issue! Waiting for 1 second before continuing...", ConsoleColor.Red);
 					Write(e.Message, ConsoleColor.Red);
 
-					shouldRestart = false;
+					Program.LogDebugException(nameof(StartServer), e);
+
+					Thread.Sleep(1000);
 				}
 				finally
 				{
@@ -479,8 +489,8 @@ namespace MultiAdmin
 			{
 				foreach (Type type in assembly.GetTypes())
 				{
-					object[] attributes = type.GetCustomAttributes(attribute, false);
-					if (attributes.Any()) yield return type;
+					object[] attributes = type.GetCustomAttributes(attribute, true);
+					if (!attributes.IsEmpty()) yield return type;
 				}
 			}
 		}
@@ -611,7 +621,7 @@ namespace MultiAdmin
 				timeStampedMessage.WriteLine(ServerConfig.UseNewInputSystem.Value);
 
 				if (ServerConfig.UseNewInputSystem.Value)
-					InputThread.WriteInputAndSetCursor();
+					InputHandler.WriteInputAndSetCursor();
 			}
 		}
 
@@ -666,7 +676,7 @@ namespace MultiAdmin
 
 			string[] parts = serverModVersion.Split('.');
 
-			if (!parts.Any())
+			if (parts.IsEmpty())
 				return false;
 
 			int.TryParse(parts[0], out int verMajor);

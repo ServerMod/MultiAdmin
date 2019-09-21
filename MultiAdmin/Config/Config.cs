@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using MultiAdmin.ConsoleTools;
+using MultiAdmin.Utility;
 
 namespace MultiAdmin.Config
 {
@@ -59,7 +60,7 @@ namespace MultiAdmin.Config
 
 		public bool Contains(string key)
 		{
-			return rawData != null && rawData.Any(entry => entry.ToLower().StartsWith(key.ToLower() + ":"));
+			return rawData != null && rawData.Any(entry => entry.StartsWith($"{key}:", StringComparison.CurrentCultureIgnoreCase));
 		}
 
 		private static string CleanValue(string value)
@@ -179,6 +180,40 @@ namespace MultiAdmin.Config
 			catch (Exception e)
 			{
 				Program.LogDebugException(nameof(GetFloat), e);
+			}
+
+			return def;
+		}
+
+		public double GetDouble(string key, double def = 0)
+		{
+			try
+			{
+				string value = GetString(key);
+
+				if (!string.IsNullOrEmpty(value) && double.TryParse(value, out double parsedValue))
+					return parsedValue;
+			}
+			catch (Exception e)
+			{
+				Program.LogDebugException(nameof(GetDouble), e);
+			}
+
+			return def;
+		}
+
+		public decimal GetDecimal(string key, decimal def = 0)
+		{
+			try
+			{
+				string value = GetString(key);
+
+				if (!string.IsNullOrEmpty(value) && decimal.TryParse(value, out decimal parsedValue))
+					return parsedValue;
+			}
+			catch (Exception e)
+			{
+				Program.LogDebugException(nameof(GetDecimal), e);
 			}
 
 			return def;

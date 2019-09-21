@@ -20,7 +20,7 @@ namespace MultiAdmin.ServerIO
 		{
 			while (Items.Count > MaxCount)
 			{
-				Items.RemoveAt(Items.Count - 1);
+				RemoveFromEnd();
 			}
 		}
 
@@ -34,8 +34,23 @@ namespace MultiAdmin.ServerIO
 			}
 		}
 
-		/*
-		public void Remove(int index)
+		public void Remove(string item)
+		{
+			lock (Items)
+			{
+				Items.Remove(item);
+			}
+		}
+
+		public void RemoveFromEnd()
+		{
+			lock (Items)
+			{
+				Items.RemoveAt(Items.Count - 1);
+			}
+		}
+
+		public void RemoveAt(int index)
 		{
 			lock (Items)
 			{
@@ -47,10 +62,9 @@ namespace MultiAdmin.ServerIO
 		{
 			lock (Items)
 			{
-				Remove(index);
+				RemoveAt(index);
 				Add(item, index);
 			}
 		}
-		*/
 	}
 }

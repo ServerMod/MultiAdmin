@@ -4,10 +4,11 @@ using System.Linq;
 using System.Threading;
 using MultiAdmin.Config;
 using MultiAdmin.ConsoleTools;
+using MultiAdmin.Utility;
 
 namespace MultiAdmin.ServerIO
 {
-	public static class InputThread
+	public static class InputHandler
 	{
 		private static readonly char[] Separator = {' '};
 
@@ -18,8 +19,11 @@ namespace MultiAdmin.ServerIO
 		public static readonly ColoredMessage RightSideIndicator = new ColoredMessage("...", ConsoleColor.Yellow);
 
 		public static int InputPrefixLength => InputPrefix?.Length ?? 0;
+
 		public static int LeftSideIndicatorLength => LeftSideIndicator?.Length ?? 0;
 		public static int RightSideIndicatorLength => RightSideIndicator?.Length ?? 0;
+
+		public static int TotalIndicatorLength => LeftSideIndicatorLength + RightSideIndicatorLength;
 
 		public static int SectionBufferWidth
 		{
@@ -43,37 +47,44 @@ namespace MultiAdmin.ServerIO
 
 		public static void Write(Server server)
 		{
-			ShiftingList prevMessages = new ShiftingList(25);
-
-			while (server.IsRunning && !server.IsStopping)
+			try
 			{
-				if (Program.Headless)
+				ShiftingList prevMessages = new ShiftingList(25);
+
+				while (server.IsRunning && !server.IsStopping)
 				{
-					Thread.Sleep(5000);
-					continue;
+					if (Program.Headless)
+					{
+						Thread.Sleep(5000);
+						continue;
+					}
+
+					string message = server.ServerConfig.UseNewInputSystem.Value ? GetInputLineNew(server, prevMessages) : Console.ReadLine();
+
+					if (string.IsNullOrEmpty(message)) continue;
+
+					server.Write($">>> {message}", ConsoleColor.DarkMagenta);
+
+					string[] messageSplit = message.Split(Separator, StringSplitOptions.RemoveEmptyEntries);
+					if (messageSplit.IsEmpty()) continue;
+
+					bool callServer = true;
+					server.commands.TryGetValue(messageSplit[0].ToLower().Trim(), out ICommand command);
+					if (command != null)
+					{
+						command.OnCall(messageSplit.Skip(1).Take(messageSplit.Length - 1).ToArray());
+						callServer = command.PassToGame();
+					}
+
+					if (callServer) server.SendMessage(message);
 				}
 
-				string message = server.ServerConfig.UseNewInputSystem.Value ? GetInputLineNew(server, prevMessages) : Console.ReadLine();
-
-				if (string.IsNullOrEmpty(message)) continue;
-
-				server.Write($">>> {message}", ConsoleColor.DarkMagenta);
-
-				string[] messageSplit = message.Split(Separator, StringSplitOptions.RemoveEmptyEntries);
-				if (!messageSplit.Any()) continue;
-
-				bool callServer = true;
-				server.commands.TryGetValue(messageSplit[0].ToLower().Trim(), out ICommand command);
-				if (command != null)
-				{
-					command.OnCall(messageSplit.Skip(1).Take(messageSplit.Length - 1).ToArray());
-					callServer = command.PassToGame();
-				}
-
-				if (callServer) server.SendMessage(message);
+				ResetInputParams();
 			}
-
-			ResetInputParams();
+			catch (ThreadInterruptedException)
+			{
+				// Exit the Thread immediately if interrupted
+			}
 		}
 
 		public static string GetInputLineNew(Server server, ShiftingList prevMessages)
@@ -97,7 +108,7 @@ namespace MultiAdmin.ServerIO
 				switch (key.Key)
 				{
 					case ConsoleKey.Backspace:
-						if (messageCursor > 0 && message.Any())
+						if (messageCursor > 0 && !message.IsEmpty())
 							message = message.Remove(--messageCursor, 1);
 
 						break;
@@ -147,11 +158,11 @@ namespace MultiAdmin.ServerIO
 						break;
 
 					case ConsoleKey.PageUp:
-						messageCursor -= SectionBufferWidth - (LeftSideIndicatorLength + RightSideIndicatorLength);
+						messageCursor -= SectionBufferWidth - TotalIndicatorLength;
 						break;
 
 					case ConsoleKey.PageDown:
-						messageCursor += SectionBufferWidth - (LeftSideIndicatorLength + RightSideIndicatorLength);
+						messageCursor += SectionBufferWidth - TotalIndicatorLength;
 						break;
 
 					default:

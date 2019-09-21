@@ -1,9 +1,9 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using MultiAdmin.ConsoleTools;
+using MultiAdmin.Utility;
 
 namespace MultiAdmin.ServerIO
 {
@@ -74,7 +74,7 @@ namespace MultiAdmin.ServerIO
 			}
 		}
 
-		private void ProcessFile(Server server, string file)
+		public void ProcessFile(Server server, string file)
 		{
 			string stream = string.Empty;
 			string command = "open";
@@ -84,7 +84,7 @@ namespace MultiAdmin.ServerIO
 			// Lock this object to wait for this event to finish before trying to read another file
 			lock (this)
 			{
-				for (int attempts = 0; attempts < 100; attempts++)
+				for (int attempts = 0; attempts < server.ServerConfig.OutputReadAttempts.Value; attempts++)
 				{
 					try
 					{
@@ -107,12 +107,12 @@ namespace MultiAdmin.ServerIO
 					catch (UnauthorizedAccessException e)
 					{
 						Program.LogDebugException(nameof(ProcessFile), e);
-						Thread.Sleep(5);
+						Thread.Sleep(8);
 					}
 					catch (Exception e)
 					{
 						Program.LogDebugException(nameof(ProcessFile), e);
-						Thread.Sleep(2);
+						Thread.Sleep(5);
 					}
 				}
 			}
@@ -209,7 +209,7 @@ namespace MultiAdmin.ServerIO
 				// This should work fine with older ServerMod versions too
 				string[] streamSplit = stream.Replace("ServerMod - Version", string.Empty).Split('-');
 
-				if (streamSplit.Any())
+				if (!streamSplit.IsEmpty())
 				{
 					server.serverModVersion = streamSplit[0].Trim();
 					server.serverModBuild = (streamSplit.Length > 1 ? streamSplit[1] : "A").Trim();

@@ -104,14 +104,16 @@
     <Compile Include="Features\RestartRoundCounter.cs" />
     <Compile Include="Features\StopNextRound.cs" />
     <Compile Include="Features\TitleBar.cs" />
-    <Compile Include="ServerIO\InputThread.cs" />
-    <Compile Include="Interfaces.cs" />
+    <Compile Include="ServerIO\InputHandler.cs" />
+    <Compile Include="EventInterfaces.cs" />
     <Compile Include="Config\MultiAdminConfig.cs" />
     <Compile Include="ServerIO\OutputHandler.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="ServerIO\ShiftingList.cs" />
-    <Compile Include="Utils.cs" />
+    <Compile Include="Utility\EmptyExtensions.cs" />
+    <Compile Include="Utility\StringExtensions.cs" />
+    <Compile Include="Utility\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Mono.Posix">

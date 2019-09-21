@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using MultiAdmin.Config;
 using MultiAdmin.Config.ConfigHandler;
 using MultiAdmin.Features.Attributes;
+using MultiAdmin.Utility;
 
 namespace MultiAdmin.Features
 {
@@ -35,7 +35,7 @@ namespace MultiAdmin.Features
 
 		public void OnCall(string[] args)
 		{
-			if (!args.Any())
+			if (args.IsEmpty())
 			{
 				Server.Write("You must specify the location of the file.");
 				return;
@@ -43,7 +43,7 @@ namespace MultiAdmin.Features
 
 			string dir = string.Join(" ", args);
 
-			List<string> lines = new List<string> {"# MultiAdmin", string.Empty, "## Features"};
+			List<string> lines = new List<string> {"# MultiAdmin", string.Empty, "## Features", string.Empty};
 
 			foreach (Feature feature in Server.features)
 			{
@@ -80,7 +80,7 @@ namespace MultiAdmin.Features
 
 					case ConfigEntry<string[]> config:
 					{
-						stringBuilder.Append($"String List{ColumnSeparator}{(!config.Default?.Any() ?? true ? EmptyIndicator : string.Join(", ", config.Default))}");
+						stringBuilder.Append($"String List{ColumnSeparator}{(config.Default?.IsEmpty() ?? true ? EmptyIndicator : string.Join(", ", config.Default))}");
 						break;
 					}
 
@@ -99,6 +99,18 @@ namespace MultiAdmin.Features
 					case ConfigEntry<float> config:
 					{
 						stringBuilder.Append($"Float{ColumnSeparator}{config.Default}");
+						break;
+					}
+
+					case ConfigEntry<double> config:
+					{
+						stringBuilder.Append($"Double{ColumnSeparator}{config.Default}");
+						break;
+					}
+
+					case ConfigEntry<decimal> config:
+					{
+						stringBuilder.Append($"Decimal{ColumnSeparator}{config.Default}");
 						break;
 					}
 

@@ -9,12 +9,13 @@ using MultiAdmin.Config;
 using MultiAdmin.ConsoleTools;
 using MultiAdmin.NativeExitSignal;
 using MultiAdmin.ServerIO;
+using MultiAdmin.Utility;
 
 namespace MultiAdmin
 {
 	public static class Program
 	{
-		public const string MaVersion = "3.2.1";
+		public const string MaVersion = "3.2.2.2";
 		public const string RecommendedMonoVersion = "5.18.0";
 
 		private static readonly List<Server> InstantiatedServers = new List<Server>();
@@ -71,7 +72,7 @@ namespace MultiAdmin
 
 		private static bool IsDebugLogTagAllowed(string tag)
 		{
-			return (!MultiAdminConfig.GlobalConfig?.DebugLogBlacklist?.Value?.Contains(tag) ?? true) && ((!MultiAdminConfig.GlobalConfig?.DebugLogWhitelist?.Value?.Any() ?? true) || MultiAdminConfig.GlobalConfig.DebugLogWhitelist.Value.Contains(tag));
+			return (!MultiAdminConfig.GlobalConfig?.DebugLogBlacklist?.Value?.Contains(tag) ?? true) && ((MultiAdminConfig.GlobalConfig?.DebugLogWhitelist?.Value?.IsEmpty() ?? true) || MultiAdminConfig.GlobalConfig.DebugLogWhitelist.Value.Contains(tag));
 		}
 
 		public static void LogDebugException(string tag, Exception exception)
@@ -131,9 +132,19 @@ namespace MultiAdmin
 							server.StopServer();
 
 							// Wait for server to exit
+							int timeToWait = Math.Max(MultiAdminConfig.GlobalConfig.SafeShutdownCheckDelay.Value, 0);
+							int timeWaited = 0;
+
 							while (server.IsGameProcessRunning)
 							{
-								Thread.Sleep(100);
+								Thread.Sleep(timeToWait);
+								timeWaited += timeToWait;
+
+								if (timeWaited >= MultiAdminConfig.GlobalConfig.SafeShutdownTimeout.Value)
+								{
+									Write($"Failed to server with ID \"{server.serverId}\" within {timeWaited} ms, giving up...", ConsoleColor.Red);
+									break;
+								}
 							}
 						}
 						catch (Exception ex)
@@ -183,11 +194,26 @@ namespace MultiAdmin
 			}
 			else
 			{
-				if (Servers.Any())
+				if (Servers.IsEmpty())
+				{
+					server = new Server(port: portArg);
+
+					InstantiatedServers.Add(server);
+				}
+				else
 				{
 					Server[] autoStartServers = AutoStartServers;
 
-					if (autoStartServers.Any())
+					if (autoStartServers.IsEmpty())
+					{
+						Write("No servers are set to automatically start, please enter a Server ID to start:");
+						InputHandler.InputPrefix?.Write();
+
+						server = new Server(Console.ReadLine(), port: portArg);
+
+						InstantiatedServers.Add(server);
+					}
+					else
 					{
 						Write("Starting this instance in multi server mode...");
 
@@ -205,21 +231,6 @@ namespace MultiAdmin
 							}
 						}
 					}
-					else
-					{
-						Write("No servers are set to automatically start, please enter a Server ID to start:");
-						InputThread.InputPrefix?.Write();
-
-						server = new Server(Console.ReadLine(), port: portArg);
-
-						InstantiatedServers.Add(server);
-					}
-				}
-				else
-				{
-					server = new Server(port: portArg);
-
-					InstantiatedServers.Add(server);
 				}
 			}
 
@@ -241,14 +252,12 @@ namespace MultiAdmin
 			}
 		}
 
-		private static bool ArrayIsNullOrEmpty(ICollection<object> array)
-		{
-			return array == null || !array.Any();
-		}
-
 		public static string GetParamFromArgs(string[] keys = null, string[] aliases = null)
 		{
-			if (ArrayIsNullOrEmpty(keys) && ArrayIsNullOrEmpty(aliases)) return null;
+			bool hasKeys = !keys.IsNullOrEmpty();
+			bool hasAliases = !aliases.IsNullOrEmpty();
+
+			if (!hasKeys && !hasAliases) return null;
 
 			string[] args = Environment.GetCommandLineArgs();
 
@@ -258,7 +267,7 @@ namespace MultiAdmin
 
 				if (string.IsNullOrEmpty(lowArg)) continue;
 
-				if (!ArrayIsNullOrEmpty(keys))
+				if (hasKeys)
 				{
 					if (keys.Any(key => !string.IsNullOrEmpty(key) && lowArg == $"--{key.ToLower()}"))
 					{
@@ -266,7 +275,7 @@ namespace MultiAdmin
 					}
 				}
 
-				if (!ArrayIsNullOrEmpty(aliases))
+				if (hasAliases)
 				{
 					if (aliases.Any(alias => !string.IsNullOrEmpty(alias) && lowArg == $"-{alias.ToLower()}"))
 					{
@@ -286,7 +295,7 @@ namespace MultiAdmin
 
 				if (string.IsNullOrEmpty(lowArg)) continue;
 
-				if (!ArrayIsNullOrEmpty(keys))
+				if (!keys.IsNullOrEmpty())
 				{
 					if (keys.Any(key => !string.IsNullOrEmpty(key) && lowArg == $"--{key.ToLower()}"))
 					{
@@ -294,7 +303,7 @@ namespace MultiAdmin
 					}
 				}
 
-				if (!ArrayIsNullOrEmpty(aliases))
+				if (!aliases.IsNullOrEmpty())
 				{
 					if (aliases.Any(alias => !string.IsNullOrEmpty(alias) && lowArg == $"-{alias.ToLower()}"))
 					{
@@ -308,7 +317,7 @@ namespace MultiAdmin
 
 		public static bool GetFlagFromArgs(string[] keys = null, string[] aliases = null)
 		{
-			if (ArrayIsNullOrEmpty(keys) && ArrayIsNullOrEmpty(aliases)) return false;
+			if (keys.IsNullOrEmpty() && aliases.IsNullOrEmpty()) return false;
 
 			return bool.TryParse(GetParamFromArgs(keys, aliases), out bool result) ? result : ArgsContainsParam(keys, aliases);
 		}
@@ -374,34 +383,6 @@ namespace MultiAdmin
 			return true;
 		}
 
-		private static int CompareVersionStrings(string firstVersion, string secondVersion)
-		{
-			if (firstVersion == null || secondVersion == null)
-				return -1;
-
-			string[] firstVersionNums = firstVersion.Split('.');
-			string[] secondVersionNums = secondVersion.Split('.');
-
-			int returnValue = 0;
-
-			for (int i = 0; i < Math.Min(firstVersionNums.Length, secondVersionNums.Length); i++)
-			{
-				if (!int.TryParse(firstVersionNums[i], out int current) || !int.TryParse(secondVersionNums[i], out int recommended))
-					continue;
-
-				if (current > recommended)
-				{
-					returnValue = 1;
-				}
-				else if (current < recommended)
-				{
-					return -1;
-				}
-			}
-
-			return returnValue;
-		}
-
 		public static void CheckMonoVersion()
 		{
 			try
@@ -412,7 +393,7 @@ namespace MultiAdmin
 				if (string.IsNullOrEmpty(monoVersion))
 					return;
 
-				int versionDifference = CompareVersionStrings(monoVersion, RecommendedMonoVersion);
+				int versionDifference = Utils.CompareVersionStrings(monoVersion, RecommendedMonoVersion);
 
 				if (versionDifference >= 0 && (versionDifference != 0 || monoVersion.Length >= RecommendedMonoVersion.Length))
 					return;

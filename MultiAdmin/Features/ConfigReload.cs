@@ -1,5 +1,5 @@
-using System.Linq;
 using MultiAdmin.Features.Attributes;
+using MultiAdmin.Utility;
 
 namespace MultiAdmin.Features
 {
@@ -27,7 +27,7 @@ namespace MultiAdmin.Features
 
 		public void OnCall(string[] args)
 		{
-			if (!args.Any() || !args[0].ToLower().Equals("reload")) return;
+			if (args.IsNullOrEmpty() || !args[0].ToLower().Equals("reload")) return;
 
 			Server.Write("Reloading configs...");
 
@@ -48,7 +48,7 @@ namespace MultiAdmin.Features
 
 		public override string GetFeatureName()
 		{
-			return "Config reload";
+			return "Config Reload";
 		}
 
 		public override void Init()
