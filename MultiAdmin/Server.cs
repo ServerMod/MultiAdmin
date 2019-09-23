@@ -398,7 +398,6 @@ namespace MultiAdmin
 					if (inputHandlerThread.IsAlive)
 					{
 						inputHandlerThread.Abort();
-						inputHandlerThread.Join();
 					}
 
 					outputHandler.Dispose();
