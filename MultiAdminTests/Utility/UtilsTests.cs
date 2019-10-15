@@ -1,3 +1,4 @@
+using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MultiAdmin.Utility;
 
@@ -70,15 +71,25 @@ namespace MultiAdminTests.Utility
 				new StringMatchingTemplate("test", "t**st", true),
 				new StringMatchingTemplate("test", "s*", false),
 				new StringMatchingTemplate("longstringtestmessage", "l*s*t*e*g*", true),
+				new StringMatchingTemplate("AdminToolbox", "config_remoteadmin.txt", false),
+				new StringMatchingTemplate("config_remoteadmin.txt", "config_remoteadmin.txt", true),
+				new StringMatchingTemplate("sizetest", "sizetest1", false)
 			};
 
 			for (int i = 0; i < matchTests.Length; i++)
 			{
-				StringMatchingTemplate test = matchTests[i];
+				try
+				{
+					StringMatchingTemplate test = matchTests[i];
 
-				bool result = Utils.StringMatches(test.input, test.pattern);
+					bool result = Utils.StringMatches(test.input, test.pattern);
 
-				Assert.IsTrue(test.expectedResult == result, $"Failed on test index {i}: Expected \"{test.expectedResult}\", got \"{result}\"");
+					Assert.IsTrue(test.expectedResult == result, $"Failed on test index {i}: Expected \"{test.expectedResult}\", got \"{result}\"");
+				}
+				catch (Exception e)
+				{
+					Assert.Fail($"Failed on test index {i}: {e}");
+				}
 			}
 		}
 

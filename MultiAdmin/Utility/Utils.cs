@@ -90,10 +90,15 @@ namespace MultiAdmin.Utility
 				if (matchIndex < 0 || matchIndex >= input.Length)
 					return false;
 
-				Program.LogDebug(nameof(StringMatches), $"Matching \"{wildCardSection}\" with \"{input.Substring(matchIndex)}\"...");;
+				Program.LogDebug(nameof(StringMatches), $"Matching \"{wildCardSection}\" with \"{input.Substring(matchIndex)}\"...");
 
 				if (matchIndex <= 0 && pattern[0] != WildCard)
 				{
+					// If the rest of the input string isn't at least as long as the section to match
+					if (input.Length - matchIndex < wildCardSection.Length)
+						return false;
+
+					// If the input doesn't match this section of the pattern
 					if (!input.Equals(wildCardSection, matchIndex, wildCardSection.Length))
 						return false;
 
