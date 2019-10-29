@@ -103,18 +103,18 @@ namespace MultiAdminTests.Utility
 				new CompareVersionTemplate("2.0.0.0", "1.0.0.0", 1),
 
 				new CompareVersionTemplate("1.0", "2.0.0.0", -1),
-				new CompareVersionTemplate("1.0", "1.0.0.0", 0),
+				new CompareVersionTemplate("1.0", "1.0.0.0", -1), // The first version is shorter, so it's lower
 				new CompareVersionTemplate("2.0", "1.0.0.0", 1),
 
 				new CompareVersionTemplate("1.0.0.0", "2.0", -1),
-				new CompareVersionTemplate("1.0.0.0", "1.0", 0),
+				new CompareVersionTemplate("1.0.0.0", "1.0", 1), // The first version is longer, so it's higher
 				new CompareVersionTemplate("2.0.0.0", "1.0", 1),
 
 				new CompareVersionTemplate("6.0.0.313", "5.18.0", 1),
 				new CompareVersionTemplate("5.18.0", "6.0.0.313", -1),
 
 				new CompareVersionTemplate("5.18.0", "5.18.0", 0),
-				new CompareVersionTemplate("5.18", "5.18.0", 0)
+				new CompareVersionTemplate("5.18", "5.18.0", -1) // The first version is shorter, so it's lower
 			};
 
 			for (int i = 0; i < versionTests.Length; i++)
