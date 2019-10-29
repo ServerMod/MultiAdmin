@@ -44,7 +44,7 @@ namespace MultiAdmin
 		public Server(string serverId = null, string configLocation = null, uint? port = null)
 		{
 			this.serverId = serverId;
-			serverDir = string.IsNullOrEmpty(this.serverId) ? null : Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.ServersFolder.Value + Path.DirectorySeparatorChar + this.serverId);
+			serverDir = string.IsNullOrEmpty(this.serverId) ? null : Utils.GetFullPathSafe(Path.Combine(MultiAdminConfig.GlobalConfig.ServersFolder.Value, this.serverId));
 
 			this.configLocation = Utils.GetFullPathSafe(configLocation) ?? Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.ConfigLocation.Value) ?? Utils.GetFullPathSafe(serverDir);
 
@@ -59,7 +59,7 @@ namespace MultiAdmin
 				this.configLocation = serverConfigLocation;
 
 				// Load the child MultiAdminConfig
-				serverConfig = new MultiAdminConfig(serverConfigLocation + Path.DirectorySeparatorChar + MultiAdminConfig.ConfigFileName, serverConfig);
+				serverConfig = new MultiAdminConfig(Path.Combine(serverConfigLocation, MultiAdminConfig.ConfigFileName), serverConfig);
 
 				// Set the server config location to the value from the config, this should be empty or null if there is no valid value
 				serverConfigLocation = Utils.GetFullPathSafe(serverConfig.ConfigLocation.Value);
@@ -73,7 +73,7 @@ namespace MultiAdmin
 			// Set port
 			this.port = port;
 
-			logDir = Utils.GetFullPathSafe((string.IsNullOrEmpty(serverDir) ? string.Empty : serverDir + Path.DirectorySeparatorChar) + "logs");
+			logDir = Utils.GetFullPathSafe(Path.Combine(string.IsNullOrEmpty(serverDir) ? string.Empty : serverDir, "logs"));
 
 			// Register all features
 			RegisterFeatures();
@@ -117,7 +117,7 @@ namespace MultiAdmin
 				startDateTime = value;
 
 				// Update related variables
-				LogDirFile = string.IsNullOrEmpty(value) || string.IsNullOrEmpty(logDir) ? null : $"{logDir}{Path.DirectorySeparatorChar}{value}_{{0}}_output_log.txt";
+				LogDirFile = string.IsNullOrEmpty(value) || string.IsNullOrEmpty(logDir) ? null : $"{Path.Combine(logDir, value)}_{{0}}_output_log.txt";
 
 				lock (this)
 				{
@@ -152,7 +152,7 @@ namespace MultiAdmin
 		}
 
 
-		public static readonly string DedicatedDir = Utils.GetFullPathSafe("SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated");
+		public static readonly string DedicatedDir = Utils.GetFullPathSafe(Path.Combine("SCPSL_Data", "Dedicated"));
 
 		private string sessionId;
 
@@ -165,7 +165,7 @@ namespace MultiAdmin
 				sessionId = value;
 
 				// Update related variables
-				SessionDirectory = string.IsNullOrEmpty(value) ? null : DedicatedDir + Path.DirectorySeparatorChar + value;
+				SessionDirectory = string.IsNullOrEmpty(value) ? null : Path.Combine(DedicatedDir, value);
 			}
 		}
 
@@ -215,16 +215,14 @@ namespace MultiAdmin
 		{
 			if (!Directory.Exists(SessionDirectory))
 			{
-				Write($"Send Message error: Sending {message} failed. \"{SessionDirectory}\" does not exist!");
-				Write("Skipping...");
+				Write($"Send Message error: Sending {message} failed. \"{SessionDirectory}\" does not exist!\nSkipping...");
 				return;
 			}
 
-			string file = $"{SessionDirectory}{Path.DirectorySeparatorChar}cs{logId}.mapi";
+			string file = Path.Combine(SessionDirectory, $"cs{logId}.mapi");
 			if (File.Exists(file))
 			{
-				Write($"Send Message error: Sending {message} failed. \"{file}\" already exists!");
-				Write("Skipping...");
+				Write($"Send Message error: Sending {message} failed. \"{file}\" already exists!\nSkipping...");
 				logId++;
 				return;
 			}
@@ -419,11 +417,28 @@ namespace MultiAdmin
 				catch (Exception e)
 				{
 					Write(e.Message, ConsoleColor.Red);
-					Write("Startup failed! Waiting for 1 second before continuing...", ConsoleColor.Red);
-
 					Program.LogDebugException(nameof(StartServer), e);
 
-					Thread.Sleep(1000);
+					// If the server should try to start up again
+					if (ServerConfig.ServerStartRetry.Value)
+					{
+						shouldRestart = true;
+
+						int waitDelayMs = ServerConfig.ServerStartRetryDelay.Value;
+						if (waitDelayMs > 0)
+						{
+							Write($"Startup failed! Waiting for {waitDelayMs} ms before retrying...", ConsoleColor.Red);
+							Thread.Sleep(waitDelayMs);
+						}
+						else
+						{
+							Write("Startup failed! Retrying...", ConsoleColor.Red);
+						}
+					}
+					else
+					{
+						Write("Startup failed! Exiting...", ConsoleColor.Red);
+					}
 				}
 				finally
 				{
@@ -436,6 +451,7 @@ namespace MultiAdmin
 		{
 			if (!IsRunning) throw new Exceptions.ServerNotRunningException();
 
+			// If the game is loading, it won't accept the safe quit command
 			if (IsLoading)
 				killGame = true;
 
@@ -483,6 +499,7 @@ namespace MultiAdmin
 				{
 					string commandKey = command.GetCommand().ToLower().Trim();
 
+					// If the command was already registered
 					if (commands.ContainsKey(commandKey))
 					{
 						string message = $"Warning, {nameof(MultiAdmin)} tried to register duplicate command \"{commandKey}\"";

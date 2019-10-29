@@ -138,6 +138,14 @@ namespace MultiAdmin.Config
 			new ConfigEntry<double>("server_stop_timeout", 10,
 				"Server Stop Timeout", "The time in seconds before MultiAdmin forces a server shutdown if it doesn't respond to the regular shutdown command");
 
+		public ConfigEntry<bool> ServerStartRetry { get; } =
+			new ConfigEntry<bool>("server_start_retry", true,
+				"Server Start Retry", "Whether to try to start the server again after crashing");
+
+		public ConfigEntry<int> ServerStartRetryDelay { get; } =
+			new ConfigEntry<int>("server_start_retry_delay", 10000,
+				"Server Start Retry Delay", "The time in milliseconds to wait before trying to start the server again after crashing");
+
 		public ConfigEntry<string> ServersFolder { get; } =
 			new ConfigEntry<string>("servers_folder", "servers",
 				"Servers Folder", "The location of the `servers` folder for MultiAdmin to load multiple server configurations from");
