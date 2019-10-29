@@ -768,7 +768,7 @@ namespace MultiAdmin
 			}
 			catch (Exception e)
 			{
-				Write(new ColoredMessage[] {new ColoredMessage("Error while copying files and folders:", ConsoleColor.Red), new ColoredMessage(e.ToString(), ConsoleColor.Red)});
+				Write($"Error while copying files and folders:\n{e}", ConsoleColor.Red);
 			}
 
 			return false;
