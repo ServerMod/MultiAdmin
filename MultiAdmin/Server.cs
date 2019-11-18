@@ -44,7 +44,7 @@ namespace MultiAdmin
 		public Server(string serverId = null, string configLocation = null, uint? port = null)
 		{
 			this.serverId = serverId;
-			serverDir = string.IsNullOrEmpty(this.serverId) ? null : Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.ServersFolder.Value + Path.DirectorySeparatorChar + this.serverId);
+			serverDir = string.IsNullOrEmpty(this.serverId) ? null : Utils.GetFullPathSafe(Path.Combine(MultiAdminConfig.GlobalConfig.ServersFolder.Value, this.serverId));
 
 			this.configLocation = Utils.GetFullPathSafe(configLocation) ?? Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.ConfigLocation.Value) ?? Utils.GetFullPathSafe(serverDir);
 
@@ -59,7 +59,7 @@ namespace MultiAdmin
 				this.configLocation = serverConfigLocation;
 
 				// Load the child MultiAdminConfig
-				serverConfig = new MultiAdminConfig(serverConfigLocation + Path.DirectorySeparatorChar + MultiAdminConfig.ConfigFileName, serverConfig);
+				serverConfig = new MultiAdminConfig(Path.Combine(serverConfigLocation, MultiAdminConfig.ConfigFileName), serverConfig);
 
 				// Set the server config location to the value from the config, this should be empty or null if there is no valid value
 				serverConfigLocation = Utils.GetFullPathSafe(serverConfig.ConfigLocation.Value);
@@ -73,7 +73,7 @@ namespace MultiAdmin
 			// Set port
 			this.port = port;
 
-			logDir = Utils.GetFullPathSafe((string.IsNullOrEmpty(serverDir) ? string.Empty : serverDir + Path.DirectorySeparatorChar) + "logs");
+			logDir = Utils.GetFullPathSafe(Path.Combine(string.IsNullOrEmpty(serverDir) ? string.Empty : serverDir, "logs"));
 
 			// Register all features
 			RegisterFeatures();
@@ -117,7 +117,7 @@ namespace MultiAdmin
 				startDateTime = value;
 
 				// Update related variables
-				LogDirFile = string.IsNullOrEmpty(value) || string.IsNullOrEmpty(logDir) ? null : $"{logDir}{Path.DirectorySeparatorChar}{value}_{{0}}_output_log.txt";
+				LogDirFile = string.IsNullOrEmpty(value) || string.IsNullOrEmpty(logDir) ? null : $"{Path.Combine(logDir, value)}_{{0}}_output_log.txt";
 
 				lock (this)
 				{
@@ -152,7 +152,7 @@ namespace MultiAdmin
 		}
 
 
-		public static readonly string DedicatedDir = Utils.GetFullPathSafe("SCPSL_Data" + Path.DirectorySeparatorChar + "Dedicated");
+		public static readonly string DedicatedDir = Utils.GetFullPathSafe(Path.Combine("SCPSL_Data", "Dedicated"));
 
 		private string sessionId;
 
@@ -165,7 +165,7 @@ namespace MultiAdmin
 				sessionId = value;
 
 				// Update related variables
-				SessionDirectory = string.IsNullOrEmpty(value) ? null : DedicatedDir + Path.DirectorySeparatorChar + value;
+				SessionDirectory = string.IsNullOrEmpty(value) ? null : Path.Combine(DedicatedDir, value);
 			}
 		}
 
@@ -215,16 +215,14 @@ namespace MultiAdmin
 		{
 			if (!Directory.Exists(SessionDirectory))
 			{
-				Write($"Send Message error: Sending {message} failed. \"{SessionDirectory}\" does not exist!");
-				Write("Skipping...");
+				Write($"Send Message error: Sending {message} failed. \"{SessionDirectory}\" does not exist!\nSkipping...");
 				return;
 			}
 
-			string file = $"{SessionDirectory}{Path.DirectorySeparatorChar}cs{logId}.mapi";
+			string file = Path.Combine(SessionDirectory, $"cs{logId}.mapi");
 			if (File.Exists(file))
 			{
-				Write($"Send Message error: Sending {message} failed. \"{file}\" already exists!");
-				Write("Skipping...");
+				Write($"Send Message error: Sending {message} failed. \"{file}\" already exists!\nSkipping...");
 				logId++;
 				return;
 			}
@@ -239,6 +237,38 @@ namespace MultiAdmin
 		#endregion
 
 		#region Server Execution Controls
+
+		public void WriteConfigInformation()
+		{
+			if (!string.IsNullOrEmpty(MultiAdminConfig.GlobalConfigFilePath))
+				Write($"Using global config \"{MultiAdminConfig.GlobalConfigFilePath}\"...");
+
+			if (ServerConfig != null)
+			{
+				foreach (MultiAdminConfig config in ServerConfig.GetConfigHierarchy())
+				{
+					if (!string.IsNullOrEmpty(config?.Config?.ConfigPath) && MultiAdminConfig.GlobalConfigFilePath != config.Config.ConfigPath)
+						Write($"Using server config \"{config.Config.ConfigPath}\"...");
+				}
+			}
+		}
+
+		public string GetExecutablePath()
+		{
+			string scpslExe;
+
+			if (Utils.IsUnix)
+				scpslExe = "SCPSL.x86_64";
+			else if (Utils.IsWindows)
+				scpslExe = "SCPSL.exe";
+			else
+				throw new FileNotFoundException("Invalid OS, can't run executable");
+
+			if (!File.Exists(scpslExe))
+				throw new FileNotFoundException($"Can't find game executable \"{scpslExe}\", the working directory must be the game directory");
+
+			return scpslExe;
+		}
 
 		public void StartServer(bool restartOnCrash = true)
 		{
@@ -258,17 +288,7 @@ namespace MultiAdmin
 				{
 					#region Startup Info Printing & Logging
 
-					if (!string.IsNullOrEmpty(MultiAdminConfig.GlobalConfigFilePath))
-						Write($"Using global config \"{MultiAdminConfig.GlobalConfigFilePath}\"...");
-
-					if (ServerConfig != null)
-					{
-						foreach (MultiAdminConfig config in ServerConfig.GetConfigHierarchy())
-						{
-							if (!string.IsNullOrEmpty(config?.Config?.ConfigPath) && MultiAdminConfig.GlobalConfigFilePath != config.Config.ConfigPath)
-								Write($"Using server config \"{config.Config.ConfigPath}\"...");
-						}
-					}
+					WriteConfigInformation();
 
 					#endregion
 
@@ -281,17 +301,7 @@ namespace MultiAdmin
 					// Init features
 					InitFeatures();
 
-					string scpslExe;
-
-					if (Utils.IsUnix)
-						scpslExe = "SCPSL.x86_64";
-					else if (Utils.IsWindows)
-						scpslExe = "SCPSL.exe";
-					else
-						throw new FileNotFoundException("Invalid OS, can't run executable");
-
-					if (!File.Exists(scpslExe))
-						throw new FileNotFoundException($"Can't find game executable \"{scpslExe}\"");
+					string scpslExe = GetExecutablePath();
 
 					Write($"Executing \"{scpslExe}\"...", ConsoleColor.DarkGreen);
 
@@ -339,14 +349,11 @@ namespace MultiAdmin
 
 					string argsString = string.Join(" ", scpslArgs);
 
-					Write("Starting server with the following parameters:");
-					Write(scpslExe + " " + argsString);
+					Write($"Starting server with the following parameters:\n{scpslExe} {argsString}");
 
 					ProcessStartInfo startInfo = new ProcessStartInfo(scpslExe, argsString);
 
-					foreach (Feature f in features)
-						if (f is IEventServerPreStart eventPreStart)
-							eventPreStart.OnServerPreStart();
+					ForEachHandler<IEventServerPreStart>(eventPreStart => eventPreStart.OnServerPreStart());
 
 					// Start the input reader
 					Thread inputHandlerThread = new Thread(() => InputHandler.Write(this));
@@ -380,9 +387,7 @@ namespace MultiAdmin
 						default:
 							Status = ServerStatus.StoppedUnexpectedly;
 
-							foreach (Feature f in features)
-								if (f is IEventCrash eventCrash)
-									eventCrash.OnCrash();
+							ForEachHandler<IEventCrash>(eventCrash => eventCrash.OnCrash());
 
 							Write("Game engine exited unexpectedly", ConsoleColor.Red);
 
@@ -407,16 +412,33 @@ namespace MultiAdmin
 					SessionId = null;
 					StartDateTime = null;
 
-					if (shouldRestart) Write("Restarting server with a new Session ID...");
+					if (shouldRestart) Write("Restarting server...");
 				}
 				catch (Exception e)
 				{
-					Write("Failed - Executable file not found or config issue! Waiting for 1 second before continuing...", ConsoleColor.Red);
 					Write(e.Message, ConsoleColor.Red);
-
 					Program.LogDebugException(nameof(StartServer), e);
 
-					Thread.Sleep(1000);
+					// If the server should try to start up again
+					if (ServerConfig.ServerStartRetry.Value)
+					{
+						shouldRestart = true;
+
+						int waitDelayMs = ServerConfig.ServerStartRetryDelay.Value;
+						if (waitDelayMs > 0)
+						{
+							Write($"Startup failed! Waiting for {waitDelayMs} ms before retrying...", ConsoleColor.Red);
+							Thread.Sleep(waitDelayMs);
+						}
+						else
+						{
+							Write("Startup failed! Retrying...", ConsoleColor.Red);
+						}
+					}
+					else
+					{
+						Write("Startup failed! Exiting...", ConsoleColor.Red);
+					}
 				}
 				finally
 				{
@@ -429,15 +451,14 @@ namespace MultiAdmin
 		{
 			if (!IsRunning) throw new Exceptions.ServerNotRunningException();
 
+			// If the game is loading, it won't accept the safe quit command
 			if (IsLoading)
 				killGame = true;
 
 			initStopTimeoutTime = DateTime.Now;
 			Status = killGame ? ServerStatus.ForceStopping : ServerStatus.Stopping;
 
-			foreach (Feature f in features)
-				if (f is IEventServerStop stopEvent)
-					stopEvent.OnServerStop();
+			ForEachHandler<IEventServerStop>(stopEvent => stopEvent.OnServerStop());
 
 			if (killGame && IsGameProcessRunning)
 				GameProcess.Kill();
@@ -464,7 +485,7 @@ namespace MultiAdmin
 
 		#endregion
 
-		#region Feature Registration and Initialization
+		#region Feature Registration, Initialization, and Execution
 
 		private void RegisterFeature(Feature feature)
 		{
@@ -475,8 +496,24 @@ namespace MultiAdmin
 					break;
 
 				case ICommand command:
-					commands.Add(command.GetCommand().ToLower().Trim(), command);
+				{
+					string commandKey = command.GetCommand().ToLower().Trim();
+
+					// If the command was already registered
+					if (commands.ContainsKey(commandKey))
+					{
+						string message = $"Warning, {nameof(MultiAdmin)} tried to register duplicate command \"{commandKey}\"";
+
+						Program.LogDebug(nameof(RegisterFeature), message);
+						Write(message);
+					}
+					else
+					{
+						commands.Add(commandKey, command);
+					}
+
 					break;
+				}
 			}
 
 			features.Add(feature);
@@ -520,6 +557,13 @@ namespace MultiAdmin
 			}
 		}
 
+		public void ForEachHandler<T>(Action<T> action) where T : IMAEvent
+		{
+			foreach (Feature feature in features)
+				if (feature is T eventHandler)
+					action.Invoke(eventHandler);
+		}
+
 		#endregion
 
 		#region Session Directory Management
@@ -529,15 +573,11 @@ namespace MultiAdmin
 			try
 			{
 				Directory.CreateDirectory(SessionDirectory);
-				Write("Started new session.", ConsoleColor.DarkGreen);
+				Write($"Started new session \"{SessionId}\"", ConsoleColor.DarkGreen);
 			}
-			catch
+			catch (Exception e)
 			{
-				Write($"Failed - Please close all open files in \"{DedicatedDir}\" and restart the server!",
-					ConsoleColor.Red);
-				Write("Press any key to close...", ConsoleColor.DarkGray);
-				Console.ReadKey(true);
-				Process.GetCurrentProcess().Kill();
+				throw new UnauthorizedAccessException($"Unable to create directory \"{SessionDirectory}\", make sure that {nameof(MultiAdmin)} has access to \"{DedicatedDir}\"\n{e}");
 			}
 		}
 
@@ -557,12 +597,12 @@ namespace MultiAdmin
 					catch (UnauthorizedAccessException e)
 					{
 						Program.LogDebugException(nameof(CleanSession), e);
-						Thread.Sleep(5);
+						Thread.Sleep(8);
 					}
 					catch (Exception e)
 					{
 						Program.LogDebugException(nameof(CleanSession), e);
-						Thread.Sleep(2);
+						Thread.Sleep(5);
 					}
 				}
 			}
@@ -586,12 +626,12 @@ namespace MultiAdmin
 					catch (UnauthorizedAccessException e)
 					{
 						Program.LogDebugException(nameof(DeleteSession), e);
-						Thread.Sleep(5);
+						Thread.Sleep(8);
 					}
 					catch (Exception e)
 					{
 						Program.LogDebugException(nameof(DeleteSession), e);
-						Thread.Sleep(2);
+						Thread.Sleep(5);
 					}
 				}
 			}
@@ -728,7 +768,7 @@ namespace MultiAdmin
 			}
 			catch (Exception e)
 			{
-				Write(new ColoredMessage[] {new ColoredMessage("Error while copying files and folders:", ConsoleColor.Red), new ColoredMessage(e.ToString(), ConsoleColor.Red)});
+				Write($"Error while copying files and folders:\n{e}", ConsoleColor.Red);
 			}
 
 			return false;

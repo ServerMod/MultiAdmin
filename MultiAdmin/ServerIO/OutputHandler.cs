@@ -119,9 +119,7 @@ namespace MultiAdmin.ServerIO
 
 			if (!isRead)
 			{
-				server.Write(
-					$"Message printer warning: Could not {command} {file}. Make sure that MultiAdmin has all necessary read-write permissions.");
-				server.Write("Skipping...");
+				server.Write($"Message printer warning: Could not {command} \"{file}\". Make sure that {nameof(MultiAdmin)} has all necessary read-write permissions\nSkipping...");
 
 				return;
 			}
@@ -132,10 +130,11 @@ namespace MultiAdmin.ServerIO
 			if (stream.EndsWith(Environment.NewLine))
 				stream = stream.Substring(0, stream.Length - Environment.NewLine.Length);
 
-			if (stream.Contains("LOGTYPE"))
+			int logTypeIndex = stream.IndexOf("LOGTYPE");
+			if (logTypeIndex >= 0)
 			{
-				string type = stream.Substring(stream.IndexOf("LOGTYPE")).Trim();
-				stream = stream.Substring(0, stream.IndexOf("LOGTYPE")).Trim();
+				string type = stream.Substring(logTypeIndex).Trim();
+				stream = stream.Substring(0, logTypeIndex).Trim();
 
 				switch (type)
 				{
@@ -199,9 +198,7 @@ namespace MultiAdmin.ServerIO
 			}
 
 			if (stream.Contains("Mod Log:"))
-				foreach (Feature f in server.features)
-					if (f is IEventAdminAction adminAction)
-						adminAction.OnAdminAction(stream.Replace("Mod Log:", string.Empty));
+				server.ForEachHandler<IEventAdminAction>(adminAction => adminAction.OnAdminAction(stream.Replace("Mod Log:", string.Empty)));
 
 			if (stream.Contains("ServerMod - Version"))
 			{
@@ -217,17 +214,13 @@ namespace MultiAdmin.ServerIO
 			}
 
 			if (stream.Contains("Round restarting"))
-				foreach (Feature f in server.features)
-					if (f is IEventRoundEnd roundEnd)
-						roundEnd.OnRoundEnd();
+				server.ForEachHandler<IEventRoundEnd>(roundEnd => roundEnd.OnRoundEnd());
 
 			if (stream.Contains("Waiting for players"))
 			{
 				server.IsLoading = false;
 
-				foreach (Feature f in server.features)
-					if (f is IEventWaitingForPlayers waitingForPlayers)
-						waitingForPlayers.OnWaitingForPlayers();
+				server.ForEachHandler<IEventWaitingForPlayers>(waitingForPlayers => waitingForPlayers.OnWaitingForPlayers());
 
 				if (fixBuggedPlayers)
 				{
@@ -237,31 +230,24 @@ namespace MultiAdmin.ServerIO
 			}
 
 			if (stream.Contains("New round has been started"))
-				foreach (Feature f in server.features)
-					if (f is IEventRoundStart roundStart)
-						roundStart.OnRoundStart();
+				server.ForEachHandler<IEventRoundStart>(roundStart => roundStart.OnRoundStart());
 
 			if (stream.Contains("Level loaded. Creating match..."))
-				foreach (Feature f in server.features)
-					if (f is IEventServerStart serverStart)
-						serverStart.OnServerStart();
+				server.ForEachHandler<IEventServerStart>(serverStart => serverStart.OnServerStart());
 
 			if (stream.Contains("Server full"))
-				foreach (Feature f in server.features)
-					if (f is IEventServerFull serverFull)
-						serverFull.OnServerFull();
+				server.ForEachHandler<IEventServerFull>(serverFull => serverFull.OnServerFull());
 
 			if (stream.Contains("Player connect"))
 			{
 				display = false;
 				server.Log("Player connect event");
-				foreach (Feature f in server.features)
+
+				int index = stream.IndexOf(":");
+				if (index >= 0)
 				{
-					if (f is IEventPlayerConnect playerConnect)
-					{
-						string name = stream.Substring(stream.IndexOf(":"));
-						playerConnect.OnPlayerConnect(name);
-					}
+					string name = stream.Substring(index);
+					server.ForEachHandler<IEventPlayerConnect>(playerConnect => playerConnect.OnPlayerConnect(name));
 				}
 			}
 
@@ -269,13 +255,12 @@ namespace MultiAdmin.ServerIO
 			{
 				display = false;
 				server.Log("Player disconnect event");
-				foreach (Feature f in server.features)
+
+				int index = stream.IndexOf(":");
+				if (index >= 0)
 				{
-					if (f is IEventPlayerDisconnect playerDisconnect)
-					{
-						string name = stream.Substring(stream.IndexOf(":"));
-						playerDisconnect.OnPlayerDisconnect(name);
-					}
+					string name = stream.Substring(index);
+					server.ForEachHandler<IEventPlayerDisconnect>(playerDisconnect => playerDisconnect.OnPlayerDisconnect(name));
 				}
 			}
 

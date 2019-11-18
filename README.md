@@ -96,6 +96,8 @@ safe_shutdown_check_delay | Integer | 100 | The time in milliseconds between che
 safe_shutdown_timeout | Integer | 10000 | The time in milliseconds before MultiAdmin gives up on safely shutting down a server
 server_restart_timeout | Double | 10 | The time in seconds before MultiAdmin forces a server restart if it doesn't respond to the regular restart command
 server_stop_timeout | Double | 10 | The time in seconds before MultiAdmin forces a server shutdown if it doesn't respond to the regular shutdown command
+server_start_retry | Boolean | True | Whether to try to start the server again after crashing
+server_start_retry_delay | Integer | 10000 | The time in milliseconds to wait before trying to start the server again after crashing
 servers_folder | String | servers | The location of the `servers` folder for MultiAdmin to load multiple server configurations from
 set_title_bar | Boolean | True | Whether to set the console window's titlebar, if false, this feature won't be used
 shutdown_when_empty_for | Integer | -1 | Shutdown the server once a round hasn't started in a number of seconds

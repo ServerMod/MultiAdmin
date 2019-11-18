@@ -1,43 +1,51 @@
 namespace MultiAdmin
 {
-	public interface IEventServerPreStart
+	public interface IMAEvent
+	{
+	}
+
+	public interface IEventServerPreStart: IMAEvent
 	{
 		void OnServerPreStart();
 	}
 
-	public interface IEventServerStart
+	public interface IEventServerStart: IMAEvent
 	{
 		void OnServerStart();
 	}
 
-	public interface IEventServerStop
+	public interface IEventServerStop: IMAEvent
 	{
 		void OnServerStop();
 	}
 
-	public interface IEventRoundEnd
+	public interface IEventRoundEnd: IMAEvent
 	{
 		void OnRoundEnd();
 	}
 
-	public interface IEventWaitingForPlayers
+	public interface IEventWaitingForPlayers: IMAEvent
 	{
 		void OnWaitingForPlayers();
 	}
 
-	public interface IEventRoundStart
+	public interface IEventRoundStart: IMAEvent
 	{
 		void OnRoundStart();
 	}
 
-	public interface IEventCrash
+	public interface IEventCrash: IMAEvent
 	{
 		void OnCrash();
 	}
 
-	public interface IEventTick
+	public interface IEventTick: IMAEvent
 	{
 		void OnTick();
+	}
+
+	public interface IServerMod: IMAEvent
+	{
 	}
 
 	public interface IEventServerFull : IServerMod
@@ -58,10 +66,6 @@ namespace MultiAdmin
 	public interface IEventAdminAction : IServerMod
 	{
 		void OnAdminAction(string message);
-	}
-
-	public interface IServerMod
-	{
 	}
 
 	public interface ICommand

@@ -15,13 +15,13 @@ namespace MultiAdmin
 {
 	public static class Program
 	{
-		public const string MaVersion = "3.2.3.1";
-		public const string RecommendedMonoVersion = "5.18.0";
+		public const string MaVersion = "3.2.4.3";
+		public const string RecommendedMonoVersion = "5.18";
 
 		private static readonly List<Server> InstantiatedServers = new List<Server>();
 
 		private static readonly string MaDebugLogDir = Utils.GetFullPathSafe("logs");
-		private static readonly string MaDebugLogFile = !string.IsNullOrEmpty(MaDebugLogDir) ? Utils.GetFullPathSafe($"{MaDebugLogDir}{Path.DirectorySeparatorChar}{Utils.DateTime}_MA_{MaVersion}_debug_log.txt") : null;
+		private static readonly string MaDebugLogFile = !string.IsNullOrEmpty(MaDebugLogDir) ? Utils.GetFullPathSafe(Path.Combine(MaDebugLogDir, $"{Utils.DateTime}_MA_{MaVersion}_debug_log.txt")) : null;
 
 		private static uint? portArg;
 
@@ -178,7 +178,8 @@ namespace MultiAdmin
 
 			Headless = GetFlagFromArgs("headless", "h");
 
-			CheckMonoVersion();
+			if (!Headless)
+				CheckMonoVersion();
 
 			string serverIdArg = GetParamFromArgs("server-id", "id");
 			string configArg = GetParamFromArgs("config", "c");
@@ -372,11 +373,11 @@ namespace MultiAdmin
 			return serverProcess;
 		}
 
-		private static bool IsVersionFormat(string input)
+		private static bool IsVersionFormat(string input, char separator = '.')
 		{
 			foreach (char character in input)
 			{
-				if (!char.IsNumber(character) && character != '.')
+				if (!char.IsNumber(character) && character != separator)
 					return false;
 			}
 
@@ -388,17 +389,17 @@ namespace MultiAdmin
 			try
 			{
 				string monoVersionRaw = Type.GetType("Mono.Runtime")?.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static)?.Invoke(null, null)?.ToString();
-				string monoVersion = monoVersionRaw?.Split(' ').FirstOrDefault(IsVersionFormat);
+				string monoVersion = monoVersionRaw?.Split(' ').FirstOrDefault(version => IsVersionFormat(version));
 
 				if (string.IsNullOrEmpty(monoVersion))
 					return;
 
 				int versionDifference = Utils.CompareVersionStrings(monoVersion, RecommendedMonoVersion);
 
-				if (versionDifference >= 0 && (versionDifference != 0 || monoVersion.Length >= RecommendedMonoVersion.Length))
+				if (versionDifference >= 0)
 					return;
 
-				Write($"Warning: Your Mono version ({monoVersion}) is below the recommended version ({RecommendedMonoVersion})", ConsoleColor.Red);
+				Write($"Warning: Your Mono version ({monoVersion}) is below the minimum recommended version ({RecommendedMonoVersion})", ConsoleColor.Red);
 				Write("Please update your Mono installation: https://www.mono-project.com/download/stable/", ConsoleColor.Red);
 			}
 			catch (Exception e)

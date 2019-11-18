@@ -56,7 +56,7 @@ namespace MultiAdmin.Utility
 
 		private const char WildCard = '*';
 
-		public static bool StringMatches(string input, string pattern)
+		public static bool StringMatches(string input, string pattern, char wildCard = WildCard)
 		{
 			if (input == null && pattern == null)
 				return true;
@@ -64,7 +64,7 @@ namespace MultiAdmin.Utility
 			if (pattern == null)
 				return false;
 
-			if (!pattern.IsEmpty() && pattern == new string(WildCard, pattern.Length))
+			if (!pattern.IsEmpty() && pattern == new string(wildCard, pattern.Length))
 				return true;
 
 			if (input == null)
@@ -76,7 +76,7 @@ namespace MultiAdmin.Utility
 			if (input.IsEmpty() || pattern.IsEmpty())
 				return false;
 
-			string[] wildCardSections = pattern.Split(WildCard);
+			string[] wildCardSections = pattern.Split(wildCard);
 
 			int matchIndex = 0;
 			foreach (string wildCardSection in wildCardSections)
@@ -90,10 +90,15 @@ namespace MultiAdmin.Utility
 				if (matchIndex < 0 || matchIndex >= input.Length)
 					return false;
 
-				Program.LogDebug(nameof(StringMatches), $"Matching \"{wildCardSection}\" with \"{input.Substring(matchIndex)}\"...");;
+				Program.LogDebug(nameof(StringMatches), $"Matching \"{wildCardSection}\" with \"{input.Substring(matchIndex)}\"...");
 
-				if (matchIndex <= 0 && pattern[0] != WildCard)
+				if (matchIndex <= 0 && pattern[0] != wildCard)
 				{
+					// If the rest of the input string isn't at least as long as the section to match
+					if (input.Length - matchIndex < wildCardSection.Length)
+						return false;
+
+					// If the input doesn't match this section of the pattern
 					if (!input.Equals(wildCardSection, matchIndex, wildCardSection.Length))
 						return false;
 
@@ -169,31 +174,67 @@ namespace MultiAdmin.Utility
 			CopyAll(new DirectoryInfo(source), new DirectoryInfo(target), fileWhitelist, fileBlacklist);
 		}
 
-		public static int CompareVersionStrings(string firstVersion, string secondVersion)
+		public static int[] StringArrayToIntArray(string[] stringArray)
+		{
+			lock (stringArray)
+			{
+				int[] intArray = new int[stringArray.Length];
+
+				for (int i = 0; i < stringArray.Length; i++)
+				{
+					if (!int.TryParse(stringArray[i], out int intValue))
+						continue;
+
+					intArray[i] = intValue;
+				}
+
+				return intArray;
+			}
+		}
+
+		/// <summary>
+		/// Compares <paramref name="firstVersion"/> to <paramref name="secondVersion"/>
+		/// </summary>
+		/// <param name="firstVersion">The version string to compare</param>
+		/// <param name="secondVersion">The version string to compare to</param>
+		/// <param name="separator">The separator character between version numbers</param>
+		/// <returns>
+		/// Returns 1 if <paramref name="firstVersion"/> is greater than (or longer if equal) <paramref name="secondVersion"/>,
+		/// 0 if <paramref name="firstVersion"/> is exactly equal to <paramref name="secondVersion"/>,
+		/// and -1 if <paramref name="firstVersion"/> is less than (or shorter if equal) <paramref name="secondVersion"/>
+		/// </returns>
+		public static int CompareVersionStrings(string firstVersion, string secondVersion, char separator = '.')
 		{
 			if (firstVersion == null || secondVersion == null)
 				return -1;
 
-			string[] firstVersionNums = firstVersion.Split('.');
-			string[] secondVersionNums = secondVersion.Split('.');
+			int[] firstVersionNums = StringArrayToIntArray(firstVersion.Split(separator));
+			int[] secondVersionNums = StringArrayToIntArray(secondVersion.Split(separator));
 			int minVersionLength = Math.Min(firstVersionNums.Length, secondVersionNums.Length);
 
+			// Compare version numbers
 			for (int i = 0; i < minVersionLength; i++)
 			{
-				if (!int.TryParse(firstVersionNums[i], out int first) || !int.TryParse(secondVersionNums[i], out int second))
-					continue;
-
-				if (first > second)
+				if (firstVersionNums[i] > secondVersionNums[i])
 				{
 					return 1;
 				}
 
-				if (first < second)
+				if (firstVersionNums[i] < secondVersionNums[i])
 				{
 					return -1;
 				}
 			}
 
+			// If all the numbers are the same
+
+			// Compare version lengths
+			if (firstVersionNums.Length > secondVersionNums.Length)
+				return 1;
+			if (firstVersionNums.Length < secondVersionNums.Length)
+				return -1;
+
+			// If the versions are perfectly identical, return 0
 			return 0;
 		}
 	}
