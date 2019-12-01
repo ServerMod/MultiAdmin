@@ -175,9 +175,11 @@ namespace MultiAdmin
 
 		private void MainLoop()
 		{
+			Stopwatch timer = new Stopwatch();
 			while (IsGameProcessRunning)
 			{
-				Stopwatch timer = Stopwatch.StartNew();
+				timer.Reset();
+				timer.Start();
 
 				foreach (IEventTick tickEvent in tick) tickEvent.OnTick();
 
@@ -345,13 +347,19 @@ namespace MultiAdmin
 						scpslArgs.Add($"-configpath \"{configLocation}\"");
 					}
 
+					string appDataPath = ServerConfig.AppDataLocation.Value;
+					if (!string.IsNullOrEmpty(appDataPath))
+					{
+						scpslArgs.Add($"-appdatapath \"{appDataPath}\"");
+					}
+
 					scpslArgs.RemoveAll(string.IsNullOrEmpty);
 
 					string argsString = string.Join(" ", scpslArgs);
 
 					Write($"Starting server with the following parameters:\n{scpslExe} {argsString}");
 
-					ProcessStartInfo startInfo = new ProcessStartInfo(scpslExe, argsString);
+					ProcessStartInfo startInfo = new ProcessStartInfo(scpslExe, argsString) {CreateNoWindow = true};
 
 					ForEachHandler<IEventServerPreStart>(eventPreStart => eventPreStart.OnServerPreStart());
 
