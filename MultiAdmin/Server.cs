@@ -347,7 +347,7 @@ namespace MultiAdmin
 						scpslArgs.Add($"-configpath \"{configLocation}\"");
 					}
 
-					string appDataPath = ServerConfig.AppDataLocation.Value;
+					string appDataPath = Utils.GetFullPathSafe(ServerConfig.AppDataLocation.Value);
 					if (!string.IsNullOrEmpty(appDataPath))
 					{
 						scpslArgs.Add($"-appdatapath \"{appDataPath}\"");
