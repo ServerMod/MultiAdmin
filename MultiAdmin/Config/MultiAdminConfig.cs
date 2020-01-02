@@ -18,6 +18,10 @@ namespace MultiAdmin.Config
 			new ConfigEntry<string>("config_location", "", false,
 				"Config Location", "The default location for the game to use for storing configuration files (a directory)");
 
+		public ConfigEntry<string> AppDataLocation { get; } =
+			new ConfigEntry<string>("appdata_location", "",
+				"AppData Location", "The location for the game to use for AppData (a directory)");
+
 		public ConfigEntry<bool> DisableConfigValidation { get; } =
 			new ConfigEntry<bool>("disable_config_validation", false,
 				"Disable Config Validation", "Disable the config validator");

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 using MultiAdmin.ConsoleTools;
@@ -45,6 +46,12 @@ namespace MultiAdmin.ServerIO
 
 		public static StringSections FromString(string fullString, int sectionLength, ColoredMessage leftIndicator = null, ColoredMessage rightIndicator = null, ColoredMessage sectionBase = null)
 		{
+			int rightIndicatorLength = rightIndicator?.Length ?? 0;
+			int totalIndicatorLength = (leftIndicator?.Length ?? 0) + rightIndicatorLength;
+
+			if (fullString.Length > sectionLength && sectionLength <= totalIndicatorLength)
+				throw new ArgumentException($"{nameof(sectionLength)} must be greater than the total length of {nameof(leftIndicator)} and {nameof(rightIndicator)}", nameof(sectionLength));
+
 			List<StringSection> sections = new List<StringSection>();
 
 			if (string.IsNullOrEmpty(fullString))
@@ -65,12 +72,12 @@ namespace MultiAdmin.ServerIO
 				curSecBuilder.Append(fullString[i]);
 
 				// If the section is less than the smallest possible section size, skip processing
-				if (curSecBuilder.Length < sectionLength - ((leftIndicator?.Length ?? 0) + (rightIndicator?.Length ?? 0))) continue;
+				if (curSecBuilder.Length < sectionLength - totalIndicatorLength) continue;
 
 				// Decide what the left indicator text should be accounting for the leftmost section
 				ColoredMessage leftIndicatorSection = sections.Count > 0 ? leftIndicator : null;
 				// Decide what the right indicator text should be accounting for the rightmost section
-				ColoredMessage rightIndicatorSection = i < fullString.Length - (1 + (rightIndicator?.Length ?? 0)) ? rightIndicator : null;
+				ColoredMessage rightIndicatorSection = i < fullString.Length - (1 + rightIndicatorLength) ? rightIndicator : null;
 
 				// Check the section length against the final section length
 				if (curSecBuilder.Length >= sectionLength - ((leftIndicatorSection?.Length ?? 0) + (rightIndicatorSection?.Length ?? 0)))

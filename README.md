@@ -66,6 +66,7 @@ Any configuration files within the directory defined by `servers_folder` will ha
 Config Option | Value Type | Default Value | Description
 --- | :---: | :---: | :------:
 config_location | String | **Empty** | The default location for the game to use for storing configuration files (a directory)
+appdata_location | String | **Empty** | The location for the game to use for AppData (a directory)
 disable_config_validation | Boolean | False | Disable the config validator
 share_non_configs | Boolean | True | Makes all files other than the config files store in AppData
 multiadmin_nolog | Boolean | False | Disable logging to file

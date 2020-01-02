@@ -1,4 +1,3 @@
-using System;
 using MultiAdmin.Features.Attributes;
 
 namespace MultiAdmin.Features
