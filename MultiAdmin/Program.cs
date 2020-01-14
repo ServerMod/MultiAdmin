@@ -362,11 +362,7 @@ namespace MultiAdmin
 
 			string stringArgs = string.Join(" ", args);
 
-			ProcessStartInfo startInfo = new ProcessStartInfo(assemblyLocation, stringArgs)
-			{
-				CreateNoWindow = true,
-				UseShellExecute = false
-			};
+			ProcessStartInfo startInfo = new ProcessStartInfo(assemblyLocation, stringArgs);
 
 			Write($"Launching \"{startInfo.FileName}\" with arguments \"{startInfo.Arguments}\"...");
 
