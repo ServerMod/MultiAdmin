@@ -359,7 +359,11 @@ namespace MultiAdmin
 
 					Write($"Starting server with the following parameters:\n{scpslExe} {argsString}");
 
-					ProcessStartInfo startInfo = new ProcessStartInfo(scpslExe, argsString) {CreateNoWindow = true};
+					ProcessStartInfo startInfo = new ProcessStartInfo(scpslExe, argsString)
+					{
+						CreateNoWindow = true,
+						UseShellExecute = false
+					};
 
 					ForEachHandler<IEventServerPreStart>(eventPreStart => eventPreStart.OnServerPreStart());
 

@@ -57,7 +57,7 @@ namespace MultiAdmin.Features
 
 		public override void Init()
 		{
-			playerCount = -1; // -1 for the "server" player, once the server starts this will increase to 0.
+			playerCount = 0; // -1 for the "server" player, once the server starts this will increase to 0.
 			UpdateTitlebar();
 		}
 
@@ -91,6 +91,8 @@ namespace MultiAdmin.Features
 			}
 
 			titleBar.Add($"{displayPlayerCount}/{maxPlayers}");
+
+			titleBar.Add($"Port: {Server.port}");
 
 			if (Server.hasServerMod && !string.IsNullOrEmpty(Server.serverModVersion))
 			{
