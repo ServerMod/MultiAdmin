@@ -13,7 +13,7 @@ namespace MultiAdmin.Features
 
 		public string GetCommandDescription()
 		{
-			return "Restarts the server at the end of this round [Requires ServerMod]";
+			return "Restarts the server at the end of this round [Requires Modding]";
 		}
 
 
@@ -53,7 +53,7 @@ namespace MultiAdmin.Features
 
 		public override string GetFeatureDescription()
 		{
-			return "Restarts the server after the current round ends [Requires ServerMod]";
+			return "Restarts the server after the current round ends [Requires Modding]";
 		}
 
 		public override string GetFeatureName()

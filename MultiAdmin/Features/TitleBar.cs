@@ -31,8 +31,7 @@ namespace MultiAdmin.Features
 
 		public override string GetFeatureDescription()
 		{
-			return
-				"Updates the title bar with instance based information, such as console port and player count [Requires ServerMod to function fully]";
+			return "Updates the title bar with instance based information";
 		}
 
 		public override string GetFeatureName()

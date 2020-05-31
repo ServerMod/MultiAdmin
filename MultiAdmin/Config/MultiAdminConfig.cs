@@ -102,10 +102,6 @@ namespace MultiAdmin.Config
 			new ConfigEntry<decimal>("restart_low_memory_roundend", 450,
 				"Restart Low Memory Round-End", "Restart at the end of the round if the game's remaining memory falls below this value in megabytes");
 
-		public ConfigEntry<int> MaxPlayers { get; } =
-			new ConfigEntry<int>("max_players", 20,
-				"Max Players", "The number of players to display as the maximum for the server (within MultiAdmin, not in-game)");
-
 		public ConfigEntry<bool> RandomInputColors { get; } =
 			new ConfigEntry<bool>("random_input_colors", false,
 				"Random Input Colors", "Randomize the new input system's colors every time a message is input");
@@ -156,7 +152,7 @@ namespace MultiAdmin.Config
 
 		public ConfigEntry<string> StartConfigOnFull { get; } =
 			new ConfigEntry<string>("start_config_on_full", "",
-				"Start Config on Full", "Start server with this config folder once the server becomes full [Requires ServerMod]");
+				"Start Config on Full", "Start server with this config folder once the server becomes full [Requires Modding]");
 
 		#endregion
 

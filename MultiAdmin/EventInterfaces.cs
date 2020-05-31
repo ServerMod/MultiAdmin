@@ -44,14 +44,11 @@ namespace MultiAdmin
 		void OnTick();
 	}
 
-	public interface IServerMod : IMAEvent
-	{
-	}
-
-	public interface IEventServerFull : IServerMod
+	public interface IEventServerFull : IMAEvent
 	{
 		void OnServerFull();
 	}
+
 	public interface ICommand
 	{
 		void OnCall(string[] args);

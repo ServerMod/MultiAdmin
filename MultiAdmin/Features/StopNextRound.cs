@@ -14,7 +14,7 @@ namespace MultiAdmin.Features
 
 		public string GetCommandDescription()
 		{
-			return "Stops the server at the end of this round [Requires ServerMod]";
+			return "Stops the server at the end of this round [Requires Modding]";
 		}
 
 		public void OnCall(string[] args)
@@ -57,7 +57,7 @@ namespace MultiAdmin.Features
 
 		public override string GetFeatureDescription()
 		{
-			return "Stops the server after the current round ends [Requires ServerMod]";
+			return "Stops the server after the current round ends [Requires Modding]";
 		}
 
 		public override string GetFeatureName()
