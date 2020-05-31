@@ -68,12 +68,6 @@ namespace MultiAdmin.ConsoleTools
 			return message;
 		}
 
-		public static List<ColoredMessage> ClearConsoleLine(List<ColoredMessage> message)
-		{
-			ClearConsoleLine(message?.GetText());
-			return message;
-		}
-
 		#endregion
 	}
 }

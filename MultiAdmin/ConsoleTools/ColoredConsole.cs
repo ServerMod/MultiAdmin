@@ -178,47 +178,47 @@ namespace MultiAdmin.ConsoleTools
 		}
 	}
 
-	public static class ColoredMessageEnumerableExtensions
+	public static class ColoredMessageArrayExtensions
 	{
-		private static string JoinTextIgnoreNull(IEnumerable<object> objects)
+		private static string JoinTextIgnoreNull(ColoredMessage[] coloredMessages)
 		{
 			StringBuilder builder = new StringBuilder(string.Empty);
 
-			foreach (object o in objects)
+			foreach (ColoredMessage coloredMessage in coloredMessages)
 			{
-				if (o != null)
-					builder.Append(o);
+				if (coloredMessage != null)
+					builder.Append(coloredMessage);
 			}
 
 			return builder.ToString();
 		}
 
-		public static string GetText(this IEnumerable<ColoredMessage> message)
+		public static string GetText(this ColoredMessage[] message)
 		{
 			return JoinTextIgnoreNull(message);
 		}
 
-		public static void Write(this IEnumerable<ColoredMessage> message, bool clearConsoleLine = false)
+		public static void Write(this ColoredMessage[] message, bool clearConsoleLine = false)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
-				ColoredConsole.Write(clearConsoleLine ? ConsoleUtils.ClearConsoleLine(message.ToArray()) : message.ToArray());
+				ColoredConsole.Write(clearConsoleLine ? ConsoleUtils.ClearConsoleLine(message) : message);
 			}
 		}
 
-		public static void WriteLine(this IEnumerable<ColoredMessage> message, bool clearConsoleLine = false)
+		public static void WriteLine(this ColoredMessage[] message, bool clearConsoleLine = false)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
-				ColoredConsole.WriteLine(clearConsoleLine ? ConsoleUtils.ClearConsoleLine(message.ToArray()) : message.ToArray());
+				ColoredConsole.WriteLine(clearConsoleLine ? ConsoleUtils.ClearConsoleLine(message) : message);
 			}
 		}
 
-		public static void WriteLines(this IEnumerable<ColoredMessage> message, bool clearConsoleLine = false)
+		public static void WriteLines(this ColoredMessage[] message, bool clearConsoleLine = false)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
-				ColoredConsole.WriteLines(clearConsoleLine ? ConsoleUtils.ClearConsoleLine(message.ToArray()) : message.ToArray());
+				ColoredConsole.WriteLines(clearConsoleLine ? ConsoleUtils.ClearConsoleLine(message) : message);
 			}
 		}
 	}
