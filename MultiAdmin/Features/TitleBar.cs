@@ -5,11 +5,8 @@ using MultiAdmin.Features.Attributes;
 namespace MultiAdmin.Features
 {
 	[Feature]
-	internal class Titlebar : Feature, IEventPlayerConnect, IEventPlayerDisconnect, IEventServerStart
+	internal class Titlebar : Feature, IEventServerStart
 	{
-		private int maxPlayers;
-		private int playerCount;
-
 		private int ServerProcessId
 		{
 			get
@@ -25,18 +22,6 @@ namespace MultiAdmin.Features
 
 		public Titlebar(Server server) : base(server)
 		{
-		}
-
-		public void OnPlayerConnect(string name)
-		{
-			playerCount++;
-			UpdateTitlebar();
-		}
-
-		public void OnPlayerDisconnect(string name)
-		{
-			playerCount--;
-			UpdateTitlebar();
 		}
 
 		public void OnServerStart()
@@ -57,21 +42,17 @@ namespace MultiAdmin.Features
 
 		public override void Init()
 		{
-			playerCount = -1; // -1 for the "server" player, once the server starts this will increase to 0.
 			UpdateTitlebar();
 		}
 
 		public override void OnConfigReload()
 		{
-			maxPlayers = Server.ServerConfig.MaxPlayers.Value;
 			UpdateTitlebar();
 		}
 
 		private void UpdateTitlebar()
 		{
 			if (Program.Headless || !Server.ServerConfig.SetTitleBar.Value) return;
-
-			int displayPlayerCount = playerCount < 0 ? 0 : playerCount;
 
 			List<string> titleBar = new List<string> {$"MultiAdmin {Program.MaVersion}"};
 
@@ -88,13 +69,6 @@ namespace MultiAdmin.Features
 			if (Server.IsGameProcessRunning)
 			{
 				titleBar.Add($"PID: {ServerProcessId}");
-			}
-
-			titleBar.Add($"{displayPlayerCount}/{maxPlayers}");
-
-			if (Server.hasServerMod && !string.IsNullOrEmpty(Server.serverModVersion))
-			{
-				titleBar.Add(string.IsNullOrEmpty(Server.serverModBuild) ? $"SMod {Server.serverModVersion}" : $"SMod {Server.serverModVersion}-{Server.serverModBuild}");
 			}
 
 			try

@@ -31,11 +31,6 @@ namespace MultiAdmin
 		public readonly string serverDir;
 		public readonly string logDir;
 
-		public bool hasServerMod;
-
-		public string serverModBuild;
-		public string serverModVersion;
-
 		private DateTime initStopTimeoutTime;
 		private DateTime initRestartTimeoutTime;
 
@@ -71,7 +66,7 @@ namespace MultiAdmin
 			// Set port
 			this.port = port;
 
-			logDir = Utils.GetFullPathSafe(Path.Combine(string.IsNullOrEmpty(serverDir) ? string.Empty : serverDir, "logs"));
+			logDir = Utils.GetFullPathSafe(Path.Combine(string.IsNullOrEmpty(serverDir) ? string.Empty : serverDir, serverConfig.LogLocation.Value));
 
 			// Register all features
 			RegisterFeatures();
@@ -455,15 +450,8 @@ namespace MultiAdmin
 			initRestartTimeoutTime = DateTime.Now;
 			Status = ServerStatus.Restarting;
 
-			if (hasServerMod)
-			{
-				SendMessage("RECONNECTRS");
-			}
-			else
-			{
-				SendMessage("ROUNDRESTART");
-				SendMessage("QUIT");
-			}
+			SendMessage("ROUNDRESTART");
+			SendMessage("QUIT");
 		}
 
 		#endregion
@@ -613,30 +601,6 @@ namespace MultiAdmin
 		}
 
 		#endregion
-
-		public bool ServerModCheck(int major, int minor, int fix)
-		{
-			if (string.IsNullOrEmpty(serverModVersion))
-				return false;
-
-			string[] parts = serverModVersion.Split('.');
-
-			if (parts.IsEmpty())
-				return false;
-
-			int.TryParse(parts[0], out int verMajor);
-
-			int verMinor = 0;
-			if (parts.Length >= 2)
-				int.TryParse(parts[1], out verMinor);
-
-			int verFix = 0;
-			if (parts.Length >= 3)
-				int.TryParse(parts[2], out verFix);
-
-			return verMajor > major || verMajor >= major && verMinor > minor ||
-			       verMajor >= major && verMinor >= minor && verFix >= fix;
-		}
 
 		public void ReloadConfig(bool copyFiles = true, bool runEvent = true)
 		{

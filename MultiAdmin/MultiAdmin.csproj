@@ -95,9 +95,7 @@
     <Compile Include="Features\FolderCopyRoundQueue.cs" />
     <Compile Include="Features\GithubGenerator.cs" />
     <Compile Include="Features\HelpCommand.cs" />
-    <Compile Include="Features\InactivityShutdown.cs" />
     <Compile Include="Features\MemoryChecker.cs" />
-    <Compile Include="Features\ModLog.cs" />
     <Compile Include="Features\MultiAdminInfo.cs" />
     <Compile Include="Features\NewCommand.cs" />
     <Compile Include="Features\Restart.cs" />

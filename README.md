@@ -27,11 +27,9 @@ Make sure that you are running Mono 5.18.0 or higher, otherwise you might have i
 - Exit Command: Adds a graceful exit command
 - Folder Copy Round Queue: Copies files from folders in a queue
 - Help: Display a full list of MultiAdmin commands and in game commands
-- Stop Server When Inactive: Stops the server after a period inactivity [Requires ServerMod]
 - Restart On Low Memory: Restarts the server if the working memory becomes too low
-- ModLog: Logs admin messages to separate file, or prints them
 - MultiAdminInfo: Prints MultiAdmin license and version information
-- New: Adds a command to start a new server given a config folder
+- New Server: Adds a command to start a new server given a config folder and a config to start a new server when one is full [Config Requires ServerMod]
 - Restart Command: Allows the game to be restarted without restarting MultiAdmin
 - Restart Next Round: Restarts the server after the current round ends [Requires ServerMod]
 - Restart After a Number of Rounds: Restarts the server after a number rounds completed [Requires ServerMod]
@@ -69,6 +67,7 @@ config_location | String | **Empty** | The default location for the game to use 
 appdata_location | String | **Empty** | The location for the game to use for AppData (a directory)
 disable_config_validation | Boolean | False | Disable the config validator
 share_non_configs | Boolean | True | Makes all files other than the config files store in AppData
+multiadmin_log_location | String | logs | The folder that MultiAdmin will store logs in (a directory)
 multiadmin_nolog | Boolean | False | Disable logging to file
 multiadmin_debug_log | Boolean | True | Enables MultiAdmin debug logging, this logs to a separate file than any other logs
 multiadmin_debug_log_blacklist | String List | HandleMessage, StringMatches, MessageListener | Which tags to block for MultiAdmin debug logging
@@ -82,13 +81,11 @@ folder_copy_round_queue | String List | **Empty** | The location of a folder to 
 folder_copy_round_queue_whitelist | String List | **Empty** | The list of file names to copy from the folders defined by `folder_copy_round_queue` (accepts `*` wildcards)
 folder_copy_round_queue_blacklist | String List | **Empty** | The list of file names to not copy from the folders defined by `folder_copy_round_queue` (accepts `*` wildcards)
 randomize_folder_copy_round_queue | Boolean | False | Whether to randomize the order of entries in `folder_copy_round_queue`
-log_mod_actions_to_own_file | Boolean | False | Logs admin messages to separate file
 manual_start | Boolean | False | Whether or not to start the server automatically when launching MultiAdmin
 max_memory | Decimal | 2048 | The amount of memory in megabytes for MultiAdmin to check against
 restart_low_memory | Decimal | 400 | Restart if the game's remaining memory falls below this value in megabytes
 restart_low_memory_roundend | Decimal | 450 | Restart at the end of the round if the game's remaining memory falls below this value in megabytes
 max_players | Integer | 20 | The number of players to display as the maximum for the server (within MultiAdmin, not in-game)
-output_read_attempts | Integer | 100 | The number of times to attempt reading a message from the server before giving up
 random_input_colors | Boolean | False | Randomize the new input system's colors every time a message is input
 restart_every_num_rounds | Integer | -1 | Restart the server every number of rounds
 restart_every_num_rounds_counting | Boolean | False | Whether to print the count of rounds passed after each round if the server is set to restart after a number of rounds
@@ -101,5 +98,4 @@ server_start_retry | Boolean | True | Whether to try to start the server again a
 server_start_retry_delay | Integer | 10000 | The time in milliseconds to wait before trying to start the server again after crashing
 servers_folder | String | servers | The location of the `servers` folder for MultiAdmin to load multiple server configurations from
 set_title_bar | Boolean | True | Whether to set the console window's titlebar, if false, this feature won't be used
-shutdown_when_empty_for | Integer | -1 | Shutdown the server once a round hasn't started in a number of seconds
 start_config_on_full | String | **Empty** | Start server with this config folder once the server becomes full [Requires ServerMod]
