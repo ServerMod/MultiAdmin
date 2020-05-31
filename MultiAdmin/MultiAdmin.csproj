@@ -84,6 +84,7 @@
     <Compile Include="NativeExitSignal\UnixExitSignal.cs" />
     <Compile Include="NativeExitSignal\WinExitSignal.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServerIO\ServerSocket.cs" />
     <Compile Include="ServerIO\StringSections.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Feature.cs" />
