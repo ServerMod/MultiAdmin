@@ -33,7 +33,7 @@ namespace MultiAdmin.ServerIO
 		{
 			get
 			{
-				return client.Connected;
+				return client?.Connected ?? false;
 			}
 		}
 
