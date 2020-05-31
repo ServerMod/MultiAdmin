@@ -19,6 +19,8 @@ namespace MultiAdmin.ServerIO
 		private TcpClient client;
 		private NetworkStream networkStream;
 
+		public event EventHandler<string> OnReceiveMessage;
+
 		public int Port
 		{
 			get
@@ -27,7 +29,13 @@ namespace MultiAdmin.ServerIO
 			}
 		}
 
-		public event EventHandler<string> OnReceiveMessage;
+		public bool Connected
+		{
+			get
+			{
+				return client.Connected;
+			}
+		}
 
 		// Port 0 automatically assigns a port
 		public ServerSocket(int port = 0)

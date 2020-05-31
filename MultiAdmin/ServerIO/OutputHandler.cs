@@ -7,13 +7,19 @@ using MultiAdmin.Utility;
 
 namespace MultiAdmin.ServerIO
 {
-	public class OutputHandler : IDisposable
+	public class OutputHandler
 	{
 		public static readonly Regex SmodRegex =
 			new Regex(@"\[(DEBUG|INFO|WARN|ERROR)\] (\[.*?\]) (.*)", RegexOptions.Compiled | RegexOptions.Singleline);
 
-		private readonly FileSystemWatcher fsWatcher;
 		private bool fixBuggedPlayers;
+
+		private readonly Server server;
+
+		public OutputHandler(Server server)
+		{
+			this.server = server;
+		}
 
 		public static ConsoleColor MapConsoleColor(string color, ConsoleColor def = ConsoleColor.Cyan)
 		{
@@ -28,113 +34,16 @@ namespace MultiAdmin.ServerIO
 			}
 		}
 
-		public OutputHandler(Server server)
+		public void HandleMessage(object source, string message)
 		{
-			if (server == null)
-			{
-				Program.Write("Error in OutputHandler - Server server is null!", ConsoleColor.Red);
-				return;
-			}
-
-			if (string.IsNullOrEmpty(server.SessionDirectory))
-			{
-				server.Write($"Missing session directory! Output is not being watched... (SessionDirectory = \"{server.SessionDirectory ?? "null"}\" SessionId = \"{server.SessionId ?? "null"}\" DedicatedDir = \"{Server.DedicatedDir ?? "null"}\")", ConsoleColor.Red);
-				return;
-			}
-
-			fsWatcher = new FileSystemWatcher {Path = server.SessionDirectory};
-
-			fsWatcher.Created += (sender, eventArgs) => OnMapiCreated(eventArgs, server);
-			fsWatcher.Filter = "sl*.mapi";
-			fsWatcher.EnableRaisingEvents = true;
-		}
-
-		/* Old Windows MAPI Watching Code
-		private void OnDirectoryChanged(FileSystemEventArgs e, Server server)
-		{
-			if (!Directory.Exists(e.FullPath)) return;
-
-			string[] files = Directory.GetFiles(e.FullPath, "sl*.mapi", SearchOption.TopDirectoryOnly).OrderBy(f => f)
-				.ToArray();
-			foreach (string file in files) ProcessFile(server, file);
-		}
-		*/
-
-		private void OnMapiCreated(FileSystemEventArgs e, Server server)
-		{
-			if (!File.Exists(e.FullPath)) return;
-
-			try
-			{
-				ProcessFile(server, e.FullPath);
-			}
-			catch (Exception ex)
-			{
-				Program.LogDebugException(nameof(OnMapiCreated), ex);
-			}
-		}
-
-		public void ProcessFile(Server server, string file)
-		{
-			string stream = string.Empty;
-			string command = "open";
-
-			bool isRead = false;
-
-			// Lock this object to wait for this event to finish before trying to read another file
-			lock (this)
-			{
-				for (int attempts = 0; attempts < server.ServerConfig.OutputReadAttempts.Value; attempts++)
-				{
-					try
-					{
-						if (!File.Exists(file)) return;
-
-						// Lock the file to prevent it from being modified further, or read by another instance
-						using (StreamReader sr = new StreamReader(new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None)))
-						{
-							command = "read";
-							stream = sr.ReadToEnd();
-
-							isRead = true;
-						}
-
-						command = "delete";
-						File.Delete(file);
-
-						break;
-					}
-					catch (UnauthorizedAccessException e)
-					{
-						Program.LogDebugException(nameof(ProcessFile), e);
-						Thread.Sleep(8);
-					}
-					catch (Exception e)
-					{
-						Program.LogDebugException(nameof(ProcessFile), e);
-						Thread.Sleep(5);
-					}
-				}
-			}
-
-			if (!isRead)
-			{
-				server.Write($"Message printer warning: Could not {command} \"{file}\". Make sure that {nameof(MultiAdmin)} has all necessary read-write permissions\nSkipping...");
-
-				return;
-			}
-
 			bool display = true;
 			ConsoleColor color = ConsoleColor.Cyan;
 
-			if (stream.EndsWith(Environment.NewLine))
-				stream = stream.Substring(0, stream.Length - Environment.NewLine.Length);
-
-			int logTypeIndex = stream.IndexOf("LOGTYPE");
+			int logTypeIndex = message.IndexOf("LOGTYPE");
 			if (logTypeIndex >= 0)
 			{
-				string type = stream.Substring(logTypeIndex).Trim();
-				stream = stream.Substring(0, logTypeIndex).Trim();
+				string type = message.Substring(logTypeIndex).Trim();
+				message = message.Substring(0, logTypeIndex).Trim();
 
 				switch (type)
 				{
@@ -154,7 +63,7 @@ namespace MultiAdmin.ServerIO
 			}
 
 			// Smod2 loggers pretty printing
-			Match match = SmodRegex.Match(stream);
+			Match match = SmodRegex.Match(message);
 			if (match.Success)
 			{
 				if (match.Groups.Count >= 3)
@@ -197,14 +106,14 @@ namespace MultiAdmin.ServerIO
 				}
 			}
 
-			if (stream.Contains("Mod Log:"))
-				server.ForEachHandler<IEventAdminAction>(adminAction => adminAction.OnAdminAction(stream.Replace("Mod Log:", string.Empty)));
+			if (message.Contains("Mod Log:"))
+				server.ForEachHandler<IEventAdminAction>(adminAction => adminAction.OnAdminAction(message.Replace("Mod Log:", string.Empty)));
 
-			if (stream.Contains("ServerMod - Version"))
+			if (message.Contains("ServerMod - Version"))
 			{
 				server.hasServerMod = true;
 				// This should work fine with older ServerMod versions too
-				string[] streamSplit = stream.Replace("ServerMod - Version", string.Empty).Split('-');
+				string[] streamSplit = message.Replace("ServerMod - Version", string.Empty).Split('-');
 
 				if (!streamSplit.IsEmpty())
 				{
@@ -213,10 +122,10 @@ namespace MultiAdmin.ServerIO
 				}
 			}
 
-			if (stream.Contains("Round restarting"))
+			if (message.Contains("Round restarting"))
 				server.ForEachHandler<IEventRoundEnd>(roundEnd => roundEnd.OnRoundEnd());
 
-			if (stream.Contains("Waiting for players"))
+			if (message.Contains("Waiting for players"))
 			{
 				server.IsLoading = false;
 
@@ -229,51 +138,45 @@ namespace MultiAdmin.ServerIO
 				}
 			}
 
-			if (stream.Contains("New round has been started"))
+			if (message.Contains("New round has been started"))
 				server.ForEachHandler<IEventRoundStart>(roundStart => roundStart.OnRoundStart());
 
-			if (stream.Contains("Level loaded. Creating match..."))
+			if (message.Contains("Level loaded. Creating match..."))
 				server.ForEachHandler<IEventServerStart>(serverStart => serverStart.OnServerStart());
 
-			if (stream.Contains("Server full"))
+			if (message.Contains("Server full"))
 				server.ForEachHandler<IEventServerFull>(serverFull => serverFull.OnServerFull());
 
-			if (stream.Contains("Player connect"))
+			if (message.Contains("Player connect"))
 			{
 				display = false;
 				server.Log("Player connect event");
 
-				int index = stream.IndexOf(":");
+				int index = message.IndexOf(":");
 				if (index >= 0)
 				{
-					string name = stream.Substring(index);
+					string name = message.Substring(index);
 					server.ForEachHandler<IEventPlayerConnect>(playerConnect => playerConnect.OnPlayerConnect(name));
 				}
 			}
 
-			if (stream.Contains("Player disconnect"))
+			if (message.Contains("Player disconnect"))
 			{
 				display = false;
 				server.Log("Player disconnect event");
 
-				int index = stream.IndexOf(":");
+				int index = message.IndexOf(":");
 				if (index >= 0)
 				{
-					string name = stream.Substring(index);
+					string name = message.Substring(index);
 					server.ForEachHandler<IEventPlayerDisconnect>(playerDisconnect => playerDisconnect.OnPlayerDisconnect(name));
 				}
 			}
 
-			if (stream.Contains("Player has connected before load is complete"))
+			if (message.Contains("Player has connected before load is complete"))
 				fixBuggedPlayers = true;
 
-			if (display) server.Write(stream, color);
-		}
-
-		public void Dispose()
-		{
-			fsWatcher?.Dispose();
-			GC.SuppressFinalize(this);
+			if (display) server.Write(message, color);
 		}
 	}
 }

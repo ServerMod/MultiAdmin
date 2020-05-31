@@ -80,9 +80,9 @@ namespace MultiAdmin.Features
 				titleBar.Add($"Config: {Server.serverId}");
 			}
 
-			if (!string.IsNullOrEmpty(Server.SessionId))
+			if (Server.SessionSocket != null)
 			{
-				titleBar.Add($"Session: {Server.SessionId}");
+				titleBar.Add($"Console Port: {Server.SessionSocket.Port}");
 			}
 
 			if (Server.IsGameProcessRunning)

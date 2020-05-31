@@ -55,8 +55,7 @@ namespace MultiAdmin.ServerIO
 				{
 					if (Program.Headless)
 					{
-						Thread.Sleep(5000);
-						continue;
+						break;
 					}
 
 					string message = server.ServerConfig.UseNewInputSystem.Value ? GetInputLineNew(server, prevMessages) : Console.ReadLine();
