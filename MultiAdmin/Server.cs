@@ -161,8 +161,7 @@ namespace MultiAdmin
 			Stopwatch timer = new Stopwatch();
 			while (IsGameProcessRunning)
 			{
-				timer.Reset();
-				timer.Start();
+				timer.Restart();
 
 				foreach (IEventTick tickEvent in tick) tickEvent.OnTick();
 
@@ -274,8 +273,12 @@ namespace MultiAdmin
 
 					Write($"Executing \"{scpslExe}\"...", ConsoleColor.DarkGreen);
 
+					// Start the console socket connection to the game server
 					ServerSocket consoleSocket = new ServerSocket();
+					// Start the connection before the game to find an open port for communication
 					consoleSocket.Connect();
+
+					SessionSocket = consoleSocket;
 
 					List<string> scpslArgs = new List<string>
 					{

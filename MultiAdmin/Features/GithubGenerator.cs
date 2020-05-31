@@ -25,7 +25,7 @@ namespace MultiAdmin.Features
 
 		public string GetCommandDescription()
 		{
-			return "Generates a github .md file outlining all the features/commands";
+			return "Generates a GitHub README file outlining all the features/commands";
 		}
 
 		public string GetUsage()
@@ -41,7 +41,7 @@ namespace MultiAdmin.Features
 				return;
 			}
 
-			string dir = string.Join(" ", args);
+			string path = Utils.GetFullPathSafe(string.Join(" ", args));
 
 			List<string> lines = new List<string> {"# MultiAdmin", string.Empty, "## Features", string.Empty};
 
@@ -132,7 +132,8 @@ namespace MultiAdmin.Features
 				lines.Add(stringBuilder.ToString());
 			}
 
-			File.WriteAllLines(dir, lines);
+			File.WriteAllLines(path, lines);
+			Server.Write($"GitHub README written to \"{path}\"");
 		}
 
 		public bool PassToGame()

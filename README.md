@@ -27,29 +27,29 @@ Make sure that you are running Mono 5.18.0 or higher, otherwise you might have i
 - Exit Command: Adds a graceful exit command
 - Folder Copy Round Queue: Copies files from folders in a queue
 - Help: Display a full list of MultiAdmin commands and in game commands
-- Stop Server When Inactive: Stops the server after a period inactivity
+- Stop Server When Inactive: Stops the server after a period inactivity [Requires ServerMod]
 - Restart On Low Memory: Restarts the server if the working memory becomes too low
 - ModLog: Logs admin messages to separate file, or prints them
 - MultiAdminInfo: Prints MultiAdmin license and version information
 - New: Adds a command to start a new server given a config folder
 - Restart Command: Allows the game to be restarted without restarting MultiAdmin
-- Restart Next Round: Restarts the server after the current round ends
-- Restart After a Number of Rounds: Restarts the server after a number rounds completed
-- Stop Next Round: Stops the server after the current round ends
-- TitleBar: Updates the title bar with instance based information, such as session id and player count (Requires ServerMod to function fully)
+- Restart Next Round: Restarts the server after the current round ends [Requires ServerMod]
+- Restart After a Number of Rounds: Restarts the server after a number rounds completed [Requires ServerMod]
+- Stop Next Round: Stops the server after the current round ends [Requires ServerMod]
+- TitleBar: Updates the title bar with instance based information, such as console port and player count [Requires ServerMod to function fully]
 
 ## MultiAdmin Commands
 This does not include ServerMod or ingame commands, for a full list type `HELP` in multiadmin which will produce all commands.
 
 - CONFIG <RELOAD>: Reloads the configuration file
 - EXIT: Exits the server
-- GITHUBGEN [FILE LOCATION]: Generates a github .md file outlining all the features/commands
+- GITHUBGEN [FILE LOCATION]: Generates a GitHub README file outlining all the features/commands
 - HELP: Prints out available commands and their function
 - INFO: Prints MultiAdmin license and version information
 - NEW <SERVER ID>: Starts a new server with the given Server ID
 - RESTART: Restarts the game server (MultiAdmin will not restart, just the game)
-- RESTARTNEXTROUND: Restarts the server at the end of this round
-- STOPNEXTROUND: Stops the server at the end of this round
+- RESTARTNEXTROUND: Restarts the server at the end of this round [Requires ServerMod]
+- STOPNEXTROUND: Stops the server at the end of this round [Requires ServerMod]
 
 ## MultiAdmin Execution Arguments
 The arguments available for running MultiAdmin with
@@ -71,7 +71,7 @@ disable_config_validation | Boolean | False | Disable the config validator
 share_non_configs | Boolean | True | Makes all files other than the config files store in AppData
 multiadmin_nolog | Boolean | False | Disable logging to file
 multiadmin_debug_log | Boolean | True | Enables MultiAdmin debug logging, this logs to a separate file than any other logs
-multiadmin_debug_log_blacklist | String List | ProcessFile, StringMatches | Which tags to block for MultiAdmin debug logging
+multiadmin_debug_log_blacklist | String List | HandleMessage, StringMatches, MessageListener | Which tags to block for MultiAdmin debug logging
 multiadmin_debug_log_whitelist | String List | **Empty** | Which tags to log for MultiAdmin debug logging (Defaults to logging all if none are provided)
 use_new_input_system | Boolean | True | Whether to use the new input system, if false, the original input system will be used
 port | Unsigned Integer | 7777 | The port for the server to use
@@ -103,6 +103,3 @@ servers_folder | String | servers | The location of the `servers` folder for Mul
 set_title_bar | Boolean | True | Whether to set the console window's titlebar, if false, this feature won't be used
 shutdown_when_empty_for | Integer | -1 | Shutdown the server once a round hasn't started in a number of seconds
 start_config_on_full | String | **Empty** | Start server with this config folder once the server becomes full [Requires ServerMod]
-
-## Upcoming Features
-- Support for running multiple server instances in one MultiAdmin instance

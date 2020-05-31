@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -36,145 +37,139 @@ namespace MultiAdmin.ServerIO
 
 		public void HandleMessage(object source, string message)
 		{
+			if (message == null)
+				return;
+
 			bool display = true;
 			ConsoleColor color = ConsoleColor.Cyan;
 
-			int logTypeIndex = message.IndexOf("LOGTYPE");
-			if (logTypeIndex >= 0)
+			if (message.Length > 0)
 			{
-				string type = message.Substring(logTypeIndex).Trim();
-				message = message.Substring(0, logTypeIndex).Trim();
-
-				switch (type)
+				if (byte.TryParse(Convert.ToString(message[0]), NumberStyles.HexNumber, NumberFormatInfo.CurrentInfo, out byte consoleColor))
 				{
-					case "LOGTYPE02":
-						color = ConsoleColor.Green;
-						break;
-					case "LOGTYPE-8":
-						color = ConsoleColor.DarkRed;
-						break;
-					case "LOGTYPE14":
-						color = ConsoleColor.Magenta;
-						break;
-					default:
-						color = ConsoleColor.Cyan;
-						break;
+					color = (ConsoleColor)consoleColor;
+					message = message.Substring(1);
 				}
-			}
 
-			// Smod2 loggers pretty printing
-			Match match = SmodRegex.Match(message);
-			if (match.Success)
-			{
-				if (match.Groups.Count >= 3)
+				// Smod2 loggers pretty printing
+				Match match = SmodRegex.Match(message);
+				if (match.Success)
 				{
-					ConsoleColor levelColor = ConsoleColor.Cyan;
-					ConsoleColor tagColor = ConsoleColor.Yellow;
-					ConsoleColor msgColor = ConsoleColor.White;
-					switch (match.Groups[1].Value.Trim())
+					if (match.Groups.Count >= 3)
 					{
-						case "DEBUG":
-							levelColor = ConsoleColor.Gray;
-							break;
-						case "INFO":
-							levelColor = ConsoleColor.Green;
-							break;
-						case "WARN":
-							levelColor = ConsoleColor.DarkYellow;
-							break;
-						case "ERROR":
-							levelColor = ConsoleColor.Red;
-							msgColor = ConsoleColor.Red;
-							break;
-						default:
-							color = ConsoleColor.Cyan;
-							break;
+						ConsoleColor levelColor = ConsoleColor.Cyan;
+						ConsoleColor tagColor = ConsoleColor.Yellow;
+						ConsoleColor msgColor = ConsoleColor.White;
+						switch (match.Groups[1].Value.Trim())
+						{
+							case "DEBUG":
+								levelColor = ConsoleColor.Gray;
+								break;
+							case "INFO":
+								levelColor = ConsoleColor.Green;
+								break;
+							case "WARN":
+								levelColor = ConsoleColor.DarkYellow;
+								break;
+							case "ERROR":
+								levelColor = ConsoleColor.Red;
+								msgColor = ConsoleColor.Red;
+								break;
+							default:
+								color = ConsoleColor.Cyan;
+								break;
+						}
+
+						server.Write(
+							new ColoredMessage[]
+							{
+								new ColoredMessage($"[{match.Groups[1].Value}] ", levelColor),
+								new ColoredMessage($"{match.Groups[2].Value} ", tagColor),
+								new ColoredMessage(match.Groups[3].Value, msgColor)
+							}, ConsoleColor.Cyan);
+
+						// P.S. the format is [Info] [courtney.exampleplugin] Something interesting happened
+						// That was just an example
+
+						// This return should be here
+						return;
 					}
+				}
 
-					server.Write(new ColoredMessage[]
+				if (message.Contains("Mod Log:"))
+					server.ForEachHandler<IEventAdminAction>(adminAction =>
+						adminAction.OnAdminAction(message.Replace("Mod Log:", string.Empty)));
+
+				if (message.Contains("ServerMod - Version"))
+				{
+					server.hasServerMod = true;
+					// This should work fine with older ServerMod versions too
+					string[] streamSplit = message.Replace("ServerMod - Version", string.Empty).Split('-');
+
+					if (!streamSplit.IsEmpty())
 					{
-						new ColoredMessage($"[{match.Groups[1].Value}] ", levelColor),
-						new ColoredMessage($"{match.Groups[2].Value} ", tagColor),
-						new ColoredMessage(match.Groups[3].Value, msgColor)
-					}, ConsoleColor.Cyan);
-
-					// P.S. the format is [Info] [courtney.exampleplugin] Something interesting happened
-					// That was just an example
-
-					// This return should be here
-					return;
+						server.serverModVersion = streamSplit[0].Trim();
+						server.serverModBuild = (streamSplit.Length > 1 ? streamSplit[1] : "A").Trim();
+					}
 				}
-			}
 
-			if (message.Contains("Mod Log:"))
-				server.ForEachHandler<IEventAdminAction>(adminAction => adminAction.OnAdminAction(message.Replace("Mod Log:", string.Empty)));
+				if (message.Contains("Round restarting"))
+					server.ForEachHandler<IEventRoundEnd>(roundEnd => roundEnd.OnRoundEnd());
 
-			if (message.Contains("ServerMod - Version"))
-			{
-				server.hasServerMod = true;
-				// This should work fine with older ServerMod versions too
-				string[] streamSplit = message.Replace("ServerMod - Version", string.Empty).Split('-');
-
-				if (!streamSplit.IsEmpty())
+				if (message.Contains("Waiting for players"))
 				{
-					server.serverModVersion = streamSplit[0].Trim();
-					server.serverModBuild = (streamSplit.Length > 1 ? streamSplit[1] : "A").Trim();
+					server.IsLoading = false;
+
+					server.ForEachHandler<IEventWaitingForPlayers>(waitingForPlayers =>
+						waitingForPlayers.OnWaitingForPlayers());
+
+					if (fixBuggedPlayers)
+					{
+						server.SendMessage("ROUNDRESTART");
+						fixBuggedPlayers = false;
+					}
 				}
-			}
 
-			if (message.Contains("Round restarting"))
-				server.ForEachHandler<IEventRoundEnd>(roundEnd => roundEnd.OnRoundEnd());
+				if (message.Contains("New round has been started"))
+					server.ForEachHandler<IEventRoundStart>(roundStart => roundStart.OnRoundStart());
 
-			if (message.Contains("Waiting for players"))
-			{
-				server.IsLoading = false;
+				if (message.Contains("Level loaded. Creating match..."))
+					server.ForEachHandler<IEventServerStart>(serverStart => serverStart.OnServerStart());
 
-				server.ForEachHandler<IEventWaitingForPlayers>(waitingForPlayers => waitingForPlayers.OnWaitingForPlayers());
+				if (message.Contains("Server full"))
+					server.ForEachHandler<IEventServerFull>(serverFull => serverFull.OnServerFull());
 
-				if (fixBuggedPlayers)
+				if (message.Contains("Player connect"))
 				{
-					server.SendMessage("ROUNDRESTART");
-					fixBuggedPlayers = false;
+					display = false;
+					server.Log("Player connect event");
+
+					int index = message.IndexOf(":");
+					if (index >= 0)
+					{
+						string name = message.Substring(index);
+						server.ForEachHandler<IEventPlayerConnect>(playerConnect =>
+							playerConnect.OnPlayerConnect(name));
+					}
 				}
-			}
 
-			if (message.Contains("New round has been started"))
-				server.ForEachHandler<IEventRoundStart>(roundStart => roundStart.OnRoundStart());
-
-			if (message.Contains("Level loaded. Creating match..."))
-				server.ForEachHandler<IEventServerStart>(serverStart => serverStart.OnServerStart());
-
-			if (message.Contains("Server full"))
-				server.ForEachHandler<IEventServerFull>(serverFull => serverFull.OnServerFull());
-
-			if (message.Contains("Player connect"))
-			{
-				display = false;
-				server.Log("Player connect event");
-
-				int index = message.IndexOf(":");
-				if (index >= 0)
+				if (message.Contains("Player disconnect"))
 				{
-					string name = message.Substring(index);
-					server.ForEachHandler<IEventPlayerConnect>(playerConnect => playerConnect.OnPlayerConnect(name));
+					display = false;
+					server.Log("Player disconnect event");
+
+					int index = message.IndexOf(":");
+					if (index >= 0)
+					{
+						string name = message.Substring(index);
+						server.ForEachHandler<IEventPlayerDisconnect>(playerDisconnect =>
+							playerDisconnect.OnPlayerDisconnect(name));
+					}
 				}
+
+				if (message.Contains("Player has connected before load is complete"))
+					fixBuggedPlayers = true;
 			}
-
-			if (message.Contains("Player disconnect"))
-			{
-				display = false;
-				server.Log("Player disconnect event");
-
-				int index = message.IndexOf(":");
-				if (index >= 0)
-				{
-					string name = message.Substring(index);
-					server.ForEachHandler<IEventPlayerDisconnect>(playerDisconnect => playerDisconnect.OnPlayerDisconnect(name));
-				}
-			}
-
-			if (message.Contains("Player has connected before load is complete"))
-				fixBuggedPlayers = true;
 
 			if (display) server.Write(message, color);
 		}

@@ -52,7 +52,7 @@ namespace MultiAdmin.Features
 
 		public override string GetFeatureDescription()
 		{
-			return "Stops the server after a period inactivity";
+			return "Stops the server after a period inactivity [Requires ServerMod]";
 		}
 
 		public override string GetFeatureName()

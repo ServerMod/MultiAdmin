@@ -64,14 +64,30 @@ namespace MultiAdmin.ServerIO
 			byte[] intBuffer = new byte[IntBytes];
 			while (!disposed)
 			{
-				networkStream.ReadAsync(intBuffer, 0, IntBytes, disposeCancellationSource.Token).Wait();
+				try
+				{
+					networkStream.ReadAsync(intBuffer, 0, IntBytes, disposeCancellationSource.Token).Wait();
+				}
+				catch (Exception e)
+				{
+					Program.LogDebugException(nameof(MessageListener), e);
+					continue;
+				}
 				if (disposed)
 					break;
 
 				int length = BitConverter.ToInt32(intBuffer, 0);
 
 				byte[] messageBuffer = new byte[length];
-				networkStream.ReadAsync(messageBuffer, 0, length, disposeCancellationSource.Token).Wait();
+				try
+				{
+					networkStream.ReadAsync(messageBuffer, 0, length, disposeCancellationSource.Token).Wait();
+				}
+				catch (Exception e)
+				{
+					Program.LogDebugException(nameof(MessageListener), e);
+					continue;
+				}
 				if (disposed)
 					break;
 
@@ -94,7 +110,14 @@ namespace MultiAdmin.ServerIO
 			int actualMessageLength = Encoding.GetBytes(message, 0, message.Length, messageBuffer, IntBytes);
 			Array.Copy(BitConverter.GetBytes(actualMessageLength), messageBuffer, IntBytes);
 
-			networkStream.WriteAsync(messageBuffer, 0, actualMessageLength + IntBytes, disposeCancellationSource.Token).Wait();
+			try
+			{
+				networkStream.WriteAsync(messageBuffer, 0, actualMessageLength + IntBytes, disposeCancellationSource.Token).Wait();
+			}
+			catch (Exception e)
+			{
+				Program.LogDebugException(nameof(SendMessage), e);
+			}
 		}
 
 		public void Disconnect()

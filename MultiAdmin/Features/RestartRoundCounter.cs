@@ -45,7 +45,7 @@ namespace MultiAdmin.Features
 
 		public override string GetFeatureDescription()
 		{
-			return "Restarts the server after a number rounds completed";
+			return "Restarts the server after a number rounds completed [Requires ServerMod]";
 		}
 
 		public override string GetFeatureName()
