@@ -1,11 +1,10 @@
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MultiAdmin.ConsoleTools;
 using MultiAdmin.ServerIO;
+using Xunit;
 
 namespace MultiAdminTests.ServerIO
 {
-	[TestClass]
 	public class StringSectionsTests
 	{
 		private struct FromStringTemplate
@@ -28,18 +27,14 @@ namespace MultiAdminTests.ServerIO
 			}
 		}
 
-		[TestMethod]
+		[Fact]
 		public void FromStringTest()
 		{
-			try
+			// No further characters can be output because of the prefix and suffix
+			Assert.Throws<ArgumentException>(() =>
 			{
 				StringSections.FromString("test string", 2, new ColoredMessage("."), new ColoredMessage("."));
-				Assert.Fail("This case should not be allowed, no further characters can be output because of the prefix and suffix");
-			}
-			catch (ArgumentException)
-			{
-				// Expected behaviour
-			}
+			});
 
 			FromStringTemplate[] sectionTests =
 			{
@@ -53,17 +48,17 @@ namespace MultiAdminTests.ServerIO
 
 				StringSections sections = StringSections.FromString(sectionTest.testString, sectionTest.sectionLength, sectionTest.leftIndictator, sectionTest.rightIndictator);
 
-				Assert.IsNotNull(sections);
-				Assert.IsNotNull(sections.Sections);
+				Assert.NotNull(sections);
+				Assert.NotNull(sections.Sections);
 
-				Assert.IsTrue(sections.Sections.Length == sectionTest.expectedSections.Length, $"Failed at index {i}: Expected sections length \"{sectionTest.expectedSections.Length}\", got \"{sections.Sections.Length}\"");
+				Assert.True(sections.Sections.Length == sectionTest.expectedSections.Length, $"Failed at index {i}: Expected sections length \"{sectionTest.expectedSections.Length}\", got \"{sections.Sections.Length}\"");
 
 				for (int j = 0; j < sectionTest.expectedSections.Length; j++)
 				{
 					string expected = sectionTest.expectedSections[j];
 					string result = sections.Sections[j].Section.GetText();
 
-					Assert.AreEqual(expected, result, $"Failed at index {i}: Failed at section index {j}: Expected section text to be \"{expected ?? "null"}\", got \"{result ?? "null"}\"");
+					Assert.True(expected == result, $"Failed at index {i}: Failed at section index {j}: Expected section text to be \"{expected ?? "null"}\", got \"{result ?? "null"}\"");
 				}
 			}
 		}
