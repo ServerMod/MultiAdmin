@@ -112,7 +112,7 @@ namespace MultiAdmin.ServerIO
 
 			try
 			{
-				networkStream.WriteAsync(messageBuffer, 0, actualMessageLength + IntBytes, disposeCancellationSource.Token).Wait();
+				networkStream.Write(messageBuffer, 0, actualMessageLength + IntBytes);
 			}
 			catch (Exception e)
 			{

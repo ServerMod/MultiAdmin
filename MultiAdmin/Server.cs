@@ -66,7 +66,7 @@ namespace MultiAdmin
 			// Set port
 			this.port = port;
 
-			logDir = Utils.GetFullPathSafe(Path.Combine(string.IsNullOrEmpty(serverDir) ? string.Empty : serverDir, serverConfig.LogLocation.Value));
+			logDir = Utils.GetFullPathSafe(Path.Combine(string.IsNullOrEmpty(serverDir) ? "" : serverDir, serverConfig.LogLocation.Value));
 
 			// Register all features
 			RegisterFeatures();

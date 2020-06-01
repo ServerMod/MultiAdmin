@@ -182,7 +182,7 @@ namespace MultiAdmin.ConsoleTools
 	{
 		private static string JoinTextIgnoreNull(ColoredMessage[] coloredMessages)
 		{
-			StringBuilder builder = new StringBuilder(string.Empty);
+			StringBuilder builder = new StringBuilder("");
 
 			foreach (ColoredMessage coloredMessage in coloredMessages)
 			{

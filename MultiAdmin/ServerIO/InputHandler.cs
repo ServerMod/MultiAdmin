@@ -91,8 +91,8 @@ namespace MultiAdmin.ServerIO
 			if (server.ServerConfig.RandomInputColors.Value)
 				RandomizeInputColors();
 
-			string curMessage = string.Empty;
-			string message = string.Empty;
+			string curMessage = "";
+			string message = "";
 			int messageCursor = 0;
 			int prevMessageCursor = -1;
 			StringSections curSections = null;

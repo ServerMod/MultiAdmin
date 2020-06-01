@@ -43,7 +43,7 @@ namespace MultiAdmin.Features
 
 			string path = Utils.GetFullPathSafe(string.Join(" ", args));
 
-			List<string> lines = new List<string> {"# MultiAdmin", string.Empty, "## Features", string.Empty};
+			List<string> lines = new List<string> {"# MultiAdmin", "", "## Features", ""};
 
 			foreach (Feature feature in Server.features)
 			{
@@ -52,17 +52,17 @@ namespace MultiAdmin.Features
 				lines.Add($"- {feature.GetFeatureName()}: {feature.GetFeatureDescription()}");
 			}
 
-			lines.Add(string.Empty);
+			lines.Add("");
 			lines.Add("## MultiAdmin Commands");
-			lines.Add(string.Empty);
+			lines.Add("");
 			foreach (ICommand comm in Server.commands.Values)
 			{
 				lines.Add($"- {(comm.GetCommand() + " " + comm.GetUsage()).Trim()}: {comm.GetCommandDescription()}");
 			}
 
-			lines.Add(string.Empty);
+			lines.Add("");
 			lines.Add("## Config Settings");
-			lines.Add(string.Empty);
+			lines.Add("");
 			lines.Add($"Config Option{ColumnSeparator}Value Type{ColumnSeparator}Default Value{ColumnSeparator}Description");
 			lines.Add($"---{ColumnSeparator}:---:{ColumnSeparator}:---:{ColumnSeparator}:------:");
 
