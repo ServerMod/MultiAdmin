@@ -50,7 +50,7 @@ namespace MultiAdmin.Features
 
 		public void PrintInfo()
 		{
-			Server.Write($"{nameof(MultiAdmin)} v{Program.MaVersion} (https://github.com/Grover-c13/MultiAdmin/)\nReleased under MIT License Copyright © Grover 2019", ConsoleColor.DarkMagenta);
+			Server.Write($"{nameof(MultiAdmin)} v{Program.MaVersion} (https://github.com/Grover-c13/MultiAdmin/)\nReleased under MIT License Copyright © Grover 2020", ConsoleColor.DarkMagenta);
 		}
 
 		public override string GetFeatureDescription()
