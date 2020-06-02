@@ -6,11 +6,14 @@ namespace MultiAdmin.Utility
 	{
 		public static bool Equals(this string input, string value, int startIndex, int count)
 		{
-			if (value == null)
-				throw new ArgumentNullException(nameof(value));
-			if (startIndex < 0 || startIndex > input.Length)
+			if (input == null && value == null)
+				return true;
+			if (input == null || value == null)
+				return false;
+
+			if (startIndex < 0 || startIndex >= input.Length)
 				throw new ArgumentOutOfRangeException(nameof(startIndex));
-			if (count < 0 || startIndex > input.Length - count)
+			if (count < 0 || count > value.Length || startIndex > input.Length - count)
 				throw new ArgumentOutOfRangeException(nameof(count));
 
 			for (int i = 0; i < count; i++)
@@ -26,7 +29,17 @@ namespace MultiAdmin.Utility
 
 		public static bool Equals(this string input, string value, int startIndex)
 		{
-			return Equals(input, value, startIndex, input.Length - startIndex);
+			if (input == null && value == null)
+				return true;
+			if (input == null || value == null)
+				return false;
+
+			int length = input.Length - startIndex;
+
+			if (length < value.Length)
+				throw new ArgumentOutOfRangeException(nameof(value));
+
+			return Equals(input, value, startIndex, length);
 		}
 	}
 }
