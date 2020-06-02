@@ -33,4 +33,4 @@ jobs:
         # Artifact name
         name: MultiAdmin
         # A file, directory or wildcard pattern that describes what to upload
-        path: ${{GITHUB_WORKSPACE}}/Release
+        path: ${{github.workspace}}/Release
