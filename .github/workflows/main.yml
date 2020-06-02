@@ -22,6 +22,7 @@ jobs:
 
     # Runs a set of commands using the runners shell
     - name: Run a multi-line script
+      shell: cmd
       run: |
         call "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/Common7/Tools/VsMSBuildCmd.bat"
         msbuild "$GITHUB_WORKSPACE" /p:Configuration=Release /p:OutputPath="Release" /restore
