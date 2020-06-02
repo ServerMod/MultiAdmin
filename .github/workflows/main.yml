@@ -1,6 +1,4 @@
 name: MultiAdmin Build
-description: Builds MultiAdmin and uploads the build folder
-author: Dankrushen
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
