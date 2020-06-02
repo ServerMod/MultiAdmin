@@ -25,7 +25,7 @@ jobs:
       shell: cmd
       run: |
         call "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/Common7/Tools/VsMSBuildCmd.bat"
-        msbuild "$GITHUB_WORKSPACE" /p:Configuration=Release /p:OutputPath="Release" /restore
+        msbuild "%GITHUB_WORKSPACE%" /p:Configuration=Release /p:OutputPath="%GITHUB_WORKSPACE%/Release" /restore
         
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.0.1
@@ -33,4 +33,4 @@ jobs:
         # Artifact name
         name: MultiAdmin
         # A file, directory or wildcard pattern that describes what to upload
-        path: Release
+        path: $GITHUB_WORKSPACE/Release
