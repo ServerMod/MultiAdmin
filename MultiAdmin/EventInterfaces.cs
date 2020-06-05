@@ -44,28 +44,9 @@ namespace MultiAdmin
 		void OnTick();
 	}
 
-	public interface IServerMod : IMAEvent
-	{
-	}
-
-	public interface IEventServerFull : IServerMod
+	public interface IEventServerFull : IMAEvent
 	{
 		void OnServerFull();
-	}
-
-	public interface IEventPlayerConnect : IServerMod
-	{
-		void OnPlayerConnect(string name);
-	}
-
-	public interface IEventPlayerDisconnect : IServerMod
-	{
-		void OnPlayerDisconnect(string name);
-	}
-
-	public interface IEventAdminAction : IServerMod
-	{
-		void OnAdminAction(string message);
 	}
 
 	public interface ICommand

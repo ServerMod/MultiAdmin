@@ -1,24 +1,52 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using MultiAdmin.Utility;
+using Xunit;
+using Xunit.Sdk;
 
 namespace MultiAdminTests.Utility
 {
-	[TestClass]
 	public class StringExtensionsTests
 	{
-		[TestMethod]
-		public void EqualsTest()
+		[Theory]
+		[InlineData("test", "test", 0)]
+		[InlineData("test", "test", 0, 4)]
+		[InlineData("test", "st", 2)]
+		[InlineData("test", "te", 0, 2)]
+		[InlineData("test", "es", 1, 2)]
+		[InlineData(null, null, 0)]
+		[InlineData(null, null, 0, 1)]
+		public void EqualsTest(string main, string section, int startIndex, int count = -1)
 		{
-			Assert.IsTrue("test".Equals("test", startIndex: 0));
-			Assert.IsFalse("test".Equals("other", startIndex: 0));
+			Assert.True(count < 0 ? main.Equals(section, startIndex) : main.Equals(section, startIndex, count));
+		}
 
-			Assert.IsTrue("test".Equals("st", startIndex: 2));
-			Assert.IsTrue("test".Equals("te", 0, 2));
+		[Theory]
+		[InlineData("test", "other", 0, 4)]
+		[InlineData("test", "te", 2)]
+		[InlineData("test", "st", 0, 2)]
+		[InlineData("test", null, 0)]
+		[InlineData(null, "test", 0)]
+		[InlineData("test", null, 0, 1)]
+		[InlineData(null, "test", 0, 1)]
+		public void NotEqualsTest(string main, string section, int startIndex, int count = -1)
+		{
+			Assert.False(count < 0 ? main.Equals(section, startIndex) : main.Equals(section, startIndex, count));
+		}
 
-			Assert.IsFalse("test".Equals("te", startIndex: 2));
-			Assert.IsFalse("test".Equals("st", 0, 2));
-
-			Assert.IsTrue("test".Equals("es", 1, 2));
+		[Theory]
+		[InlineData(typeof(ArgumentOutOfRangeException), "longtest", "test", 1, 5)]
+		[InlineData(typeof(ArgumentOutOfRangeException), "test", "st", 3)]
+		[InlineData(typeof(ArgumentOutOfRangeException), "test", "te", -1)]
+		[InlineData(typeof(ArgumentOutOfRangeException), "test", "es", 4)]
+		public void EqualsThrowsTest(Type expected, string main, string section, int startIndex, int count = -1)
+		{
+			Assert.Throws(expected, () =>
+			{
+				if (count < 0)
+					main.Equals(section, startIndex);
+				else
+					main.Equals(section, startIndex, count);
+			});
 		}
 	}
 }

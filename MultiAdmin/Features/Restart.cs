@@ -21,7 +21,7 @@ namespace MultiAdmin.Features
 
 		public string GetUsage()
 		{
-			return string.Empty;
+			return "";
 		}
 
 		public void OnCall(string[] args)

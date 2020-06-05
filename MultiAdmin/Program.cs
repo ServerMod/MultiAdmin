@@ -15,12 +15,12 @@ namespace MultiAdmin
 {
 	public static class Program
 	{
-		public const string MaVersion = "3.2.5.1";
+		public const string MaVersion = "3.3.0.0";
 		public const string RecommendedMonoVersion = "5.18";
 
 		private static readonly List<Server> InstantiatedServers = new List<Server>();
 
-		private static readonly string MaDebugLogDir = Utils.GetFullPathSafe("logs");
+		private static readonly string MaDebugLogDir = Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.LogLocation.Value);
 		private static readonly string MaDebugLogFile = !string.IsNullOrEmpty(MaDebugLogDir) ? Utils.GetFullPathSafe(Path.Combine(MaDebugLogDir, $"{Utils.DateTime}_MA_{MaVersion}_debug_log.txt")) : null;
 
 		private static uint? portArg;

@@ -48,7 +48,7 @@ namespace MultiAdmin.Features
 
 		public string GetUsage()
 		{
-			return string.Empty;
+			return "";
 		}
 
 		public override void OnConfigReload()

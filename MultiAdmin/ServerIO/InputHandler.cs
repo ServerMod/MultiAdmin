@@ -55,11 +55,18 @@ namespace MultiAdmin.ServerIO
 				{
 					if (Program.Headless)
 					{
-						Thread.Sleep(5000);
-						continue;
+						break;
 					}
 
-					string message = server.ServerConfig.UseNewInputSystem.Value ? GetInputLineNew(server, prevMessages) : Console.ReadLine();
+					string message;
+					if (server.ServerConfig.UseNewInputSystem.Value && SectionBufferWidth - TotalIndicatorLength > 0)
+					{
+						message = GetInputLineNew(server, prevMessages);
+					}
+					else
+					{
+						message = Console.ReadLine();
+					}
 
 					if (string.IsNullOrEmpty(message)) continue;
 
@@ -92,8 +99,8 @@ namespace MultiAdmin.ServerIO
 			if (server.ServerConfig.RandomInputColors.Value)
 				RandomizeInputColors();
 
-			string curMessage = string.Empty;
-			string message = string.Empty;
+			string curMessage = "";
+			string message = "";
 			int messageCursor = 0;
 			int prevMessageCursor = -1;
 			StringSections curSections = null;
@@ -197,7 +204,7 @@ namespace MultiAdmin.ServerIO
 				// If the message has changed, re-write it to the console
 				if (CurrentMessage != message)
 				{
-					if (message.Length > SectionBufferWidth)
+					if (message.Length > SectionBufferWidth && SectionBufferWidth - TotalIndicatorLength > 0)
 					{
 						curSections = GetStringSections(message);
 

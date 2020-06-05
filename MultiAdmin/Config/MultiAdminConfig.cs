@@ -30,6 +30,10 @@ namespace MultiAdmin.Config
 			new ConfigEntry<bool>("share_non_configs", true,
 				"Share Non-Configs", "Makes all files other than the config files store in AppData");
 
+		public ConfigEntry<string> LogLocation { get; } =
+			new ConfigEntry<string>("multiadmin_log_location", "logs",
+				"MultiAdmin Log Location", "The folder that MultiAdmin will store logs in (a directory)");
+
 		public ConfigEntry<bool> NoLog { get; } =
 			new ConfigEntry<bool>("multiadmin_nolog", false,
 				"MultiAdmin No-Logging", "Disable logging to file");
@@ -39,7 +43,7 @@ namespace MultiAdmin.Config
 				"MultiAdmin Debug Logging", "Enables MultiAdmin debug logging, this logs to a separate file than any other logs");
 
 		public ConfigEntry<string[]> DebugLogBlacklist { get; } =
-			new ConfigEntry<string[]>("multiadmin_debug_log_blacklist", new string[] {nameof(OutputHandler.ProcessFile), nameof(Utils.StringMatches)},
+			new ConfigEntry<string[]>("multiadmin_debug_log_blacklist", new string[] {nameof(OutputHandler.HandleMessage), nameof(Utils.StringMatches), nameof(ServerSocket.MessageListener) },
 				"MultiAdmin Debug Logging Blacklist", "Which tags to block for MultiAdmin debug logging");
 
 		public ConfigEntry<string[]> DebugLogWhitelist { get; } =
@@ -82,10 +86,6 @@ namespace MultiAdmin.Config
 			new ConfigEntry<bool>("randomize_folder_copy_round_queue", false,
 				"Randomize Folder Copy Round Queue", "Whether to randomize the order of entries in `folder_copy_round_queue`");
 
-		public ConfigEntry<bool> LogModActionsToOwnFile { get; } =
-			new ConfigEntry<bool>("log_mod_actions_to_own_file", false,
-				"Log Mod Actions to Own File", "Logs admin messages to separate file");
-
 		public ConfigEntry<bool> ManualStart { get; } =
 			new ConfigEntry<bool>("manual_start", false,
 				"Manual Start", "Whether or not to start the server automatically when launching MultiAdmin");
@@ -101,14 +101,6 @@ namespace MultiAdmin.Config
 		public ConfigEntry<decimal> RestartLowMemoryRoundEnd { get; } =
 			new ConfigEntry<decimal>("restart_low_memory_roundend", 450,
 				"Restart Low Memory Round-End", "Restart at the end of the round if the game's remaining memory falls below this value in megabytes");
-
-		public ConfigEntry<int> MaxPlayers { get; } =
-			new ConfigEntry<int>("max_players", 20,
-				"Max Players", "The number of players to display as the maximum for the server (within MultiAdmin, not in-game)");
-
-		public ConfigEntry<int> OutputReadAttempts { get; } =
-			new ConfigEntry<int>("output_read_attempts", 100,
-				"Output Read Attempts", "The number of times to attempt reading a message from the server before giving up");
 
 		public ConfigEntry<bool> RandomInputColors { get; } =
 			new ConfigEntry<bool>("random_input_colors", false,
@@ -158,13 +150,9 @@ namespace MultiAdmin.Config
 			new ConfigEntry<bool>("set_title_bar", true,
 				"Set Title Bar", "Whether to set the console window's titlebar, if false, this feature won't be used");
 
-		public ConfigEntry<int> ShutdownWhenEmptyFor { get; } =
-			new ConfigEntry<int>("shutdown_when_empty_for", -1,
-				"Shutdown When Empty For", "Shutdown the server once a round hasn't started in a number of seconds");
-
 		public ConfigEntry<string> StartConfigOnFull { get; } =
 			new ConfigEntry<string>("start_config_on_full", "",
-				"Start Config on Full", "Start server with this config folder once the server becomes full [Requires ServerMod]");
+				"Start Config on Full", "Start server with this config folder once the server becomes full [Requires Modding]");
 
 		#endregion
 

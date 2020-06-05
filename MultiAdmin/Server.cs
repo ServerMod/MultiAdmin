@@ -31,13 +31,6 @@ namespace MultiAdmin
 		public readonly string serverDir;
 		public readonly string logDir;
 
-		public bool hasServerMod;
-
-		public string serverModBuild;
-		public string serverModVersion;
-
-		private int logId;
-
 		private DateTime initStopTimeoutTime;
 		private DateTime initRestartTimeoutTime;
 
@@ -73,7 +66,7 @@ namespace MultiAdmin
 			// Set port
 			this.port = port;
 
-			logDir = Utils.GetFullPathSafe(Path.Combine(string.IsNullOrEmpty(serverDir) ? string.Empty : serverDir, "logs"));
+			logDir = Utils.GetFullPathSafe(Path.Combine(string.IsNullOrEmpty(serverDir) ? "" : serverDir, serverConfig.LogLocation.Value));
 
 			// Register all features
 			RegisterFeatures();
@@ -154,22 +147,7 @@ namespace MultiAdmin
 
 		public static readonly string DedicatedDir = Utils.GetFullPathSafe(Path.Combine("SCPSL_Data", "Dedicated"));
 
-		private string sessionId;
-
-		public string SessionId
-		{
-			get => sessionId;
-
-			private set
-			{
-				sessionId = value;
-
-				// Update related variables
-				SessionDirectory = string.IsNullOrEmpty(value) ? null : Path.Combine(DedicatedDir, value);
-			}
-		}
-
-		public string SessionDirectory { get; private set; }
+		public ServerSocket SessionSocket { get; private set; }
 
 		#region Server Core
 
@@ -178,8 +156,7 @@ namespace MultiAdmin
 			Stopwatch timer = new Stopwatch();
 			while (IsGameProcessRunning)
 			{
-				timer.Reset();
-				timer.Start();
+				timer.Restart();
 
 				foreach (IEventTick tickEvent in tick) tickEvent.OnTick();
 
@@ -215,25 +192,13 @@ namespace MultiAdmin
 		/// <param name="message"></param>
 		public void SendMessage(string message)
 		{
-			if (!Directory.Exists(SessionDirectory))
+			if (SessionSocket == null || !SessionSocket.Connected)
 			{
-				Write($"Send Message error: Sending {message} failed. \"{SessionDirectory}\" does not exist!\nSkipping...");
+				Write("Unable to send command to server, the console is disconnected", ConsoleColor.Red);
 				return;
 			}
 
-			string file = Path.Combine(SessionDirectory, $"cs{logId}.mapi");
-			if (File.Exists(file))
-			{
-				Write($"Send Message error: Sending {message} failed. \"{file}\" already exists!\nSkipping...");
-				logId++;
-				return;
-			}
-
-			StreamWriter streamWriter = new StreamWriter(file);
-			logId++;
-			streamWriter.WriteLine(message + "terminator");
-			streamWriter.Close();
-			Write("Sending request to SCP: Secret Laboratory...", ConsoleColor.White);
+			SessionSocket.SendMessage(message);
 		}
 
 		#endregion
@@ -283,7 +248,6 @@ namespace MultiAdmin
 				Status = ServerStatus.Starting;
 				IsLoading = true;
 
-				SessionId = DateTime.Now.Ticks.ToString();
 				StartDateTime = Utils.DateTime;
 
 				try
@@ -297,9 +261,6 @@ namespace MultiAdmin
 					// Reload the config immediately as server is starting
 					ReloadConfig();
 
-					// Create session directory
-					PrepareSession();
-
 					// Init features
 					InitFeatures();
 
@@ -307,14 +268,21 @@ namespace MultiAdmin
 
 					Write($"Executing \"{scpslExe}\"...", ConsoleColor.DarkGreen);
 
+					// Start the console socket connection to the game server
+					ServerSocket consoleSocket = new ServerSocket();
+					// Start the connection before the game to find an open port for communication
+					consoleSocket.Connect();
+
+					SessionSocket = consoleSocket;
+
 					List<string> scpslArgs = new List<string>
 					{
 						"-batchmode",
 						"-nographics",
 						"-silent-crashes",
 						"-nodedicateddelete",
-						$"-key{SessionId}",
 						$"-id{Process.GetCurrentProcess().Id}",
+						$"-console{consoleSocket.Port}",
 						$"-port{port ?? ServerConfig.Port.Value}"
 					};
 
@@ -368,13 +336,17 @@ namespace MultiAdmin
 					ForEachHandler<IEventServerPreStart>(eventPreStart => eventPreStart.OnServerPreStart());
 
 					// Start the input reader
-					Thread inputHandlerThread = new Thread(() => InputHandler.Write(this));
+					Thread inputHandlerThread = null;
 
 					if (!Program.Headless)
+					{
+						inputHandlerThread = new Thread(() => InputHandler.Write(this));
 						inputHandlerThread.Start();
+					}
 
 					// Start the output reader
 					OutputHandler outputHandler = new OutputHandler(this);
+					consoleSocket.OnReceiveMessage += outputHandler.HandleMessage;
 
 					// Finally, start the game
 					GameProcess = Process.Start(startInfo);
@@ -412,16 +384,14 @@ namespace MultiAdmin
 					GameProcess = null;
 
 					// Stop the input handler if it's running
-					if (inputHandlerThread.IsAlive)
+					if (inputHandlerThread != null && inputHandlerThread.IsAlive)
 					{
 						inputHandlerThread.Abort();
 					}
 
-					outputHandler.Dispose();
+					consoleSocket.Disconnect();
 
-					DeleteSession();
-
-					SessionId = null;
+					SessionSocket = null;
 					StartDateTime = null;
 
 					if (shouldRestart) Write("Restarting server...");
@@ -452,10 +422,6 @@ namespace MultiAdmin
 						Write("Startup failed! Exiting...", ConsoleColor.Red);
 					}
 				}
-				finally
-				{
-					DeleteSession();
-				}
 			} while (shouldRestart);
 		}
 
@@ -484,15 +450,8 @@ namespace MultiAdmin
 			initRestartTimeoutTime = DateTime.Now;
 			Status = ServerStatus.Restarting;
 
-			if (hasServerMod)
-			{
-				SendMessage("RECONNECTRS");
-			}
-			else
-			{
-				SendMessage("ROUNDRESTART");
-				SendMessage("QUIT");
-			}
+			SendMessage("ROUNDRESTART");
+			SendMessage("QUIT");
 		}
 
 		#endregion
@@ -578,83 +537,6 @@ namespace MultiAdmin
 
 		#endregion
 
-		#region Session Directory Management
-
-		public void PrepareSession()
-		{
-			try
-			{
-				Directory.CreateDirectory(SessionDirectory);
-				Write($"Started new session \"{SessionId}\"", ConsoleColor.DarkGreen);
-			}
-			catch (Exception e)
-			{
-				throw new UnauthorizedAccessException($"Unable to create directory \"{SessionDirectory}\", make sure that {nameof(MultiAdmin)} has access to \"{DedicatedDir}\"\n{e}");
-			}
-		}
-
-		public void CleanSession()
-		{
-			if (!Directory.Exists(SessionDirectory)) return;
-
-			foreach (string file in Directory.GetFiles(SessionDirectory))
-			{
-				for (int i = 0; i < 20; i++)
-				{
-					try
-					{
-						File.Delete(file);
-						break;
-					}
-					catch (UnauthorizedAccessException e)
-					{
-						Program.LogDebugException(nameof(CleanSession), e);
-						Thread.Sleep(8);
-					}
-					catch (Exception e)
-					{
-						Program.LogDebugException(nameof(CleanSession), e);
-						Thread.Sleep(5);
-					}
-				}
-			}
-		}
-
-		public void DeleteSession()
-		{
-			try
-			{
-				CleanSession();
-
-				if (!Directory.Exists(SessionDirectory)) return;
-
-				for (int i = 0; i < 20; i++)
-				{
-					try
-					{
-						Directory.Delete(SessionDirectory);
-						break;
-					}
-					catch (UnauthorizedAccessException e)
-					{
-						Program.LogDebugException(nameof(DeleteSession), e);
-						Thread.Sleep(8);
-					}
-					catch (Exception e)
-					{
-						Program.LogDebugException(nameof(DeleteSession), e);
-						Thread.Sleep(5);
-					}
-				}
-			}
-			catch (Exception e)
-			{
-				Program.LogDebugException(nameof(DeleteSession), e);
-			}
-		}
-
-		#endregion
-
 		#region Console Output and Logging
 
 		public void Write(ColoredMessage[] messages, ConsoleColor? timeStampColor = null)
@@ -719,30 +601,6 @@ namespace MultiAdmin
 		}
 
 		#endregion
-
-		public bool ServerModCheck(int major, int minor, int fix)
-		{
-			if (string.IsNullOrEmpty(serverModVersion))
-				return false;
-
-			string[] parts = serverModVersion.Split('.');
-
-			if (parts.IsEmpty())
-				return false;
-
-			int.TryParse(parts[0], out int verMajor);
-
-			int verMinor = 0;
-			if (parts.Length >= 2)
-				int.TryParse(parts[1], out verMinor);
-
-			int verFix = 0;
-			if (parts.Length >= 3)
-				int.TryParse(parts[2], out verFix);
-
-			return verMajor > major || verMajor >= major && verMinor > minor ||
-			       verMajor >= major && verMinor >= minor && verFix >= fix;
-		}
 
 		public void ReloadConfig(bool copyFiles = true, bool runEvent = true)
 		{

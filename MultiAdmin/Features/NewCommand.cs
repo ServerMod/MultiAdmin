@@ -63,12 +63,12 @@ namespace MultiAdmin.Features
 
 		public override string GetFeatureDescription()
 		{
-			return "Adds a command to start a new server given a config folder";
+			return "Adds a command to start a new server given a config folder and a config to start a new server when one is full [Config Requires Modding]";
 		}
 
 		public override string GetFeatureName()
 		{
-			return "New";
+			return "New Server";
 		}
 
 		public void OnServerFull()
