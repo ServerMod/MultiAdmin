@@ -4,6 +4,7 @@
     <TargetFramework>net472</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <ApplicationIcon>Icon.ico</ApplicationIcon>
+    <RootNamespace>MultiAdmin</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Mono.Posix-4.5" Version="4.5.0" />
