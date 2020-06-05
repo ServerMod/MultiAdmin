@@ -36,4 +36,4 @@ jobs:
         # Artifact name
         name: MultiAdmin
         # A file, directory or wildcard pattern that describes what to upload
-        path: ${{github.workspace}}/bin/Release/net472/publish
+        path: ${{github.workspace}}\MultiAdmin\bin\Release\net472\publish
