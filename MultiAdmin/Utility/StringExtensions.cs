@@ -18,9 +18,7 @@ namespace MultiAdmin.Utility
 
 			for (int i = 0; i < count; i++)
 			{
-				int curIndex = startIndex + i;
-
-				if (input[curIndex] != value[i])
+				if (input[startIndex + i] != value[i])
 					return false;
 			}
 

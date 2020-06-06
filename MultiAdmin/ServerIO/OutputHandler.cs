@@ -22,11 +22,11 @@ namespace MultiAdmin.ServerIO
 			if (message == null)
 				return;
 
-			ColoredMessage coloredMessage = new ColoredMessage(message, ConsoleColor.Cyan);
+			ColoredMessage coloredMessage = new ColoredMessage(message, ConsoleColor.White);
 
 			if (coloredMessage.text.Length > 0)
 			{
-				if (byte.TryParse(Convert.ToString(coloredMessage.text[0]), NumberStyles.HexNumber,
+				if (byte.TryParse(coloredMessage.text[0].ToString(), NumberStyles.HexNumber,
 					NumberFormatInfo.CurrentInfo, out byte consoleColor))
 				{
 					coloredMessage.textColor = (ConsoleColor)consoleColor;
@@ -39,36 +39,36 @@ namespace MultiAdmin.ServerIO
 				{
 					if (match.Groups.Count >= 3)
 					{
-						ConsoleColor levelColor = ConsoleColor.Cyan;
+						ConsoleColor levelColor = ConsoleColor.Green;
 						ConsoleColor tagColor = ConsoleColor.Yellow;
-						ConsoleColor msgColor = ConsoleColor.White;
+						ConsoleColor msgColor = coloredMessage.textColor ?? ConsoleColor.White;
+
 						switch (match.Groups[1].Value.Trim())
 						{
 							case "DEBUG":
-								levelColor = ConsoleColor.Gray;
+								levelColor = ConsoleColor.DarkGray;
 								break;
+
 							case "INFO":
 								levelColor = ConsoleColor.Green;
 								break;
+
 							case "WARN":
 								levelColor = ConsoleColor.DarkYellow;
 								break;
+
 							case "ERROR":
 								levelColor = ConsoleColor.Red;
-								msgColor = ConsoleColor.Red;
-								break;
-							default:
-								coloredMessage.textColor = ConsoleColor.Cyan;
 								break;
 						}
 
 						server.Write(
-							new ColoredMessage[]
+							new[]
 							{
 								new ColoredMessage($"[{match.Groups[1].Value}] ", levelColor),
 								new ColoredMessage($"{match.Groups[2].Value} ", tagColor),
 								new ColoredMessage(match.Groups[3].Value, msgColor)
-							}, ConsoleColor.Cyan);
+							}, msgColor);
 
 						// P.S. the format is [Info] [courtney.exampleplugin] Something interesting happened
 						// That was just an example
@@ -78,24 +78,24 @@ namespace MultiAdmin.ServerIO
 					}
 				}
 
-				switch (coloredMessage.text)
+				switch (coloredMessage.text.Trim('.', ' ', '\t'))
 				{
-					case "The round is about to restart! Please wait..":
+					case "The round is about to restart! Please wait":
 						server.ForEachHandler<IEventRoundEnd>(roundEnd => roundEnd.OnRoundEnd());
 						break;
 
-					case "Waiting for players...":
+					case "Waiting for players":
 						server.IsLoading = false;
 
 						server.ForEachHandler<IEventWaitingForPlayers>(waitingForPlayers =>
 							waitingForPlayers.OnWaitingForPlayers());
 						break;
 
-					case "New round has been started.":
+					case "New round has been started":
 						server.ForEachHandler<IEventRoundStart>(roundStart => roundStart.OnRoundStart());
 						break;
 
-					case "Level loaded. Creating match...":
+					case "Level loaded. Creating match":
 						server.ForEachHandler<IEventServerStart>(serverStart => serverStart.OnServerStart());
 						break;
 
