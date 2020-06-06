@@ -372,44 +372,53 @@ namespace MultiAdmin
 
 					MainLoop();
 
-					switch (Status)
+					try
 					{
-						case ServerStatus.Stopping:
-						case ServerStatus.ForceStopping:
-							Status = ServerStatus.Stopped;
+						switch (Status)
+						{
+							case ServerStatus.Stopping:
+							case ServerStatus.ForceStopping:
+								Status = ServerStatus.Stopped;
 
-							shouldRestart = false;
-							break;
+								shouldRestart = false;
+								break;
 
-						case ServerStatus.Restarting:
-							shouldRestart = true;
-							break;
+							case ServerStatus.Restarting:
+								shouldRestart = true;
+								break;
 
-						default:
-							Status = ServerStatus.StoppedUnexpectedly;
+							default:
+								Status = ServerStatus.StoppedUnexpectedly;
 
-							ForEachHandler<IEventCrash>(eventCrash => eventCrash.OnCrash());
+								ForEachHandler<IEventCrash>(eventCrash => eventCrash.OnCrash());
 
-							Write("Game engine exited unexpectedly", ConsoleColor.Red);
+								Write("Game engine exited unexpectedly", ConsoleColor.Red);
 
-							shouldRestart = restartOnCrash;
-							break;
+								shouldRestart = restartOnCrash;
+								break;
+						}
+
+						// Cleanup after exit from MainLoop
+						GameProcess.Dispose();
+						GameProcess = null;
+
+						// Stop the input handler if it's running
+						if (inputHandlerThread != null && inputHandlerThread.IsAlive)
+						{
+							inputHandlerThread.Abort();
+						}
+
+						consoleSocket.Disconnect();
+
+						SessionSocket = null;
+						StartDateTime = null;
 					}
-
-					// Cleanup after exit from MainLoop
-					GameProcess.Dispose();
-					GameProcess = null;
-
-					// Stop the input handler if it's running
-					if (inputHandlerThread != null && inputHandlerThread.IsAlive)
+					catch (Exception e)
 					{
-						inputHandlerThread.Abort();
+						Write(e.Message, ConsoleColor.Red);
+						Program.LogDebugException(nameof(StartServer), e);
+						Write("Shutdown failed...", ConsoleColor.Red);
 					}
-
-					consoleSocket.Disconnect();
-
-					SessionSocket = null;
-					StartDateTime = null;
 
 					if (shouldRestart) Write("Restarting server...");
 				}

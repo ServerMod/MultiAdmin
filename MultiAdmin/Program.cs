@@ -15,7 +15,7 @@ namespace MultiAdmin
 {
 	public static class Program
 	{
-		public const string MaVersion = "3.3.0.0";
+		public const string MaVersion = "3.3.0.1";
 		public const string RecommendedMonoVersion = "5.18";
 
 		private static readonly List<Server> InstantiatedServers = new List<Server>();
@@ -31,6 +31,7 @@ namespace MultiAdmin
 
 		private static IExitSignal exitSignalListener;
 
+		private static bool exited = false;
 		private static readonly object ExitLock = new object();
 
 		#region Server Properties
@@ -133,6 +134,9 @@ namespace MultiAdmin
 		{
 			lock (ExitLock)
 			{
+				if (exited)
+					return;
+
 				if (MultiAdminConfig.GlobalConfig.SafeServerShutdown.Value)
 				{
 					Write("Stopping servers and exiting MultiAdmin...", ConsoleColor.DarkMagenta);
@@ -144,8 +148,10 @@ namespace MultiAdmin
 
 						try
 						{
-							if (!string.IsNullOrEmpty(server.serverId))
-								Write($"Stopping server with ID \"{server.serverId}\"...", ConsoleColor.DarkMagenta);
+							Write(
+								string.IsNullOrEmpty(server.serverId)
+									? "Stopping the default server..."
+									: $"Stopping server with ID \"{server.serverId}\"...", ConsoleColor.DarkMagenta);
 
 							server.StopServer();
 
@@ -161,7 +167,9 @@ namespace MultiAdmin
 								if (timeWaited >= MultiAdminConfig.GlobalConfig.SafeShutdownTimeout.Value)
 								{
 									Write(
-										$"Failed to server with ID \"{server.serverId}\" within {timeWaited} ms, giving up...",
+										string.IsNullOrEmpty(server.serverId)
+											? $"Failed to stop the default server within {timeWaited} ms, giving up..."
+											: $"Failed to stop server with ID \"{server.serverId}\" within {timeWaited} ms, giving up...",
 										ConsoleColor.Red);
 									break;
 								}
@@ -173,6 +181,8 @@ namespace MultiAdmin
 						}
 					}
 				}
+
+				exited = true;
 
 				// For some reason Mono hangs on this, but it works perfectly without it,
 				// but on Windows it doesn't close immediately unless this is here
