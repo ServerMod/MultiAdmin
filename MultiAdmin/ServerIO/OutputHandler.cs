@@ -1,10 +1,7 @@
 using System;
 using System.Globalization;
-using System.IO;
 using System.Text.RegularExpressions;
-using System.Threading;
 using MultiAdmin.ConsoleTools;
-using MultiAdmin.Utility;
 
 namespace MultiAdmin.ServerIO
 {
@@ -29,7 +26,8 @@ namespace MultiAdmin.ServerIO
 
 			if (coloredMessage.text.Length > 0)
 			{
-				if (byte.TryParse(Convert.ToString(coloredMessage.text[0]), NumberStyles.HexNumber, NumberFormatInfo.CurrentInfo, out byte consoleColor))
+				if (byte.TryParse(Convert.ToString(coloredMessage.text[0]), NumberStyles.HexNumber,
+					NumberFormatInfo.CurrentInfo, out byte consoleColor))
 				{
 					coloredMessage.textColor = (ConsoleColor)consoleColor;
 					coloredMessage.text = coloredMessage.text.Substring(1);

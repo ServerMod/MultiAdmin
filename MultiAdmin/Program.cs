@@ -20,8 +20,12 @@ namespace MultiAdmin
 
 		private static readonly List<Server> InstantiatedServers = new List<Server>();
 
-		private static readonly string MaDebugLogDir = Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.LogLocation.Value);
-		private static readonly string MaDebugLogFile = !string.IsNullOrEmpty(MaDebugLogDir) ? Utils.GetFullPathSafe(Path.Combine(MaDebugLogDir, $"{Utils.DateTime}_MA_{MaVersion}_debug_log.txt")) : null;
+		private static readonly string MaDebugLogDir =
+			Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.LogLocation.Value);
+
+		private static readonly string MaDebugLogFile = !string.IsNullOrEmpty(MaDebugLogDir)
+			? Utils.GetFullPathSafe(Path.Combine(MaDebugLogDir, $"{Utils.DateTime}_MA_{MaVersion}_debug_log.txt"))
+			: null;
 
 		private static uint? portArg;
 
@@ -31,14 +35,17 @@ namespace MultiAdmin
 
 		#region Server Properties
 
-		public static Server[] Servers => ServerDirectories.Select(serverDir => new Server(Path.GetFileName(serverDir), serverDir, portArg)).ToArray();
+		public static Server[] Servers => ServerDirectories
+			.Select(serverDir => new Server(Path.GetFileName(serverDir), serverDir, portArg)).ToArray();
 
 		public static string[] ServerDirectories
 		{
 			get
 			{
 				string globalServersFolder = MultiAdminConfig.GlobalConfig.ServersFolder.Value;
-				return !Directory.Exists(globalServersFolder) ? new string[] { } : Directory.GetDirectories(globalServersFolder);
+				return !Directory.Exists(globalServersFolder)
+					? new string[] { }
+					: Directory.GetDirectories(globalServersFolder);
 			}
 		}
 
@@ -48,11 +55,14 @@ namespace MultiAdmin
 
 		#region Auto-Start Server Properties
 
-		public static Server[] AutoStartServers => Servers.Where(server => !server.ServerConfig.ManualStart.Value).ToArray();
+		public static Server[] AutoStartServers =>
+			Servers.Where(server => !server.ServerConfig.ManualStart.Value).ToArray();
 
-		public static string[] AutoStartServerDirectories => AutoStartServers.Select(autoStartServer => autoStartServer.serverDir).ToArray();
+		public static string[] AutoStartServerDirectories =>
+			AutoStartServers.Select(autoStartServer => autoStartServer.serverDir).ToArray();
 
-		public static string[] AutoStartServerIds => AutoStartServers.Select(autoStartServer => autoStartServer.serverId).ToArray();
+		public static string[] AutoStartServerIds =>
+			AutoStartServers.Select(autoStartServer => autoStartServer.serverId).ToArray();
 
 		#endregion
 
@@ -66,13 +76,16 @@ namespace MultiAdmin
 			{
 				if (Headless) return;
 
-				new ColoredMessage(Utils.TimeStampMessage(message), color).WriteLine(MultiAdminConfig.GlobalConfig?.UseNewInputSystem?.Value ?? false);
+				new ColoredMessage(Utils.TimeStampMessage(message), color).WriteLine(
+					MultiAdminConfig.GlobalConfig?.UseNewInputSystem?.Value ?? false);
 			}
 		}
 
 		private static bool IsDebugLogTagAllowed(string tag)
 		{
-			return (!MultiAdminConfig.GlobalConfig?.DebugLogBlacklist?.Value?.Contains(tag) ?? true) && ((MultiAdminConfig.GlobalConfig?.DebugLogWhitelist?.Value?.IsEmpty() ?? true) || MultiAdminConfig.GlobalConfig.DebugLogWhitelist.Value.Contains(tag));
+			return (!MultiAdminConfig.GlobalConfig?.DebugLogBlacklist?.Value?.Contains(tag) ?? true) &&
+			       ((MultiAdminConfig.GlobalConfig?.DebugLogWhitelist?.Value?.IsEmpty() ?? true) ||
+			        MultiAdminConfig.GlobalConfig.DebugLogWhitelist.Value.Contains(tag));
 		}
 
 		public static void LogDebugException(string tag, Exception exception)
@@ -91,7 +104,8 @@ namespace MultiAdmin
 			{
 				try
 				{
-					if ((!MultiAdminConfig.GlobalConfig?.DebugLog?.Value ?? true) || string.IsNullOrEmpty(MaDebugLogFile) || tag == null || !IsDebugLogTagAllowed(tag)) return;
+					if ((!MultiAdminConfig.GlobalConfig?.DebugLog?.Value ?? true) ||
+					    string.IsNullOrEmpty(MaDebugLogFile) || tag == null || !IsDebugLogTagAllowed(tag)) return;
 
 					Directory.CreateDirectory(MaDebugLogDir);
 
@@ -104,7 +118,11 @@ namespace MultiAdmin
 				}
 				catch (Exception e)
 				{
-					new ColoredMessage[] {new ColoredMessage("Error while logging for MultiAdmin debug:", ConsoleColor.Red), new ColoredMessage(e.ToString(), ConsoleColor.Red)}.WriteLines();
+					new ColoredMessage[]
+					{
+						new ColoredMessage("Error while logging for MultiAdmin debug:", ConsoleColor.Red),
+						new ColoredMessage(e.ToString(), ConsoleColor.Red)
+					}.WriteLines();
 				}
 			}
 		}
@@ -142,7 +160,9 @@ namespace MultiAdmin
 
 								if (timeWaited >= MultiAdminConfig.GlobalConfig.SafeShutdownTimeout.Value)
 								{
-									Write($"Failed to server with ID \"{server.serverId}\" within {timeWaited} ms, giving up...", ConsoleColor.Red);
+									Write(
+										$"Failed to server with ID \"{server.serverId}\" within {timeWaited} ms, giving up...",
+										ConsoleColor.Red);
 									break;
 								}
 							}
@@ -238,7 +258,8 @@ namespace MultiAdmin
 			if (server != null)
 			{
 				if (!string.IsNullOrEmpty(server.serverId) && !string.IsNullOrEmpty(server.configLocation))
-					Write($"Starting this instance with Server ID: \"{server.serverId}\" and config directory: \"{server.configLocation}\"...");
+					Write(
+						$"Starting this instance with Server ID: \"{server.serverId}\" and config directory: \"{server.configLocation}\"...");
 
 				else if (!string.IsNullOrEmpty(server.serverId))
 					Write($"Starting this instance with Server ID: \"{server.serverId}\"...");
@@ -320,7 +341,9 @@ namespace MultiAdmin
 		{
 			if (keys.IsNullOrEmpty() && aliases.IsNullOrEmpty()) return false;
 
-			return bool.TryParse(GetParamFromArgs(keys, aliases), out bool result) ? result : ArgsContainsParam(keys, aliases);
+			return bool.TryParse(GetParamFromArgs(keys, aliases), out bool result)
+				? result
+				: ArgsContainsParam(keys, aliases);
 		}
 
 		public static string GetParamFromArgs(string key = null, string alias = null)
@@ -388,7 +411,9 @@ namespace MultiAdmin
 		{
 			try
 			{
-				string monoVersionRaw = Type.GetType("Mono.Runtime")?.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static)?.Invoke(null, null)?.ToString();
+				string monoVersionRaw = Type.GetType("Mono.Runtime")
+					?.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static)?.Invoke(null, null)
+					?.ToString();
 				string monoVersion = monoVersionRaw?.Split(' ').FirstOrDefault(version => IsVersionFormat(version));
 
 				if (string.IsNullOrEmpty(monoVersion))
@@ -399,8 +424,11 @@ namespace MultiAdmin
 				if (versionDifference >= 0)
 					return;
 
-				Write($"Warning: Your Mono version ({monoVersion}) is below the minimum recommended version ({RecommendedMonoVersion})", ConsoleColor.Red);
-				Write("Please update your Mono installation: https://www.mono-project.com/download/stable/", ConsoleColor.Red);
+				Write(
+					$"Warning: Your Mono version ({monoVersion}) is below the minimum recommended version ({RecommendedMonoVersion})",
+					ConsoleColor.Red);
+				Write("Please update your Mono installation: https://www.mono-project.com/download/stable/",
+					ConsoleColor.Red);
 			}
 			catch (Exception e)
 			{

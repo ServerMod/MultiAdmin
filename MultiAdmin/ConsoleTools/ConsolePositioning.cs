@@ -57,7 +57,8 @@ namespace MultiAdmin.ConsoleTools
 			this.y = y;
 		}
 
-		public ConsolePoint(BufferPoint bufferPoint) : this(bufferPoint.x - Console.WindowLeft, bufferPoint.y - Console.WindowTop)
+		public ConsolePoint(BufferPoint bufferPoint) : this(bufferPoint.x - Console.WindowLeft,
+			bufferPoint.y - Console.WindowTop)
 		{
 		}
 
@@ -89,7 +90,8 @@ namespace MultiAdmin.ConsoleTools
 			this.y = y;
 		}
 
-		public BufferPoint(ConsolePoint consolePoint) : this(consolePoint.x + Console.WindowLeft, consolePoint.y + Console.WindowTop)
+		public BufferPoint(ConsolePoint consolePoint) : this(consolePoint.x + Console.WindowLeft,
+			consolePoint.y + Console.WindowTop)
 		{
 		}
 

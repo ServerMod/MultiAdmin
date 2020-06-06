@@ -9,7 +9,10 @@ namespace MultiAdmin.NativeExitSignal
 	{
 		public event EventHandler Exit;
 
-		private readonly UnixSignal[] signals = {new UnixSignal(Signum.SIGTERM), new UnixSignal(Signum.SIGINT), new UnixSignal(Signum.SIGUSR1)};
+		private readonly UnixSignal[] signals =
+		{
+			new UnixSignal(Signum.SIGTERM), new UnixSignal(Signum.SIGINT), new UnixSignal(Signum.SIGUSR1)
+		};
 
 		public UnixExitSignal()
 		{

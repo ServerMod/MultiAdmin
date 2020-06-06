@@ -4,10 +4,10 @@ using MultiAdmin;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle(nameof(MultiAdminTests))]
+[assembly: AssemblyTitle(nameof(MultiAdmin.Tests))]
 [assembly: AssemblyDescription("A set of Unit Tests for " + nameof(MultiAdmin) + " v" + Program.MaVersion)]
-[assembly: AssemblyProduct(nameof(MultiAdminTests))]
-[assembly: AssemblyCopyright("Copyright © Grover 2019")]
+[assembly: AssemblyProduct(nameof(MultiAdmin.Tests))]
+[assembly: AssemblyCopyright("Copyright © Grover 2020")]
 
 // Version information for an assembly consists of the following four values:
 //

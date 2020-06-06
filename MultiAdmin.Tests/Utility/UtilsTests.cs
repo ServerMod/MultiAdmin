@@ -1,8 +1,7 @@
-using System;
 using MultiAdmin.Utility;
 using Xunit;
 
-namespace MultiAdminTests.Utility
+namespace MultiAdmin.Tests.Utility
 {
 	public class UtilsTests
 	{

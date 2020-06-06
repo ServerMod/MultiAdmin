@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace MultiAdmin.ConsoleTools
@@ -96,7 +94,8 @@ namespace MultiAdmin.ConsoleTools
 
 		public bool Equals(ColoredMessage other)
 		{
-			return string.Equals(text, other.text) && textColor == other.textColor && backgroundColor == other.backgroundColor;
+			return string.Equals(text, other.text) && textColor == other.textColor &&
+			       backgroundColor == other.backgroundColor;
 		}
 
 		public override bool Equals(object obj)

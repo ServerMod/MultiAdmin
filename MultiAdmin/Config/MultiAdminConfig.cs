@@ -183,7 +183,12 @@ namespace MultiAdmin.Config
 				}
 				catch (Exception e)
 				{
-					new ColoredMessage[] {new ColoredMessage($"Error while creating config (Path = {Config?.ConfigPath ?? "Null"}):", ConsoleColor.Red), new ColoredMessage(e.ToString(), ConsoleColor.Red)}.WriteLines();
+					new ColoredMessage[]
+					{
+						new ColoredMessage($"Error while creating config (Path = {Config?.ConfigPath ?? "Null"}):",
+							ConsoleColor.Red),
+						new ColoredMessage(e.ToString(), ConsoleColor.Red)
+					}.WriteLines();
 				}
 			}
 
@@ -206,7 +211,8 @@ namespace MultiAdmin.Config
 		{
 		}
 
-		public MultiAdminConfig(string path, MultiAdminConfig parentConfig, bool createConfig = true) : this(new Config(path), parentConfig, createConfig)
+		public MultiAdminConfig(string path, MultiAdminConfig parentConfig, bool createConfig = true) : this(
+			new Config(path), parentConfig, createConfig)
 		{
 		}
 
@@ -279,7 +285,9 @@ namespace MultiAdmin.Config
 
 				default:
 				{
-					throw new ArgumentException($"Config type unsupported (Config: Key = \"{configEntry.Key ?? "Null"}\" Type = \"{configEntry.ValueType.FullName ?? "Null"}\" Name = \"{configEntry.Name ?? "Null"}\" Description = \"{configEntry.Description ?? "Null"}\").", nameof(configEntry));
+					throw new ArgumentException(
+						$"Config type unsupported (Config: Key = \"{configEntry.Key ?? "Null"}\" Type = \"{configEntry.ValueType.FullName ?? "Null"}\" Name = \"{configEntry.Name ?? "Null"}\" Description = \"{configEntry.Description ?? "Null"}\").",
+						nameof(configEntry));
 				}
 			}
 		}
@@ -326,7 +334,8 @@ namespace MultiAdmin.Config
 		{
 			string fullPath = Utils.GetFullPathSafe(path);
 
-			return !string.IsNullOrEmpty(fullPath) && GetConfigHierarchy().Any(config => config.Config?.ConfigPath == path);
+			return !string.IsNullOrEmpty(fullPath) &&
+			       GetConfigHierarchy().Any(config => config.Config?.ConfigPath == path);
 		}
 	}
 }

@@ -1,7 +1,8 @@
 namespace MultiAdmin.Features
 {
 	internal class EventTest : Feature, IEventCrash,
-		IEventRoundEnd, IEventWaitingForPlayers, IEventRoundStart, IEventServerPreStart, IEventServerStart, IEventServerStop
+		IEventRoundEnd, IEventWaitingForPlayers, IEventRoundStart, IEventServerPreStart, IEventServerStart,
+		IEventServerStop
 	{
 		public EventTest(Server server) : base(server)
 		{

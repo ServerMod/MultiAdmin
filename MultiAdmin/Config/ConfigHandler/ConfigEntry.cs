@@ -58,7 +58,8 @@ namespace MultiAdmin.Config.ConfigHandler
 		/// <summary>
 		/// Creates a basic <see cref="ConfigEntry"/> with no values.
 		/// </summary>
-		public ConfigEntry(string key, string name = null, string description = null) : this(key, true, name, description)
+		public ConfigEntry(string key, string name = null, string description = null) : this(key, true, name,
+			description)
 		{
 		}
 	}
@@ -97,7 +98,8 @@ namespace MultiAdmin.Config.ConfigHandler
 		/// <summary>
 		/// Creates a <see cref="ConfigEntry{T}" /> with the provided type, default value, and indication for whether to inherit the value.
 		/// </summary>
-		public ConfigEntry(string key, T defaultValue = default, bool inherit = true, string name = null, string description = null) : base(key, inherit, name, description)
+		public ConfigEntry(string key, T defaultValue = default, bool inherit = true, string name = null,
+			string description = null) : base(key, inherit, name, description)
 		{
 			Default = defaultValue;
 		}
@@ -106,7 +108,8 @@ namespace MultiAdmin.Config.ConfigHandler
 		/// <summary>
 		/// Creates a <see cref="ConfigEntry{T}" /> with the provided type and default value.
 		/// </summary>
-		public ConfigEntry(string key, T defaultValue = default, string name = null, string description = null) : this(key, defaultValue, true, name, description)
+		public ConfigEntry(string key, T defaultValue = default, string name = null, string description = null) : this(
+			key, defaultValue, true, name, description)
 		{
 		}
 	}

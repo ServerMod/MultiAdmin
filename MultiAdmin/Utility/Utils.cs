@@ -31,7 +31,8 @@ namespace MultiAdmin.Utility
 			return string.IsNullOrEmpty(message) ? message : $"{TimeStamp} {message}";
 		}
 
-		public static ColoredMessage[] TimeStampMessage(ColoredMessage[] message, ConsoleColor? color = null, bool cloneMessages = false)
+		public static ColoredMessage[] TimeStampMessage(ColoredMessage[] message, ConsoleColor? color = null,
+			bool cloneMessages = false)
 		{
 			if (message == null) return null;
 
@@ -52,7 +53,8 @@ namespace MultiAdmin.Utility
 			return newMessage;
 		}
 
-		public static ColoredMessage[] TimeStampMessage(ColoredMessage message, ConsoleColor? color = null, bool cloneMessages = false)
+		public static ColoredMessage[] TimeStampMessage(ColoredMessage message, ConsoleColor? color = null,
+			bool cloneMessages = false)
 		{
 			return TimeStampMessage(new ColoredMessage[] {message}, color, cloneMessages);
 		}
@@ -98,7 +100,8 @@ namespace MultiAdmin.Utility
 				if (matchIndex < 0 || matchIndex >= input.Length)
 					return false;
 
-				Program.LogDebug(nameof(StringMatches), $"Matching \"{wildCardSection}\" with \"{input.Substring(matchIndex)}\"...");
+				Program.LogDebug(nameof(StringMatches),
+					$"Matching \"{wildCardSection}\" with \"{input.Substring(matchIndex)}\"...");
 
 				if (matchIndex <= 0 && pattern[0] != wildCard)
 				{
@@ -134,7 +137,8 @@ namespace MultiAdmin.Utility
 				}
 			}
 
-			Program.LogDebug(nameof(StringMatches), $"Done matching. Matches = {matchIndex == input.Length || wildCardSections[wildCardSections.Length - 1].IsEmpty()}.");
+			Program.LogDebug(nameof(StringMatches),
+				$"Done matching. Matches = {matchIndex == input.Length || wildCardSections[wildCardSections.Length - 1].IsEmpty()}.");
 
 			return matchIndex == input.Length || wildCardSections[wildCardSections.Length - 1].IsEmpty();
 		}
@@ -144,12 +148,15 @@ namespace MultiAdmin.Utility
 			return !namePatterns.IsNullOrEmpty() && namePatterns.Any(namePattern => StringMatches(input, namePattern));
 		}
 
-		private static bool PassesWhitelistAndBlacklist(string toCheck, string[] whitelist = null, string[] blacklist = null)
+		private static bool PassesWhitelistAndBlacklist(string toCheck, string[] whitelist = null,
+			string[] blacklist = null)
 		{
-			return (whitelist.IsNullOrEmpty() || InputMatchesAnyPattern(toCheck, whitelist)) && (blacklist.IsNullOrEmpty() || !InputMatchesAnyPattern(toCheck, blacklist));
+			return (whitelist.IsNullOrEmpty() || InputMatchesAnyPattern(toCheck, whitelist)) &&
+			       (blacklist.IsNullOrEmpty() || !InputMatchesAnyPattern(toCheck, blacklist));
 		}
 
-		public static void CopyAll(DirectoryInfo source, DirectoryInfo target, string[] fileWhitelist = null, string[] fileBlacklist = null)
+		public static void CopyAll(DirectoryInfo source, DirectoryInfo target, string[] fileWhitelist = null,
+			string[] fileBlacklist = null)
 		{
 			// If the target directory is the same as the source directory 
 			if (source.FullName == target.FullName)
@@ -177,7 +184,8 @@ namespace MultiAdmin.Utility
 			}
 		}
 
-		public static void CopyAll(string source, string target, string[] fileWhitelist = null, string[] fileBlacklist = null)
+		public static void CopyAll(string source, string target, string[] fileWhitelist = null,
+			string[] fileBlacklist = null)
 		{
 			CopyAll(new DirectoryInfo(source), new DirectoryInfo(target), fileWhitelist, fileBlacklist);
 		}

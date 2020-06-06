@@ -49,7 +49,12 @@ namespace MultiAdmin.Config
 			{
 				Program.LogDebugException(nameof(ReadConfigFile), e);
 
-				new ColoredMessage[] {new ColoredMessage($"Error while reading config (Path = {ConfigPath ?? "Null"}):", ConsoleColor.Red), new ColoredMessage(e.ToString(), ConsoleColor.Red)}.WriteLines();
+				new ColoredMessage[]
+				{
+					new ColoredMessage($"Error while reading config (Path = {ConfigPath ?? "Null"}):",
+						ConsoleColor.Red),
+					new ColoredMessage(e.ToString(), ConsoleColor.Red)
+				}.WriteLines();
 			}
 		}
 
@@ -60,7 +65,8 @@ namespace MultiAdmin.Config
 
 		public bool Contains(string key)
 		{
-			return rawData != null && rawData.Any(entry => entry.StartsWith($"{key}:", StringComparison.CurrentCultureIgnoreCase));
+			return rawData != null &&
+			       rawData.Any(entry => entry.StartsWith($"{key}:", StringComparison.CurrentCultureIgnoreCase));
 		}
 
 		private static string CleanValue(string value)

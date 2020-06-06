@@ -2,7 +2,7 @@ using System;
 using MultiAdmin.ServerIO;
 using Xunit;
 
-namespace MultiAdminTests.ServerIO
+namespace MultiAdmin.Tests.ServerIO
 {
 	public class ShiftingListTests
 	{

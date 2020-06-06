@@ -63,24 +63,28 @@ namespace MultiAdmin.Features
 			lines.Add("");
 			lines.Add("## Config Settings");
 			lines.Add("");
-			lines.Add($"Config Option{ColumnSeparator}Value Type{ColumnSeparator}Default Value{ColumnSeparator}Description");
+			lines.Add(
+				$"Config Option{ColumnSeparator}Value Type{ColumnSeparator}Default Value{ColumnSeparator}Description");
 			lines.Add($"---{ColumnSeparator}:---:{ColumnSeparator}:---:{ColumnSeparator}:------:");
 
 			foreach (ConfigEntry configEntry in MultiAdminConfig.GlobalConfig.GetRegisteredConfigs())
 			{
-				StringBuilder stringBuilder = new StringBuilder($"{configEntry.Key ?? EmptyIndicator}{ColumnSeparator}");
+				StringBuilder stringBuilder =
+					new StringBuilder($"{configEntry.Key ?? EmptyIndicator}{ColumnSeparator}");
 
 				switch (configEntry)
 				{
 					case ConfigEntry<string> config:
 					{
-						stringBuilder.Append($"String{ColumnSeparator}{(string.IsNullOrEmpty(config.Default) ? EmptyIndicator : config.Default)}");
+						stringBuilder.Append(
+							$"String{ColumnSeparator}{(string.IsNullOrEmpty(config.Default) ? EmptyIndicator : config.Default)}");
 						break;
 					}
 
 					case ConfigEntry<string[]> config:
 					{
-						stringBuilder.Append($"String List{ColumnSeparator}{(config.Default?.IsEmpty() ?? true ? EmptyIndicator : string.Join(", ", config.Default))}");
+						stringBuilder.Append(
+							$"String List{ColumnSeparator}{(config.Default?.IsEmpty() ?? true ? EmptyIndicator : string.Join(", ", config.Default))}");
 						break;
 					}
 
@@ -122,7 +126,8 @@ namespace MultiAdmin.Features
 
 					default:
 					{
-						stringBuilder.Append($"{configEntry.ValueType?.Name ?? EmptyIndicator}{ColumnSeparator}{configEntry.ObjectDefault ?? EmptyIndicator}");
+						stringBuilder.Append(
+							$"{configEntry.ValueType?.Name ?? EmptyIndicator}{ColumnSeparator}{configEntry.ObjectDefault ?? EmptyIndicator}");
 						break;
 					}
 				}

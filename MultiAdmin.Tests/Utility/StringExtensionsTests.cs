@@ -1,9 +1,8 @@
 using System;
 using MultiAdmin.Utility;
 using Xunit;
-using Xunit.Sdk;
 
-namespace MultiAdminTests.Utility
+namespace MultiAdmin.Tests.Utility
 {
 	public class StringExtensionsTests
 	{

@@ -37,9 +37,13 @@ namespace MultiAdmin
 		public Server(string serverId = null, string configLocation = null, uint? port = null)
 		{
 			this.serverId = serverId;
-			serverDir = string.IsNullOrEmpty(this.serverId) ? null : Utils.GetFullPathSafe(Path.Combine(MultiAdminConfig.GlobalConfig.ServersFolder.Value, this.serverId));
+			serverDir = string.IsNullOrEmpty(this.serverId)
+				? null
+				: Utils.GetFullPathSafe(Path.Combine(MultiAdminConfig.GlobalConfig.ServersFolder.Value, this.serverId));
 
-			this.configLocation = Utils.GetFullPathSafe(configLocation) ?? Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.ConfigLocation.Value) ?? Utils.GetFullPathSafe(serverDir);
+			this.configLocation = Utils.GetFullPathSafe(configLocation) ??
+			                      Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.ConfigLocation.Value) ??
+			                      Utils.GetFullPathSafe(serverDir);
 
 			// Load config
 			serverConfig = MultiAdminConfig.GlobalConfig;
@@ -52,7 +56,8 @@ namespace MultiAdmin
 				this.configLocation = serverConfigLocation;
 
 				// Load the child MultiAdminConfig
-				serverConfig = new MultiAdminConfig(Path.Combine(serverConfigLocation, MultiAdminConfig.ConfigFileName), serverConfig);
+				serverConfig = new MultiAdminConfig(Path.Combine(serverConfigLocation, MultiAdminConfig.ConfigFileName),
+					serverConfig);
 
 				// Set the server config location to the value from the config, this should be empty or null if there is no valid value
 				serverConfigLocation = Utils.GetFullPathSafe(serverConfig.ConfigLocation.Value);
@@ -66,7 +71,8 @@ namespace MultiAdmin
 			// Set port
 			this.port = port;
 
-			logDir = Utils.GetFullPathSafe(Path.Combine(string.IsNullOrEmpty(serverDir) ? "" : serverDir, serverConfig.LogLocation.Value));
+			logDir = Utils.GetFullPathSafe(Path.Combine(string.IsNullOrEmpty(serverDir) ? "" : serverDir,
+				serverConfig.LogLocation.Value));
 
 			// Register all features
 			RegisterFeatures();
@@ -88,12 +94,16 @@ namespace MultiAdmin
 			}
 		}
 
-		public bool IsStopped => Status == ServerStatus.NotStarted || Status == ServerStatus.Stopped || Status == ServerStatus.StoppedUnexpectedly;
+		public bool IsStopped => Status == ServerStatus.NotStarted || Status == ServerStatus.Stopped ||
+		                         Status == ServerStatus.StoppedUnexpectedly;
+
 		public bool IsRunning => !IsStopped;
 		public bool IsStarted => !IsStopped && !IsStarting;
 
 		public bool IsStarting => Status == ServerStatus.Starting;
-		public bool IsStopping => Status == ServerStatus.Stopping || Status == ServerStatus.ForceStopping || Status == ServerStatus.Restarting;
+
+		public bool IsStopping => Status == ServerStatus.Stopping || Status == ServerStatus.ForceStopping ||
+		                          Status == ServerStatus.Restarting;
 
 		public bool IsLoading { get; set; }
 
@@ -110,7 +120,9 @@ namespace MultiAdmin
 				startDateTime = value;
 
 				// Update related variables
-				LogDirFile = string.IsNullOrEmpty(value) || string.IsNullOrEmpty(logDir) ? null : $"{Path.Combine(logDir, value)}_{{0}}_output_log.txt";
+				LogDirFile = string.IsNullOrEmpty(value) || string.IsNullOrEmpty(logDir)
+					? null
+					: $"{Path.Combine(logDir, value)}_{{0}}_output_log.txt";
 
 				lock (this)
 				{
@@ -121,8 +133,11 @@ namespace MultiAdmin
 			}
 		}
 
-		public bool CheckStopTimeout => (DateTime.Now - initStopTimeoutTime).Seconds > ServerConfig.ServerStopTimeout.Value;
-		public bool CheckRestartTimeout => (DateTime.Now - initRestartTimeoutTime).Seconds > ServerConfig.ServerRestartTimeout.Value;
+		public bool CheckStopTimeout =>
+			(DateTime.Now - initStopTimeoutTime).Seconds > ServerConfig.ServerStopTimeout.Value;
+
+		public bool CheckRestartTimeout =>
+			(DateTime.Now - initRestartTimeoutTime).Seconds > ServerConfig.ServerRestartTimeout.Value;
 
 		public string LogDirFile { get; private set; }
 		public string MaLogFile { get; private set; }
@@ -214,7 +229,8 @@ namespace MultiAdmin
 			{
 				foreach (MultiAdminConfig config in ServerConfig.GetConfigHierarchy())
 				{
-					if (!string.IsNullOrEmpty(config?.Config?.ConfigPath) && MultiAdminConfig.GlobalConfigFilePath != config.Config.ConfigPath)
+					if (!string.IsNullOrEmpty(config?.Config?.ConfigPath) &&
+					    MultiAdminConfig.GlobalConfigFilePath != config.Config.ConfigPath)
 						Write($"Using server config \"{config.Config.ConfigPath}\"...");
 				}
 			}
@@ -232,7 +248,8 @@ namespace MultiAdmin
 				throw new FileNotFoundException("Invalid OS, can't run executable");
 
 			if (!File.Exists(scpslExe))
-				throw new FileNotFoundException($"Can't find game executable \"{scpslExe}\", the working directory must be the game directory");
+				throw new FileNotFoundException(
+					$"Can't find game executable \"{scpslExe}\", the working directory must be the game directory");
 
 			return scpslExe;
 		}
@@ -329,8 +346,7 @@ namespace MultiAdmin
 
 					ProcessStartInfo startInfo = new ProcessStartInfo(scpslExe, argsString)
 					{
-						CreateNoWindow = true,
-						UseShellExecute = false
+						CreateNoWindow = true, UseShellExecute = false
 					};
 
 					ForEachHandler<IEventServerPreStart>(eventPreStart => eventPreStart.OnServerPreStart());
@@ -473,7 +489,8 @@ namespace MultiAdmin
 					// If the command was already registered
 					if (commands.ContainsKey(commandKey))
 					{
-						string message = $"Warning, {nameof(MultiAdmin)} tried to register duplicate command \"{commandKey}\"";
+						string message =
+							$"Warning, {nameof(MultiAdmin)} tried to register duplicate command \"{commandKey}\"";
 
 						Program.LogDebug(nameof(RegisterFeature), message);
 						Write(message);
@@ -566,7 +583,8 @@ namespace MultiAdmin
 			}
 		}
 
-		public void Write(string message, ConsoleColor? color = ConsoleColor.Yellow, ConsoleColor? timeStampColor = null)
+		public void Write(string message, ConsoleColor? color = ConsoleColor.Yellow,
+			ConsoleColor? timeStampColor = null)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
@@ -595,7 +613,11 @@ namespace MultiAdmin
 				{
 					Program.LogDebugException(nameof(Log), e);
 
-					new ColoredMessage[] {new ColoredMessage("Error while logging for MultiAdmin:", ConsoleColor.Red), new ColoredMessage(e.ToString(), ConsoleColor.Red)}.WriteLines();
+					new ColoredMessage[]
+					{
+						new ColoredMessage("Error while logging for MultiAdmin:", ConsoleColor.Red),
+						new ColoredMessage(e.ToString(), ConsoleColor.Red)
+					}.WriteLines();
 				}
 			}
 		}
@@ -608,9 +630,11 @@ namespace MultiAdmin
 
 			// Handle directory copying
 			string copyFromDir;
-			if (copyFiles && !string.IsNullOrEmpty(configLocation) && !string.IsNullOrEmpty(copyFromDir = ServerConfig.CopyFromFolderOnReload.Value))
+			if (copyFiles && !string.IsNullOrEmpty(configLocation) &&
+			    !string.IsNullOrEmpty(copyFromDir = ServerConfig.CopyFromFolderOnReload.Value))
 			{
-				CopyFromDir(copyFromDir, ServerConfig.FolderCopyWhitelist.Value, ServerConfig.FolderCopyBlacklist.Value);
+				CopyFromDir(copyFromDir, ServerConfig.FolderCopyWhitelist.Value,
+					ServerConfig.FolderCopyBlacklist.Value);
 			}
 
 			// Handle each config reload event

@@ -208,7 +208,8 @@ namespace MultiAdmin.ServerIO
 					{
 						curSections = GetStringSections(message);
 
-						StringSection? curSection = curSections.GetSection(IndexMinusOne(messageCursor), out int sectionIndex);
+						StringSection? curSection =
+							curSections.GetSection(IndexMinusOne(messageCursor), out int sectionIndex);
 
 						if (curSection != null)
 						{
@@ -241,7 +242,8 @@ namespace MultiAdmin.ServerIO
 						// If the message length is longer than the buffer width (being cut into sections), re-write the message
 						if (curSections != null)
 						{
-							StringSection? curSection = curSections.GetSection(IndexMinusOne(messageCursor), out int sectionIndex);
+							StringSection? curSection =
+								curSections.GetSection(IndexMinusOne(messageCursor), out int sectionIndex);
 
 							if (curSection != null)
 							{
@@ -265,7 +267,8 @@ namespace MultiAdmin.ServerIO
 							}
 							else
 							{
-								server.Write("Error while processing input string: curSection is null!", ConsoleColor.Red);
+								server.Write("Error while processing input string: curSection is null!",
+									ConsoleColor.Red);
 							}
 						}
 						else
@@ -322,7 +325,8 @@ namespace MultiAdmin.ServerIO
 
 		private static StringSections GetStringSections(string message)
 		{
-			return StringSections.FromString(message, SectionBufferWidth, LeftSideIndicator, RightSideIndicator, BaseSection);
+			return StringSections.FromString(message, SectionBufferWidth, LeftSideIndicator, RightSideIndicator,
+				BaseSection);
 		}
 
 		private static int IndexMinusOne(int index)

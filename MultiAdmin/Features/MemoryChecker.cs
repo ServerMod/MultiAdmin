@@ -84,7 +84,8 @@ namespace MultiAdmin.Features
 
 			if (tickCount < MaxTicks && LowBytes >= 0 && MemoryLeftBytes <= LowBytes)
 			{
-				Server.Write($"Warning: Program is running low on memory ({decimal.Round(MemoryLeftMb, OutputPrecision)} MB left), the server will restart if it continues",
+				Server.Write(
+					$"Warning: Program is running low on memory ({decimal.Round(MemoryLeftMb, OutputPrecision)} MB left), the server will restart if it continues",
 					ConsoleColor.Red);
 				tickCount++;
 			}

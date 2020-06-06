@@ -1,8 +1,10 @@
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace MultiAdmin.ServerIO
 {
@@ -54,46 +56,58 @@ namespace MultiAdmin.ServerIO
 				client = listener.EndAcceptTcpClient(result);
 				networkStream = client.GetStream();
 
-				Thread listenerThread = new Thread(MessageListener);
-				listenerThread.Start();
+				Task.Run(MessageListener, disposeCancellationSource.Token);
 			}, listener);
 		}
 
-		public void MessageListener()
+		public async void MessageListener()
 		{
 			byte[] intBuffer = new byte[IntBytes];
-			while (!disposed)
+			while (!disposed && networkStream != null)
 			{
 				try
 				{
-					networkStream.ReadAsync(intBuffer, 0, IntBytes, disposeCancellationSource.Token).Wait();
+					int lengthBytesRead =
+						await networkStream.ReadAsync(intBuffer, 0, IntBytes, disposeCancellationSource.Token);
+
+					// Socket has been disconnected
+					if (lengthBytesRead <= 0)
+					{
+						Disconnect();
+						break;
+					}
+
+					int length = BitConverter.ToInt32(intBuffer, 0);
+
+					// Handle empty messages asap
+					if (length == 0)
+					{
+						OnReceiveMessage?.Invoke(this, "");
+					}
+					else if (length < 0)
+					{
+						OnReceiveMessage?.Invoke(this, null);
+					}
+
+					byte[] messageBuffer = new byte[length];
+					int messageBytesRead =
+						await networkStream.ReadAsync(messageBuffer, 0, length, disposeCancellationSource.Token);
+
+					// Socket has been disconnected
+					if (messageBytesRead <= 0)
+					{
+						Disconnect();
+						break;
+					}
+
+					string message = Encoding.GetString(messageBuffer, 0, length);
+
+					OnReceiveMessage?.Invoke(this, message);
 				}
 				catch (Exception e)
 				{
 					Program.LogDebugException(nameof(MessageListener), e);
-					continue;
 				}
-				if (disposed)
-					break;
-
-				int length = BitConverter.ToInt32(intBuffer, 0);
-
-				byte[] messageBuffer = new byte[length];
-				try
-				{
-					networkStream.ReadAsync(messageBuffer, 0, length, disposeCancellationSource.Token).Wait();
-				}
-				catch (Exception e)
-				{
-					Program.LogDebugException(nameof(MessageListener), e);
-					continue;
-				}
-				if (disposed)
-					break;
-
-				string message = Encoding.GetString(messageBuffer, 0, length);
-
-				OnReceiveMessage?.Invoke(this, message);
 			}
 		}
 

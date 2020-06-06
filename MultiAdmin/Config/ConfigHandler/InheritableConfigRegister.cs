@@ -39,7 +39,8 @@ namespace MultiAdmin.Config.ConfigHandler
 		/// <param name="configEntry">The <see cref="ConfigEntry"/> to be assigned a value.</param>
 		public override void UpdateConfigValue(ConfigEntry configEntry)
 		{
-			if (configEntry != null && configEntry.Inherit && ParentConfigRegister != null && ShouldInheritConfigEntry(configEntry))
+			if (configEntry != null && configEntry.Inherit && ParentConfigRegister != null &&
+			    ShouldInheritConfigEntry(configEntry))
 			{
 				ParentConfigRegister.UpdateConfigValue(configEntry);
 			}
