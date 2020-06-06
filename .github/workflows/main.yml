@@ -25,7 +25,7 @@ jobs:
       run: dotnet restore
 
     - name: Build MultiAdmin
-      run: dotnet publish -c release
+      run: dotnet publish -c Release -o "${{github.workspace}}/Release" "MultiAdmin"
       
     - name: Test MultiAdmin
       run: dotnet test
@@ -36,4 +36,4 @@ jobs:
         # Artifact name
         name: MultiAdmin
         # A file, directory or wildcard pattern that describes what to upload
-        path: ${{github.workspace}}\MultiAdmin\bin\Release\net472\publish
+        path: ${{github.workspace}}/Release
