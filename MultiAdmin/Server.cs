@@ -205,15 +205,16 @@ namespace MultiAdmin
 		/// Sends the string <paramref name="message" /> to the SCP: SL server process.
 		/// </summary>
 		/// <param name="message"></param>
-		public void SendMessage(string message)
+		public bool SendMessage(string message)
 		{
 			if (SessionSocket == null || !SessionSocket.Connected)
 			{
 				Write("Unable to send command to server, the console is disconnected", ConsoleColor.Red);
-				return;
+				return false;
 			}
 
 			SessionSocket.SendMessage(message);
+			return true;
 		}
 
 		#endregion
@@ -445,10 +446,6 @@ namespace MultiAdmin
 		{
 			if (!IsRunning) throw new Exceptions.ServerNotRunningException();
 
-			// If the game is loading, it won't accept the safe quit command
-			if (IsLoading)
-				killGame = true;
-
 			initStopTimeoutTime = DateTime.Now;
 			Status = killGame ? ServerStatus.ForceStopping : ServerStatus.Stopping;
 
@@ -456,7 +453,8 @@ namespace MultiAdmin
 
 			if (killGame && IsGameProcessRunning)
 				GameProcess.Kill();
-			else SendMessage("QUIT");
+			else if (!SendMessage("QUIT"))
+				GameProcess.Kill();
 		}
 
 		public void SoftRestartServer()
@@ -467,7 +465,8 @@ namespace MultiAdmin
 			Status = ServerStatus.Restarting;
 
 			SendMessage("ROUNDRESTART");
-			SendMessage("QUIT");
+			if (!SendMessage("QUIT"))
+				GameProcess.Kill();
 		}
 
 		#endregion

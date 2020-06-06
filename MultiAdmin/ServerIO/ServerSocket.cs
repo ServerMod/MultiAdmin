@@ -53,10 +53,21 @@ namespace MultiAdmin.ServerIO
 			listener.Start();
 			listener.BeginAcceptTcpClient(result =>
 			{
-				client = listener.EndAcceptTcpClient(result);
-				networkStream = client.GetStream();
+				try
+				{
+					client = listener.EndAcceptTcpClient(result);
+					networkStream = client.GetStream();
 
-				Task.Run(MessageListener, disposeCancellationSource.Token);
+					Task.Run(MessageListener, disposeCancellationSource.Token);
+				}
+				catch (ObjectDisposedException)
+				{
+					// IGNORE
+				}
+				catch (Exception e)
+				{
+					Program.LogDebugException(nameof(Connect), e);
+				}
 			}, listener);
 		}
 
