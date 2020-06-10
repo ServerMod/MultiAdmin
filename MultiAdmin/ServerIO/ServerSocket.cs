@@ -23,21 +23,9 @@ namespace MultiAdmin.ServerIO
 
 		public event EventHandler<string> OnReceiveMessage;
 
-		public int Port
-		{
-			get
-			{
-				return ((IPEndPoint)listener.LocalEndpoint).Port;
-			}
-		}
+		public int Port => ((IPEndPoint)listener.LocalEndpoint).Port;
 
-		public bool Connected
-		{
-			get
-			{
-				return client?.Connected ?? false;
-			}
-		}
+		public bool Connected => client?.Connected ?? false;
 
 		// Port 0 automatically assigns a port
 		public ServerSocket(int port = 0)
