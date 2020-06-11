@@ -1,12 +1,12 @@
 # Looking for ServerMod?
-ServerMod is on its own repo now: https://github.com/Grover-c13/Smod2/
+ServerMod is on its own repo now: https://github.com/ServerMod/Smod2/
 
 # MultiAdmin
 MultiAdmin is a replacement server tool for SCP: Secret Laboratory, which was built to help enable servers to have multiple configurations per server instance.
 
-The latest release can be found here: [Release link](https://github.com/Grover-c13/MultiAdmin/releases/latest)
+The latest release can be found here: [Release link](https://github.com/ServerMod/MultiAdmin/releases/latest)
 
-Please check the [Installation Instructions](https://github.com/Grover-c13/MultiAdmin#installation-instructions) for information about installing and running MultiAdmin.
+Please check the [Installation Instructions](https://github.com/ServerMod/MultiAdmin#installation-instructions) for information about installing and running MultiAdmin.
 
 ## Discord
 You can join our Discord server here: https://discord.gg/8nvmMTr
