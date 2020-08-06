@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using MultiAdmin.ConsoleTools;
+using MultiAdmin.Utility;
 
 namespace MultiAdmin.ServerIO
 {
@@ -25,8 +26,9 @@ namespace MultiAdmin.ServerIO
 
 			ColoredMessage coloredMessage = new ColoredMessage(message, ConsoleColor.White);
 
-			if (coloredMessage.text.Length > 0)
+			if (!coloredMessage.text.IsEmpty())
 			{
+				// Convert the first character to the corresponding color
 				if (byte.TryParse(coloredMessage.text[0].ToString(), NumberStyles.HexNumber,
 					NumberFormatInfo.CurrentInfo, out byte consoleColor))
 				{
@@ -79,7 +81,8 @@ namespace MultiAdmin.ServerIO
 					}
 				}
 
-				switch (coloredMessage.text.Trim(TrimList).ToLower())
+				string trimmedMessage = coloredMessage.text.Trim(TrimList);
+				switch (trimmedMessage.ToLower())
 				{
 					case "multiadmin:round-end-event":
 					case "the round is about to restart! please wait":

@@ -76,5 +76,15 @@ namespace MultiAdmin.Utility
 		{
 			return stringBuilder?.IsEmpty() ?? true;
 		}
+
+		public static bool IsEmpty(this string @string)
+		{
+			return @string.Length <= 0;
+		}
+
+		public static bool IsNullOrEmpty(this string @string)
+		{
+			return @string?.IsEmpty() ?? true;
+		}
 	}
 }
