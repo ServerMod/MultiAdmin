@@ -295,7 +295,7 @@ namespace MultiAdmin
 
 					List<string> scpslArgs = new List<string>
 					{
-						"-multiadmin",
+						$"-multiadmin{Program.MaVersion}",
 						"-batchmode",
 						"-nographics",
 						"-silent-crashes",
