@@ -9,6 +9,7 @@ namespace MultiAdmin.ServerIO
 	{
 		public static readonly Regex SmodRegex =
 			new Regex(@"\[(DEBUG|INFO|WARN|ERROR)\] (\[.*?\]) (.*)", RegexOptions.Compiled | RegexOptions.Singleline);
+		public static readonly char[] TrimList = { '.', ' ', '\t', '!', '?', ',' };
 
 		private readonly Server server;
 
@@ -78,28 +79,33 @@ namespace MultiAdmin.ServerIO
 					}
 				}
 
-				switch (coloredMessage.text.Trim('.', ' ', '\t'))
+				switch (coloredMessage.text.Trim(TrimList).ToLower())
 				{
-					case "The round is about to restart! Please wait":
+					case "multiadmin:round-end-event":
+					case "the round is about to restart! please wait":
 						server.ForEachHandler<IEventRoundEnd>(roundEnd => roundEnd.OnRoundEnd());
 						break;
 
-					case "Waiting for players":
+					case "multiadmin:waiting-for-players-event":
+					case "waiting for players":
 						server.IsLoading = false;
 
 						server.ForEachHandler<IEventWaitingForPlayers>(waitingForPlayers =>
 							waitingForPlayers.OnWaitingForPlayers());
 						break;
 
-					case "New round has been started":
+					case "multiadmin:round-start-event":
+					case "new round has been started":
 						server.ForEachHandler<IEventRoundStart>(roundStart => roundStart.OnRoundStart());
 						break;
 
-					case "Level loaded. Creating match":
+					case "multiadmin:server-start-event":
+					case "level loaded. creating match":
 						server.ForEachHandler<IEventServerStart>(serverStart => serverStart.OnServerStart());
 						break;
 
-					case "Server full":
+					case "multiadmin:server-full-event":
+					case "server full":
 						server.ForEachHandler<IEventServerFull>(serverFull => serverFull.OnServerFull());
 						break;
 				}
