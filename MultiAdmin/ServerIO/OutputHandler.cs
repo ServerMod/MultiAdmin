@@ -153,6 +153,9 @@ namespace MultiAdmin.ServerIO
 							}
 							break;
 					}
+
+					// Don't print any MultiAdmin events
+					return;
 				}
 			}
 
