@@ -34,6 +34,8 @@ namespace MultiAdmin
 		private DateTime initStopTimeoutTime;
 		private DateTime initRestartTimeoutTime;
 
+		public ModFeatures supportedModFeatures = ModFeatures.None;
+
 		public Server(string serverId = null, string configLocation = null, uint? port = null)
 		{
 			this.serverId = serverId;

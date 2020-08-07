@@ -7,9 +7,8 @@ namespace MultiAdmin
 	{
 		None = 0,
 
-		// Ex. Feature1 = 1 << 0,
-		// Feature2 = 1 << 1,
+		CustomEvents = 1 << 0,
 
-		All = ~(~0 << 0) // All = ~(~0 << 2)
+		All = ~(~0 << 1)
 	}
 }
