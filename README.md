@@ -23,9 +23,11 @@ Make sure that you are running Mono 5.18.0 or higher, otherwise you might have i
 4. Optional: Create a file named `scp_multiadmin.cfg` within your server's folder for configuring MultiAdmin specifically for that server
 
 ## Features
+- Config Generator: Generates a full default MultiAdmin config file
 - Config Reload: Reloads the MultiAdmin configuration file
 - Exit Command: Adds a graceful exit command
 - Folder Copy Round Queue: Copies files from folders in a queue
+- GitHub Generator: Generates a GitHub README file outlining all the features/commands
 - Help: Display a full list of MultiAdmin commands and in game commands
 - Restart On Low Memory: Restarts the server if the working memory becomes too low
 - MultiAdminInfo: Prints MultiAdmin license and version information
@@ -39,6 +41,7 @@ Make sure that you are running Mono 5.18.0 or higher, otherwise you might have i
 ## MultiAdmin Commands
 This does not include ingame commands, for a full list type `HELP` in MultiAdmin which will produce all commands.
 
+- CONFIGGEN [FILE LOCATION]: Generates a full default MultiAdmin config file
 - CONFIG <RELOAD>: Reloads the configuration file
 - EXIT: Exits the server
 - GITHUBGEN [FILE LOCATION]: Generates a GitHub README file outlining all the features/commands
