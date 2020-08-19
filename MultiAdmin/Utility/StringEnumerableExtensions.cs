@@ -14,20 +14,23 @@ namespace MultiAdmin.Utility
 				if (arg.IsNullOrEmpty())
 					continue;
 
+				// Escape quotation marks
+				string escapedArg = arg.Replace("\"", "\\\"");
+
 				// Separate with spaces
 				if (!argsStringBuilder.IsEmpty())
 					argsStringBuilder.Append(' ');
 
 				// Handle spaces by surrounding with quotes
-				if (arg.Contains(' '))
+				if (escapedArg.Contains(' '))
 				{
 					argsStringBuilder.Append('"');
-					argsStringBuilder.Append(arg);
+					argsStringBuilder.Append(escapedArg);
 					argsStringBuilder.Append('"');
 				}
 				else
 				{
-					argsStringBuilder.Append(arg);
+					argsStringBuilder.Append(escapedArg);
 				}
 			}
 
