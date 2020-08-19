@@ -28,6 +28,7 @@ namespace MultiAdmin
 			: null;
 
 		private static uint? portArg;
+		public static readonly string[] Args = Environment.GetCommandLineArgs();
 
 		private static IExitSignal exitSignalListener;
 
@@ -37,7 +38,7 @@ namespace MultiAdmin
 		#region Server Properties
 
 		public static Server[] Servers => ServerDirectories
-			.Select(serverDir => new Server(Path.GetFileName(serverDir), serverDir, portArg)).ToArray();
+			.Select(serverDir => new Server(Path.GetFileName(serverDir), serverDir, portArg, Args)).ToArray();
 
 		public static string[] ServerDirectories
 		{
@@ -206,20 +207,24 @@ namespace MultiAdmin
 					exitSignalListener.Exit += OnExit;
 			}
 
-			Headless = GetFlagFromArgs("headless", "h");
+			// Remove executable path
+			if (Args.Length > 0)
+				Args[0] = null;
+
+			Headless = GetFlagFromArgs(Args, "headless", "h");
 
 			if (!Headless)
 				CheckMonoVersion();
 
-			string serverIdArg = GetParamFromArgs("server-id", "id");
-			string configArg = GetParamFromArgs("config", "c");
-			portArg = uint.TryParse(GetParamFromArgs("port", "p"), out uint port) ? (uint?)port : null;
+			string serverIdArg = GetParamFromArgs(Args, "server-id", "id");
+			string configArg = GetParamFromArgs(Args, "config", "c");
+			portArg = uint.TryParse(GetParamFromArgs(Args, "port", "p"), out uint port) ? (uint?)port : null;
 
 			Server server = null;
 
 			if (!string.IsNullOrEmpty(serverIdArg) || !string.IsNullOrEmpty(configArg))
 			{
-				server = new Server(serverIdArg, configArg, portArg);
+				server = new Server(serverIdArg, configArg, portArg, Args);
 
 				InstantiatedServers.Add(server);
 			}
@@ -227,7 +232,7 @@ namespace MultiAdmin
 			{
 				if (Servers.IsEmpty())
 				{
-					server = new Server(port: portArg);
+					server = new Server(port: portArg, args: Args);
 
 					InstantiatedServers.Add(server);
 				}
@@ -240,7 +245,7 @@ namespace MultiAdmin
 						Write("No servers are set to automatically start, please enter a Server ID to start:");
 						InputHandler.InputPrefix?.Write();
 
-						server = new Server(Console.ReadLine(), port: portArg);
+						server = new Server(Console.ReadLine(), port: portArg, args: Args);
 
 						InstantiatedServers.Add(server);
 					}
@@ -284,14 +289,12 @@ namespace MultiAdmin
 			}
 		}
 
-		public static string GetParamFromArgs(string[] keys = null, string[] aliases = null)
+		public static string GetParamFromArgs(string[] args, string[] keys = null, string[] aliases = null)
 		{
 			bool hasKeys = !keys.IsNullOrEmpty();
 			bool hasAliases = !aliases.IsNullOrEmpty();
 
 			if (!hasKeys && !hasAliases) return null;
-
-			string[] args = Environment.GetCommandLineArgs();
 
 			for (int i = 0; i < args.Length - 1; i++)
 			{
@@ -301,17 +304,27 @@ namespace MultiAdmin
 
 				if (hasKeys)
 				{
-					if (keys.Any(key => !string.IsNullOrEmpty(key) && lowArg == $"--{key.ToLower()}"))
+					if (keys.Any(key => lowArg == $"--{key?.ToLower()}"))
 					{
-						return args[i + 1];
+						string value = args[i + 1];
+
+						args[i] = null;
+						args[i + 1] = null;
+
+						return value;
 					}
 				}
 
 				if (hasAliases)
 				{
-					if (aliases.Any(alias => !string.IsNullOrEmpty(alias) && lowArg == $"-{alias.ToLower()}"))
+					if (aliases.Any(alias => lowArg == $"-{alias?.ToLower()}"))
 					{
-						return args[i + 1];
+						string value = args[i + 1];
+
+						args[i] = null;
+						args[i + 1] = null;
+
+						return value;
 					}
 				}
 			}
@@ -319,26 +332,33 @@ namespace MultiAdmin
 			return null;
 		}
 
-		public static bool ArgsContainsParam(string[] keys = null, string[] aliases = null)
+		public static bool ArgsContainsParam(string[] args, string[] keys = null, string[] aliases = null)
 		{
-			foreach (string arg in Environment.GetCommandLineArgs())
+			bool hasKeys = !keys.IsNullOrEmpty();
+			bool hasAliases = !aliases.IsNullOrEmpty();
+
+			if (!hasKeys && !hasAliases) return false;
+
+			for (int i = 0; i < args.Length; i++)
 			{
-				string lowArg = arg?.ToLower();
+				string lowArg = args[i]?.ToLower();
 
 				if (string.IsNullOrEmpty(lowArg)) continue;
 
-				if (!keys.IsNullOrEmpty())
+				if (hasKeys)
 				{
-					if (keys.Any(key => !string.IsNullOrEmpty(key) && lowArg == $"--{key.ToLower()}"))
+					if (keys.Any(key => lowArg == $"--{key?.ToLower()}"))
 					{
+						args[i] = null;
 						return true;
 					}
 				}
 
-				if (!aliases.IsNullOrEmpty())
+				if (hasAliases)
 				{
-					if (aliases.Any(alias => !string.IsNullOrEmpty(alias) && lowArg == $"-{alias.ToLower()}"))
+					if (aliases.Any(alias => lowArg == $"-{alias?.ToLower()}"))
 					{
+						args[i] = null;
 						return true;
 					}
 				}
@@ -347,28 +367,28 @@ namespace MultiAdmin
 			return false;
 		}
 
-		public static bool GetFlagFromArgs(string[] keys = null, string[] aliases = null)
+		public static bool GetFlagFromArgs(string[] args, string[] keys = null, string[] aliases = null)
 		{
 			if (keys.IsNullOrEmpty() && aliases.IsNullOrEmpty()) return false;
 
-			return bool.TryParse(GetParamFromArgs(keys, aliases), out bool result)
+			return bool.TryParse(GetParamFromArgs(args, keys, aliases), out bool result)
 				? result
-				: ArgsContainsParam(keys, aliases);
+				: ArgsContainsParam(args, keys, aliases);
 		}
 
-		public static string GetParamFromArgs(string key = null, string alias = null)
+		public static string GetParamFromArgs(string[] args, string key = null, string alias = null)
 		{
-			return GetParamFromArgs(new string[] {key}, new string[] {alias});
+			return GetParamFromArgs(args, new string[] {key}, new string[] {alias});
 		}
 
-		public static bool ArgsContainsParam(string key = null, string alias = null)
+		public static bool ArgsContainsParam(string[] args, string key = null, string alias = null)
 		{
-			return ArgsContainsParam(new string[] {key}, new string[] {alias});
+			return ArgsContainsParam(args, new string[] {key}, new string[] {alias});
 		}
 
-		public static bool GetFlagFromArgs(string key = null, string alias = null)
+		public static bool GetFlagFromArgs(string[] args, string key = null, string alias = null)
 		{
-			return GetFlagFromArgs(new string[] {key}, new string[] {alias});
+			return GetFlagFromArgs(args, new string[] {key}, new string[] {alias});
 		}
 
 		public static Process StartServer(Server server)
@@ -380,7 +400,7 @@ namespace MultiAdmin
 				Write("Error while starting new server: Could not find the executable location!", ConsoleColor.Red);
 			}
 
-			List<string> args = new List<string>();
+			List<string> args = new List<string>(server.args);
 
 			if (!string.IsNullOrEmpty(server.serverId))
 				args.Add($"-id \"{server.serverId}\"");
@@ -391,11 +411,7 @@ namespace MultiAdmin
 			if (Headless)
 				args.Add("-h");
 
-			args.RemoveAll(string.IsNullOrEmpty);
-
-			string stringArgs = string.Join(" ", args);
-
-			ProcessStartInfo startInfo = new ProcessStartInfo(assemblyLocation, stringArgs);
+			ProcessStartInfo startInfo = new ProcessStartInfo(assemblyLocation, args.JoinArgs());
 
 			Write($"Launching \"{startInfo.FileName}\" with arguments \"{startInfo.Arguments}\"...");
 
