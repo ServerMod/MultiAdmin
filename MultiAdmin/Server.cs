@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 using MultiAdmin.Config;
 using MultiAdmin.ConsoleTools;
@@ -28,13 +29,16 @@ namespace MultiAdmin
 		public readonly string serverId;
 		public readonly string configLocation;
 		public readonly uint? port;
+		public readonly string[] args;
 		public readonly string serverDir;
 		public readonly string logDir;
 
 		private DateTime initStopTimeoutTime;
 		private DateTime initRestartTimeoutTime;
 
-		public Server(string serverId = null, string configLocation = null, uint? port = null)
+		public ModFeatures supportedModFeatures = ModFeatures.None;
+
+		public Server(string serverId = null, string configLocation = null, uint? port = null, string[] args = null)
 		{
 			this.serverId = serverId;
 			serverDir = string.IsNullOrEmpty(this.serverId)
@@ -70,6 +74,9 @@ namespace MultiAdmin
 
 			// Set port
 			this.port = port;
+
+			// Set args
+			this.args = args;
 
 			logDir = Utils.GetFullPathSafe(Path.Combine(string.IsNullOrEmpty(serverDir) ? "" : serverDir,
 				serverConfig.LogLocation.Value));
@@ -295,6 +302,7 @@ namespace MultiAdmin
 
 					List<string> scpslArgs = new List<string>
 					{
+						$"-multiadmin:{Program.MaVersion}:{(int)ModFeatures.All}",
 						"-batchmode",
 						"-nographics",
 						"-silent-crashes",
@@ -309,13 +317,20 @@ namespace MultiAdmin
 						scpslArgs.Add("-nolog");
 
 						if (Utils.IsUnix)
-							scpslArgs.Add("-logFile \"/dev/null\"");
+						{
+							scpslArgs.Add("-logFile");
+							scpslArgs.Add("/dev/null");
+						}
 						else if (Utils.IsWindows)
-							scpslArgs.Add("-logFile \"NUL\"");
+						{
+							scpslArgs.Add("-logFile");
+							scpslArgs.Add("NUL");
+						}
 					}
 					else
 					{
-						scpslArgs.Add($"-logFile \"{ScpLogFile}\"");
+						scpslArgs.Add("-logFile");
+						scpslArgs.Add(ScpLogFile);
 					}
 
 					if (ServerConfig.DisableConfigValidation.Value)
@@ -330,25 +345,26 @@ namespace MultiAdmin
 
 					if (!string.IsNullOrEmpty(configLocation))
 					{
-						scpslArgs.Add($"-configpath \"{configLocation}\"");
+						scpslArgs.Add("-configpath");
+						scpslArgs.Add(configLocation);
 					}
 
 					string appDataPath = Utils.GetFullPathSafe(ServerConfig.AppDataLocation.Value);
 					if (!string.IsNullOrEmpty(appDataPath))
 					{
-						scpslArgs.Add($"-appdatapath \"{appDataPath}\"");
+						scpslArgs.Add("-appdatapath");
+						scpslArgs.Add(appDataPath);
 					}
 
-					scpslArgs.RemoveAll(string.IsNullOrEmpty);
+					// Add custom arguments
+					scpslArgs.AddRange(args);
 
-					string argsString = string.Join(" ", scpslArgs);
-
-					Write($"Starting server with the following parameters:\n{scpslExe} {argsString}");
-
-					ProcessStartInfo startInfo = new ProcessStartInfo(scpslExe, argsString)
+					ProcessStartInfo startInfo = new ProcessStartInfo(scpslExe, scpslArgs.JoinArgs())
 					{
 						CreateNoWindow = true, UseShellExecute = false
 					};
+
+					Write($"Starting server with the following parameters:\n{scpslExe} {startInfo.Arguments}");
 
 					ForEachHandler<IEventServerPreStart>(eventPreStart => eventPreStart.OnServerPreStart());
 

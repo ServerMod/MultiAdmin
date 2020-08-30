@@ -28,7 +28,7 @@ namespace MultiAdmin.Features
 
 				Server.Write($"Launching new server with Server ID: \"{serverId}\"...");
 
-				Program.StartServer(new Server(serverId));
+				Program.StartServer(new Server(serverId, args: Program.Args));
 			}
 		}
 
@@ -86,7 +86,7 @@ namespace MultiAdmin.Features
 
 			Server.Write($"Launching new server with Server ID: \"{onFullServerId}\" due to this server being full...");
 
-			onFullServerInstance = Program.StartServer(new Server(onFullServerId));
+			onFullServerInstance = Program.StartServer(new Server(onFullServerId, args: Program.Args));
 		}
 	}
 }

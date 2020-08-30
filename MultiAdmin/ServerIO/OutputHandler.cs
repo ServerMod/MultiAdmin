@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using MultiAdmin.ConsoleTools;
+using MultiAdmin.Utility;
 
 namespace MultiAdmin.ServerIO
 {
@@ -9,6 +10,8 @@ namespace MultiAdmin.ServerIO
 	{
 		public static readonly Regex SmodRegex =
 			new Regex(@"\[(DEBUG|INFO|WARN|ERROR)\] (\[.*?\]) (.*)", RegexOptions.Compiled | RegexOptions.Singleline);
+		public static readonly char[] TrimChars = { '.', ' ', '\t', '!', '?', ',' };
+		public static readonly char[] EventSplitChars = new char[] {':'};
 
 		private readonly Server server;
 
@@ -24,8 +27,9 @@ namespace MultiAdmin.ServerIO
 
 			ColoredMessage coloredMessage = new ColoredMessage(message, ConsoleColor.White);
 
-			if (coloredMessage.text.Length > 0)
+			if (!coloredMessage.text.IsEmpty())
 			{
+				// Convert the first character to the corresponding color
 				if (byte.TryParse(coloredMessage.text[0].ToString(), NumberStyles.HexNumber,
 					NumberFormatInfo.CurrentInfo, out byte consoleColor))
 				{
@@ -78,30 +82,80 @@ namespace MultiAdmin.ServerIO
 					}
 				}
 
-				switch (coloredMessage.text.Trim('.', ' ', '\t'))
+				string lowerMessage = coloredMessage.text.ToLower();
+				if (!server.supportedModFeatures.HasFlag(ModFeatures.CustomEvents))
 				{
-					case "The round is about to restart! Please wait":
-						server.ForEachHandler<IEventRoundEnd>(roundEnd => roundEnd.OnRoundEnd());
-						break;
+					switch (lowerMessage.Trim(TrimChars))
+					{
+						case "the round is about to restart! please wait":
+							server.ForEachHandler<IEventRoundEnd>(roundEnd => roundEnd.OnRoundEnd());
+							break;
 
-					case "Waiting for players":
-						server.IsLoading = false;
+						case "waiting for players":
+							server.IsLoading = false;
 
-						server.ForEachHandler<IEventWaitingForPlayers>(waitingForPlayers =>
-							waitingForPlayers.OnWaitingForPlayers());
-						break;
+							server.ForEachHandler<IEventWaitingForPlayers>(waitingForPlayers => waitingForPlayers.OnWaitingForPlayers());
+							break;
 
-					case "New round has been started":
-						server.ForEachHandler<IEventRoundStart>(roundStart => roundStart.OnRoundStart());
-						break;
+						case "new round has been started":
+							server.ForEachHandler<IEventRoundStart>(roundStart => roundStart.OnRoundStart());
+							break;
 
-					case "Level loaded. Creating match":
-						server.ForEachHandler<IEventServerStart>(serverStart => serverStart.OnServerStart());
-						break;
+						case "level loaded. creating match":
+							server.ForEachHandler<IEventServerStart>(serverStart => serverStart.OnServerStart());
+							break;
 
-					case "Server full":
-						server.ForEachHandler<IEventServerFull>(serverFull => serverFull.OnServerFull());
-						break;
+						case "server full":
+							server.ForEachHandler<IEventServerFull>(serverFull => serverFull.OnServerFull());
+							break;
+					}
+				}
+
+				if (lowerMessage.StartsWith("multiadmin:"))
+				{
+					// 11 chars in "multiadmin:"
+					string eventMessage = coloredMessage.text.Substring(11);
+
+					// Split event and event data
+					string[] eventSplit = eventMessage.Split(EventSplitChars, 2);
+
+					string @event = eventSplit[0].ToLower();
+					string eventData = eventSplit.Length > 1 ? eventSplit[1] : null; // Handle events with no data
+
+					switch (@event)
+					{
+						case "round-end-event":
+							server.ForEachHandler<IEventRoundEnd>(roundEnd => roundEnd.OnRoundEnd());
+							break;
+
+						case "waiting-for-players-event":
+							server.IsLoading = false;
+
+							server.ForEachHandler<IEventWaitingForPlayers>(waitingForPlayers => waitingForPlayers.OnWaitingForPlayers());
+							break;
+
+						case "round-start-event":
+							server.ForEachHandler<IEventRoundStart>(roundStart => roundStart.OnRoundStart());
+							break;
+
+						case "server-start-event":
+							server.ForEachHandler<IEventServerStart>(serverStart => serverStart.OnServerStart());
+							break;
+
+						case "server-full-event":
+							server.ForEachHandler<IEventServerFull>(serverFull => serverFull.OnServerFull());
+							break;
+
+						case "set-supported-features":
+							if (int.TryParse(eventData, out int supportedFeatures))
+							{
+								server.supportedModFeatures = (ModFeatures)supportedFeatures;
+							}
+							break;
+					}
+
+					// Don't print any MultiAdmin events
+					return;
 				}
 			}
 

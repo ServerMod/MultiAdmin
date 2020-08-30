@@ -47,8 +47,6 @@ namespace MultiAdmin.Features
 
 			foreach (Feature feature in Server.features)
 			{
-				if (feature.Equals(this)) continue;
-
 				lines.Add($"- {feature.GetFeatureName()}: {feature.GetFeatureDescription()}");
 			}
 
@@ -152,12 +150,12 @@ namespace MultiAdmin.Features
 
 		public override string GetFeatureDescription()
 		{
-			return "NOT INCLUDED IN FILE";
+			return "Generates a GitHub README file outlining all the features/commands";
 		}
 
 		public override string GetFeatureName()
 		{
-			return "GITHUB GEN";
+			return "GitHub Generator";
 		}
 
 		public override void Init()
