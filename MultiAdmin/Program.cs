@@ -403,10 +403,16 @@ namespace MultiAdmin
 			List<string> args = new List<string>(server.args);
 
 			if (!string.IsNullOrEmpty(server.serverId))
-				args.Add($"-id \"{server.serverId}\"");
+			{
+				args.Add("-id");
+				args.Add(server.serverId);
+			}
 
 			if (!string.IsNullOrEmpty(server.configLocation))
-				args.Add($"-c \"{server.configLocation}\"");
+			{
+				args.Add("-c");
+				args.Add(server.configLocation);
+			}
 
 			if (Headless)
 				args.Add("-h");
