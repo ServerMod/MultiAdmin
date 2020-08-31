@@ -15,7 +15,7 @@ namespace MultiAdmin
 {
 	public static class Program
 	{
-		public const string MaVersion = "3.3.0.4";
+		public const string MaVersion = "3.3.1.0";
 		public const string RecommendedMonoVersion = "5.18";
 
 		private static readonly List<Server> InstantiatedServers = new List<Server>();
