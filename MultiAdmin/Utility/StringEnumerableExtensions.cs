@@ -14,8 +14,8 @@ namespace MultiAdmin.Utility
 				if (arg.IsNullOrEmpty())
 					continue;
 
-				// Escape quotation marks
-				string escapedArg = arg.Replace("\"", "\\\"");
+				// Escape escape characters quotation marks
+				string escapedArg = arg.Replace("\\", "\\\\").Replace("\"", "\\\"");
 
 				// Separate with spaces
 				if (!argsStringBuilder.IsEmpty())
