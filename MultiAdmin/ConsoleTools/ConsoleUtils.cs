@@ -36,7 +36,7 @@ namespace MultiAdmin.ConsoleTools
 						Console.Write(new string(' ', charCount));
 					}
 
-					Console.SetCursorPosition(cursorLeftReturnIndex, cursorTopIndex);
+					Console.SetCursorPosition(IsIndexWithinBuffer(cursorLeftReturnIndex) ? cursorLeftReturnIndex : 0, cursorTopIndex);
 				}
 				catch (Exception e)
 				{
