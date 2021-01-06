@@ -19,7 +19,7 @@ namespace MultiAdmin.ConsoleTools
 
 				try
 				{
-					int cursorLeftReturnIndex = returnCursorPos ? Math.Max(Console.CursorLeft, 0) : 0;
+					int cursorLeftReturnIndex = returnCursorPos ? Console.CursorLeft : 0;
 					// Linux console uses visible section as a scrolling buffer,
 					// that means that making the console taller moves CursorTop to a higher index,
 					// but when the user makes the console smaller, CursorTop is left at a higher index than BufferHeight,
@@ -36,7 +36,7 @@ namespace MultiAdmin.ConsoleTools
 						Console.Write(new string(' ', charCount));
 					}
 
-					Console.SetCursorPosition(cursorLeftReturnIndex, cursorTopIndex);
+					Console.SetCursorPosition(IsIndexWithinBuffer(cursorLeftReturnIndex) ? cursorLeftReturnIndex : 0, cursorTopIndex);
 				}
 				catch (Exception e)
 				{
