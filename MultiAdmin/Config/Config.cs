@@ -69,7 +69,7 @@ namespace MultiAdmin.Config
 			       rawData.Any(entry => entry.StartsWith($"{key}:", StringComparison.CurrentCultureIgnoreCase));
 		}
 
-		private static string CleanValue(string value)
+		private static string CleanValue(string value, bool removeQuotes = true)
 		{
 			if (string.IsNullOrEmpty(value)) return value;
 
@@ -77,7 +77,7 @@ namespace MultiAdmin.Config
 
 			try
 			{
-				if (newValue.StartsWith("\"") && newValue.EndsWith("\""))
+				if (removeQuotes && newValue.StartsWith("\"") && newValue.EndsWith("\""))
 					return newValue.Substring(1, newValue.Length - 2);
 			}
 			catch (Exception e)
@@ -88,7 +88,7 @@ namespace MultiAdmin.Config
 			return newValue;
 		}
 
-		public string GetString(string key, string def = null)
+		public string GetString(string key, string def = null, bool removeQuotes = true)
 		{
 			try
 			{
@@ -98,7 +98,7 @@ namespace MultiAdmin.Config
 
 					try
 					{
-						return CleanValue(line.Substring(key.Length + 1));
+						return CleanValue(line.Substring(key.Length + 1), removeQuotes);
 					}
 					catch (Exception e)
 					{
@@ -118,13 +118,13 @@ namespace MultiAdmin.Config
 		{
 			try
 			{
-				foreach (string line in rawData)
-				{
-					if (!line.ToLower().StartsWith(key.ToLower() + ":")) continue;
+				string value = GetString(key, removeQuotes: false);
 
+				if (!string.IsNullOrEmpty(value))
+				{
 					try
 					{
-						return line.Substring(key.Length + 1).Split(',').Select(CleanValue).ToArray();
+						return value.Split(',').Select(entry => CleanValue(entry)).ToArray();
 					}
 					catch (Exception e)
 					{
