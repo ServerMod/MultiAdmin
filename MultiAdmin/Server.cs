@@ -94,7 +94,7 @@ namespace MultiAdmin
 		public ServerStatus Status
 		{
 			get => status;
-			set
+			private set
 			{
 				LastStatus = status;
 				status = value;
@@ -473,7 +473,7 @@ namespace MultiAdmin
 			} while (shouldRestart);
 		}
 
-		public void StopServer(bool killGame = false)
+		public void SetStopStatus(bool killGame = false)
 		{
 			if (!IsRunning) throw new Exceptions.ServerNotRunningException();
 
@@ -481,17 +481,31 @@ namespace MultiAdmin
 			Status = killGame ? ServerStatus.ForceStopping : ServerStatus.Stopping;
 
 			ForEachHandler<IEventServerStop>(stopEvent => stopEvent.OnServerStop());
+		}
+
+		public void StopServer(bool killGame = false)
+		{
+			if (!IsRunning) throw new Exceptions.ServerNotRunningException();
+
+			SetStopStatus(killGame);
 
 			if ((killGame || !SendMessage("QUIT")) && IsGameProcessRunning)
 				GameProcess.Kill();
+		}
+
+		public void SetRestartStatus()
+		{
+			if (!IsRunning) throw new Exceptions.ServerNotRunningException();
+
+			initRestartTimeoutTime = DateTime.Now;
+			Status = ServerStatus.Restarting;
 		}
 
 		public void SoftRestartServer(bool killGame = false)
 		{
 			if (!IsRunning) throw new Exceptions.ServerNotRunningException();
 
-			initRestartTimeoutTime = DateTime.Now;
-			Status = ServerStatus.Restarting;
+			SetRestartStatus();
 
 			SendMessage("SOFTRESTART");
 			if (killGame && IsGameProcessRunning)

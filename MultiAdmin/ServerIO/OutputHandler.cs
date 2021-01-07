@@ -190,19 +190,19 @@ namespace MultiAdmin.ServerIO
 					break;
 
 				case OutputCodes.ExitActionReset:
-					server.Status = ServerStatus.Restarting;
+					server.SetRestartStatus();
 					break;
 
 				case OutputCodes.ExitActionShutdown:
-					server.Status = ServerStatus.Stopping;
+					server.SetStopStatus();
 					break;
 
 				case OutputCodes.ExitActionSilentShutdown:
-					server.Status = ServerStatus.Stopping;
+					server.SetStopStatus();
 					break;
 
 				case OutputCodes.ExitActionRestart:
-					server.Status = ServerStatus.Restarting;
+					server.SetRestartStatus();
 					break;
 
 				default:
