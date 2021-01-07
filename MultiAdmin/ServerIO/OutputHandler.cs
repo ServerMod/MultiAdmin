@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 using System.Text.RegularExpressions;
 using MultiAdmin.ConsoleTools;
 using MultiAdmin.Utility;
@@ -15,27 +14,35 @@ namespace MultiAdmin.ServerIO
 
 		private readonly Server server;
 
+		private enum OutputCodes : byte
+		{
+			//0x00 - 0x0F - reserved for colors
+
+			RoundRestart = 0x10,
+			IdleEnter = 0x11,
+			IdleExit = 0x12,
+			ExitActionReset = 0x13,
+			ExitActionShutdown = 0x14,
+			ExitActionSilentShutdown = 0x15,
+			ExitActionRestart = 0x16
+		}
+
 		public OutputHandler(Server server)
 		{
 			this.server = server;
 		}
 
-		public void HandleMessage(object source, string message)
+		public void HandleMessage(object source, ServerSocket.MessageEventArgs message)
 		{
-			if (message == null)
+			if (message.message == null)
 				return;
 
-			ColoredMessage coloredMessage = new ColoredMessage(message, ConsoleColor.White);
+			ColoredMessage coloredMessage = new ColoredMessage(message.message, ConsoleColor.White);
 
 			if (!coloredMessage.text.IsEmpty())
 			{
-				// Convert the first character to the corresponding color
-				if (byte.TryParse(coloredMessage.text[0].ToString(), NumberStyles.HexNumber,
-					NumberFormatInfo.CurrentInfo, out byte consoleColor))
-				{
-					coloredMessage.textColor = (ConsoleColor)consoleColor;
-					coloredMessage.text = coloredMessage.text.Substring(1);
-				}
+				// Parse the color byte
+				coloredMessage.textColor = (ConsoleColor)message.color;
 
 				// Smod2 loggers pretty printing
 				Match match = SmodRegex.Match(coloredMessage.text);
@@ -91,11 +98,12 @@ namespace MultiAdmin.ServerIO
 							server.ForEachHandler<IEventRoundEnd>(roundEnd => roundEnd.OnRoundEnd());
 							break;
 
+						/* Replaced by OutputCodes.RoundRestart
 						case "waiting for players":
 							server.IsLoading = false;
-
 							server.ForEachHandler<IEventWaitingForPlayers>(waitingForPlayers => waitingForPlayers.OnWaitingForPlayers());
 							break;
+						*/
 
 						case "new round has been started":
 							server.ForEachHandler<IEventRoundStart>(roundStart => roundStart.OnRoundStart());
@@ -128,11 +136,12 @@ namespace MultiAdmin.ServerIO
 							server.ForEachHandler<IEventRoundEnd>(roundEnd => roundEnd.OnRoundEnd());
 							break;
 
+						/* Replaced by OutputCodes.RoundRestart
 						case "waiting-for-players-event":
 							server.IsLoading = false;
-
 							server.ForEachHandler<IEventWaitingForPlayers>(waitingForPlayers => waitingForPlayers.OnWaitingForPlayers());
 							break;
+						*/
 
 						case "round-start-event":
 							server.ForEachHandler<IEventRoundStart>(roundStart => roundStart.OnRoundStart());
@@ -160,6 +169,37 @@ namespace MultiAdmin.ServerIO
 			}
 
 			server.Write(coloredMessage);
+		}
+
+		public void HandleAction(object source, byte action)
+		{
+			switch ((OutputCodes)action)
+			{
+				// This seems to show up at the waiting for players event
+				case OutputCodes.RoundRestart:
+					server.IsLoading = false;
+					server.ForEachHandler<IEventWaitingForPlayers>(waitingForPlayers => waitingForPlayers.OnWaitingForPlayers());
+					break;
+
+				case OutputCodes.IdleEnter:
+					server.ForEachHandler<IEventIdleEnter>(idleEnter => idleEnter.OnIdleEnter());
+					break;
+
+				case OutputCodes.IdleExit:
+					server.ForEachHandler<IEventIdleExit>(idleExit => idleExit.OnIdleExit());
+					break;
+
+				// Unhandled for now
+				case OutputCodes.ExitActionReset:
+				case OutputCodes.ExitActionShutdown:
+				case OutputCodes.ExitActionSilentShutdown:
+				case OutputCodes.ExitActionRestart:
+					break;
+
+				default:
+					Program.LogDebug(nameof(HandleAction), $"Received unknown output code ({action}), is MultiAdmin up to date? This error can probably be safely ignored.");
+					break;
+			}
 		}
 	}
 }
