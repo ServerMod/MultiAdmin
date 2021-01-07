@@ -118,13 +118,13 @@ namespace MultiAdmin.Config
 		{
 			try
 			{
-				foreach (string line in rawData)
-				{
-					if (!line.ToLower().StartsWith(key.ToLower() + ":")) continue;
+				string value = GetString(key);
 
+				if (!string.IsNullOrEmpty(value))
+				{
 					try
 					{
-						return line.Substring(key.Length + 1).Split(',').Select(CleanValue).ToArray();
+						return value.Split(',').Select(CleanValue).ToArray();
 					}
 					catch (Exception e)
 					{
