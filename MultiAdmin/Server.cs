@@ -94,7 +94,7 @@ namespace MultiAdmin
 		public ServerStatus Status
 		{
 			get => status;
-			private set
+			set
 			{
 				LastStatus = status;
 				status = value;
