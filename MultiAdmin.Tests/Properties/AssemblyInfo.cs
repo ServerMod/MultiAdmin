@@ -7,7 +7,7 @@ using MultiAdmin;
 [assembly: AssemblyTitle(nameof(MultiAdmin.Tests))]
 [assembly: AssemblyDescription("A set of Unit Tests for " + nameof(MultiAdmin) + " v" + Program.MaVersion)]
 [assembly: AssemblyProduct(nameof(MultiAdmin.Tests))]
-[assembly: AssemblyCopyright("Copyright © Grover 2020")]
+[assembly: AssemblyCopyright("Copyright © Grover 2021")]
 
 // Version information for an assembly consists of the following four values:
 //

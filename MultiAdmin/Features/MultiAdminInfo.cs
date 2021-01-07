@@ -51,7 +51,7 @@ namespace MultiAdmin.Features
 		public void PrintInfo()
 		{
 			Server.Write(
-				$"{nameof(MultiAdmin)} v{Program.MaVersion} (https://github.com/ServerMod/MultiAdmin/)\nReleased under MIT License Copyright © Grover 2020",
+				$"{nameof(MultiAdmin)} v{Program.MaVersion} (https://github.com/ServerMod/MultiAdmin/)\nReleased under MIT License Copyright © Grover 2021",
 				ConsoleColor.DarkMagenta);
 		}
 
