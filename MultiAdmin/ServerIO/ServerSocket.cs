@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using MultiAdmin.ConsoleTools;
 
 namespace MultiAdmin.ServerIO
 {
@@ -21,7 +22,20 @@ namespace MultiAdmin.ServerIO
 		private TcpClient client;
 		private NetworkStream networkStream;
 
-		public event EventHandler<string> OnReceiveMessage;
+		public struct MessageEventArgs
+		{
+			public MessageEventArgs(string message, byte color)
+			{
+				this.message = message;
+				this.color = color;
+			}
+
+			public readonly string message;
+			public readonly byte color;
+		}
+
+		public event EventHandler<MessageEventArgs> OnReceiveMessage;
+		public event EventHandler<byte> OnReceiveAction;
 
 		public int Port => ((IPEndPoint)listener.LocalEndpoint).Port;
 
@@ -61,31 +75,52 @@ namespace MultiAdmin.ServerIO
 
 		public async void MessageListener()
 		{
+			byte[] typeBuffer = new byte[1];
 			byte[] intBuffer = new byte[IntBytes];
 			while (!disposed && networkStream != null)
 			{
 				try
 				{
-					int lengthBytesRead =
-						await networkStream.ReadAsync(intBuffer, 0, IntBytes, disposeCancellationSource.Token);
+					int messageTypeBytesRead =
+						await networkStream.ReadAsync(typeBuffer, 0, 1, disposeCancellationSource.Token);
 
 					// Socket has been disconnected
-					if (lengthBytesRead <= 0)
+					if (messageTypeBytesRead <= 0)
 					{
 						Disconnect();
 						break;
 					}
 
-					int length = BitConverter.ToInt32(intBuffer, 0);
+					byte messageType = typeBuffer[0];
+
+					// 16 colors reserved, otherwise process as control message (action)
+					if (messageType >= 16)
+					{
+						OnReceiveAction?.Invoke(this, messageType);
+						continue;
+					}
+
+					int lengthBytesRead =
+						await networkStream.ReadAsync(intBuffer, 0, IntBytes, disposeCancellationSource.Token);
+
+					// Socket has been disconnected or integer read is invalid
+					if (lengthBytesRead != IntBytes)
+					{
+						Disconnect();
+						break;
+					}
+
+					// Decode integer
+					int length = (intBuffer[0] << 24) | (intBuffer[1] << 16) | (intBuffer[2] << 8) | intBuffer[3];
 
 					// Handle empty messages asap
 					if (length == 0)
 					{
-						OnReceiveMessage?.Invoke(this, "");
+						OnReceiveMessage?.Invoke(this, new MessageEventArgs("", messageType));
 					}
 					else if (length < 0)
 					{
-						OnReceiveMessage?.Invoke(this, null);
+						OnReceiveMessage?.Invoke(this, new MessageEventArgs(null, messageType));
 					}
 
 					byte[] messageBuffer = new byte[length];
@@ -101,7 +136,7 @@ namespace MultiAdmin.ServerIO
 
 					string message = Encoding.GetString(messageBuffer, 0, length);
 
-					OnReceiveMessage?.Invoke(this, message);
+					OnReceiveMessage?.Invoke(this, new MessageEventArgs(message, messageType));
 				}
 				catch (Exception e)
 				{

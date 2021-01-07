@@ -379,7 +379,9 @@ namespace MultiAdmin
 
 					// Start the output reader
 					OutputHandler outputHandler = new OutputHandler(this);
+					// Assign the socket events to the OutputHandler
 					consoleSocket.OnReceiveMessage += outputHandler.HandleMessage;
+					consoleSocket.OnReceiveAction += outputHandler.HandleAction;
 
 					// Finally, start the game
 					GameProcess = Process.Start(startInfo);
@@ -425,6 +427,10 @@ namespace MultiAdmin
 						}
 
 						consoleSocket.Disconnect();
+
+						// Remove the socket events for OutputHandler
+						consoleSocket.OnReceiveMessage -= outputHandler.HandleMessage;
+						consoleSocket.OnReceiveAction -= outputHandler.HandleAction;
 
 						SessionSocket = null;
 						StartDateTime = null;
@@ -476,22 +482,29 @@ namespace MultiAdmin
 
 			ForEachHandler<IEventServerStop>(stopEvent => stopEvent.OnServerStop());
 
-			if (killGame && IsGameProcessRunning)
-				GameProcess.Kill();
-			else if (!SendMessage("QUIT"))
+			if ((killGame || !SendMessage("QUIT")) && IsGameProcessRunning)
 				GameProcess.Kill();
 		}
 
-		public void SoftRestartServer()
+		public void SoftRestartServer(bool killGame = false)
 		{
 			if (!IsRunning) throw new Exceptions.ServerNotRunningException();
 
 			initRestartTimeoutTime = DateTime.Now;
 			Status = ServerStatus.Restarting;
 
-			SendMessage("ROUNDRESTART");
-			if (!SendMessage("QUIT"))
-				GameProcess.Kill();
+			if (supportedModFeatures.HasFlag(ModFeatures.RestartCommand))
+			{
+				SendMessage("RESTART");
+				if (killGame && IsGameProcessRunning)
+					GameProcess.Kill();
+			}
+			else
+			{
+				SendMessage("ROUNDRESTART");
+				if ((killGame || !SendMessage("QUIT")) && IsGameProcessRunning)
+					GameProcess.Kill();
+			}
 		}
 
 		#endregion

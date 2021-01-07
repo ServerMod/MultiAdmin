@@ -49,6 +49,16 @@ namespace MultiAdmin
 		void OnServerFull();
 	}
 
+	public interface IEventIdleEnter : IMAEvent
+	{
+		void OnIdleEnter();
+	}
+
+	public interface IEventIdleExit : IMAEvent
+	{
+		void OnIdleExit();
+	}
+
 	public interface ICommand
 	{
 		void OnCall(string[] args);
