@@ -10,10 +10,7 @@ namespace MultiAdmin
 		// Replaces detecting game output with MultiAdmin events for game events
 		CustomEvents = 1 << 0,
 
-		// Uses a custom restart command ("RESTART")
-		RestartCommand = 2 << 0,
-
 		// Supporting all current features
-		All = ~(~0 << 2)
+		All = ~(~0 << 1)
 	}
 }

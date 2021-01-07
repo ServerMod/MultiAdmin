@@ -493,18 +493,9 @@ namespace MultiAdmin
 			initRestartTimeoutTime = DateTime.Now;
 			Status = ServerStatus.Restarting;
 
-			if (supportedModFeatures.HasFlag(ModFeatures.RestartCommand))
-			{
-				SendMessage("RESTART");
-				if (killGame && IsGameProcessRunning)
-					GameProcess.Kill();
-			}
-			else
-			{
-				SendMessage("ROUNDRESTART");
-				if ((killGame || !SendMessage("QUIT")) && IsGameProcessRunning)
-					GameProcess.Kill();
-			}
+			SendMessage("SOFTRESTART");
+			if (killGame && IsGameProcessRunning)
+				GameProcess.Kill();
 		}
 
 		#endregion
