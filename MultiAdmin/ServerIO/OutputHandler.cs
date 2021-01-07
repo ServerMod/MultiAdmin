@@ -189,11 +189,20 @@ namespace MultiAdmin.ServerIO
 					server.ForEachHandler<IEventIdleExit>(idleExit => idleExit.OnIdleExit());
 					break;
 
-				// Unhandled for now
 				case OutputCodes.ExitActionReset:
+					server.SetRestartStatus();
+					break;
+
 				case OutputCodes.ExitActionShutdown:
+					server.SetStopStatus();
+					break;
+
 				case OutputCodes.ExitActionSilentShutdown:
+					server.SetStopStatus();
+					break;
+
 				case OutputCodes.ExitActionRestart:
+					server.SetRestartStatus();
 					break;
 
 				default:
