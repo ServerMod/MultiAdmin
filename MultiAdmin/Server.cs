@@ -28,10 +28,12 @@ namespace MultiAdmin
 
 		public readonly string serverId;
 		public readonly string configLocation;
-		public readonly uint? port;
+		private readonly uint? port;
 		public readonly string[] args;
 		public readonly string serverDir;
 		public readonly string logDir;
+
+		public uint Port => port ?? ServerConfig.Port.Value;
 
 		private DateTime initStopTimeoutTime;
 		private DateTime initRestartTimeoutTime;
@@ -129,7 +131,7 @@ namespace MultiAdmin
 				// Update related variables
 				LogDirFile = string.IsNullOrEmpty(value) || string.IsNullOrEmpty(logDir)
 					? null
-					: $"{Path.Combine(logDir, value)}_{{0}}_output_log.txt";
+					: $"{Path.Combine(logDir, value)}_{{0}}_log_{Port}.txt";
 
 				lock (this)
 				{
@@ -309,7 +311,7 @@ namespace MultiAdmin
 						"-nodedicateddelete",
 						$"-id{Process.GetCurrentProcess().Id}",
 						$"-console{consoleSocket.Port}",
-						$"-port{port ?? ServerConfig.Port.Value}"
+						$"-port{Port}"
 					};
 
 					if (string.IsNullOrEmpty(ScpLogFile) || ServerConfig.NoLog.Value)
