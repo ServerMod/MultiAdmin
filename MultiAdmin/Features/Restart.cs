@@ -26,7 +26,7 @@ namespace MultiAdmin.Features
 
 		public void OnCall(string[] args)
 		{
-			Server.SoftRestartServer();
+			Server.RestartServer();
 		}
 
 		public bool PassToGame()

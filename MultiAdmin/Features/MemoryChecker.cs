@@ -73,7 +73,7 @@ namespace MultiAdmin.Features
 
 			Server.Write("Restarting due to low memory (Round End)...", ConsoleColor.Red);
 
-			Server.SoftRestartServer();
+			Server.RestartServer();
 
 			Init();
 		}
@@ -111,7 +111,7 @@ namespace MultiAdmin.Features
 			if (tickCount >= MaxTicks)
 			{
 				Server.Write("Restarting due to low memory...", ConsoleColor.Red);
-				Server.SoftRestartServer();
+				Server.RestartServer();
 
 				restart = false;
 			}

@@ -24,8 +24,12 @@ namespace MultiAdmin.ServerIO
 			ExitActionReset = 0x13,
 			ExitActionShutdown = 0x14,
 			ExitActionSilentShutdown = 0x15,
-			ExitActionRestart = 0x16
+			ExitActionRestart = 0x16,
+			RoundEnd = 0x17
 		}
+
+		// Temporary measure to handle round ends until the game updates to use this
+		private bool roundEndCodeUsed = false;
 
 		public OutputHandler(Server server)
 		{
@@ -95,7 +99,8 @@ namespace MultiAdmin.ServerIO
 					switch (lowerMessage.Trim(TrimChars))
 					{
 						case "the round is about to restart! please wait":
-							server.ForEachHandler<IEventRoundEnd>(roundEnd => roundEnd.OnRoundEnd());
+							if (!roundEndCodeUsed)
+								server.ForEachHandler<IEventRoundEnd>(roundEnd => roundEnd.OnRoundEnd());
 							break;
 
 						/* Replaced by OutputCodes.RoundRestart
@@ -133,7 +138,8 @@ namespace MultiAdmin.ServerIO
 					switch (@event)
 					{
 						case "round-end-event":
-							server.ForEachHandler<IEventRoundEnd>(roundEnd => roundEnd.OnRoundEnd());
+							if (!roundEndCodeUsed)
+								server.ForEachHandler<IEventRoundEnd>(roundEnd => roundEnd.OnRoundEnd());
 							break;
 
 						/* Replaced by OutputCodes.RoundRestart
@@ -189,20 +195,29 @@ namespace MultiAdmin.ServerIO
 					server.ForEachHandler<IEventIdleExit>(idleExit => idleExit.OnIdleExit());
 					break;
 
+				// Requests to reset the ExitAction status
 				case OutputCodes.ExitActionReset:
-					server.SetRestartStatus();
+					server.SetServerRequestedStatus(ServerStatus.Running);
 					break;
 
+				// Requests the Shutdown ExitAction with the intent to restart at any time in the future
 				case OutputCodes.ExitActionShutdown:
-					server.SetStopStatus();
+					server.SetServerRequestedStatus(ServerStatus.ExitActionStop);
 					break;
 
+				// Requests the SilentShutdown ExitAction with the intent to restart at any time in the future
 				case OutputCodes.ExitActionSilentShutdown:
-					server.SetStopStatus();
+					server.SetServerRequestedStatus(ServerStatus.ExitActionStop);
 					break;
 
+				// Requests the Restart ExitAction status with the intent to restart at any time in the future
 				case OutputCodes.ExitActionRestart:
-					server.SetRestartStatus();
+					server.SetServerRequestedStatus(ServerStatus.ExitActionRestart);
+					break;
+
+				case OutputCodes.RoundEnd:
+					roundEndCodeUsed = true;
+					server.ForEachHandler<IEventRoundEnd>(roundEnd => roundEnd.OnRoundEnd());
 					break;
 
 				default:
