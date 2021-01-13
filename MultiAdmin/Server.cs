@@ -116,6 +116,19 @@ namespace MultiAdmin
 
 		public bool IsLoading { get; set; }
 
+		public bool SetServerRequestedStatus(ServerStatus status)
+		{
+			// Don't override the console's own requests
+			if (IsStopping)
+			{
+				return false;
+			}
+
+			Status = status;
+
+			return true;
+		}
+
 		#endregion
 
 		private string startDateTime;
@@ -192,8 +205,7 @@ namespace MultiAdmin
 				if (Status == ServerStatus.Restarting && CheckRestartTimeout)
 				{
 					Write("Server restart timed out, killing the server process...", ConsoleColor.Red);
-					if (IsGameProcessRunning)
-						GameProcess.Kill();
+					RestartServer(true);
 				}
 
 				if (Status == ServerStatus.Stopping && CheckStopTimeout)
@@ -398,12 +410,14 @@ namespace MultiAdmin
 						{
 							case ServerStatus.Stopping:
 							case ServerStatus.ForceStopping:
+							case ServerStatus.ExitActionStop:
 								Status = ServerStatus.Stopped;
 
 								shouldRestart = false;
 								break;
 
 							case ServerStatus.Restarting:
+							case ServerStatus.ExitActionRestart:
 								shouldRestart = true;
 								break;
 
@@ -503,14 +517,13 @@ namespace MultiAdmin
 			Status = ServerStatus.Restarting;
 		}
 
-		public void SoftRestartServer(bool killGame = false)
+		public void RestartServer(bool killGame = false)
 		{
 			if (!IsRunning) throw new Exceptions.ServerNotRunningException();
 
 			SetRestartStatus();
 
-			SendMessage("SOFTRESTART");
-			if (killGame && IsGameProcessRunning)
+			if ((killGame || !SendMessage("SOFTRESTART")) && IsGameProcessRunning)
 				GameProcess.Kill();
 		}
 
@@ -719,8 +732,10 @@ namespace MultiAdmin
 		Starting,
 		Running,
 		Stopping,
+		ExitActionStop,
 		ForceStopping,
 		Restarting,
+		ExitActionRestart,
 		Stopped,
 		StoppedUnexpectedly
 	}
