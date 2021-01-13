@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using MultiAdmin.Config;
 using MultiAdmin.ConsoleTools;
@@ -65,7 +66,7 @@ namespace MultiAdmin.ServerIO
 					}
 					else
 					{
-						message = Console.ReadLine();
+						message = GetInputLineOld();
 					}
 
 					if (string.IsNullOrEmpty(message)) continue;
@@ -94,6 +95,35 @@ namespace MultiAdmin.ServerIO
 			}
 		}
 
+		public static string GetInputLineOld()
+		{
+			while (true)
+			{
+				while (!Console.KeyAvailable)
+				{
+					Thread.Sleep(10);
+				}
+
+				ConsoleKeyInfo key = Console.ReadKey();
+
+				StringBuilder message = new StringBuilder();
+				switch (key.Key)
+				{
+					case ConsoleKey.Backspace:
+						if (!message.IsEmpty())
+							message.Remove(message.Length - 1, 1);
+						break;
+
+					case ConsoleKey.Enter:
+						return message.ToString();
+
+					default:
+						message.Append(key.KeyChar);
+						break;
+				}
+			}
+		}
+
 		public static string GetInputLineNew(Server server, ShiftingList prevMessages)
 		{
 			if (server.ServerConfig.RandomInputColors.Value)
@@ -109,6 +139,11 @@ namespace MultiAdmin.ServerIO
 			while (!exitLoop)
 			{
 				#region Key Press Handling
+
+				while (!Console.KeyAvailable)
+				{
+					Thread.Sleep(10);
+				}
 
 				ConsoleKeyInfo key = Console.ReadKey(true);
 
@@ -182,17 +217,9 @@ namespace MultiAdmin.ServerIO
 				if (prevMessageCursor < 0)
 					curMessage = message;
 
-				// If the input is done and should exit the loop, this will cause the loop to be exited and the input to be processed
+				// If the input is done and should exit the loop, break from the while loop
 				if (exitLoop)
-				{
-					// Reset the current input parameters
-					ResetInputParams();
-
-					if (!string.IsNullOrEmpty(message))
-						prevMessages.Add(message);
-
-					return message;
-				}
+					break;
 
 				if (messageCursor < 0)
 					messageCursor = 0;
@@ -291,7 +318,13 @@ namespace MultiAdmin.ServerIO
 				#endregion
 			}
 
-			return null;
+			// Reset the current input parameters
+			ResetInputParams();
+
+			if (!string.IsNullOrEmpty(message))
+				prevMessages.Add(message);
+
+			return message;
 		}
 
 		public static void ResetInputParams()
