@@ -2,7 +2,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-	<LangVersion>7.3</LangVersion>
+	<LangVersion>8</LangVersion>
     <ApplicationIcon>Icon.ico</ApplicationIcon>
     <RootNamespace>MultiAdmin</RootNamespace>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
