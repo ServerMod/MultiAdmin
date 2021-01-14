@@ -27,6 +27,8 @@ namespace MultiAdmin
 			? Utils.GetFullPathSafe(Path.Combine(MaDebugLogDir, $"{Utils.DateTime}_MA_{MaVersion}_debug_log.txt"))
 			: null;
 
+		private static StreamWriter debugLogStream = null;
+
 		private static uint? portArg;
 		public static readonly string[] Args = Environment.GetCommandLineArgs();
 
@@ -111,12 +113,15 @@ namespace MultiAdmin
 
 					Directory.CreateDirectory(MaDebugLogDir);
 
-					using (StreamWriter sw = File.AppendText(MaDebugLogFile))
-					{
-						message = Utils.TimeStampMessage($"[{tag}] {message}");
-						sw.Write(message);
-						if (!message.EndsWith(Environment.NewLine)) sw.WriteLine();
-					}
+					// Assign debug log stream as needed
+					if (debugLogStream == null)
+						debugLogStream = File.AppendText(MaDebugLogFile);
+
+					message = Utils.TimeStampMessage($"[{tag}] {message}");
+					debugLogStream.Write(message);
+					if (!message.EndsWith(Environment.NewLine)) debugLogStream.WriteLine();
+
+					debugLogStream.Flush();
 				}
 				catch (Exception e)
 				{
@@ -182,6 +187,9 @@ namespace MultiAdmin
 						}
 					}
 				}
+
+				debugLogStream?.Close();
+				debugLogStream = null;
 
 				exited = true;
 			}
