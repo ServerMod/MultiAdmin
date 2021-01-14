@@ -111,11 +111,12 @@ namespace MultiAdmin
 					if ((!MultiAdminConfig.GlobalConfig?.DebugLog?.Value ?? true) ||
 					    string.IsNullOrEmpty(MaDebugLogFile) || tag == null || !IsDebugLogTagAllowed(tag)) return;
 
-					Directory.CreateDirectory(MaDebugLogDir);
-
 					// Assign debug log stream as needed
 					if (debugLogStream == null)
+					{
+						Directory.CreateDirectory(MaDebugLogDir);
 						debugLogStream = File.AppendText(MaDebugLogFile);
+					}
 
 					message = Utils.TimeStampMessage($"[{tag}] {message}");
 					debugLogStream.Write(message);

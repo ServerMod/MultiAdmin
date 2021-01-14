@@ -296,6 +296,7 @@ namespace MultiAdmin
 				{
 					// Set up logging
 					maLogStream?.Close();
+					Directory.CreateDirectory(logDir);
 					maLogStream = File.AppendText(MaLogFile);
 
 					#region Startup Info Printing & Logging
@@ -681,8 +682,6 @@ namespace MultiAdmin
 
 				try
 				{
-					Directory.CreateDirectory(logDir);
-
 					message = Utils.TimeStampMessage(message);
 					maLogStream.Write(message);
 					if (!message.EndsWith(Environment.NewLine)) maLogStream.WriteLine();
