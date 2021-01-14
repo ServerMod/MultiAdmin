@@ -34,7 +34,7 @@ jobs:
     - name: Restore for ${{matrix.target}}
       run: dotnet restore -r ${{matrix.target}}
 
-    - name: Publish for  ${{matrix.target}}
+    - name: Publish for ${{matrix.target}}
       run: dotnet publish -r ${{matrix.target}} -c Release -o "${{github.workspace}}/Builds/${{matrix.framework}}/${{matrix.target}}" "MultiAdmin"
 
     - name: Run unit tests
