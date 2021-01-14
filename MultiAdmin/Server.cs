@@ -4,8 +4,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using MultiAdmin.Config;
 using MultiAdmin.ConsoleTools;
 using MultiAdmin.Features.Attributes;
@@ -150,7 +150,6 @@ namespace MultiAdmin
 				{
 					MaLogFile = string.IsNullOrEmpty(LogDirFile) ? null : string.Format(LogDirFile, "MA");
 					ScpLogFile = string.IsNullOrEmpty(LogDirFile) ? null : string.Format(LogDirFile, "SCP");
-					ModLogFile = string.IsNullOrEmpty(LogDirFile) ? null : string.Format(LogDirFile, "MODERATOR");
 				}
 			}
 		}
@@ -164,7 +163,8 @@ namespace MultiAdmin
 		public string LogDirFile { get; private set; }
 		public string MaLogFile { get; private set; }
 		public string ScpLogFile { get; private set; }
-		public string ModLogFile { get; private set; }
+
+		private StreamWriter maLogStream;
 
 		public Process GameProcess { get; private set; }
 
@@ -291,6 +291,10 @@ namespace MultiAdmin
 
 				try
 				{
+					// Set up logging
+					maLogStream?.Close();
+					maLogStream = File.AppendText(MaLogFile);
+
 					#region Startup Info Printing & Logging
 
 					WriteConfigInformation();
@@ -383,12 +387,12 @@ namespace MultiAdmin
 					ForEachHandler<IEventServerPreStart>(eventPreStart => eventPreStart.OnServerPreStart());
 
 					// Start the input reader
-					Thread inputHandlerThread = null;
+					CancellationTokenSource inputHandlerCancellation = new CancellationTokenSource();
+					Task inputHandler = null;
 
 					if (!Program.Headless)
 					{
-						inputHandlerThread = new Thread(() => InputHandler.Write(this));
-						inputHandlerThread.Start();
+						inputHandler = Task.Run(() => InputHandler.Write(this, inputHandlerCancellation.Token), inputHandlerCancellation.Token);
 					}
 
 					// Start the output reader
@@ -437,9 +441,19 @@ namespace MultiAdmin
 						GameProcess = null;
 
 						// Stop the input handler if it's running
-						if (inputHandlerThread != null && inputHandlerThread.IsAlive)
+						if (inputHandler != null)
 						{
-							inputHandlerThread.Abort();
+							inputHandlerCancellation.Cancel();
+							try
+							{
+								inputHandler.Wait();
+							}
+							catch (Exception)
+							{
+								// Task was cancelled or disposed, this is fine since we're waiting for that
+							}
+							inputHandler.Dispose();
+							inputHandlerCancellation.Dispose();
 						}
 
 						consoleSocket.Disconnect();
@@ -487,6 +501,10 @@ namespace MultiAdmin
 					}
 				}
 			} while (shouldRestart);
+
+			// Finish server instance
+			maLogStream?.Close();
+			maLogStream = null;
 		}
 
 		public void SetStopStatus(bool killGame = false)
@@ -659,12 +677,10 @@ namespace MultiAdmin
 				{
 					Directory.CreateDirectory(logDir);
 
-					using (StreamWriter sw = File.AppendText(MaLogFile))
-					{
-						message = Utils.TimeStampMessage(message);
-						sw.Write(message);
-						if (!message.EndsWith(Environment.NewLine)) sw.WriteLine();
-					}
+					message = Utils.TimeStampMessage(message);
+					maLogStream.Write(message);
+					if (!message.EndsWith(Environment.NewLine)) maLogStream.WriteLine();
+					maLogStream.Flush();
 				}
 				catch (Exception e)
 				{

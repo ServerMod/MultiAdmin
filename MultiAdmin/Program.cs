@@ -184,11 +184,6 @@ namespace MultiAdmin
 				}
 
 				exited = true;
-
-				// For some reason Mono hangs on this, but it works perfectly without it,
-				// but on Windows it doesn't close immediately unless this is here
-				if (Utils.IsWindows)
-					Environment.Exit(0);
 			}
 		}
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using MultiAdmin.Config;
 using MultiAdmin.ConsoleTools;
 using MultiAdmin.Utility;
@@ -46,7 +47,7 @@ namespace MultiAdmin.ServerIO
 		public static ColoredMessage[] CurrentInput { get; private set; } = {InputPrefix};
 		public static int CurrentCursor { get; private set; }
 
-		public static void Write(Server server)
+		public static async void Write(Server server, CancellationToken cancellationToken)
 		{
 			try
 			{
@@ -62,11 +63,11 @@ namespace MultiAdmin.ServerIO
 					string message;
 					if (server.ServerConfig.UseNewInputSystem.Value && SectionBufferWidth - TotalIndicatorLength > 0)
 					{
-						message = GetInputLineNew(server, prevMessages);
+						message = await GetInputLineNew(server, cancellationToken, prevMessages);
 					}
 					else
 					{
-						message = GetInputLineOld();
+						message = await GetInputLineOld(cancellationToken);
 					}
 
 					if (string.IsNullOrEmpty(message)) continue;
@@ -89,20 +90,30 @@ namespace MultiAdmin.ServerIO
 
 				ResetInputParams();
 			}
-			catch (ThreadInterruptedException)
+			catch (TaskCanceledException)
 			{
-				// Exit the Thread immediately if interrupted
+				// Exit the Task immediately if cancelled
 			}
 		}
 
-		public static string GetInputLineOld()
+		/// <summary>
+		/// Waits until <see cref="Console.KeyAvailable"/> returns true.
+		/// </summary>
+		/// <param name="cancellationToken">The cancellation token to check for cancellation.</param>
+		/// <exception cref="TaskCanceledException">The task has been canceled.</exception>
+		public static async Task WaitForKey(CancellationToken cancellationToken)
+		{
+			while (!Console.KeyAvailable)
+			{
+				await Task.Delay(10, cancellationToken);
+			}
+		}
+
+		public static async Task<string> GetInputLineOld(CancellationToken cancellationToken)
 		{
 			while (true)
 			{
-				while (!Console.KeyAvailable)
-				{
-					Thread.Sleep(10);
-				}
+				await WaitForKey(cancellationToken);
 
 				ConsoleKeyInfo key = Console.ReadKey();
 
@@ -124,7 +135,7 @@ namespace MultiAdmin.ServerIO
 			}
 		}
 
-		public static string GetInputLineNew(Server server, ShiftingList prevMessages)
+		public static async Task<string> GetInputLineNew(Server server, CancellationToken cancellationToken, ShiftingList prevMessages)
 		{
 			if (server.ServerConfig.RandomInputColors.Value)
 				RandomizeInputColors();
@@ -140,10 +151,7 @@ namespace MultiAdmin.ServerIO
 			{
 				#region Key Press Handling
 
-				while (!Console.KeyAvailable)
-				{
-					Thread.Sleep(10);
-				}
+				await WaitForKey(cancellationToken);
 
 				ConsoleKeyInfo key = Console.ReadKey(true);
 
