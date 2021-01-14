@@ -23,8 +23,8 @@ jobs:
     - if: matrix.os == 'ubuntu-latest'
       name: Install Linux packages
       run: |
-       sudo apt update
-       sudo apt install -y clang zlib1g-dev libkrb5-dev libtinfo5
+        sudo apt update
+        sudo apt install -y build-essential libkrb5-dev make gcc libc-dev cmake llvm
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v1.7.2
