@@ -111,13 +111,13 @@ namespace MultiAdmin.ServerIO
 
 		public static async Task<string> GetInputLineOld(CancellationToken cancellationToken)
 		{
+			StringBuilder message = new StringBuilder();
 			while (true)
 			{
 				await WaitForKey(cancellationToken);
 
 				ConsoleKeyInfo key = Console.ReadKey();
 
-				StringBuilder message = new StringBuilder();
 				switch (key.Key)
 				{
 					case ConsoleKey.Backspace:
