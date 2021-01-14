@@ -13,8 +13,8 @@ namespace MultiAdmin.Features
 		private uint tickCount;
 		private uint tickCountSoft;
 
-		private const uint MaxTicks = 10;
-		private const uint MaxTicksSoft = 10;
+		private uint maxTicks = 10;
+		private uint maxTicksSoft = 10;
 
 		private bool restart;
 
@@ -82,7 +82,7 @@ namespace MultiAdmin.Features
 		{
 			if (LowBytes < 0 && LowBytesSoft < 0 || MaxBytes < 0) return;
 
-			if (tickCount < MaxTicks && LowBytes >= 0 && MemoryLeftBytes <= LowBytes)
+			if (tickCount < maxTicks && LowBytes >= 0 && MemoryLeftBytes <= LowBytes)
 			{
 				Server.Write(
 					$"Warning: Program is running low on memory ({decimal.Round(MemoryLeftMb, OutputPrecision)} MB left), the server will restart if it continues",
@@ -94,7 +94,7 @@ namespace MultiAdmin.Features
 				tickCount = 0;
 			}
 
-			if (!restart && tickCountSoft < MaxTicksSoft && LowBytesSoft >= 0 && MemoryLeftBytes <= LowBytesSoft)
+			if (!restart && tickCountSoft < maxTicksSoft && LowBytesSoft >= 0 && MemoryLeftBytes <= LowBytesSoft)
 			{
 				Server.Write(
 					$"Warning: Program is running low on memory ({decimal.Round(MemoryLeftMb, OutputPrecision)} MB left), the server will restart at the end of the round if it continues",
@@ -108,14 +108,14 @@ namespace MultiAdmin.Features
 
 			if (Server.Status == ServerStatus.Restarting) return;
 
-			if (tickCount >= MaxTicks)
+			if (tickCount >= maxTicks)
 			{
 				Server.Write("Restarting due to low memory...", ConsoleColor.Red);
 				Server.RestartServer();
 
 				restart = false;
 			}
-			else if (!restart && tickCountSoft >= MaxTicksSoft)
+			else if (!restart && tickCountSoft >= maxTicksSoft)
 			{
 				Server.Write("Server will restart at the end of the round due to low memory");
 
@@ -143,6 +143,9 @@ namespace MultiAdmin.Features
 
 		public override void OnConfigReload()
 		{
+			maxTicks = Server.ServerConfig.RestartLowMemoryTicks.Value;
+			maxTicksSoft = Server.ServerConfig.RestartLowMemoryRoundEndTicks.Value;
+
 			LowMb = Server.ServerConfig.RestartLowMemory.Value;
 			LowMbSoft = Server.ServerConfig.RestartLowMemoryRoundEnd.Value;
 			MaxMb = Server.ServerConfig.MaxMemory.Value;

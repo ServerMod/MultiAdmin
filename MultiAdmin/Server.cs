@@ -190,17 +190,20 @@ namespace MultiAdmin
 
 		private void MainLoop()
 		{
+			// Creates and starts a timer
 			Stopwatch timer = new Stopwatch();
+			timer.Restart();
+
 			while (IsGameProcessRunning)
 			{
-				timer.Restart();
-
 				foreach (IEventTick tickEvent in tick) tickEvent.OnTick();
 
 				timer.Stop();
 
-				// Wait 1 second per tick (calculating how long the tick took and compensating)
-				Thread.Sleep(Math.Max(1000 - timer.Elapsed.Milliseconds, 0));
+				// Wait the delay per tick (calculating how long the tick took and compensating)
+				Thread.Sleep(Math.Max(ServerConfig.MultiAdminTickDelay.Value - timer.Elapsed.Milliseconds, 0));
+
+				timer.Restart();
 
 				if (Status == ServerStatus.Restarting && CheckRestartTimeout)
 				{
@@ -383,6 +386,9 @@ namespace MultiAdmin
 					};
 
 					Write($"Starting server with the following parameters:\n{scpslExe} {startInfo.Arguments}");
+
+					// Reset the supported mod features
+					supportedModFeatures = ModFeatures.None;
 
 					ForEachHandler<IEventServerPreStart>(eventPreStart => eventPreStart.OnServerPreStart());
 

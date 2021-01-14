@@ -98,9 +98,17 @@ namespace MultiAdmin.Config
 			new ConfigEntry<decimal>("restart_low_memory", 400,
 				"Restart Low Memory", "Restart if the game's remaining memory falls below this value in megabytes");
 
+		public ConfigEntry<uint> RestartLowMemoryTicks { get; } =
+			new ConfigEntry<uint>("restart_low_memory_ticks", 10,
+				"Restart Low Memory Ticks", "The number of ticks the memory can be over the limit before restarting");
+
 		public ConfigEntry<decimal> RestartLowMemoryRoundEnd { get; } =
 			new ConfigEntry<decimal>("restart_low_memory_roundend", 450,
 				"Restart Low Memory Round-End", "Restart at the end of the round if the game's remaining memory falls below this value in megabytes");
+
+		public ConfigEntry<uint> RestartLowMemoryRoundEndTicks { get; } =
+			new ConfigEntry<uint>("restart_low_memory_roundend_ticks", 10,
+				"Restart Low Memory Round-End Ticks", "The number of ticks the memory can be over the limit before restarting at the end of the round");
 
 		public ConfigEntry<bool> RandomInputColors { get; } =
 			new ConfigEntry<bool>("random_input_colors", false,
@@ -141,6 +149,10 @@ namespace MultiAdmin.Config
 		public ConfigEntry<int> ServerStartRetryDelay { get; } =
 			new ConfigEntry<int>("server_start_retry_delay", 10000,
 				"Server Start Retry Delay", "The time in milliseconds to wait before trying to start the server again after crashing");
+
+		public ConfigEntry<int> MultiAdminTickDelay { get; } =
+			new ConfigEntry<int>("multiadmin_tick_delay", 1000,
+				"MultiAdmin Tick Delay", "The time in milliseconds between MultiAdmin ticks (any features that update over time)");
 
 		public ConfigEntry<string> ServersFolder { get; } =
 			new ConfigEntry<string>("servers_folder", "servers",
