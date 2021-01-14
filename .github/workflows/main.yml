@@ -31,10 +31,10 @@ jobs:
       with:
         dotnet-version: ${{matrix.framework}}
 
-    - name: Restore the project for ${{matrix.target}}
+    - name: Restore for ${{matrix.target}}
       run: dotnet restore -r ${{matrix.target}}
 
-    - name: Build ${{matrix.target}}
+    - name: Publish for  ${{matrix.target}}
       run: dotnet publish -r ${{matrix.target}} -c Release -o "${{github.workspace}}/Builds/${{matrix.framework}}/${{matrix.target}}" "MultiAdmin"
 
     - name: Run unit tests
