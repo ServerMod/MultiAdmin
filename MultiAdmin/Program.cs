@@ -16,7 +16,6 @@ namespace MultiAdmin
 	public static class Program
 	{
 		public const string MaVersion = "3.4.0.0";
-		public const string RecommendedMonoVersion = "5.18";
 
 		private static readonly List<Server> InstantiatedServers = new List<Server>();
 
@@ -202,10 +201,16 @@ namespace MultiAdmin
 			{
 				AppDomain.CurrentDomain.ProcessExit += OnExit;
 
-				if (Utils.IsUnix)
+				if (OperatingSystem.IsLinux())
+				{
+#if LINUX
 					exitSignalListener = new UnixExitSignal();
-				else if (Utils.IsWindows)
+#endif
+				}
+				else if (OperatingSystem.IsWindows())
+				{
 					exitSignalListener = new WinExitSignal();
+				}
 
 				if (exitSignalListener != null)
 					exitSignalListener.Exit += OnExit;
@@ -217,10 +222,7 @@ namespace MultiAdmin
 
 			Headless = GetFlagFromArgs(Args, "headless", "h");
 
-			if (!Headless)
-				CheckMonoVersion();
-
-			string serverIdArg = GetParamFromArgs(Args, "server-id", "id");
+            string serverIdArg = GetParamFromArgs(Args, "server-id", "id");
 			string configArg = GetParamFromArgs(Args, "config", "c");
 			portArg = uint.TryParse(GetParamFromArgs(Args, "port", "p"), out uint port) ? (uint?)port : null;
 
@@ -430,46 +432,6 @@ namespace MultiAdmin
 			InstantiatedServers.Add(server);
 
 			return serverProcess;
-		}
-
-		private static bool IsVersionFormat(string input, char separator = '.')
-		{
-			foreach (char character in input)
-			{
-				if (!char.IsNumber(character) && character != separator)
-					return false;
-			}
-
-			return true;
-		}
-
-		public static void CheckMonoVersion()
-		{
-			try
-			{
-				string monoVersionRaw = Type.GetType("Mono.Runtime")
-					?.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static)?.Invoke(null, null)
-					?.ToString();
-				string monoVersion = monoVersionRaw?.Split(' ').FirstOrDefault(version => IsVersionFormat(version));
-
-				if (string.IsNullOrEmpty(monoVersion))
-					return;
-
-				int versionDifference = Utils.CompareVersionStrings(monoVersion, RecommendedMonoVersion);
-
-				if (versionDifference >= 0)
-					return;
-
-				Write(
-					$"Warning: Your Mono version ({monoVersion}) is below the minimum recommended version ({RecommendedMonoVersion})",
-					ConsoleColor.Red);
-				Write("Please update your Mono installation: https://www.mono-project.com/download/stable/",
-					ConsoleColor.Red);
-			}
-			catch (Exception e)
-			{
-				LogDebugException(nameof(CheckMonoVersion), e);
-			}
 		}
 	}
 }

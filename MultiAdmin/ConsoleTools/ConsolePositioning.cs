@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace MultiAdmin.ConsoleTools
 {
@@ -21,25 +21,21 @@ namespace MultiAdmin.ConsoleTools
 		public static BufferPoint BufferLeft
 		{
 			get => new BufferPoint(0, 0);
-			set => Console.WindowLeft = -value.ConsolePoint.x;
 		}
 
 		public static BufferPoint BufferRight
 		{
 			get => new BufferPoint(Console.BufferWidth - 1, 0);
-			set => Console.BufferWidth = value.x + 1;
 		}
 
 		public static BufferPoint BufferTop
 		{
 			get => new BufferPoint(0, 0);
-			set => Console.WindowTop = -value.ConsolePoint.y;
 		}
 
 		public static BufferPoint BufferBottom
 		{
 			get => new BufferPoint(0, Console.BufferHeight - 1);
-			set => Console.BufferHeight = value.y + 1;
 		}
 
 		#endregion

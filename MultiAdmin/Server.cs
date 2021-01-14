@@ -265,9 +265,9 @@ namespace MultiAdmin
 		{
 			string scpslExe;
 
-			if (Utils.IsUnix)
+			if (OperatingSystem.IsLinux())
 				scpslExe = "SCPSL.x86_64";
-			else if (Utils.IsWindows)
+			else if (OperatingSystem.IsWindows())
 				scpslExe = "SCPSL.exe";
 			else
 				throw new FileNotFoundException("Invalid OS, can't run executable");
@@ -338,12 +338,12 @@ namespace MultiAdmin
 					{
 						scpslArgs.Add("-nolog");
 
-						if (Utils.IsUnix)
+						if (OperatingSystem.IsLinux())
 						{
 							scpslArgs.Add("-logFile");
 							scpslArgs.Add("/dev/null");
 						}
-						else if (Utils.IsWindows)
+						else if (OperatingSystem.IsWindows())
 						{
 							scpslArgs.Add("-logFile");
 							scpslArgs.Add("NUL");

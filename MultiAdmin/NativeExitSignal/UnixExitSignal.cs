@@ -1,3 +1,4 @@
+#if LINUX
 using System;
 using System.Threading.Tasks;
 using Mono.Unix;
@@ -26,3 +27,4 @@ namespace MultiAdmin.NativeExitSignal
 		}
 	}
 }
+#endif
