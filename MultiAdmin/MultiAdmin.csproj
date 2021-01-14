@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
 	<LangVersion>7.3</LangVersion>
     <ApplicationIcon>Icon.ico</ApplicationIcon>
     <RootNamespace>MultiAdmin</RootNamespace>
@@ -10,6 +10,6 @@
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Mono.Posix-4.5" Version="4.5.0" />
+    <PackageReference Include="Mono.Posix.NETStandard" Version="1.0.0" />
   </ItemGroup>
 </Project>
