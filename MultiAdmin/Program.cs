@@ -15,7 +15,7 @@ namespace MultiAdmin
 {
 	public static class Program
 	{
-		public const string MaVersion = "3.3.1.2";
+		public const string MaVersion = "3.4.0.0";
 		public const string RecommendedMonoVersion = "5.18";
 
 		private static readonly List<Server> InstantiatedServers = new List<Server>();
@@ -26,6 +26,8 @@ namespace MultiAdmin
 		private static readonly string MaDebugLogFile = !string.IsNullOrEmpty(MaDebugLogDir)
 			? Utils.GetFullPathSafe(Path.Combine(MaDebugLogDir, $"{Utils.DateTime}_MA_{MaVersion}_debug_log.txt"))
 			: null;
+
+		private static StreamWriter debugLogStream = null;
 
 		private static uint? portArg;
 		public static readonly string[] Args = Environment.GetCommandLineArgs();
@@ -78,8 +80,8 @@ namespace MultiAdmin
 			{
 				if (Headless) return;
 
-				new ColoredMessage(Utils.TimeStampMessage(message), color).WriteLine(
-					MultiAdminConfig.GlobalConfig?.UseNewInputSystem?.Value ?? false);
+				new ColoredMessage(Utils.TimeStampMessage(message), color).WriteLine((!MultiAdminConfig.GlobalConfig?.HideInput?.Value ?? false) &&
+					(MultiAdminConfig.GlobalConfig?.UseNewInputSystem?.Value ?? false));
 			}
 		}
 
@@ -109,14 +111,18 @@ namespace MultiAdmin
 					if ((!MultiAdminConfig.GlobalConfig?.DebugLog?.Value ?? true) ||
 					    string.IsNullOrEmpty(MaDebugLogFile) || tag == null || !IsDebugLogTagAllowed(tag)) return;
 
-					Directory.CreateDirectory(MaDebugLogDir);
-
-					using (StreamWriter sw = File.AppendText(MaDebugLogFile))
+					// Assign debug log stream as needed
+					if (debugLogStream == null)
 					{
-						message = Utils.TimeStampMessage($"[{tag}] {message}");
-						sw.Write(message);
-						if (!message.EndsWith(Environment.NewLine)) sw.WriteLine();
+						Directory.CreateDirectory(MaDebugLogDir);
+						debugLogStream = File.AppendText(MaDebugLogFile);
 					}
+
+					message = Utils.TimeStampMessage($"[{tag}] {message}");
+					debugLogStream.Write(message);
+					if (!message.EndsWith(Environment.NewLine)) debugLogStream.WriteLine();
+
+					debugLogStream.Flush();
 				}
 				catch (Exception e)
 				{
@@ -157,7 +163,7 @@ namespace MultiAdmin
 							server.StopServer();
 
 							// Wait for server to exit
-							int timeToWait = Math.Max(MultiAdminConfig.GlobalConfig.SafeShutdownCheckDelay.Value, 0);
+							int timeToWait = Math.Max(server.ServerConfig.SafeShutdownCheckDelay.Value, 0);
 							int timeWaited = 0;
 
 							while (server.IsGameProcessRunning)
@@ -165,7 +171,7 @@ namespace MultiAdmin
 								Thread.Sleep(timeToWait);
 								timeWaited += timeToWait;
 
-								if (timeWaited >= MultiAdminConfig.GlobalConfig.SafeShutdownTimeout.Value)
+								if (timeWaited >= server.ServerConfig.SafeShutdownTimeout.Value)
 								{
 									Write(
 										string.IsNullOrEmpty(server.serverId)
@@ -183,12 +189,10 @@ namespace MultiAdmin
 					}
 				}
 
-				exited = true;
+				debugLogStream?.Close();
+				debugLogStream = null;
 
-				// For some reason Mono hangs on this, but it works perfectly without it,
-				// but on Windows it doesn't close immediately unless this is here
-				if (Utils.IsWindows)
-					Environment.Exit(0);
+				exited = true;
 			}
 		}
 

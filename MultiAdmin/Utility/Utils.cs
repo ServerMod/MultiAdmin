@@ -7,7 +7,7 @@ namespace MultiAdmin.Utility
 {
 	public static class Utils
 	{
-		public static string DateTime => System.DateTime.Now.ToString("yyyy-MM-dd_HH_mm");
+		public static string DateTime => System.DateTime.Now.ToString("yyyy-MM-dd_HH_mm_ss");
 
 		public static string TimeStamp
 		{

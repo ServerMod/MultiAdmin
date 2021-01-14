@@ -33,9 +33,7 @@ Make sure that you are running Mono 5.18.0 or higher, otherwise you might have i
 - MultiAdminInfo: Prints MultiAdmin license and version information
 - New Server: Adds a command to start a new server given a config folder and a config to start a new server when one is full [Config Requires Modding]
 - Restart Command: Allows the game to be restarted without restarting MultiAdmin
-- Restart Next Round: Restarts the server after the current round ends [Requires Modding]
 - Restart After a Number of Rounds: Restarts the server after a number rounds completed [Requires Modding]
-- Stop Next Round: Stops the server after the current round ends [Requires Modding]
 - TitleBar: Updates the title bar with instance based information
 
 ## MultiAdmin Commands
@@ -49,8 +47,6 @@ This does not include ingame commands, for a full list type `HELP` in MultiAdmin
 - INFO: Prints MultiAdmin license and version information
 - NEW <SERVER ID>: Starts a new server with the given Server ID
 - RESTART: Restarts the game server (MultiAdmin will not restart, just the game)
-- RESTARTNEXTROUND: Restarts the server at the end of this round [Requires Modding]
-- STOPNEXTROUND: Stops the server at the end of this round [Requires Modding]
 
 ## MultiAdmin Execution Arguments
 The arguments available for running MultiAdmin with
@@ -76,6 +72,7 @@ multiadmin_debug_log | Boolean | True | Enables MultiAdmin debug logging, this l
 multiadmin_debug_log_blacklist | String List | HandleMessage, StringMatches, MessageListener | Which tags to block for MultiAdmin debug logging
 multiadmin_debug_log_whitelist | String List | **Empty** | Which tags to log for MultiAdmin debug logging (Defaults to logging all if none are provided)
 use_new_input_system | Boolean | True | Whether to use the new input system, if false, the original input system will be used
+hide_input | Boolean | False | Whether to hide console input, if true, typed input will not be printed
 port | Unsigned Integer | 7777 | The port for the server to use
 copy_from_folder_on_reload | String | **Empty** | The location of a folder to copy files from into the folder defined by `config_location` whenever the configuration file is reloaded
 folder_copy_whitelist | String List | **Empty** | The list of file names to copy from the folder defined by `copy_from_folder_on_reload` (accepts `*` wildcards)
@@ -87,7 +84,9 @@ randomize_folder_copy_round_queue | Boolean | False | Whether to randomize the o
 manual_start | Boolean | False | Whether or not to start the server automatically when launching MultiAdmin
 max_memory | Decimal | 2048 | The amount of memory in megabytes for MultiAdmin to check against
 restart_low_memory | Decimal | 400 | Restart if the game's remaining memory falls below this value in megabytes
+restart_low_memory_ticks | Unsigned Integer | 10 | The number of ticks the memory can be over the limit before restarting
 restart_low_memory_roundend | Decimal | 450 | Restart at the end of the round if the game's remaining memory falls below this value in megabytes
+restart_low_memory_roundend_ticks | Unsigned Integer | 10 | The number of ticks the memory can be over the limit before restarting at the end of the round
 random_input_colors | Boolean | False | Randomize the new input system's colors every time a message is input
 restart_every_num_rounds | Integer | -1 | Restart the server every number of rounds
 restart_every_num_rounds_counting | Boolean | False | Whether to print the count of rounds passed after each round if the server is set to restart after a number of rounds
@@ -98,6 +97,7 @@ server_restart_timeout | Double | 10 | The time in seconds before MultiAdmin for
 server_stop_timeout | Double | 10 | The time in seconds before MultiAdmin forces a server shutdown if it doesn't respond to the regular shutdown command
 server_start_retry | Boolean | True | Whether to try to start the server again after crashing
 server_start_retry_delay | Integer | 10000 | The time in milliseconds to wait before trying to start the server again after crashing
+multiadmin_tick_delay | Integer | 1000 | The time in milliseconds between MultiAdmin ticks (any features that update over time)
 servers_folder | String | servers | The location of the `servers` folder for MultiAdmin to load multiple server configurations from
 set_title_bar | Boolean | True | Whether to set the console window's titlebar, if false, this feature won't be used
 start_config_on_full | String | **Empty** | Start server with this config folder once the server becomes full [Requires Modding]

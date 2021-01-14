@@ -4,8 +4,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using MultiAdmin.Config;
 using MultiAdmin.ConsoleTools;
 using MultiAdmin.Features.Attributes;
@@ -150,7 +150,6 @@ namespace MultiAdmin
 				{
 					MaLogFile = string.IsNullOrEmpty(LogDirFile) ? null : string.Format(LogDirFile, "MA");
 					ScpLogFile = string.IsNullOrEmpty(LogDirFile) ? null : string.Format(LogDirFile, "SCP");
-					ModLogFile = string.IsNullOrEmpty(LogDirFile) ? null : string.Format(LogDirFile, "MODERATOR");
 				}
 			}
 		}
@@ -164,7 +163,8 @@ namespace MultiAdmin
 		public string LogDirFile { get; private set; }
 		public string MaLogFile { get; private set; }
 		public string ScpLogFile { get; private set; }
-		public string ModLogFile { get; private set; }
+
+		private StreamWriter maLogStream;
 
 		public Process GameProcess { get; private set; }
 
@@ -190,17 +190,20 @@ namespace MultiAdmin
 
 		private void MainLoop()
 		{
+			// Creates and starts a timer
 			Stopwatch timer = new Stopwatch();
+			timer.Restart();
+
 			while (IsGameProcessRunning)
 			{
-				timer.Restart();
-
 				foreach (IEventTick tickEvent in tick) tickEvent.OnTick();
 
 				timer.Stop();
 
-				// Wait 1 second per tick (calculating how long the tick took and compensating)
-				Thread.Sleep(Math.Max(1000 - timer.Elapsed.Milliseconds, 0));
+				// Wait the delay per tick (calculating how long the tick took and compensating)
+				Thread.Sleep(Math.Max(ServerConfig.MultiAdminTickDelay.Value - timer.Elapsed.Milliseconds, 0));
+
+				timer.Restart();
 
 				if (Status == ServerStatus.Restarting && CheckRestartTimeout)
 				{
@@ -291,6 +294,11 @@ namespace MultiAdmin
 
 				try
 				{
+					// Set up logging
+					maLogStream?.Close();
+					Directory.CreateDirectory(logDir);
+					maLogStream = File.AppendText(MaLogFile);
+
 					#region Startup Info Printing & Logging
 
 					WriteConfigInformation();
@@ -380,15 +388,18 @@ namespace MultiAdmin
 
 					Write($"Starting server with the following parameters:\n{scpslExe} {startInfo.Arguments}");
 
+					// Reset the supported mod features
+					supportedModFeatures = ModFeatures.None;
+
 					ForEachHandler<IEventServerPreStart>(eventPreStart => eventPreStart.OnServerPreStart());
 
 					// Start the input reader
-					Thread inputHandlerThread = null;
+					CancellationTokenSource inputHandlerCancellation = new CancellationTokenSource();
+					Task inputHandler = null;
 
 					if (!Program.Headless)
 					{
-						inputHandlerThread = new Thread(() => InputHandler.Write(this));
-						inputHandlerThread.Start();
+						inputHandler = Task.Run(() => InputHandler.Write(this, inputHandlerCancellation.Token), inputHandlerCancellation.Token);
 					}
 
 					// Start the output reader
@@ -437,9 +448,19 @@ namespace MultiAdmin
 						GameProcess = null;
 
 						// Stop the input handler if it's running
-						if (inputHandlerThread != null && inputHandlerThread.IsAlive)
+						if (inputHandler != null)
 						{
-							inputHandlerThread.Abort();
+							inputHandlerCancellation.Cancel();
+							try
+							{
+								inputHandler.Wait();
+							}
+							catch (Exception)
+							{
+								// Task was cancelled or disposed, this is fine since we're waiting for that
+							}
+							inputHandler.Dispose();
+							inputHandlerCancellation.Dispose();
 						}
 
 						consoleSocket.Disconnect();
@@ -487,6 +508,10 @@ namespace MultiAdmin
 					}
 				}
 			} while (shouldRestart);
+
+			// Finish server instance
+			maLogStream?.Close();
+			maLogStream = null;
 		}
 
 		public void SetStopStatus(bool killGame = false)
@@ -625,10 +650,10 @@ namespace MultiAdmin
 
 				ColoredMessage[] timeStampedMessage = Utils.TimeStampMessage(messages, timeStampColor);
 
-				timeStampedMessage.WriteLine(ServerConfig.UseNewInputSystem.Value);
+				timeStampedMessage.WriteLine(!ServerConfig.HideInput.Value && ServerConfig.UseNewInputSystem.Value);
 
-				if (ServerConfig.UseNewInputSystem.Value)
-					InputHandler.WriteInputAndSetCursor();
+				if (!ServerConfig.HideInput.Value && ServerConfig.UseNewInputSystem.Value)
+					InputHandler.WriteInputAndSetCursor(ServerConfig);
 			}
 		}
 
@@ -657,14 +682,10 @@ namespace MultiAdmin
 
 				try
 				{
-					Directory.CreateDirectory(logDir);
-
-					using (StreamWriter sw = File.AppendText(MaLogFile))
-					{
-						message = Utils.TimeStampMessage(message);
-						sw.Write(message);
-						if (!message.EndsWith(Environment.NewLine)) sw.WriteLine();
-					}
+					message = Utils.TimeStampMessage(message);
+					maLogStream.Write(message);
+					if (!message.EndsWith(Environment.NewLine)) maLogStream.WriteLine();
+					maLogStream.Flush();
 				}
 				catch (Exception e)
 				{

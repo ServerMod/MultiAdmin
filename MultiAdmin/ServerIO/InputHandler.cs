@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using MultiAdmin.Config;
 using MultiAdmin.ConsoleTools;
 using MultiAdmin.Utility;
@@ -45,7 +47,7 @@ namespace MultiAdmin.ServerIO
 		public static ColoredMessage[] CurrentInput { get; private set; } = {InputPrefix};
 		public static int CurrentCursor { get; private set; }
 
-		public static void Write(Server server)
+		public static async void Write(Server server, CancellationToken cancellationToken)
 		{
 			try
 			{
@@ -59,13 +61,13 @@ namespace MultiAdmin.ServerIO
 					}
 
 					string message;
-					if (server.ServerConfig.UseNewInputSystem.Value && SectionBufferWidth - TotalIndicatorLength > 0)
+					if (!server.ServerConfig.HideInput.Value && server.ServerConfig.UseNewInputSystem.Value && SectionBufferWidth - TotalIndicatorLength > 0)
 					{
-						message = GetInputLineNew(server, prevMessages);
+						message = await GetInputLineNew(server, cancellationToken, prevMessages);
 					}
 					else
 					{
-						message = Console.ReadLine();
+						message = await GetInputLineOld(server, cancellationToken);
 					}
 
 					if (string.IsNullOrEmpty(message)) continue;
@@ -88,13 +90,52 @@ namespace MultiAdmin.ServerIO
 
 				ResetInputParams();
 			}
-			catch (ThreadInterruptedException)
+			catch (TaskCanceledException)
 			{
-				// Exit the Thread immediately if interrupted
+				// Exit the Task immediately if cancelled
 			}
 		}
 
-		public static string GetInputLineNew(Server server, ShiftingList prevMessages)
+		/// <summary>
+		/// Waits until <see cref="Console.KeyAvailable"/> returns true.
+		/// </summary>
+		/// <param name="cancellationToken">The cancellation token to check for cancellation.</param>
+		/// <exception cref="TaskCanceledException">The task has been canceled.</exception>
+		public static async Task WaitForKey(CancellationToken cancellationToken)
+		{
+			while (!Console.KeyAvailable)
+			{
+				await Task.Delay(10, cancellationToken);
+			}
+		}
+
+		public static async Task<string> GetInputLineOld(Server server, CancellationToken cancellationToken)
+		{
+			StringBuilder message = new StringBuilder();
+			while (true)
+			{
+				await WaitForKey(cancellationToken);
+
+				ConsoleKeyInfo key = Console.ReadKey(server.ServerConfig.HideInput.Value);
+
+				switch (key.Key)
+				{
+					case ConsoleKey.Backspace:
+						if (!message.IsEmpty())
+							message.Remove(message.Length - 1, 1);
+						break;
+
+					case ConsoleKey.Enter:
+						return message.ToString();
+
+					default:
+						message.Append(key.KeyChar);
+						break;
+				}
+			}
+		}
+
+		public static async Task<string> GetInputLineNew(Server server, CancellationToken cancellationToken, ShiftingList prevMessages)
 		{
 			if (server.ServerConfig.RandomInputColors.Value)
 				RandomizeInputColors();
@@ -109,6 +150,8 @@ namespace MultiAdmin.ServerIO
 			while (!exitLoop)
 			{
 				#region Key Press Handling
+
+				await WaitForKey(cancellationToken);
 
 				ConsoleKeyInfo key = Console.ReadKey(true);
 
@@ -182,17 +225,9 @@ namespace MultiAdmin.ServerIO
 				if (prevMessageCursor < 0)
 					curMessage = message;
 
-				// If the input is done and should exit the loop, this will cause the loop to be exited and the input to be processed
+				// If the input is done and should exit the loop, break from the while loop
 				if (exitLoop)
-				{
-					// Reset the current input parameters
-					ResetInputParams();
-
-					if (!string.IsNullOrEmpty(message))
-						prevMessages.Add(message);
-
-					return message;
-				}
+					break;
 
 				if (messageCursor < 0)
 					messageCursor = 0;
@@ -218,7 +253,7 @@ namespace MultiAdmin.ServerIO
 							SetCurrentInput(curSection.Value.Section);
 							CurrentCursor = curSection.Value.GetRelativeIndex(messageCursor);
 
-							WriteInputAndSetCursor();
+							WriteInputAndSetCursor(server.ServerConfig);
 						}
 						else
 						{
@@ -232,7 +267,7 @@ namespace MultiAdmin.ServerIO
 						SetCurrentInput(message);
 						CurrentCursor = messageCursor;
 
-						WriteInputAndSetCursor();
+						WriteInputAndSetCursor(server.ServerConfig);
 					}
 				}
 				else if (CurrentCursor != messageCursor)
@@ -256,7 +291,7 @@ namespace MultiAdmin.ServerIO
 
 									SetCurrentInput(curSection.Value.Section);
 
-									WriteInputAndSetCursor();
+									WriteInputAndSetCursor(server.ServerConfig);
 								}
 
 								// Otherwise, if only the relative cursor index has changed, set only the cursor
@@ -291,7 +326,13 @@ namespace MultiAdmin.ServerIO
 				#endregion
 			}
 
-			return null;
+			// Reset the current input parameters
+			ResetInputParams();
+
+			if (!string.IsNullOrEmpty(message))
+				prevMessages.Add(message);
+
+			return message;
 		}
 
 		public static void ResetInputParams()
@@ -359,28 +400,29 @@ namespace MultiAdmin.ServerIO
 			SetCursor(CurrentCursor);
 		}
 
-		public static void WriteInput(ColoredMessage[] message)
+		public static void WriteInput(ColoredMessage[] message, MultiAdminConfig config = null)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
 				if (Program.Headless) return;
 
-				message?.Write(MultiAdminConfig.GlobalConfig.UseNewInputSystem.Value);
+				MultiAdminConfig curConfig = config ?? MultiAdminConfig.GlobalConfig;
+				message?.Write(!curConfig.HideInput.Value && curConfig.UseNewInputSystem.Value);
 
 				CurrentInput = message;
 			}
 		}
 
-		public static void WriteInput()
+		public static void WriteInput(MultiAdminConfig config = null)
 		{
-			WriteInput(CurrentInput);
+			WriteInput(CurrentInput, config);
 		}
 
-		public static void WriteInputAndSetCursor()
+		public static void WriteInputAndSetCursor(MultiAdminConfig config = null)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
-				WriteInput();
+				WriteInput(config);
 				SetCursor();
 			}
 		}

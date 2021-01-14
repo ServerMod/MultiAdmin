@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using MultiAdmin.Config;
 using MultiAdmin.Config.ConfigHandler;
 using MultiAdmin.Features.Attributes;
