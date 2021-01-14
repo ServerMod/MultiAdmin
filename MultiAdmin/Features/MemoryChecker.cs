@@ -69,7 +69,7 @@ namespace MultiAdmin.Features
 
 		public void OnRoundEnd()
 		{
-			if (!restart || Server.Status == ServerStatus.Restarting) return;
+			if (!restart || Server.IsStopping) return;
 
 			Server.Write("Restarting due to low memory (Round End)...", ConsoleColor.Red);
 
