@@ -649,10 +649,10 @@ namespace MultiAdmin
 
 				ColoredMessage[] timeStampedMessage = Utils.TimeStampMessage(messages, timeStampColor);
 
-				timeStampedMessage.WriteLine(ServerConfig.UseNewInputSystem.Value);
+				timeStampedMessage.WriteLine(!ServerConfig.HideInput.Value && ServerConfig.UseNewInputSystem.Value);
 
-				if (ServerConfig.UseNewInputSystem.Value)
-					InputHandler.WriteInputAndSetCursor();
+				if (!ServerConfig.HideInput.Value && ServerConfig.UseNewInputSystem.Value)
+					InputHandler.WriteInputAndSetCursor(ServerConfig);
 			}
 		}
 

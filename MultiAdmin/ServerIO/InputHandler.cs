@@ -61,13 +61,13 @@ namespace MultiAdmin.ServerIO
 					}
 
 					string message;
-					if (server.ServerConfig.UseNewInputSystem.Value && SectionBufferWidth - TotalIndicatorLength > 0)
+					if (!server.ServerConfig.HideInput.Value && server.ServerConfig.UseNewInputSystem.Value && SectionBufferWidth - TotalIndicatorLength > 0)
 					{
 						message = await GetInputLineNew(server, cancellationToken, prevMessages);
 					}
 					else
 					{
-						message = await GetInputLineOld(cancellationToken);
+						message = await GetInputLineOld(server, cancellationToken);
 					}
 
 					if (string.IsNullOrEmpty(message)) continue;
@@ -109,14 +109,14 @@ namespace MultiAdmin.ServerIO
 			}
 		}
 
-		public static async Task<string> GetInputLineOld(CancellationToken cancellationToken)
+		public static async Task<string> GetInputLineOld(Server server, CancellationToken cancellationToken)
 		{
 			StringBuilder message = new StringBuilder();
 			while (true)
 			{
 				await WaitForKey(cancellationToken);
 
-				ConsoleKeyInfo key = Console.ReadKey();
+				ConsoleKeyInfo key = Console.ReadKey(server.ServerConfig.HideInput.Value);
 
 				switch (key.Key)
 				{
@@ -253,7 +253,7 @@ namespace MultiAdmin.ServerIO
 							SetCurrentInput(curSection.Value.Section);
 							CurrentCursor = curSection.Value.GetRelativeIndex(messageCursor);
 
-							WriteInputAndSetCursor();
+							WriteInputAndSetCursor(server.ServerConfig);
 						}
 						else
 						{
@@ -267,7 +267,7 @@ namespace MultiAdmin.ServerIO
 						SetCurrentInput(message);
 						CurrentCursor = messageCursor;
 
-						WriteInputAndSetCursor();
+						WriteInputAndSetCursor(server.ServerConfig);
 					}
 				}
 				else if (CurrentCursor != messageCursor)
@@ -291,7 +291,7 @@ namespace MultiAdmin.ServerIO
 
 									SetCurrentInput(curSection.Value.Section);
 
-									WriteInputAndSetCursor();
+									WriteInputAndSetCursor(server.ServerConfig);
 								}
 
 								// Otherwise, if only the relative cursor index has changed, set only the cursor
@@ -400,28 +400,29 @@ namespace MultiAdmin.ServerIO
 			SetCursor(CurrentCursor);
 		}
 
-		public static void WriteInput(ColoredMessage[] message)
+		public static void WriteInput(ColoredMessage[] message, MultiAdminConfig config = null)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
 				if (Program.Headless) return;
 
-				message?.Write(MultiAdminConfig.GlobalConfig.UseNewInputSystem.Value);
+				MultiAdminConfig curConfig = config ?? MultiAdminConfig.GlobalConfig;
+				message?.Write(!curConfig.HideInput.Value && curConfig.UseNewInputSystem.Value);
 
 				CurrentInput = message;
 			}
 		}
 
-		public static void WriteInput()
+		public static void WriteInput(MultiAdminConfig config = null)
 		{
-			WriteInput(CurrentInput);
+			WriteInput(CurrentInput, config);
 		}
 
-		public static void WriteInputAndSetCursor()
+		public static void WriteInputAndSetCursor(MultiAdminConfig config = null)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
-				WriteInput();
+				WriteInput(config);
 				SetCursor();
 			}
 		}

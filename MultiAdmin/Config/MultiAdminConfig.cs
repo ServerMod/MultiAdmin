@@ -54,6 +54,10 @@ namespace MultiAdmin.Config
 			new ConfigEntry<bool>("use_new_input_system", true,
 				"Use New Input System", "Whether to use the new input system, if false, the original input system will be used");
 
+		public ConfigEntry<bool> HideInput { get; } =
+			new ConfigEntry<bool>("hide_input", false,
+				"Hide Console Input", "Whether to hide console input, if true, typed input will not be printed");
+
 		public ConfigEntry<uint> Port { get; } =
 			new ConfigEntry<uint>("port", 7777,
 				"Game Port", "The port for the server to use");

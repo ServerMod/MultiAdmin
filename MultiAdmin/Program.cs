@@ -78,8 +78,8 @@ namespace MultiAdmin
 			{
 				if (Headless) return;
 
-				new ColoredMessage(Utils.TimeStampMessage(message), color).WriteLine(
-					MultiAdminConfig.GlobalConfig?.UseNewInputSystem?.Value ?? false);
+				new ColoredMessage(Utils.TimeStampMessage(message), color).WriteLine((!MultiAdminConfig.GlobalConfig?.HideInput?.Value ?? false) &&
+					(MultiAdminConfig.GlobalConfig?.UseNewInputSystem?.Value ?? false));
 			}
 		}
 
@@ -157,7 +157,7 @@ namespace MultiAdmin
 							server.StopServer();
 
 							// Wait for server to exit
-							int timeToWait = Math.Max(MultiAdminConfig.GlobalConfig.SafeShutdownCheckDelay.Value, 0);
+							int timeToWait = Math.Max(server.ServerConfig.SafeShutdownCheckDelay.Value, 0);
 							int timeWaited = 0;
 
 							while (server.IsGameProcessRunning)
@@ -165,7 +165,7 @@ namespace MultiAdmin
 								Thread.Sleep(timeToWait);
 								timeWaited += timeToWait;
 
-								if (timeWaited >= MultiAdminConfig.GlobalConfig.SafeShutdownTimeout.Value)
+								if (timeWaited >= server.ServerConfig.SafeShutdownTimeout.Value)
 								{
 									Write(
 										string.IsNullOrEmpty(server.serverId)
