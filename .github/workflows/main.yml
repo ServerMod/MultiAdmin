@@ -24,20 +24,20 @@ jobs:
       name: Install Linux packages
       run: |
         sudo apt update
-        sudo apt install -y build-essential libkrb5-dev make gcc libc-dev cmake llvm
+        sudo apt install -y clang zlib1g-dev libkrb5-dev libtinfo5
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v1.7.2
       with:
         dotnet-version: ${{matrix.framework}}
 
-    - name: Install dependencies for ${{matrix.target}}
+    - name: Restore the project for ${{matrix.target}}
       run: dotnet restore -r ${{matrix.target}}
 
     - name: Build ${{matrix.target}}
       run: dotnet publish -r ${{matrix.target}} -c Release -o "${{github.workspace}}/Builds/${{matrix.framework}}/${{matrix.target}}" "MultiAdmin"
 
-    - name: Test
+    - name: Run unit tests
       run: dotnet test
 
     - name: Upload ${{matrix.target}} build
