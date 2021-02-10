@@ -114,7 +114,7 @@ namespace MultiAdmin.ServerIO
 			StringBuilder message = new StringBuilder();
 			while (true)
 			{
-				await WaitForKey(cancellationToken);
+				//await WaitForKey(cancellationToken);
 
 				ConsoleKeyInfo key = Console.ReadKey(server.ServerConfig.HideInput.Value);
 
@@ -151,7 +151,7 @@ namespace MultiAdmin.ServerIO
 			{
 				#region Key Press Handling
 
-				await WaitForKey(cancellationToken);
+				//await WaitForKey(cancellationToken);
 
 				ConsoleKeyInfo key = Console.ReadKey(true);
 
