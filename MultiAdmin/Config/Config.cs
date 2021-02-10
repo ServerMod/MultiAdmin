@@ -241,5 +241,22 @@ namespace MultiAdmin.Config
 
 			return def;
 		}
+
+		public ConsoleInputSystem GetConsoleInputSystem(string key, ConsoleInputSystem def = ConsoleInputSystem.New)
+		{
+			try
+			{
+				string value = GetString(key);
+
+				if (!string.IsNullOrEmpty(value) && Enum.TryParse<ConsoleInputSystem>(value, out var consoleInputSystem))
+					return consoleInputSystem;
+			}
+			catch (Exception e)
+			{
+				Program.LogDebugException(nameof(GetConsoleInputSystem), e);
+			}
+
+			return def;
+		}
 	}
 }

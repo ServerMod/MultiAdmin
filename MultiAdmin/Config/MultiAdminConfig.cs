@@ -50,9 +50,9 @@ namespace MultiAdmin.Config
 			new ConfigEntry<string[]>("multiadmin_debug_log_whitelist", new string[0],
 				"MultiAdmin Debug Logging Whitelist", "Which tags to log for MultiAdmin debug logging (Defaults to logging all if none are provided)");
 
-		public ConfigEntry<bool> UseNewInputSystem { get; } =
-			new ConfigEntry<bool>("use_new_input_system", true,
-				"Use New Input System", "Whether to use the new input system, if false, the original input system will be used");
+		public ConfigEntry<ConsoleInputSystem> ConsoleInputSystem { get; } =
+			new ConfigEntry<ConsoleInputSystem>("console_input_system", MultiAdmin.ConsoleInputSystem.New,
+				"Console Input System", "Which console input system to use");
 
 		public ConfigEntry<bool> HideInput { get; } =
 			new ConfigEntry<bool>("hide_input", false,
@@ -296,6 +296,12 @@ namespace MultiAdmin.Config
 				case ConfigEntry<bool> config:
 				{
 					config.Value = Config.GetBool(config.Key, config.Default);
+					break;
+				}
+
+				case ConfigEntry<ConsoleInputSystem> config:
+				{
+					config.Value = Config.GetConsoleInputSystem(config.Key, config.Default);
 					break;
 				}
 

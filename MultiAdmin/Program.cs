@@ -81,7 +81,7 @@ namespace MultiAdmin
 				if (Headless) return;
 
 				new ColoredMessage(Utils.TimeStampMessage(message), color).WriteLine((!MultiAdminConfig.GlobalConfig?.HideInput?.Value ?? false) &&
-					(MultiAdminConfig.GlobalConfig?.UseNewInputSystem?.Value ?? false));
+					(MultiAdminConfig.GlobalConfig?.ConsoleInputSystem.Value.IsNewInputSystem() ?? false));
 			}
 		}
 

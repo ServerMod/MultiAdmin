@@ -650,9 +650,9 @@ namespace MultiAdmin
 
 				ColoredMessage[] timeStampedMessage = Utils.TimeStampMessage(messages, timeStampColor);
 
-				timeStampedMessage.WriteLine(!ServerConfig.HideInput.Value && ServerConfig.UseNewInputSystem.Value);
+				timeStampedMessage.WriteLine(!ServerConfig.HideInput.Value && ServerConfig.ConsoleInputSystem.Value.IsNewInputSystem());
 
-				if (!ServerConfig.HideInput.Value && ServerConfig.UseNewInputSystem.Value)
+				if (!ServerConfig.HideInput.Value && ServerConfig.ConsoleInputSystem.Value.IsNewInputSystem())
 					InputHandler.WriteInputAndSetCursor(ServerConfig);
 			}
 		}
@@ -759,5 +759,16 @@ namespace MultiAdmin
 		ExitActionRestart,
 		Stopped,
 		StoppedUnexpectedly
+	}
+
+	public enum ConsoleInputSystem
+	{
+		// Represents the default input system, which calls Console.ReadLine and blocks the calling context
+		Original,
+		// Represents the "old" input system, which calls non-blocking methods
+		Old,
+		// Represents the "new" input system, which also calls non-blocking methods,
+		// but the main difference is great display
+		New,
 	}
 }

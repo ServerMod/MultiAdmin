@@ -61,13 +61,17 @@ namespace MultiAdmin.ServerIO
 					}
 
 					string message;
-					if (!server.ServerConfig.HideInput.Value && server.ServerConfig.UseNewInputSystem.Value && SectionBufferWidth - TotalIndicatorLength > 0)
+					if (!server.ServerConfig.HideInput.Value && server.ServerConfig.ConsoleInputSystem.Value.IsNewInputSystem() && SectionBufferWidth - TotalIndicatorLength > 0)
 					{
 						message = await GetInputLineNew(server, cancellationToken, prevMessages);
 					}
-					else
+					else if (server.ServerConfig.ConsoleInputSystem.Value.IsOldInputSystem())
 					{
 						message = await GetInputLineOld(server, cancellationToken);
+					}
+					else
+					{
+						message = Console.ReadLine();
 					}
 
 					if (string.IsNullOrEmpty(message)) continue;
@@ -114,7 +118,7 @@ namespace MultiAdmin.ServerIO
 			StringBuilder message = new StringBuilder();
 			while (true)
 			{
-				//await WaitForKey(cancellationToken);
+				await WaitForKey(cancellationToken);
 
 				ConsoleKeyInfo key = Console.ReadKey(server.ServerConfig.HideInput.Value);
 
@@ -151,7 +155,7 @@ namespace MultiAdmin.ServerIO
 			{
 				#region Key Press Handling
 
-				//await WaitForKey(cancellationToken);
+				await WaitForKey(cancellationToken);
 
 				ConsoleKeyInfo key = Console.ReadKey(true);
 
@@ -407,7 +411,7 @@ namespace MultiAdmin.ServerIO
 				if (Program.Headless) return;
 
 				MultiAdminConfig curConfig = config ?? MultiAdminConfig.GlobalConfig;
-				message?.Write(!curConfig.HideInput.Value && curConfig.UseNewInputSystem.Value);
+				message?.Write(!curConfig.HideInput.Value && curConfig.ConsoleInputSystem.Value.IsNewInputSystem());
 
 				CurrentInput = message;
 			}
