@@ -122,6 +122,12 @@ namespace MultiAdmin.Features
 						break;
 					}
 
+					case ConfigEntry<ConsoleInputSystem> config:
+					{
+							stringBuilder.Append($"ConsoleInputSystem{ColumnSeparator}{config.Default}");
+							break;
+					}
+
 					default:
 					{
 						stringBuilder.Append(
