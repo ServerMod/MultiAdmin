@@ -256,6 +256,6 @@ namespace MultiAdmin.Utility
 
 		public static bool IsNewInputSystem(this ConsoleInputSystem consoleInputSystem) => consoleInputSystem == ConsoleInputSystem.New;
 		public static bool IsOldInputSystem(this ConsoleInputSystem consoleInputSystem) => consoleInputSystem == ConsoleInputSystem.Old;
-		public static bool IsOriginInputSystem(this ConsoleInputSystem consoleInputSystem) => consoleInputSystem == ConsoleInputSystem.Original;
+		public static bool IsOriginalInputSystem(this ConsoleInputSystem consoleInputSystem) => consoleInputSystem == ConsoleInputSystem.Original;
 	}
 }

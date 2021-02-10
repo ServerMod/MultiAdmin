@@ -388,7 +388,7 @@ namespace MultiAdmin
 
 					Write($"Starting server with the following parameters:\n{scpslExe} {startInfo.Arguments}");
 
-					if (ServerConfig.ConsoleInputSystem.Value.IsOriginInputSystem())
+					if (ServerConfig.ConsoleInputSystem.Value.IsOriginalInputSystem())
 						Write("You are using the original input system. It may prevent MultiAdmin from closing and cause ghost game processes.", ConsoleColor.Red);
 
 					// Reset the supported mod features
