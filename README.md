@@ -23,6 +23,7 @@ Make sure that you are running Mono 5.18.0 or higher, otherwise you might have i
 4. Optional: Create a file named `scp_multiadmin.cfg` within your server's folder for configuring MultiAdmin specifically for that server
 
 ## Features
+
 - Config Generator: Generates a full default MultiAdmin config file
 - Config Reload: Reloads the MultiAdmin configuration file
 - Exit Command: Adds a graceful exit command
@@ -71,7 +72,8 @@ multiadmin_nolog | Boolean | False | Disable logging to file
 multiadmin_debug_log | Boolean | True | Enables MultiAdmin debug logging, this logs to a separate file than any other logs
 multiadmin_debug_log_blacklist | String List | HandleMessage, StringMatches, MessageListener | Which tags to block for MultiAdmin debug logging
 multiadmin_debug_log_whitelist | String List | **Empty** | Which tags to log for MultiAdmin debug logging (Defaults to logging all if none are provided)
-console_input_system | [ConsoleInputSystem](#ConsoleInputSystem) | New | Which console input system to use
+use_new_input_system | Boolean | True | **OBSOLETE: Use `console_input_system` instead, this config option may be removed in a future version of MultiAdmin.** Whether to use the new input system, if false, the original input system will be used
+console_input_system | ConsoleInputSystem | New | Which console input system to use
 hide_input | Boolean | False | Whether to hide console input, if true, typed input will not be printed
 port | Unsigned Integer | 7777 | The port for the server to use
 copy_from_folder_on_reload | String | **Empty** | The location of a folder to copy files from into the folder defined by `config_location` whenever the configuration file is reloaded
@@ -102,12 +104,11 @@ servers_folder | String | servers | The location of the `servers` folder for Mul
 set_title_bar | Boolean | True | Whether to set the console window's titlebar, if false, this feature won't be used
 start_config_on_full | String | **Empty** | Start server with this config folder once the server becomes full [Requires Modding]
 
-
 ## ConsoleInputSystem
 If you are running into issues with the `tmux send-keys` command, switch to the original input system.
 
-String value | Intenger value | Description
+String String | Integer Value | Description
 --- | :---: | :----:
-Original | 0 | Represents the original input system. It may prevent MultiAdmin from closing and cause ghost game processes
-Old | 1 | Represents the old input system
-New | 2 | Represents the new input system. The main difference from the original input system is great display
+Original | 0 | Represents the original input system. It may prevent MultiAdmin from closing and/or cause ghost game processes.
+Old | 1 | Represents the old input system. This input system should operate similarly to the original input system but won't cause issues with MultiAdmin's functionality.
+New | 2 | Represents the new input system. The main difference from the original input system is an improved display.

@@ -4,6 +4,7 @@ using System.Text;
 using MultiAdmin.Config;
 using MultiAdmin.Config.ConfigHandler;
 using MultiAdmin.Features.Attributes;
+using MultiAdmin.ServerIO;
 using MultiAdmin.Utility;
 
 namespace MultiAdmin.Features
@@ -122,7 +123,7 @@ namespace MultiAdmin.Features
 						break;
 					}
 
-					case ConfigEntry<ConsoleInputSystem> config:
+					case ConfigEntry<InputHandler.ConsoleInputSystem> config:
 					{
 							stringBuilder.Append($"ConsoleInputSystem{ColumnSeparator}{config.Default}");
 							break;

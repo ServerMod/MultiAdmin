@@ -50,8 +50,12 @@ namespace MultiAdmin.Config
 			new ConfigEntry<string[]>("multiadmin_debug_log_whitelist", new string[0],
 				"MultiAdmin Debug Logging Whitelist", "Which tags to log for MultiAdmin debug logging (Defaults to logging all if none are provided)");
 
-		public ConfigEntry<ConsoleInputSystem> ConsoleInputSystem { get; } =
-			new ConfigEntry<ConsoleInputSystem>("console_input_system", MultiAdmin.ConsoleInputSystem.New,
+		public ConfigEntry<bool> UseNewInputSystem { get; } =
+			new ConfigEntry<bool>("use_new_input_system", true,
+				"Use New Input System", "**OBSOLETE: Use `console_input_system` instead, this config option may be removed in a future version of MultiAdmin.** Whether to use the new input system, if false, the original input system will be used");
+
+		public ConfigEntry<InputHandler.ConsoleInputSystem> ConsoleInputSystem { get; } =
+			new ConfigEntry<InputHandler.ConsoleInputSystem>("console_input_system", InputHandler.ConsoleInputSystem.New,
 				"Console Input System", "Which console input system to use");
 
 		public ConfigEntry<bool> HideInput { get; } =
@@ -171,6 +175,26 @@ namespace MultiAdmin.Config
 				"Start Config on Full", "Start server with this config folder once the server becomes full [Requires Modding]");
 
 		#endregion
+
+		public InputHandler.ConsoleInputSystem ActualConsoleInputSystem
+		{
+			get
+			{
+				if (UseNewInputSystem.Value)
+				{
+					switch (ConsoleInputSystem.Value)
+					{
+						case InputHandler.ConsoleInputSystem.New:
+							return HideInput.Value ? InputHandler.ConsoleInputSystem.Old : InputHandler.ConsoleInputSystem.New;
+
+						case InputHandler.ConsoleInputSystem.Old:
+							return InputHandler.ConsoleInputSystem.Old;
+					}
+				}
+
+				return InputHandler.ConsoleInputSystem.Original;
+			}
+		}
 
 		public const string ConfigFileName = "scp_multiadmin.cfg";
 		public static readonly string GlobalConfigFilePath = Utils.GetFullPathSafe(ConfigFileName);
@@ -299,7 +323,7 @@ namespace MultiAdmin.Config
 					break;
 				}
 
-				case ConfigEntry<ConsoleInputSystem> config:
+				case ConfigEntry<InputHandler.ConsoleInputSystem> config:
 				{
 					config.Value = Config.GetConsoleInputSystem(config.Key, config.Default);
 					break;

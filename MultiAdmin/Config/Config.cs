@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using MultiAdmin.ConsoleTools;
+using MultiAdmin.ServerIO;
 using MultiAdmin.Utility;
 
 namespace MultiAdmin.Config
@@ -242,13 +243,13 @@ namespace MultiAdmin.Config
 			return def;
 		}
 
-		public ConsoleInputSystem GetConsoleInputSystem(string key, ConsoleInputSystem def = ConsoleInputSystem.New)
+		public InputHandler.ConsoleInputSystem GetConsoleInputSystem(string key, InputHandler.ConsoleInputSystem def = InputHandler.ConsoleInputSystem.New)
 		{
 			try
 			{
 				string value = GetString(key);
 
-				if (!string.IsNullOrEmpty(value) && Enum.TryParse<ConsoleInputSystem>(value, out var consoleInputSystem))
+				if (!string.IsNullOrEmpty(value) && Enum.TryParse<InputHandler.ConsoleInputSystem>(value, out var consoleInputSystem))
 					return consoleInputSystem;
 			}
 			catch (Exception e)

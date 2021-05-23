@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using MultiAdmin.Config;
 using MultiAdmin.ConsoleTools;
 using MultiAdmin.Utility;
 
@@ -61,11 +60,11 @@ namespace MultiAdmin.ServerIO
 					}
 
 					string message;
-					if (!server.ServerConfig.HideInput.Value && server.ServerConfig.ConsoleInputSystem.Value.IsNewInputSystem() && SectionBufferWidth - TotalIndicatorLength > 0)
+					if (server.ServerConfig.ActualConsoleInputSystem == ConsoleInputSystem.New && SectionBufferWidth - TotalIndicatorLength > 0)
 					{
 						message = await GetInputLineNew(server, cancellationToken, prevMessages);
 					}
-					else if (server.ServerConfig.ConsoleInputSystem.Value.IsOldInputSystem())
+					else if (server.ServerConfig.ActualConsoleInputSystem == ConsoleInputSystem.Old)
 					{
 						message = await GetInputLineOld(server, cancellationToken);
 					}
@@ -256,8 +255,7 @@ namespace MultiAdmin.ServerIO
 
 							SetCurrentInput(curSection.Value.Section);
 							CurrentCursor = curSection.Value.GetRelativeIndex(messageCursor);
-
-							WriteInputAndSetCursor(server.ServerConfig);
+							WriteInputAndSetCursor(true);
 						}
 						else
 						{
@@ -271,7 +269,7 @@ namespace MultiAdmin.ServerIO
 						SetCurrentInput(message);
 						CurrentCursor = messageCursor;
 
-						WriteInputAndSetCursor(server.ServerConfig);
+						WriteInputAndSetCursor(true);
 					}
 				}
 				else if (CurrentCursor != messageCursor)
@@ -295,7 +293,7 @@ namespace MultiAdmin.ServerIO
 
 									SetCurrentInput(curSection.Value.Section);
 
-									WriteInputAndSetCursor(server.ServerConfig);
+									WriteInputAndSetCursor(true);
 								}
 
 								// Otherwise, if only the relative cursor index has changed, set only the cursor
@@ -404,29 +402,28 @@ namespace MultiAdmin.ServerIO
 			SetCursor(CurrentCursor);
 		}
 
-		public static void WriteInput(ColoredMessage[] message, MultiAdminConfig config = null)
+		public static void WriteInput(ColoredMessage[] message, bool clearConsoleLine = false)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
 				if (Program.Headless) return;
 
-				MultiAdminConfig curConfig = config ?? MultiAdminConfig.GlobalConfig;
-				message?.Write(!curConfig.HideInput.Value && curConfig.ConsoleInputSystem.Value.IsNewInputSystem());
+				message?.Write(clearConsoleLine);
 
 				CurrentInput = message;
 			}
 		}
 
-		public static void WriteInput(MultiAdminConfig config = null)
+		public static void WriteInput(bool clearConsoleLine = false)
 		{
-			WriteInput(CurrentInput, config);
+			WriteInput(CurrentInput, clearConsoleLine);
 		}
 
-		public static void WriteInputAndSetCursor(MultiAdminConfig config = null)
+		public static void WriteInputAndSetCursor(bool clearConsoleLine = false)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
-				WriteInput(config);
+				WriteInput(clearConsoleLine);
 				SetCursor();
 			}
 		}
@@ -453,6 +450,17 @@ namespace MultiAdmin.ServerIO
 			{
 				Program.LogDebugException(nameof(RandomizeInputColors), e);
 			}
+		}
+
+		public enum ConsoleInputSystem
+		{
+			// Represents the default input system, which calls Console.ReadLine and blocks the calling context
+			Original,
+			// Represents the "old" input system, which calls non-blocking methods
+			Old,
+			// Represents the "new" input system, which also calls non-blocking methods,
+			// but the main difference is great display
+			New,
 		}
 	}
 }

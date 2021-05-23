@@ -388,8 +388,8 @@ namespace MultiAdmin
 
 					Write($"Starting server with the following parameters:\n{scpslExe} {startInfo.Arguments}");
 
-					if (ServerConfig.ConsoleInputSystem.Value.IsOriginalInputSystem())
-						Write("You are using the original input system. It may prevent MultiAdmin from closing and cause ghost game processes.", ConsoleColor.Red);
+					if (ServerConfig.ActualConsoleInputSystem == InputHandler.ConsoleInputSystem.Original)
+						Write("You are using the original input system. It may prevent MultiAdmin from closing and/or cause ghost game processes", ConsoleColor.Red);
 
 					// Reset the supported mod features
 					supportedModFeatures = ModFeatures.None;
@@ -653,10 +653,10 @@ namespace MultiAdmin
 
 				ColoredMessage[] timeStampedMessage = Utils.TimeStampMessage(messages, timeStampColor);
 
-				timeStampedMessage.WriteLine(!ServerConfig.HideInput.Value && ServerConfig.ConsoleInputSystem.Value.IsNewInputSystem());
+				timeStampedMessage.WriteLine(ServerConfig.ActualConsoleInputSystem == InputHandler.ConsoleInputSystem.New);
 
-				if (!ServerConfig.HideInput.Value && ServerConfig.ConsoleInputSystem.Value.IsNewInputSystem())
-					InputHandler.WriteInputAndSetCursor(ServerConfig);
+				if (ServerConfig.ActualConsoleInputSystem == InputHandler.ConsoleInputSystem.New)
+					InputHandler.WriteInputAndSetCursor(true);
 			}
 		}
 
@@ -762,16 +762,5 @@ namespace MultiAdmin
 		ExitActionRestart,
 		Stopped,
 		StoppedUnexpectedly
-	}
-
-	public enum ConsoleInputSystem
-	{
-		// Represents the default input system, which calls Console.ReadLine and blocks the calling context
-		Original,
-		// Represents the "old" input system, which calls non-blocking methods
-		Old,
-		// Represents the "new" input system, which also calls non-blocking methods,
-		// but the main difference is great display
-		New,
 	}
 }
