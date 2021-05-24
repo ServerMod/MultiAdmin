@@ -388,6 +388,9 @@ namespace MultiAdmin
 
 					Write($"Starting server with the following parameters:\n{scpslExe} {startInfo.Arguments}");
 
+					if (ServerConfig.ActualConsoleInputSystem == InputHandler.ConsoleInputSystem.Original)
+						Write("You are using the original input system. It may prevent MultiAdmin from closing and/or cause ghost game processes", ConsoleColor.Red);
+
 					// Reset the supported mod features
 					supportedModFeatures = ModFeatures.None;
 
@@ -650,10 +653,10 @@ namespace MultiAdmin
 
 				ColoredMessage[] timeStampedMessage = Utils.TimeStampMessage(messages, timeStampColor);
 
-				timeStampedMessage.WriteLine(!ServerConfig.HideInput.Value && ServerConfig.UseNewInputSystem.Value);
+				timeStampedMessage.WriteLine(ServerConfig.ActualConsoleInputSystem == InputHandler.ConsoleInputSystem.New);
 
-				if (!ServerConfig.HideInput.Value && ServerConfig.UseNewInputSystem.Value)
-					InputHandler.WriteInputAndSetCursor(ServerConfig);
+				if (ServerConfig.ActualConsoleInputSystem == InputHandler.ConsoleInputSystem.New)
+					InputHandler.WriteInputAndSetCursor(true);
 			}
 		}
 
