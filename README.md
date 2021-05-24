@@ -107,7 +107,7 @@ start_config_on_full | String | **Empty** | Start server with this config folder
 ## ConsoleInputSystem
 If you are running into issues with the `tmux send-keys` command, switch to the original input system.
 
-String String | Integer Value | Description
+String Value | Integer Value | Description
 --- | :---: | :----:
 Original | 0 | Represents the original input system. It may prevent MultiAdmin from closing and/or cause ghost game processes.
 Old | 1 | Represents the old input system. This input system should operate similarly to the original input system but won't cause issues with MultiAdmin's functionality.
