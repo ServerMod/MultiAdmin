@@ -73,7 +73,7 @@ multiadmin_debug_log | Boolean | True | Enables MultiAdmin debug logging, this l
 multiadmin_debug_log_blacklist | String List | HandleMessage, StringMatches, MessageListener | Which tags to block for MultiAdmin debug logging
 multiadmin_debug_log_whitelist | String List | **Empty** | Which tags to log for MultiAdmin debug logging (Defaults to logging all if none are provided)
 use_new_input_system | Boolean | True | **OBSOLETE: Use `console_input_system` instead, this config option may be removed in a future version of MultiAdmin.** Whether to use the new input system, if false, the original input system will be used
-console_input_system | ConsoleInputSystem | New | Which console input system to use
+console_input_system | [ConsoleInputSystem](#ConsoleInputSystem) | New | Which console input system to use
 hide_input | Boolean | False | Whether to hide console input, if true, typed input will not be printed
 port | Unsigned Integer | 7777 | The port for the server to use
 copy_from_folder_on_reload | String | **Empty** | The location of a folder to copy files from into the folder defined by `config_location` whenever the configuration file is reloaded
