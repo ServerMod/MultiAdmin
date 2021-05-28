@@ -144,7 +144,7 @@ namespace MultiAdmin
 				// Update related variables
 				LogDirFile = string.IsNullOrEmpty(value) || string.IsNullOrEmpty(logDir)
 					? null
-					: $"{Path.Combine(logDir, value)}_{{0}}_log_{Port}.txt";
+					: $"{Path.Combine(logDir.EscapeFormat(), value)}_{{0}}_log_{Port}.txt";
 
 				lock (this)
 				{
