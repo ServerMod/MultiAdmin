@@ -20,7 +20,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2.3.4
 
-    - if: matrix.os == 'ubuntu-latest'
+    - if: matrix.os == 'ubuntu-18.04'
       name: Install Linux packages
       run: |
         sudo apt update
