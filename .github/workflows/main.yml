@@ -11,7 +11,7 @@ jobs:
         os: [ubuntu-18.04, windows-latest]
         framework: ['5.0']
         include:
-        - os: ubuntu-latest
+        - os: ubuntu-18.04
           target: linux-x64
         - os: windows-latest
           target: win-x64
