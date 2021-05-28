@@ -4,6 +4,7 @@ using System.Text;
 using MultiAdmin.Config;
 using MultiAdmin.Config.ConfigHandler;
 using MultiAdmin.Features.Attributes;
+using MultiAdmin.ServerIO;
 using MultiAdmin.Utility;
 
 namespace MultiAdmin.Features
@@ -119,6 +120,12 @@ namespace MultiAdmin.Features
 					case ConfigEntry<bool> config:
 					{
 						stringBuilder.Append($"Boolean{ColumnSeparator}{config.Default}");
+						break;
+					}
+
+					case ConfigEntry<InputHandler.ConsoleInputSystem> config:
+					{
+						stringBuilder.Append($"[ConsoleInputSystem](#ConsoleInputSystem){ColumnSeparator}{config.Default}");
 						break;
 					}
 

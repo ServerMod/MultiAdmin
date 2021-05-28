@@ -15,7 +15,7 @@ namespace MultiAdmin
 {
 	public static class Program
 	{
-		public const string MaVersion = "3.4.0.0";
+		public const string MaVersion = "3.4.0.1";
 
 		private static readonly List<Server> InstantiatedServers = new List<Server>();
 
@@ -79,8 +79,7 @@ namespace MultiAdmin
 			{
 				if (Headless) return;
 
-				new ColoredMessage(Utils.TimeStampMessage(message), color).WriteLine((!MultiAdminConfig.GlobalConfig?.HideInput?.Value ?? false) &&
-					(MultiAdminConfig.GlobalConfig?.UseNewInputSystem?.Value ?? false));
+				new ColoredMessage(Utils.TimeStampMessage(message), color).WriteLine(MultiAdminConfig.GlobalConfig?.ActualConsoleInputSystem == InputHandler.ConsoleInputSystem.New);
 			}
 		}
 
