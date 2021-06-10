@@ -1,5 +1,6 @@
+#if LINUX
 using System;
-using System.Threading.Tasks;
+using System.Threading;
 using Mono.Unix;
 using Mono.Unix.Native;
 
@@ -9,20 +10,24 @@ namespace MultiAdmin.NativeExitSignal
 	{
 		public event EventHandler Exit;
 
-		private readonly UnixSignal[] signals =
-		{
-			new UnixSignal(Signum.SIGTERM), new UnixSignal(Signum.SIGINT), new UnixSignal(Signum.SIGUSR1)
+		private static readonly UnixSignal[] Signals = {
+			new UnixSignal(Signum.SIGINT),  // CTRL + C pressed
+			new UnixSignal(Signum.SIGTERM), // Sending KILL
+			new UnixSignal(Signum.SIGUSR1),
+			new UnixSignal(Signum.SIGUSR2),
+			new UnixSignal(Signum.SIGHUP)   // Terminal is closed
 		};
 
 		public UnixExitSignal()
 		{
-			Task.Factory.StartNew(() =>
+			new Thread(() =>
 			{
 				// blocking call to wait for any kill signal
-				UnixSignal.WaitAny(signals, -1);
+				UnixSignal.WaitAny(Signals, -1);
 
 				Exit?.Invoke(this, EventArgs.Empty);
-			});
+			}).Start();
 		}
 	}
 }
+#endif

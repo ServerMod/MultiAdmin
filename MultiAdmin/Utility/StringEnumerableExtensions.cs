@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace MultiAdmin.Utility
@@ -15,7 +15,7 @@ namespace MultiAdmin.Utility
 					continue;
 
 				// Escape escape characters (if not on Windows) and quotation marks
-				string escapedArg = Utils.IsWindows ? arg.Replace("\"", "\\\"") : arg.Replace("\\", "\\\\").Replace("\"", "\\\"");
+				string escapedArg = OperatingSystem.IsWindows() ? arg.Replace("\"", "\\\"") : arg.Replace("\\", "\\\\").Replace("\"", "\\\"");
 
 				// Separate with spaces
 				if (!argsStringBuilder.IsEmpty())
