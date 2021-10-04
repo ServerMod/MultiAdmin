@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using MultiAdmin.Config;
@@ -32,13 +33,42 @@ namespace MultiAdmin.Features
 
 		public void OnCall(string[] args)
 		{
-			if (args.IsEmpty())
+			if (args.IsNullOrEmpty())
 			{
 				Server.Write("You must specify the location of the file.");
 				return;
 			}
 
-			string path = Utils.GetFullPathSafe(string.Join(" ", args));
+			string path = args[0];
+			try
+			{
+				FileAttributes fileAttributes = File.GetAttributes(path);
+
+				if (fileAttributes.HasFlag(FileAttributes.Directory))
+				{
+					// Path provided is a directory, add a default file
+					path = Path.Combine(path, MultiAdminConfig.ConfigFileName);
+				}
+			}
+			catch (ArgumentException)
+			{
+				Server.Write("The path provided is empty, contains only white spaces, or contains invalid characters.");
+				return;
+			}
+			catch (PathTooLongException)
+			{
+				Server.Write("The path provided is too long.");
+				return;
+			}
+			catch (NotSupportedException)
+			{
+				Server.Write("The path provided is in an invalid format.");
+				return;
+			}
+			catch (Exception)
+			{
+				// Ignore, any proper exceptions will be presented when the file is written
+			}
 
 			ConfigEntry[] registeredConfigs = MultiAdminConfig.GlobalConfig.GetRegisteredConfigs();
 

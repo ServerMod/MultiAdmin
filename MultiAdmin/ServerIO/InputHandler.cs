@@ -77,14 +77,23 @@ namespace MultiAdmin.ServerIO
 
 					server.Write($">>> {message}", ConsoleColor.DarkMagenta);
 
-					string[] messageSplit = message.Split(Separator, StringSplitOptions.RemoveEmptyEntries);
-					if (messageSplit.IsEmpty()) continue;
+					int separatorIndex = message.IndexOfAny(Separator);
+					string commandName = (separatorIndex < 0 ? message : message.Substring(0, separatorIndex)).ToLower().Trim();
+					if (commandName.IsNullOrEmpty()) continue;
 
 					bool callServer = true;
-					server.commands.TryGetValue(messageSplit[0].ToLower().Trim(), out ICommand command);
+					server.commands.TryGetValue(commandName, out ICommand command);
 					if (command != null)
 					{
-						command.OnCall(messageSplit.Skip(1).Take(messageSplit.Length - 1).ToArray());
+						try
+						{
+							command.OnCall(separatorIndex < 0 || separatorIndex + 1 >= message.Length ? Array.Empty<string>() : CommandUtils.StringToArgs(message, separatorIndex + 1));
+						}
+						catch (Exception e)
+						{
+							server.Write($"Error in command \"{commandName}\":{Environment.NewLine}{e}");
+						}
+
 						callServer = command.PassToGame();
 					}
 
