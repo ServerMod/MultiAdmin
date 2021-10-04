@@ -87,7 +87,8 @@ namespace MultiAdmin.ServerIO
 					{
 						try
 						{
-							command.OnCall(separatorIndex < 0 || separatorIndex + 1 >= message.Length ? Array.Empty<string>() : CommandUtils.StringToArgs(message, separatorIndex + 1));
+							// Use double quotation marks to escape a quotation mark
+							command.OnCall(separatorIndex < 0 || separatorIndex + 1 >= message.Length ? Array.Empty<string>() : CommandUtils.StringToArgs(message, separatorIndex + 1, escapeChar: '\"', quoteChar: '\"'));
 						}
 						catch (Exception e)
 						{

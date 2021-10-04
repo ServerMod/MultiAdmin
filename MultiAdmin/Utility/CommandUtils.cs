@@ -31,15 +31,15 @@ namespace MultiAdmin.Utility
 
 				if (!escaped)
 				{
-					if (stringChar == escapeChar)
+					if (stringChar == escapeChar && (escapeChar != inChar || ((i + 1) < count && inString[startIndex + i + 1] == escapeChar)))
 					{
 						escaped = true;
 						continue;
 					}
 				}
 
-				// If the character is escaped or the character that's escaped is an escape character then check if it matches
-				if ((!escaped || stringChar == escapeChar) && stringChar == inChar)
+				// If the character isn't escaped or the character that's escaped is an escape character then check if it matches
+				if ((!escaped || (stringChar == escapeChar && escapeChar != inChar)) && stringChar == inChar)
 				{
 					return stringIndex;
 				}
@@ -91,7 +91,7 @@ namespace MultiAdmin.Utility
 
 				if (!escaped)
 				{
-					if (stringChar == escapeChar)
+					if (stringChar == escapeChar && (escapeChar != quoteChar || ((i + 1) < count && inString[startIndex + i + 1] == escapeChar)))
 					{
 						escaped = true;
 						continue;

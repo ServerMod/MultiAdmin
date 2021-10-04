@@ -16,7 +16,7 @@ namespace MultiAdmin.Tests.Utility
 		[InlineData("test \"something test something\"", new string[] { "test", "something test something" })]
 		[InlineData("\"test something test something\"", new string[] { "test something test something" })]
 		[InlineData("test \"something test something\\\"", new string[] { "test", "\"something", "test", "something\"" })]
-		public void CommandUtilsTest(string input, string[] expected)
+		public void StringToArgsTest(string input, string[] expected)
 		{
 			string[] result = CommandUtils.StringToArgs(input);
 			Assert.Equal(expected, result);
@@ -28,7 +28,7 @@ namespace MultiAdmin.Tests.Utility
 		[InlineData("configgen \"", 0, 10, new string[] { "configgen", "" })]
 		[InlineData("test \"something test\" something\"", 10, 22, new string[] { "thing", "test something" })]
 		[InlineData("test \"something \"test something\"", 10, 22, new string[] { "thing", "test something" })]
-		public void CommandUtilsSubstringTest(string input, int start, int count, string[] expected)
+		public void StringToArgsSubstringTest(string input, int start, int count, string[] expected)
 		{
 			string[] result = CommandUtils.StringToArgs(input, start, count);
 			Assert.Equal(expected, result);
@@ -50,7 +50,7 @@ namespace MultiAdmin.Tests.Utility
 		[InlineData("test \t\"something\ttest\tsomething\"", new string[] { "test ", "something\ttest\tsomething" })]
 		[InlineData("\"test something\ttest\tsomething\"", new string[] { "test something\ttest\tsomething" })]
 		[InlineData("test\t\"something test\tsomething\\\"", new string[] { "test", "\"something test", "something\"" })]
-		public void CommandUtilsSeparatorTest(string input, string[] expected)
+		public void StringToArgsSeparatorTest(string input, string[] expected)
 		{
 			string[] result = CommandUtils.StringToArgs(input, separator: '\t');
 			Assert.Equal(expected, result);
@@ -67,7 +67,7 @@ namespace MultiAdmin.Tests.Utility
 		[InlineData("test $\"something test\" something", new string[] { "test", "\"something", "test\"", "something" })]
 		[InlineData("test \"something test$\" something", new string[] { "test", "\"something", "test\"", "something" })]
 		[InlineData("test \"something test something$\"", new string[] { "test", "\"something", "test", "something\"" })]
-		public void CommandUtilsEscapeTest(string input, string[] expected)
+		public void StringToArgsEscapeTest(string input, string[] expected)
 		{
 			string[] result = CommandUtils.StringToArgs(input, escapeChar: '$');
 			Assert.Equal(expected, result);
@@ -80,7 +80,7 @@ namespace MultiAdmin.Tests.Utility
 		[InlineData("test \'something test something\'", new string[] { "test", "something test something" })]
 		[InlineData("\'test something test something\'", new string[] { "test something test something" })]
 		[InlineData("test \'something test something\\\'", new string[] { "test", "\'something", "test", "something\'" })]
-		public void CommandUtilsQuotesTest(string input, string[] expected)
+		public void StringToArgsQuotesTest(string input, string[] expected)
 		{
 			string[] result = CommandUtils.StringToArgs(input, quoteChar: '\'');
 			Assert.Equal(expected, result);
@@ -93,9 +93,24 @@ namespace MultiAdmin.Tests.Utility
 		[InlineData("test \"something test something\"", new string[] { "test", "\"something test something\"" })]
 		[InlineData("\"test something test something\"", new string[] { "\"test something test something\"" })]
 		[InlineData("test \"something test something\\\"", new string[] { "test", "\"something", "test", "something\"" })]
-		public void CommandUtilsKeepQuotesTest(string input, string[] expected)
+		public void StringToArgsKeepQuotesTest(string input, string[] expected)
 		{
 			string[] result = CommandUtils.StringToArgs(input, keepQuotes: true);
+			Assert.Equal(expected, result);
+		}
+
+		[Theory]
+		[InlineData("test \"something test something\"", new string[] { "test", "something test something" })]
+		[InlineData("test \"\"something test something\"\"", new string[] { "test", "\"something", "test", "something\"" })]
+		[InlineData("test \"\"something test\"\" something", new string[] { "test", "\"something", "test\"", "something" })]
+		[InlineData("test \"\"something test\" something", new string[] { "test", "\"something", "test\"", "something" })]
+		[InlineData("test \"something test\"\" something", new string[] { "test", "\"something", "test\"", "something" })]
+		[InlineData("\"test something test something\"", new string[] { "test something test something" })]
+		[InlineData("test \"something test\"\" something\" test test \"test test\" something \"something\" test",
+			new string[] { "test", "something test\" something", "test", "test", "test test", "something", "something", "test" })]
+		public void StringToArgsDoubleEscapeTest(string input, string[] expected)
+		{
+			string[] result = CommandUtils.StringToArgs(input, escapeChar: '\"', quoteChar: '\"');
 			Assert.Equal(expected, result);
 		}
 	}
