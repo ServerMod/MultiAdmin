@@ -27,7 +27,7 @@ Make sure that you are running Mono 5.18.0 or higher, otherwise you might have i
 - Config Generator: Generates a full default MultiAdmin config file
 - Config Reload: Reloads the MultiAdmin configuration file
 - Exit Command: Adds a graceful exit command
-- Folder Copy Round Queue: Copies files from folders in a queue
+- File Copy Round Queue: Copies files from folders in a queue
 - GitHub Generator: Generates a GitHub README file outlining all the features/commands
 - Help: Display a full list of MultiAdmin commands and in game commands
 - Restart On Low Memory: Restarts the server if the working memory becomes too low

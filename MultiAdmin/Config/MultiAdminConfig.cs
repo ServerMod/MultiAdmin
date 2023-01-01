@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using MultiAdmin.Config.ConfigHandler;
 using MultiAdmin.ConsoleTools;
 using MultiAdmin.ServerIO;
@@ -234,13 +233,46 @@ namespace MultiAdmin.Config
 
 			#region MultiAdmin Config Register
 
-			foreach (PropertyInfo property in GetType().GetProperties())
-			{
-				if (property.GetValue(this) is ConfigEntry entry)
-				{
-					RegisterConfig(entry);
-				}
-			}
+			RegisterConfig(ConfigLocation);
+			RegisterConfig(AppDataLocation);
+			RegisterConfig(DisableConfigValidation);
+			RegisterConfig(ShareNonConfigs);
+			RegisterConfig(LogLocation);
+			RegisterConfig(NoLog);
+			RegisterConfig(DebugLog);
+			RegisterConfig(DebugLogBlacklist);
+			RegisterConfig(DebugLogWhitelist);
+			RegisterConfig(UseNewInputSystem);
+			RegisterConfig(ConsoleInputSystem);
+			RegisterConfig(HideInput);
+			RegisterConfig(Port);
+			RegisterConfig(CopyFromFolderOnReload);
+			RegisterConfig(FolderCopyWhitelist);
+			RegisterConfig(FolderCopyBlacklist);
+			RegisterConfig(FolderCopyRoundQueue);
+			RegisterConfig(FolderCopyRoundQueueWhitelist);
+			RegisterConfig(FolderCopyRoundQueueBlacklist);
+			RegisterConfig(RandomizeFolderCopyRoundQueue);
+			RegisterConfig(ManualStart);
+			RegisterConfig(MaxMemory);
+			RegisterConfig(RestartLowMemory);
+			RegisterConfig(RestartLowMemoryTicks);
+			RegisterConfig(RestartLowMemoryRoundEnd);
+			RegisterConfig(RestartLowMemoryRoundEndTicks);
+			RegisterConfig(RandomInputColors);
+			RegisterConfig(RestartEveryNumRounds);
+			RegisterConfig(RestartEveryNumRoundsCounting);
+			RegisterConfig(SafeServerShutdown);
+			RegisterConfig(SafeShutdownCheckDelay);
+			RegisterConfig(SafeShutdownTimeout);
+			RegisterConfig(ServerRestartTimeout);
+			RegisterConfig(ServerStopTimeout);
+			RegisterConfig(ServerStartRetry);
+			RegisterConfig(ServerStartRetryDelay);
+			RegisterConfig(MultiAdminTickDelay);
+			RegisterConfig(ServersFolder);
+			RegisterConfig(SetTitleBar);
+			RegisterConfig(StartConfigOnFull);
 
 			#endregion
 
