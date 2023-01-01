@@ -43,7 +43,7 @@ namespace MultiAdmin.Config
 				"MultiAdmin Debug Logging", "Enables MultiAdmin debug logging, this logs to a separate file than any other logs");
 
 		public ConfigEntry<string[]> DebugLogBlacklist { get; } =
-			new ConfigEntry<string[]>("multiadmin_debug_log_blacklist", new string[] {nameof(OutputHandler.HandleMessage), nameof(Utils.StringMatches), nameof(ServerSocket.MessageListener) },
+			new ConfigEntry<string[]>("multiadmin_debug_log_blacklist", new string[] { nameof(OutputHandler.HandleMessage), nameof(Utils.StringMatches), nameof(ServerSocket.MessageListener) },
 				"MultiAdmin Debug Logging Blacklist", "Which tags to block for MultiAdmin debug logging");
 
 		public ConfigEntry<string[]> DebugLogWhitelist { get; } =
@@ -199,7 +199,7 @@ namespace MultiAdmin.Config
 		public const string ConfigFileName = "scp_multiadmin.cfg";
 		public static readonly string GlobalConfigFilePath = Utils.GetFullPathSafe(ConfigFileName);
 
-		public static readonly MultiAdminConfig GlobalConfig = new MultiAdminConfig(GlobalConfigFilePath, null);
+		public static readonly MultiAdminConfig GlobalConfig = new(GlobalConfigFilePath, null);
 
 		public MultiAdminConfig ParentConfig
 		{
@@ -276,65 +276,65 @@ namespace MultiAdmin.Config
 			switch (configEntry)
 			{
 				case ConfigEntry<string> config:
-				{
-					config.Value = Config.GetString(config.Key, config.Default);
-					break;
-				}
+					{
+						config.Value = Config.GetString(config.Key, config.Default);
+						break;
+					}
 
 				case ConfigEntry<string[]> config:
-				{
-					config.Value = Config.GetStringArray(config.Key, config.Default);
-					break;
-				}
+					{
+						config.Value = Config.GetStringArray(config.Key, config.Default);
+						break;
+					}
 
 				case ConfigEntry<int> config:
-				{
-					config.Value = Config.GetInt(config.Key, config.Default);
-					break;
-				}
+					{
+						config.Value = Config.GetInt(config.Key, config.Default);
+						break;
+					}
 
 				case ConfigEntry<uint> config:
-				{
-					config.Value = Config.GetUInt(config.Key, config.Default);
-					break;
-				}
+					{
+						config.Value = Config.GetUInt(config.Key, config.Default);
+						break;
+					}
 
 				case ConfigEntry<float> config:
-				{
-					config.Value = Config.GetFloat(config.Key, config.Default);
-					break;
-				}
+					{
+						config.Value = Config.GetFloat(config.Key, config.Default);
+						break;
+					}
 
 				case ConfigEntry<double> config:
-				{
-					config.Value = Config.GetDouble(config.Key, config.Default);
-					break;
-				}
+					{
+						config.Value = Config.GetDouble(config.Key, config.Default);
+						break;
+					}
 
 				case ConfigEntry<decimal> config:
-				{
-					config.Value = Config.GetDecimal(config.Key, config.Default);
-					break;
-				}
+					{
+						config.Value = Config.GetDecimal(config.Key, config.Default);
+						break;
+					}
 
 				case ConfigEntry<bool> config:
-				{
-					config.Value = Config.GetBool(config.Key, config.Default);
-					break;
-				}
+					{
+						config.Value = Config.GetBool(config.Key, config.Default);
+						break;
+					}
 
 				case ConfigEntry<InputHandler.ConsoleInputSystem> config:
-				{
-					config.Value = Config.GetConsoleInputSystem(config.Key, config.Default);
-					break;
-				}
+					{
+						config.Value = Config.GetConsoleInputSystem(config.Key, config.Default);
+						break;
+					}
 
 				default:
-				{
-					throw new ArgumentException(
-						$"Config type unsupported (Config: Key = \"{configEntry.Key ?? "Null"}\" Type = \"{configEntry.ValueType.FullName ?? "Null"}\" Name = \"{configEntry.Name ?? "Null"}\" Description = \"{configEntry.Description ?? "Null"}\").",
-						nameof(configEntry));
-				}
+					{
+						throw new ArgumentException(
+							$"Config type unsupported (Config: Key = \"{configEntry.Key ?? "Null"}\" Type = \"{configEntry.ValueType.FullName ?? "Null"}\" Name = \"{configEntry.Name ?? "Null"}\" Description = \"{configEntry.Description ?? "Null"}\").",
+							nameof(configEntry));
+					}
 			}
 		}
 
@@ -365,7 +365,7 @@ namespace MultiAdmin.Config
 
 		public MultiAdminConfig[] GetConfigHierarchy(bool highestToLowest = true)
 		{
-			List<MultiAdminConfig> configHierarchy = new List<MultiAdminConfig>();
+			List<MultiAdminConfig> configHierarchy = new();
 
 			foreach (ConfigRegister configRegister in GetConfigRegisterHierarchy(highestToLowest))
 			{
@@ -381,7 +381,7 @@ namespace MultiAdmin.Config
 			string fullPath = Utils.GetFullPathSafe(path);
 
 			return !string.IsNullOrEmpty(fullPath) &&
-			       GetConfigHierarchy().Any(config => config.Config?.ConfigPath == path);
+				   GetConfigHierarchy().Any(config => config.Config?.ConfigPath == path);
 		}
 	}
 }

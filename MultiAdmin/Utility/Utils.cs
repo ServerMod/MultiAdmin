@@ -48,7 +48,7 @@ namespace MultiAdmin.Utility
 		public static ColoredMessage[] TimeStampMessage(ColoredMessage message, ConsoleColor? color = null,
 			bool cloneMessages = false)
 		{
-			return TimeStampMessage(new ColoredMessage[] {message}, color, cloneMessages);
+			return TimeStampMessage(new ColoredMessage[] { message }, color, cloneMessages);
 		}
 
 		public static string GetFullPathSafe(string path)
@@ -144,7 +144,7 @@ namespace MultiAdmin.Utility
 			string[] blacklist = null)
 		{
 			return (whitelist.IsNullOrEmpty() || InputMatchesAnyPattern(toCheck, whitelist)) &&
-			       (blacklist.IsNullOrEmpty() || !InputMatchesAnyPattern(toCheck, blacklist));
+				   (blacklist.IsNullOrEmpty() || !InputMatchesAnyPattern(toCheck, blacklist));
 		}
 
 		public static void CopyAll(DirectoryInfo source, DirectoryInfo target, string[] fileWhitelist = null,

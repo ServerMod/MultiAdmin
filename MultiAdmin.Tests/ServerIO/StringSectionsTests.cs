@@ -16,8 +16,8 @@ namespace MultiAdmin.Tests.ServerIO
 		}
 
 		[Theory]
-		[InlineData("test string", new[] {"te", "st", " s", "tr", "in", "g"}, 2)]
-		[InlineData("test string", new[] {"tes..", ".t ..", ".st..", ".ring"}, 5, ".", "..")]
+		[InlineData("test string", new[] { "te", "st", " s", "tr", "in", "g" }, 2)]
+		[InlineData("test string", new[] { "tes..", ".t ..", ".st..", ".ring" }, 5, ".", "..")]
 		public void FromStringTest(string testString, string[] expectedSections, int sectionLength,
 			string leftIndictator = null, string rightIndictator = null)
 		{

@@ -17,7 +17,7 @@ namespace MultiAdmin
 	{
 		public const string MaVersion = "3.4.1.0";
 
-		private static readonly List<Server> InstantiatedServers = new List<Server>();
+		private static readonly List<Server> InstantiatedServers = new();
 
 		private static readonly string MaDebugLogDir =
 			Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.LogLocation.Value);
@@ -34,7 +34,7 @@ namespace MultiAdmin
 		private static IExitSignal exitSignalListener;
 
 		private static bool exited = false;
-		private static readonly object ExitLock = new object();
+		private static readonly object ExitLock = new();
 
 		#region Server Properties
 
@@ -86,8 +86,8 @@ namespace MultiAdmin
 		private static bool IsDebugLogTagAllowed(string tag)
 		{
 			return (!MultiAdminConfig.GlobalConfig?.DebugLogBlacklist?.Value?.Contains(tag) ?? true) &&
-			       ((MultiAdminConfig.GlobalConfig?.DebugLogWhitelist?.Value?.IsEmpty() ?? true) ||
-			        MultiAdminConfig.GlobalConfig.DebugLogWhitelist.Value.Contains(tag));
+				   ((MultiAdminConfig.GlobalConfig?.DebugLogWhitelist?.Value?.IsEmpty() ?? true) ||
+					MultiAdminConfig.GlobalConfig.DebugLogWhitelist.Value.Contains(tag));
 		}
 
 		public static void LogDebugException(string tag, Exception exception)
@@ -107,7 +107,7 @@ namespace MultiAdmin
 				try
 				{
 					if ((!MultiAdminConfig.GlobalConfig?.DebugLog?.Value ?? true) ||
-					    string.IsNullOrEmpty(MaDebugLogFile) || tag == null || !IsDebugLogTagAllowed(tag)) return;
+						string.IsNullOrEmpty(MaDebugLogFile) || tag == null || !IsDebugLogTagAllowed(tag)) return;
 
 					// Assign debug log stream as needed
 					if (debugLogStream == null)
@@ -221,7 +221,7 @@ namespace MultiAdmin
 
 			Headless = GetFlagFromArgs(Args, "headless", "h");
 
-            string serverIdArg = GetParamFromArgs(Args, "server-id", "id");
+			string serverIdArg = GetParamFromArgs(Args, "server-id", "id");
 			string configArg = GetParamFromArgs(Args, "config", "c");
 			portArg = uint.TryParse(GetParamFromArgs(Args, "port", "p"), out uint port) ? (uint?)port : null;
 
@@ -383,17 +383,17 @@ namespace MultiAdmin
 
 		public static string GetParamFromArgs(string[] args, string key = null, string alias = null)
 		{
-			return GetParamFromArgs(args, new string[] {key}, new string[] {alias});
+			return GetParamFromArgs(args, new string[] { key }, new string[] { alias });
 		}
 
 		public static bool ArgsContainsParam(string[] args, string key = null, string alias = null)
 		{
-			return ArgsContainsParam(args, new string[] {key}, new string[] {alias});
+			return ArgsContainsParam(args, new string[] { key }, new string[] { alias });
 		}
 
 		public static bool GetFlagFromArgs(string[] args, string key = null, string alias = null)
 		{
-			return GetFlagFromArgs(args, new string[] {key}, new string[] {alias});
+			return GetFlagFromArgs(args, new string[] { key }, new string[] { alias });
 		}
 
 		public static Process StartServer(Server server)
@@ -405,7 +405,7 @@ namespace MultiAdmin
 				Write("Error while starting new server: Could not find the executable location!", ConsoleColor.Red);
 			}
 
-			List<string> args = new List<string>(server.args);
+			List<string> args = new(server.args);
 
 			if (!string.IsNullOrEmpty(server.serverId))
 			{
@@ -422,7 +422,7 @@ namespace MultiAdmin
 			if (Headless)
 				args.Add("-h");
 
-			ProcessStartInfo startInfo = new ProcessStartInfo(assemblyLocation, args.JoinArgs());
+			ProcessStartInfo startInfo = new(assemblyLocation, args.JoinArgs());
 
 			Write($"Launching \"{startInfo.FileName}\" with arguments \"{startInfo.Arguments}\"...");
 

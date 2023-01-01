@@ -8,9 +8,9 @@ namespace MultiAdmin.ServerIO
 	public class OutputHandler
 	{
 		public static readonly Regex SmodRegex =
-			new Regex(@"\[(DEBUG|INFO|WARN|ERROR)\] (\[.*?\]) (.*)", RegexOptions.Compiled | RegexOptions.Singleline);
+			new(@"\[(DEBUG|INFO|WARN|ERROR)\] (\[.*?\]) (.*)", RegexOptions.Compiled | RegexOptions.Singleline);
 		public static readonly char[] TrimChars = { '.', ' ', '\t', '!', '?', ',' };
-		public static readonly char[] EventSplitChars = new char[] {':'};
+		public static readonly char[] EventSplitChars = new char[] { ':' };
 
 		private readonly Server server;
 
@@ -41,7 +41,7 @@ namespace MultiAdmin.ServerIO
 			if (message.message == null)
 				return;
 
-			ColoredMessage coloredMessage = new ColoredMessage(message.message, ConsoleColor.White);
+			ColoredMessage coloredMessage = new(message.message, ConsoleColor.White);
 
 			if (!coloredMessage.text.IsEmpty())
 			{

@@ -80,8 +80,8 @@ namespace MultiAdmin.Utility
 			if (inString.IsEmpty())
 				return Array.Empty<string>();
 
-			List<string> args = new List<string>();
-			StringBuilder strBuilder = new StringBuilder();
+			List<string> args = new();
+			StringBuilder strBuilder = new();
 			bool inQuotes = false;
 			bool escaped = false;
 

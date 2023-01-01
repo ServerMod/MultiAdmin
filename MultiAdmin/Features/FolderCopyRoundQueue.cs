@@ -60,7 +60,7 @@ namespace MultiAdmin.Features
 		{
 			if (!HasValidQueue) return 0;
 
-			Random random = new Random();
+			Random random = new();
 
 			int index;
 			do

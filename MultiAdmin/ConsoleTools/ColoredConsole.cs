@@ -5,7 +5,7 @@ namespace MultiAdmin.ConsoleTools
 {
 	public static class ColoredConsole
 	{
-		public static readonly object WriteLock = new object();
+		public static readonly object WriteLock = new();
 
 		public static void Write(string text, ConsoleColor? textColor = null, ConsoleColor? backgroundColor = null)
 		{
@@ -95,7 +95,7 @@ namespace MultiAdmin.ConsoleTools
 		public bool Equals(ColoredMessage other)
 		{
 			return string.Equals(text, other.text) && textColor == other.textColor &&
-			       backgroundColor == other.backgroundColor;
+				   backgroundColor == other.backgroundColor;
 		}
 
 		public override bool Equals(object obj)
@@ -181,7 +181,7 @@ namespace MultiAdmin.ConsoleTools
 	{
 		private static string JoinTextIgnoreNull(ColoredMessage[] coloredMessages)
 		{
-			StringBuilder builder = new StringBuilder("");
+			StringBuilder builder = new("");
 
 			foreach (ColoredMessage coloredMessage in coloredMessages)
 			{

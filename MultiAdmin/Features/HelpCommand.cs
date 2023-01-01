@@ -9,7 +9,7 @@ namespace MultiAdmin.Features
 	[Feature]
 	public class HelpCommand : Feature, ICommand
 	{
-		private static readonly ColoredMessage helpPrefix = new ColoredMessage("Commands from MultiAdmin:\n", ConsoleColor.Yellow);
+		private static readonly ColoredMessage helpPrefix = new("Commands from MultiAdmin:\n", ConsoleColor.Yellow);
 
 		public HelpCommand(Server server) : base(server)
 		{
@@ -31,7 +31,7 @@ namespace MultiAdmin.Features
 
 			message[0] = helpPrefix;
 
-			List<string> helpOutput = new List<string>();
+			List<string> helpOutput = new();
 			foreach (KeyValuePair<string, ICommand> command in Server.commands)
 			{
 				string usage = command.Value.GetUsage();

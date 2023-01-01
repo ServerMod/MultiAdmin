@@ -53,7 +53,7 @@ namespace MultiAdmin.Features
 		{
 			if (Program.Headless || !Server.ServerConfig.SetTitleBar.Value) return;
 
-			List<string> titleBar = new List<string> {$"MultiAdmin {Program.MaVersion}"};
+			List<string> titleBar = new() { $"MultiAdmin {Program.MaVersion}" };
 
 			if (!string.IsNullOrEmpty(Server.serverId))
 			{

@@ -8,7 +8,7 @@ namespace MultiAdmin.Utility
 	{
 		public static string JoinArgs(this IEnumerable<string> args)
 		{
-			StringBuilder argsStringBuilder = new StringBuilder();
+			StringBuilder argsStringBuilder = new();
 			foreach (string arg in args)
 			{
 				if (arg.IsNullOrEmpty())

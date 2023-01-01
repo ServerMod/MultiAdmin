@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,13 +10,13 @@ namespace MultiAdmin.ServerIO
 {
 	public static class InputHandler
 	{
-		private static readonly char[] Separator = {' '};
+		private static readonly char[] Separator = { ' ' };
 
-		public static readonly ColoredMessage BaseSection = new ColoredMessage(null, ConsoleColor.White);
+		public static readonly ColoredMessage BaseSection = new(null, ConsoleColor.White);
 
-		public static readonly ColoredMessage InputPrefix = new ColoredMessage("> ", ConsoleColor.Yellow);
-		public static readonly ColoredMessage LeftSideIndicator = new ColoredMessage("...", ConsoleColor.Yellow);
-		public static readonly ColoredMessage RightSideIndicator = new ColoredMessage("...", ConsoleColor.Yellow);
+		public static readonly ColoredMessage InputPrefix = new("> ", ConsoleColor.Yellow);
+		public static readonly ColoredMessage LeftSideIndicator = new("...", ConsoleColor.Yellow);
+		public static readonly ColoredMessage RightSideIndicator = new("...", ConsoleColor.Yellow);
 
 		public static int InputPrefixLength => InputPrefix?.Length ?? 0;
 
@@ -43,14 +42,14 @@ namespace MultiAdmin.ServerIO
 		}
 
 		public static string CurrentMessage { get; private set; }
-		public static ColoredMessage[] CurrentInput { get; private set; } = {InputPrefix};
+		public static ColoredMessage[] CurrentInput { get; private set; } = { InputPrefix };
 		public static int CurrentCursor { get; private set; }
 
 		public static async void Write(Server server, CancellationToken cancellationToken)
 		{
 			try
 			{
-				ShiftingList prevMessages = new ShiftingList(25);
+				ShiftingList prevMessages = new(25);
 
 				while (server.IsRunning && !server.IsStopping)
 				{
@@ -124,7 +123,7 @@ namespace MultiAdmin.ServerIO
 
 		public static async Task<string> GetInputLineOld(Server server, CancellationToken cancellationToken)
 		{
-			StringBuilder message = new StringBuilder();
+			StringBuilder message = new();
 			while (true)
 			{
 				await WaitForKey(cancellationToken);
@@ -356,7 +355,7 @@ namespace MultiAdmin.ServerIO
 
 		public static void SetCurrentInput(params ColoredMessage[] coloredMessages)
 		{
-			List<ColoredMessage> message = new List<ColoredMessage> {InputPrefix};
+			List<ColoredMessage> message = new() { InputPrefix };
 
 			if (coloredMessages != null)
 				message.AddRange(coloredMessages);
@@ -444,7 +443,7 @@ namespace MultiAdmin.ServerIO
 		{
 			try
 			{
-				Random random = new Random();
+				Random random = new();
 				Array colors = Enum.GetValues(typeof(ConsoleColor));
 
 				ConsoleColor random1 = (ConsoleColor)colors.GetValue(random.Next(colors.Length));

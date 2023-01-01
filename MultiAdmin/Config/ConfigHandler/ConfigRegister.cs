@@ -10,7 +10,7 @@ namespace MultiAdmin.Config.ConfigHandler
 		/// <summary>
 		/// A list of registered <see cref="ConfigEntry"/>s.
 		/// </summary>
-		protected readonly List<ConfigEntry> registeredConfigs = new List<ConfigEntry>();
+		protected readonly List<ConfigEntry> registeredConfigs = new();
 
 		/// <summary>
 		/// Returns an array of registered <see cref="ConfigEntry"/>s.

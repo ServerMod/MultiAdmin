@@ -40,7 +40,7 @@ namespace MultiAdmin.Config.ConfigHandler
 		public override void UpdateConfigValue(ConfigEntry configEntry)
 		{
 			if (configEntry != null && configEntry.Inherit && ParentConfigRegister != null &&
-			    ShouldInheritConfigEntry(configEntry))
+				ShouldInheritConfigEntry(configEntry))
 			{
 				ParentConfigRegister.UpdateConfigValue(configEntry);
 			}
@@ -56,7 +56,7 @@ namespace MultiAdmin.Config.ConfigHandler
 		/// <param name="highestToLowest">Whether to order the returned array from highest <see cref="ConfigRegister"/> in the hierarchy to the lowest.</param>
 		public ConfigRegister[] GetConfigRegisterHierarchy(bool highestToLowest = true)
 		{
-			List<ConfigRegister> configRegisterHierarchy = new List<ConfigRegister>();
+			List<ConfigRegister> configRegisterHierarchy = new();
 
 			ConfigRegister configRegister = this;
 			while (configRegister != null && !configRegisterHierarchy.Contains(configRegister))

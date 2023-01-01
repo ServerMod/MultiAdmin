@@ -56,7 +56,7 @@ namespace MultiAdmin.ServerIO
 					$"{nameof(sectionLength)} must be greater than the total length of {nameof(leftIndicator)} and {nameof(rightIndicator)}",
 					nameof(sectionLength));
 
-			List<StringSection> sections = new List<StringSection>();
+			List<StringSection> sections = new();
 
 			if (string.IsNullOrEmpty(fullString))
 				return new StringSections(sections.ToArray());
@@ -69,7 +69,7 @@ namespace MultiAdmin.ServerIO
 			int sectionStartIndex = 0;
 
 			// The text of the current section being created
-			StringBuilder curSecBuilder = new StringBuilder();
+			StringBuilder curSecBuilder = new();
 
 			for (int i = 0; i < fullString.Length; i++)
 			{
@@ -128,7 +128,7 @@ namespace MultiAdmin.ServerIO
 		public ColoredMessage LeftIndicator { get; }
 		public ColoredMessage RightIndicator { get; }
 
-		public ColoredMessage[] Section => new ColoredMessage[] {LeftIndicator, Text, RightIndicator};
+		public ColoredMessage[] Section => new ColoredMessage[] { LeftIndicator, Text, RightIndicator };
 
 		public int MinIndex { get; }
 		public int MaxIndex { get; }

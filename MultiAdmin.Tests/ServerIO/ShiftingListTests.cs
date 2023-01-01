@@ -10,7 +10,7 @@ namespace MultiAdmin.Tests.ServerIO
 		public void ShiftingListTest()
 		{
 			const int maxCount = 2;
-			ShiftingList shiftingList = new ShiftingList(maxCount);
+			ShiftingList shiftingList = new(maxCount);
 
 			Assert.Equal(maxCount, shiftingList.MaxCount);
 		}
@@ -20,7 +20,7 @@ namespace MultiAdmin.Tests.ServerIO
 		{
 			const int maxCount = 2;
 			const int entriesToAdd = 6;
-			ShiftingList shiftingList = new ShiftingList(maxCount);
+			ShiftingList shiftingList = new(maxCount);
 
 			for (int i = 0; i < entriesToAdd; i++)
 			{
@@ -40,7 +40,7 @@ namespace MultiAdmin.Tests.ServerIO
 		{
 			const int maxCount = 6;
 			const int entriesToRemove = 2;
-			ShiftingList shiftingList = new ShiftingList(maxCount);
+			ShiftingList shiftingList = new(maxCount);
 
 			for (int i = 0; i < maxCount; i++)
 			{
@@ -65,7 +65,7 @@ namespace MultiAdmin.Tests.ServerIO
 		{
 			const int maxCount = 6;
 			const int indexToReplace = 2;
-			ShiftingList shiftingList = new ShiftingList(maxCount);
+			ShiftingList shiftingList = new(maxCount);
 
 			for (int i = 0; i < maxCount; i++)
 			{

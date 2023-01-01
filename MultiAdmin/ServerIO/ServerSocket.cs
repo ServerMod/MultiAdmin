@@ -10,9 +10,9 @@ namespace MultiAdmin.ServerIO
 	public class ServerSocket : IDisposable
 	{
 		private const int IntBytes = sizeof(int);
-		public static readonly UTF8Encoding Encoding = new UTF8Encoding(false, true);
+		public static readonly UTF8Encoding Encoding = new(false, true);
 
-		private readonly CancellationTokenSource disposeCancellationSource = new CancellationTokenSource();
+		private readonly CancellationTokenSource disposeCancellationSource = new();
 		private bool disposed = false;
 
 		private readonly TcpListener listener;

@@ -67,7 +67,7 @@ namespace MultiAdmin.Config
 		public bool Contains(string key)
 		{
 			return rawData != null &&
-			       rawData.Any(entry => entry.StartsWith($"{key}:", StringComparison.CurrentCultureIgnoreCase));
+				   rawData.Any(entry => entry.StartsWith($"{key}:", StringComparison.CurrentCultureIgnoreCase));
 		}
 
 		private static string CleanValue(string value, bool removeQuotes = true)
