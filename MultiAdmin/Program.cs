@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using MultiAdmin.Config;
 using MultiAdmin.ConsoleTools;
@@ -15,23 +14,23 @@ namespace MultiAdmin
 {
 	public static class Program
 	{
-		public const string MaVersion = "3.4.1.0";
+		public const string MaVersion = "3.5.0.0";
 
 		private static readonly List<Server> InstantiatedServers = new();
 
 		private static readonly string MaDebugLogDir =
-			Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.LogLocation.Value);
+			Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.LogLocation.Value) ?? throw new FileNotFoundException($"Log file \"{nameof(MaDebugLogDir)}\" was not set", MultiAdminConfig.GlobalConfig.LogLocation.Value);
 
-		private static readonly string MaDebugLogFile = !string.IsNullOrEmpty(MaDebugLogDir)
+		private static readonly string? MaDebugLogFile = !string.IsNullOrEmpty(MaDebugLogDir)
 			? Utils.GetFullPathSafe(Path.Combine(MaDebugLogDir, $"{Utils.DateTime}_MA_{MaVersion}_debug_log.txt"))
 			: null;
 
-		private static StreamWriter debugLogStream = null;
+		private static StreamWriter? debugLogStream = null;
 
 		private static uint? portArg;
-		public static readonly string[] Args = Environment.GetCommandLineArgs();
+		public static readonly string?[] Args = Environment.GetCommandLineArgs();
 
-		private static IExitSignal exitSignalListener;
+		private static IExitSignal? exitSignalListener;
 
 		private static bool exited = false;
 		private static readonly object ExitLock = new();
@@ -45,14 +44,14 @@ namespace MultiAdmin
 		{
 			get
 			{
-				string globalServersFolder = MultiAdminConfig.GlobalConfig.ServersFolder.Value;
+				string globalServersFolder = MultiAdminConfig.GlobalConfig.ServersFolder.Value!;
 				return !Directory.Exists(globalServersFolder)
-					? new string[] { }
+					? Array.Empty<string>()
 					: Directory.GetDirectories(globalServersFolder);
 			}
 		}
 
-		public static string[] ServerIds => Servers.Select(server => server.serverId).ToArray();
+		public static string[] ServerIds => Servers.Select(server => server.serverId).OfType<string>().ToArray();
 
 		#endregion
 
@@ -62,10 +61,10 @@ namespace MultiAdmin
 			Servers.Where(server => !server.ServerConfig.ManualStart.Value).ToArray();
 
 		public static string[] AutoStartServerDirectories =>
-			AutoStartServers.Select(autoStartServer => autoStartServer.serverDir).ToArray();
+			AutoStartServers.Select(autoStartServer => autoStartServer.serverDir).OfType<string>().ToArray();
 
 		public static string[] AutoStartServerIds =>
-			AutoStartServers.Select(autoStartServer => autoStartServer.serverId).ToArray();
+			AutoStartServers.Select(autoStartServer => autoStartServer.serverId).OfType<string>().ToArray();
 
 		#endregion
 
@@ -92,6 +91,7 @@ namespace MultiAdmin
 
 		public static void LogDebugException(string tag, Exception exception)
 		{
+			if (MaDebugLogFile == null) return;
 			lock (MaDebugLogFile)
 			{
 				if (tag == null || !IsDebugLogTagAllowed(tag)) return;
@@ -102,6 +102,7 @@ namespace MultiAdmin
 
 		public static void LogDebug(string tag, string message)
 		{
+			if (MaDebugLogFile == null) return;
 			lock (MaDebugLogFile)
 			{
 				try
@@ -135,7 +136,7 @@ namespace MultiAdmin
 
 		#endregion
 
-		private static void OnExit(object sender, EventArgs e)
+		private static void OnExit(object? sender, EventArgs e)
 		{
 			lock (ExitLock)
 			{
@@ -221,11 +222,11 @@ namespace MultiAdmin
 
 			Headless = GetFlagFromArgs(Args, "headless", "h");
 
-			string serverIdArg = GetParamFromArgs(Args, "server-id", "id");
-			string configArg = GetParamFromArgs(Args, "config", "c");
-			portArg = uint.TryParse(GetParamFromArgs(Args, "port", "p"), out uint port) ? (uint?)port : null;
+			string? serverIdArg = GetParamFromArgs(Args, "server-id", "id");
+			string? configArg = GetParamFromArgs(Args, "config", "c");
+			portArg = uint.TryParse(GetParamFromArgs(Args, "port", "p"), out uint port) ? port : null;
 
-			Server server = null;
+			Server? server = null;
 
 			if (!string.IsNullOrEmpty(serverIdArg) || !string.IsNullOrEmpty(configArg))
 			{
@@ -294,7 +295,7 @@ namespace MultiAdmin
 			}
 		}
 
-		public static string GetParamFromArgs(string[] args, string[] keys = null, string[] aliases = null)
+		public static string? GetParamFromArgs(string?[] args, string[]? keys = null, string[]? aliases = null)
 		{
 			bool hasKeys = !keys.IsNullOrEmpty();
 			bool hasAliases = !aliases.IsNullOrEmpty();
@@ -303,15 +304,15 @@ namespace MultiAdmin
 
 			for (int i = 0; i < args.Length - 1; i++)
 			{
-				string lowArg = args[i]?.ToLower();
+				string? lowArg = args[i]?.ToLower();
 
 				if (string.IsNullOrEmpty(lowArg)) continue;
 
 				if (hasKeys)
 				{
-					if (keys.Any(key => lowArg == $"--{key?.ToLower()}"))
+					if (keys?.Any(key => lowArg == $"--{key?.ToLower()}") == true)
 					{
-						string value = args[i + 1];
+						string? value = args[i + 1];
 
 						args[i] = null;
 						args[i + 1] = null;
@@ -322,9 +323,9 @@ namespace MultiAdmin
 
 				if (hasAliases)
 				{
-					if (aliases.Any(alias => lowArg == $"-{alias?.ToLower()}"))
+					if (aliases?.Any(alias => lowArg == $"-{alias?.ToLower()}") == true)
 					{
-						string value = args[i + 1];
+						string? value = args[i + 1];
 
 						args[i] = null;
 						args[i + 1] = null;
@@ -337,7 +338,7 @@ namespace MultiAdmin
 			return null;
 		}
 
-		public static bool ArgsContainsParam(string[] args, string[] keys = null, string[] aliases = null)
+		public static bool ArgsContainsParam(string?[] args, string[]? keys = null, string[]? aliases = null)
 		{
 			bool hasKeys = !keys.IsNullOrEmpty();
 			bool hasAliases = !aliases.IsNullOrEmpty();
@@ -346,13 +347,13 @@ namespace MultiAdmin
 
 			for (int i = 0; i < args.Length; i++)
 			{
-				string lowArg = args[i]?.ToLower();
+				string? lowArg = args[i]?.ToLower();
 
 				if (string.IsNullOrEmpty(lowArg)) continue;
 
 				if (hasKeys)
 				{
-					if (keys.Any(key => lowArg == $"--{key?.ToLower()}"))
+					if (keys?.Any(key => lowArg == $"--{key?.ToLower()}") == true)
 					{
 						args[i] = null;
 						return true;
@@ -361,7 +362,7 @@ namespace MultiAdmin
 
 				if (hasAliases)
 				{
-					if (aliases.Any(alias => lowArg == $"-{alias?.ToLower()}"))
+					if (aliases?.Any(alias => lowArg == $"-{alias?.ToLower()}") == true)
 					{
 						args[i] = null;
 						return true;
@@ -372,7 +373,7 @@ namespace MultiAdmin
 			return false;
 		}
 
-		public static bool GetFlagFromArgs(string[] args, string[] keys = null, string[] aliases = null)
+		public static bool GetFlagFromArgs(string?[] args, string[]? keys = null, string[]? aliases = null)
 		{
 			if (keys.IsNullOrEmpty() && aliases.IsNullOrEmpty()) return false;
 
@@ -381,31 +382,31 @@ namespace MultiAdmin
 				: ArgsContainsParam(args, keys, aliases);
 		}
 
-		public static string GetParamFromArgs(string[] args, string key = null, string alias = null)
+		public static string? GetParamFromArgs(string?[] args, string? key = null, string? alias = null)
 		{
-			return GetParamFromArgs(args, new string[] { key }, new string[] { alias });
+			return GetParamFromArgs(args, key != null ? new string[] { key } : null, alias != null ? new string[] { alias } : null);
 		}
 
-		public static bool ArgsContainsParam(string[] args, string key = null, string alias = null)
+		public static bool ArgsContainsParam(string?[] args, string? key = null, string? alias = null)
 		{
-			return ArgsContainsParam(args, new string[] { key }, new string[] { alias });
+			return ArgsContainsParam(args, key != null ? new string[] { key } : null, alias != null ? new string[] { alias } : null);
 		}
 
-		public static bool GetFlagFromArgs(string[] args, string key = null, string alias = null)
+		public static bool GetFlagFromArgs(string?[] args, string? key = null, string? alias = null)
 		{
-			return GetFlagFromArgs(args, new string[] { key }, new string[] { alias });
+			return GetFlagFromArgs(args, key != null ? new string[] { key } : null, alias != null ? new string[] { alias } : null);
 		}
 
-		public static Process StartServer(Server server)
+		public static Process? StartServer(Server server)
 		{
-			string assemblyLocation = Assembly.GetEntryAssembly()?.Location;
+			string assemblyLocation = AppContext.BaseDirectory;
 
 			if (string.IsNullOrEmpty(assemblyLocation))
 			{
 				Write("Error while starting new server: Could not find the executable location!", ConsoleColor.Red);
 			}
 
-			List<string> args = new(server.args);
+			List<string?> args = server.args != null ? new(server.args) : new();
 
 			if (!string.IsNullOrEmpty(server.serverId))
 			{
@@ -426,9 +427,9 @@ namespace MultiAdmin
 
 			Write($"Launching \"{startInfo.FileName}\" with arguments \"{startInfo.Arguments}\"...");
 
-			Process serverProcess = Process.Start(startInfo);
+			Process? serverProcess = Process.Start(startInfo);
 
-			InstantiatedServers.Add(server);
+			if (serverProcess != null) InstantiatedServers.Add(server);
 
 			return serverProcess;
 		}

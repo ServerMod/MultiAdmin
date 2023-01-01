@@ -11,7 +11,7 @@ namespace MultiAdmin.Config.ConfigHandler
 		/// Creates an <see cref="InheritableConfigRegister"/> with the parent <paramref name="parentConfigRegister"/> to inherit unset config values from.
 		/// </summary>
 		/// <param name="parentConfigRegister">The <see cref="ConfigRegister"/> to inherit unset config values from.</param>
-		protected InheritableConfigRegister(ConfigRegister parentConfigRegister = null)
+		protected InheritableConfigRegister(ConfigRegister? parentConfigRegister = null)
 		{
 			ParentConfigRegister = parentConfigRegister;
 		}
@@ -19,7 +19,7 @@ namespace MultiAdmin.Config.ConfigHandler
 		/// <summary>
 		/// The parent <see cref="ConfigRegister"/> to inherit from.
 		/// </summary>
-		public ConfigRegister ParentConfigRegister { get; protected set; }
+		public ConfigRegister? ParentConfigRegister { get; protected set; }
 
 		/// <summary>
 		/// Returns whether <paramref name="configEntry"/> should be inherited from the parent <see cref="ConfigRegister"/>.
@@ -34,7 +34,7 @@ namespace MultiAdmin.Config.ConfigHandler
 		public abstract void UpdateConfigValueInheritable(ConfigEntry configEntry);
 
 		/// <summary>
-		/// Updates the value of <paramref name="configEntry"/> from this <see cref="InheritableConfigRegister"/> if the <see cref="ParentConfigRegister"/> is null or if <seealso cref="ShouldInheritConfigEntry"/> returns true.
+		/// Updates the value of <paramref name="configEntry"/> from this <see cref="InheritableConfigRegister"/> if the <see cref="ParentConfigRegister"/> is null or if <seealso cref="ShouldInheritConfigEntry"/> returns false.
 		/// </summary>
 		/// <param name="configEntry">The <see cref="ConfigEntry"/> to be assigned a value.</param>
 		public override void UpdateConfigValue(ConfigEntry configEntry)
@@ -44,7 +44,7 @@ namespace MultiAdmin.Config.ConfigHandler
 			{
 				ParentConfigRegister.UpdateConfigValue(configEntry);
 			}
-			else
+			else if (configEntry != null)
 			{
 				UpdateConfigValueInheritable(configEntry);
 			}
@@ -59,12 +59,12 @@ namespace MultiAdmin.Config.ConfigHandler
 			List<ConfigRegister> configRegisterHierarchy = new();
 
 			ConfigRegister configRegister = this;
-			while (configRegister != null && !configRegisterHierarchy.Contains(configRegister))
+			while (!configRegisterHierarchy.Contains(configRegister))
 			{
 				configRegisterHierarchy.Add(configRegister);
 
 				// If there's another InheritableConfigRegister as a parent, then get the parent of that, otherwise, break the loop as there are no more parents
-				if (configRegister is InheritableConfigRegister inheritableConfigRegister)
+				if (configRegister is InheritableConfigRegister inheritableConfigRegister && inheritableConfigRegister.ParentConfigRegister != null)
 				{
 					configRegister = inheritableConfigRegister.ParentConfigRegister;
 				}

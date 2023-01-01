@@ -4,7 +4,7 @@ namespace MultiAdmin.Utility
 {
 	public static class StringExtensions
 	{
-		public static bool Equals(this string input, string value, int startIndex, int count)
+		public static bool Equals(this string? input, string? value, int startIndex, int count)
 		{
 			if (input == null && value == null)
 				return true;
@@ -25,7 +25,7 @@ namespace MultiAdmin.Utility
 			return true;
 		}
 
-		public static bool Equals(this string input, string value, int startIndex)
+		public static bool Equals(this string? input, string? value, int startIndex)
 		{
 			if (input == null && value == null)
 				return true;
@@ -47,7 +47,7 @@ namespace MultiAdmin.Utility
 		/// <returns>A <see cref="string"/> escaped for use with <see cref="string.Format"/></returns>
 		public static string EscapeFormat(this string input)
 		{
-			return input?.Replace("{", "{{").Replace("}", "}}");
+			return input.Replace("{", "{{").Replace("}", "}}");
 		}
 	}
 }

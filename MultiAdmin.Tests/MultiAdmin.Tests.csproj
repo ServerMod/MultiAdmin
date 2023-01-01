@@ -4,6 +4,7 @@
   	<LangVersion>11</LangVersion>
     <IsPackable>false</IsPackable>
     <RootNamespace>MultiAdmin.Tests</RootNamespace>
+    <Nullable>enable</Nullable>
     
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>

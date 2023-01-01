@@ -41,7 +41,7 @@ namespace MultiAdmin.ConsoleTools
 		#endregion
 	}
 
-	public struct ConsolePoint
+	public readonly struct ConsolePoint
 	{
 		public readonly int x, y;
 
@@ -74,7 +74,7 @@ namespace MultiAdmin.ConsoleTools
 		}
 	}
 
-	public struct BufferPoint
+	public readonly struct BufferPoint
 	{
 		public readonly int x, y;
 

@@ -45,7 +45,7 @@ namespace MultiAdmin.ConsoleTools
 			}
 		}
 
-		public static string ClearConsoleLine(string message)
+		public static string? ClearConsoleLine(string? message)
 		{
 			if (!string.IsNullOrEmpty(message))
 				ClearConsoleLine(message.Contains(Environment.NewLine) ? 0 : message.Length);
@@ -55,16 +55,16 @@ namespace MultiAdmin.ConsoleTools
 			return message;
 		}
 
-		public static ColoredMessage ClearConsoleLine(ColoredMessage message)
+		public static ColoredMessage? ClearConsoleLine(ColoredMessage? message)
 		{
 			ClearConsoleLine(message?.text);
 			return message;
 		}
 
-		public static ColoredMessage[] ClearConsoleLine(ColoredMessage[] message)
+		public static ColoredMessage?[] ClearConsoleLine(ColoredMessage?[] message)
 		{
 			ClearConsoleLine(message?.GetText());
-			return message;
+			return message!;
 		}
 
 		#endregion

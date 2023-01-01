@@ -7,8 +7,8 @@ namespace MultiAdmin.Features
 	[Feature]
 	internal class NewCommand : Feature, ICommand, IEventServerFull
 	{
-		private string onFullServerId;
-		private Process onFullServerInstance;
+		private string? onFullServerId;
+		private Process? onFullServerInstance;
 
 		public NewCommand(Server server) : base(server)
 		{

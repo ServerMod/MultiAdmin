@@ -47,7 +47,7 @@ namespace MultiAdmin.Config
 				"MultiAdmin Debug Logging Blacklist", "Which tags to block for MultiAdmin debug logging");
 
 		public ConfigEntry<string[]> DebugLogWhitelist { get; } =
-			new ConfigEntry<string[]>("multiadmin_debug_log_whitelist", new string[0],
+			new ConfigEntry<string[]>("multiadmin_debug_log_whitelist", Array.Empty<string>(),
 				"MultiAdmin Debug Logging Whitelist", "Which tags to log for MultiAdmin debug logging (Defaults to logging all if none are provided)");
 
 		public ConfigEntry<bool> UseNewInputSystem { get; } =
@@ -71,23 +71,23 @@ namespace MultiAdmin.Config
 				"Copy from Folder on Reload", "The location of a folder to copy files from into the folder defined by `config_location` whenever the configuration file is reloaded");
 
 		public ConfigEntry<string[]> FolderCopyWhitelist { get; } =
-			new ConfigEntry<string[]>("folder_copy_whitelist", new string[0],
+			new ConfigEntry<string[]>("folder_copy_whitelist", Array.Empty<string>(),
 				"Folder Copy Whitelist", "The list of file names to copy from the folder defined by `copy_from_folder_on_reload` (accepts `*` wildcards)");
 
 		public ConfigEntry<string[]> FolderCopyBlacklist { get; } =
-			new ConfigEntry<string[]>("folder_copy_blacklist", new string[0],
+			new ConfigEntry<string[]>("folder_copy_blacklist", Array.Empty<string>(),
 				"Folder Copy Blacklist", "The list of file names to not copy from the folder defined by `copy_from_folder_on_reload` (accepts `*` wildcards)");
 
 		public ConfigEntry<string[]> FolderCopyRoundQueue { get; } =
-			new ConfigEntry<string[]>("folder_copy_round_queue", new string[0],
+			new ConfigEntry<string[]>("folder_copy_round_queue", Array.Empty<string>(),
 				"Folder Copy Round Queue", "The location of a folder to copy files from into the folder defined by `config_location` after each round, looping through the locations");
 
 		public ConfigEntry<string[]> FolderCopyRoundQueueWhitelist { get; } =
-			new ConfigEntry<string[]>("folder_copy_round_queue_whitelist", new string[0],
+			new ConfigEntry<string[]>("folder_copy_round_queue_whitelist", Array.Empty<string>(),
 				"Folder Copy Round Queue Whitelist", "The list of file names to copy from the folders defined by `folder_copy_round_queue` (accepts `*` wildcards)");
 
 		public ConfigEntry<string[]> FolderCopyRoundQueueBlacklist { get; } =
-			new ConfigEntry<string[]>("folder_copy_round_queue_blacklist", new string[0],
+			new ConfigEntry<string[]>("folder_copy_round_queue_blacklist", Array.Empty<string>(),
 				"Folder Copy Round Queue Blacklist", "The list of file names to not copy from the folders defined by `folder_copy_round_queue` (accepts `*` wildcards)");
 
 		public ConfigEntry<bool> RandomizeFolderCopyRoundQueue { get; } =
@@ -197,19 +197,19 @@ namespace MultiAdmin.Config
 		}
 
 		public const string ConfigFileName = "scp_multiadmin.cfg";
-		public static readonly string GlobalConfigFilePath = Utils.GetFullPathSafe(ConfigFileName);
+		public static readonly string GlobalConfigFilePath = Utils.GetFullPathSafe(ConfigFileName) ?? throw new FileNotFoundException($"Config file \"{nameof(GlobalConfigFilePath)}\" was not set", ConfigFileName);
 
 		public static readonly MultiAdminConfig GlobalConfig = new(GlobalConfigFilePath, null);
 
-		public MultiAdminConfig ParentConfig
+		public MultiAdminConfig? ParentConfig
 		{
 			get => ParentConfigRegister as MultiAdminConfig;
 			protected set => ParentConfigRegister = value;
 		}
 
-		public Config Config { get; }
+		public Config? Config { get; }
 
-		public MultiAdminConfig(Config config, MultiAdminConfig parentConfig, bool createConfig = true)
+		public MultiAdminConfig(Config? config, MultiAdminConfig? parentConfig, bool createConfig = true)
 		{
 			Config = config;
 			ParentConfig = parentConfig;
@@ -247,16 +247,16 @@ namespace MultiAdmin.Config
 			ReloadConfig();
 		}
 
-		public MultiAdminConfig(Config config, bool createConfig = true) : this(config, GlobalConfig, createConfig)
+		public MultiAdminConfig(Config? config, bool createConfig = true) : this(config, GlobalConfig, createConfig)
 		{
 		}
 
-		public MultiAdminConfig(string path, MultiAdminConfig parentConfig, bool createConfig = true) : this(
-			new Config(path), parentConfig, createConfig)
+		public MultiAdminConfig(string? path, MultiAdminConfig? parentConfig, bool createConfig = true) : this(
+			path != null ? new Config(path) : null, parentConfig, createConfig)
 		{
 		}
 
-		public MultiAdminConfig(string path, bool createConfig = true) : this(path, GlobalConfig, createConfig)
+		public MultiAdminConfig(string? path, bool createConfig = true) : this(path, GlobalConfig, createConfig)
 		{
 		}
 
@@ -277,13 +277,13 @@ namespace MultiAdmin.Config
 			{
 				case ConfigEntry<string> config:
 					{
-						config.Value = Config.GetString(config.Key, config.Default);
+						config.Value = Config.GetString(config.Key, config.Default) ?? config.Default;
 						break;
 					}
 
 				case ConfigEntry<string[]> config:
 					{
-						config.Value = Config.GetStringArray(config.Key, config.Default);
+						config.Value = Config.GetStringArray(config.Key, config.Default) ?? config.Default;
 						break;
 					}
 
@@ -376,9 +376,9 @@ namespace MultiAdmin.Config
 			return configHierarchy.ToArray();
 		}
 
-		public bool ConfigHierarchyContainsPath(string path)
+		public bool ConfigHierarchyContainsPath(string? path)
 		{
-			string fullPath = Utils.GetFullPathSafe(path);
+			string? fullPath = Utils.GetFullPathSafe(path) ?? path;
 
 			return !string.IsNullOrEmpty(fullPath) &&
 				   GetConfigHierarchy().Any(config => config.Config?.ConfigPath == path);

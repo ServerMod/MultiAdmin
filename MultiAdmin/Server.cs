@@ -26,11 +26,11 @@ namespace MultiAdmin
 		private readonly MultiAdminConfig serverConfig;
 		public MultiAdminConfig ServerConfig => serverConfig ?? MultiAdminConfig.GlobalConfig;
 
-		public readonly string serverId;
-		public readonly string configLocation;
+		public readonly string? serverId;
+		public readonly string? configLocation;
 		private readonly uint? port;
-		public readonly string[] args;
-		public readonly string serverDir;
+		public readonly string?[]? args;
+		public readonly string? serverDir;
 		public readonly string logDir;
 
 		public uint Port => port ?? ServerConfig.Port.Value;
@@ -40,12 +40,12 @@ namespace MultiAdmin
 
 		public ModFeatures supportedModFeatures = ModFeatures.None;
 
-		public Server(string serverId = null, string configLocation = null, uint? port = null, string[] args = null)
+		public Server(string? serverId = null, string? configLocation = null, uint? port = null, string?[]? args = null)
 		{
 			this.serverId = serverId;
-			serverDir = string.IsNullOrEmpty(this.serverId)
+			serverDir = string.IsNullOrEmpty(serverId)
 				? null
-				: Utils.GetFullPathSafe(Path.Combine(MultiAdminConfig.GlobalConfig.ServersFolder.Value, this.serverId));
+				: Utils.GetFullPathSafe(Path.Combine(MultiAdminConfig.GlobalConfig.ServersFolder.Value, serverId));
 
 			this.configLocation = Utils.GetFullPathSafe(configLocation) ??
 								  Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.ConfigLocation.Value) ??
@@ -55,7 +55,7 @@ namespace MultiAdmin
 			serverConfig = MultiAdminConfig.GlobalConfig;
 
 			// Load config hierarchy
-			string serverConfigLocation = this.configLocation;
+			string? serverConfigLocation = this.configLocation;
 			while (!string.IsNullOrEmpty(serverConfigLocation))
 			{
 				// Update the Server object's config location with the valid config location
@@ -81,7 +81,7 @@ namespace MultiAdmin
 			this.args = args;
 
 			logDir = Utils.GetFullPathSafe(Path.Combine(string.IsNullOrEmpty(serverDir) ? "" : serverDir,
-				serverConfig.LogLocation.Value));
+				serverConfig.LogLocation.Value)) ?? throw new FileNotFoundException($"Log file \"{nameof(logDir)}\" was not set");
 
 			// Register all features
 			RegisterFeatures();
@@ -131,9 +131,9 @@ namespace MultiAdmin
 
 		#endregion
 
-		private string startDateTime;
+		private string? startDateTime;
 
-		public string StartDateTime
+		public string? StartDateTime
 		{
 			get => startDateTime;
 
@@ -160,13 +160,13 @@ namespace MultiAdmin
 		public bool CheckRestartTimeout =>
 			(DateTime.Now - initRestartTimeoutTime).Seconds > ServerConfig.ServerRestartTimeout.Value;
 
-		public string LogDirFile { get; private set; }
-		public string MaLogFile { get; private set; }
-		public string ScpLogFile { get; private set; }
+		public string? LogDirFile { get; private set; }
+		public string? MaLogFile { get; private set; }
+		public string? ScpLogFile { get; private set; }
 
-		private StreamWriter maLogStream;
+		private StreamWriter? maLogStream;
 
-		public Process GameProcess { get; private set; }
+		public Process? GameProcess { get; private set; }
 
 		public bool IsGameProcessRunning
 		{
@@ -182,9 +182,9 @@ namespace MultiAdmin
 		}
 
 
-		public static readonly string DedicatedDir = Utils.GetFullPathSafe(Path.Combine("SCPSL_Data", "Dedicated"));
+		public static readonly string? DedicatedDir = Utils.GetFullPathSafe(Path.Combine("SCPSL_Data", "Dedicated"));
 
-		public ServerSocket SessionSocket { get; private set; }
+		public ServerSocket? SessionSocket { get; private set; }
 
 		#region Server Core
 
@@ -297,7 +297,7 @@ namespace MultiAdmin
 					// Set up logging
 					maLogStream?.Close();
 					Directory.CreateDirectory(logDir);
-					maLogStream = File.AppendText(MaLogFile);
+					maLogStream = File.AppendText(MaLogFile ?? throw new FileNotFoundException($"Log file \"{nameof(MaLogFile)}\" was not set"));
 
 					#region Startup Info Printing & Logging
 
@@ -322,7 +322,7 @@ namespace MultiAdmin
 
 					SessionSocket = consoleSocket;
 
-					List<string> scpslArgs = new()
+					List<string?> scpslArgs = new()
 					{
 						$"-multiadmin:{Program.MaVersion}:{(int)ModFeatures.All}",
 						"-batchmode",
@@ -371,7 +371,7 @@ namespace MultiAdmin
 						scpslArgs.Add(configLocation);
 					}
 
-					string appDataPath = Utils.GetFullPathSafe(ServerConfig.AppDataLocation.Value);
+					string? appDataPath = Utils.GetFullPathSafe(ServerConfig.AppDataLocation.Value);
 					if (!string.IsNullOrEmpty(appDataPath))
 					{
 						scpslArgs.Add("-appdatapath");
@@ -379,7 +379,7 @@ namespace MultiAdmin
 					}
 
 					// Add custom arguments
-					scpslArgs.AddRange(args);
+					if (args != null) scpslArgs.AddRange(args);
 
 					ProcessStartInfo startInfo = new(scpslExe, scpslArgs.JoinArgs())
 					{
@@ -399,7 +399,7 @@ namespace MultiAdmin
 
 					// Start the input reader
 					CancellationTokenSource inputHandlerCancellation = new();
-					Task inputHandler = null;
+					Task? inputHandler = null;
 
 					if (!Program.Headless)
 					{
@@ -448,7 +448,7 @@ namespace MultiAdmin
 						}
 
 						// Cleanup after exit from MainLoop
-						GameProcess.Dispose();
+						GameProcess?.Dispose();
 						GameProcess = null;
 
 						// Stop the input handler if it's running
@@ -535,7 +535,7 @@ namespace MultiAdmin
 			SetStopStatus(killGame);
 
 			if ((killGame || !SendMessage("QUIT")) && IsGameProcessRunning)
-				GameProcess.Kill();
+				GameProcess?.Kill();
 		}
 
 		public void SetRestartStatus()
@@ -553,7 +553,7 @@ namespace MultiAdmin
 			SetRestartStatus();
 
 			if ((killGame || !SendMessage("SOFTRESTART")) && IsGameProcessRunning)
-				GameProcess.Kill();
+				GameProcess?.Kill();
 		}
 
 		#endregion
@@ -612,7 +612,7 @@ namespace MultiAdmin
 			{
 				try
 				{
-					object featureInstance = Activator.CreateInstance(type, this);
+					object? featureInstance = Activator.CreateInstance(type, this);
 					if (featureInstance is Feature feature) RegisterFeature(feature);
 				}
 				catch (Exception e)
@@ -642,7 +642,7 @@ namespace MultiAdmin
 
 		#region Console Output and Logging
 
-		public void Write(ColoredMessage[] messages, ConsoleColor? timeStampColor = null)
+		public void Write(ColoredMessage?[] messages, ConsoleColor? timeStampColor = null)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
@@ -652,7 +652,7 @@ namespace MultiAdmin
 
 				if (Program.Headless) return;
 
-				ColoredMessage[] timeStampedMessage = Utils.TimeStampMessage(messages, timeStampColor);
+				ColoredMessage?[] timeStampedMessage = Utils.TimeStampMessage(messages, timeStampColor);
 
 				timeStampedMessage.WriteLine(ServerConfig.ActualConsoleInputSystem == InputHandler.ConsoleInputSystem.New);
 
@@ -682,7 +682,7 @@ namespace MultiAdmin
 		{
 			lock (ColoredConsole.WriteLock)
 			{
-				if (message == null || string.IsNullOrEmpty(MaLogFile) || ServerConfig.NoLog.Value) return;
+				if (maLogStream == null || string.IsNullOrEmpty(MaLogFile) || ServerConfig.NoLog.Value) return;
 
 				try
 				{
@@ -725,7 +725,7 @@ namespace MultiAdmin
 					feature.OnConfigReload();
 		}
 
-		public bool CopyFromDir(string sourceDir, string[] fileWhitelist = null, string[] fileBlacklist = null)
+		public bool CopyFromDir(string? sourceDir, string[]? fileWhitelist = null, string[]? fileBlacklist = null)
 		{
 			if (string.IsNullOrEmpty(configLocation) || string.IsNullOrEmpty(sourceDir)) return false;
 

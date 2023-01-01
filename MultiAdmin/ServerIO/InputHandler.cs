@@ -41,8 +41,8 @@ namespace MultiAdmin.ServerIO
 			}
 		}
 
-		public static string CurrentMessage { get; private set; }
-		public static ColoredMessage[] CurrentInput { get; private set; } = { InputPrefix };
+		public static string? CurrentMessage { get; private set; }
+		public static ColoredMessage?[]? CurrentInput { get; private set; } = { InputPrefix };
 		public static int CurrentCursor { get; private set; }
 
 		public static async void Write(Server server, CancellationToken cancellationToken)
@@ -58,10 +58,10 @@ namespace MultiAdmin.ServerIO
 						break;
 					}
 
-					string message;
+					string? message;
 					if (server.ServerConfig.ActualConsoleInputSystem == ConsoleInputSystem.New && SectionBufferWidth - TotalIndicatorLength > 0)
 					{
-						message = await GetInputLineNew(server, cancellationToken, prevMessages);
+						message = await GetInputLineNew(server, prevMessages, cancellationToken);
 					}
 					else if (server.ServerConfig.ActualConsoleInputSystem == ConsoleInputSystem.Old)
 					{
@@ -77,12 +77,11 @@ namespace MultiAdmin.ServerIO
 					server.Write($">>> {message}", ConsoleColor.DarkMagenta);
 
 					int separatorIndex = message.IndexOfAny(Separator);
-					string commandName = (separatorIndex < 0 ? message : message.Substring(0, separatorIndex)).ToLower().Trim();
+					string commandName = (separatorIndex < 0 ? message : message[..separatorIndex]).ToLower().Trim();
 					if (commandName.IsNullOrEmpty()) continue;
 
 					bool callServer = true;
-					server.commands.TryGetValue(commandName, out ICommand command);
-					if (command != null)
+					if (server.commands.TryGetValue(commandName, out ICommand? command))
 					{
 						try
 						{
@@ -147,7 +146,7 @@ namespace MultiAdmin.ServerIO
 			}
 		}
 
-		public static async Task<string> GetInputLineNew(Server server, CancellationToken cancellationToken, ShiftingList prevMessages)
+		public static async Task<string> GetInputLineNew(Server server, ShiftingList prevMessages, CancellationToken cancellationToken)
 		{
 			if (server.ServerConfig.RandomInputColors.Value)
 				RandomizeInputColors();
@@ -156,7 +155,7 @@ namespace MultiAdmin.ServerIO
 			string message = "";
 			int messageCursor = 0;
 			int prevMessageCursor = -1;
-			StringSections curSections = null;
+			StringSections? curSections = null;
 			int lastSectionIndex = -1;
 			bool exitLoop = false;
 			while (!exitLoop)
@@ -353,9 +352,9 @@ namespace MultiAdmin.ServerIO
 			CurrentCursor = 0;
 		}
 
-		public static void SetCurrentInput(params ColoredMessage[] coloredMessages)
+		public static void SetCurrentInput(params ColoredMessage?[]? coloredMessages)
 		{
-			List<ColoredMessage> message = new() { InputPrefix };
+			List<ColoredMessage?> message = new() { InputPrefix };
 
 			if (coloredMessages != null)
 				message.AddRange(coloredMessages);
@@ -365,7 +364,7 @@ namespace MultiAdmin.ServerIO
 
 		public static void SetCurrentInput(string message)
 		{
-			ColoredMessage baseSection = BaseSection?.Clone();
+			ColoredMessage? baseSection = BaseSection?.Clone();
 
 			if (baseSection == null)
 				baseSection = new ColoredMessage(message);
@@ -411,7 +410,7 @@ namespace MultiAdmin.ServerIO
 			SetCursor(CurrentCursor);
 		}
 
-		public static void WriteInput(ColoredMessage[] message, bool clearConsoleLine = false)
+		public static void WriteInput(ColoredMessage?[]? message, bool clearConsoleLine = false)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
@@ -444,10 +443,10 @@ namespace MultiAdmin.ServerIO
 			try
 			{
 				Random random = new();
-				Array colors = Enum.GetValues<ConsoleColor>();
+				ConsoleColor[] colors = Enum.GetValues<ConsoleColor>();
 
-				ConsoleColor random1 = (ConsoleColor)colors.GetValue(random.Next(colors.Length));
-				ConsoleColor random2 = (ConsoleColor)colors.GetValue(random.Next(colors.Length));
+				ConsoleColor random1 = colors[random.Next(colors.Length)];
+				ConsoleColor random2 = colors[random.Next(colors.Length)];
 
 				BaseSection.textColor = random1;
 
