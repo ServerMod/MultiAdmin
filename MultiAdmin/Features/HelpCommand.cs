@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using MultiAdmin.ConsoleTools;
 using MultiAdmin.Features.Attributes;
 using MultiAdmin.Utility;
 
@@ -8,6 +9,8 @@ namespace MultiAdmin.Features
 	[Feature]
 	public class HelpCommand : Feature, ICommand
 	{
+		private static readonly ColoredMessage helpPrefix = new ColoredMessage("Commands from MultiAdmin:\n", ConsoleColor.Yellow);
+
 		public HelpCommand(Server server) : base(server)
 		{
 		}
@@ -24,7 +27,10 @@ namespace MultiAdmin.Features
 
 		public void OnCall(string[] args)
 		{
-			Server.Write("Commands from MultiAdmin:");
+			ColoredMessage[] message = new ColoredMessage[2];
+
+			message[0] = helpPrefix;
+
 			List<string> helpOutput = new List<string>();
 			foreach (KeyValuePair<string, ICommand> command in Server.commands)
 			{
@@ -35,9 +41,9 @@ namespace MultiAdmin.Features
 			}
 
 			helpOutput.Sort();
+			message[1] = new ColoredMessage(string.Join('\n', helpOutput), ConsoleColor.Green);
 
-			foreach (string line in helpOutput) Server.Write(line, ConsoleColor.Green);
-
+			Server.Write(message, helpPrefix.textColor);
 			Server.Write("Commands from game:");
 		}
 
