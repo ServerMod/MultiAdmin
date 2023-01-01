@@ -18,7 +18,7 @@ jobs:
     timeout-minutes: 30
 
     steps:
-    - uses: actions/checkout@v2.3.4
+    - uses: actions/checkout@v3
 
     - if: matrix.os == 'ubuntu-18.04'
       name: Install Linux packages
@@ -27,7 +27,7 @@ jobs:
         sudo apt install -y clang zlib1g-dev libkrb5-dev libtinfo5
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v1.7.2
+      uses: actions/setup-dotnet@v3
       with:
         dotnet-version: ${{matrix.framework}}
 
@@ -41,13 +41,13 @@ jobs:
       run: dotnet test
 
     - name: Upload ${{matrix.target}} build
-      uses: actions/upload-artifact@v2.2.2
+      uses: actions/upload-artifact@v3
       with:
         name: MultiAdmin-${{matrix.target}}-${{matrix.framework}}
         path: ${{github.workspace}}/Builds/${{matrix.framework}}/${{matrix.target}}
 
     - name: Upload ${{matrix.target}} build to bundle
-      uses: actions/upload-artifact@v2.2.2
+      uses: actions/upload-artifact@v3
       with:
         name: MultiAdmin-all-${{matrix.framework}}
         path: ${{github.workspace}}/Builds/${{matrix.framework}}
