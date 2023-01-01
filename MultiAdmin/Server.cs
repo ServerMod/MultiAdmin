@@ -261,7 +261,7 @@ namespace MultiAdmin
 			}
 		}
 
-		public string GetExecutablePath()
+		public static string GetExecutablePath()
 		{
 			string scpslExe;
 
@@ -329,7 +329,7 @@ namespace MultiAdmin
 						"-nographics",
 						"-silent-crashes",
 						"-nodedicateddelete",
-						$"-id{Process.GetCurrentProcess().Id}",
+						$"-id{Environment.ProcessId}",
 						$"-console{consoleSocket.Port}",
 						$"-port{Port}"
 					};
