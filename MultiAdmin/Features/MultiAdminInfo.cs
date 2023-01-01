@@ -1,9 +1,7 @@
 using System;
-using MultiAdmin.Features.Attributes;
 
 namespace MultiAdmin.Features
 {
-	[Feature]
 	internal class MultiAdminInfo : Feature, IEventServerPreStart, ICommand
 	{
 		public MultiAdminInfo(Server server) : base(server)

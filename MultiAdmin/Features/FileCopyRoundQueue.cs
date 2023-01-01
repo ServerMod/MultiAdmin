@@ -1,10 +1,8 @@
 using System;
-using MultiAdmin.Features.Attributes;
 using MultiAdmin.Utility;
 
 namespace MultiAdmin.Features
 {
-	[Feature]
 	internal class FileCopyRoundQueue : Feature, IEventRoundEnd
 	{
 		private string[] queue = Array.Empty<string>();
@@ -93,7 +91,7 @@ namespace MultiAdmin.Features
 
 		public override string GetFeatureName()
 		{
-			return "Folder Copy Round Queue";
+			return "File Copy Round Queue";
 		}
 	}
 }

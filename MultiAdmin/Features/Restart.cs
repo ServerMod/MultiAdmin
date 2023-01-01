@@ -1,8 +1,5 @@
-using MultiAdmin.Features.Attributes;
-
 namespace MultiAdmin.Features
 {
-	[Feature]
 	internal class Restart : Feature, ICommand
 	{
 		public Restart(Server server) : base(server)

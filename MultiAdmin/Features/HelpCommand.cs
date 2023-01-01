@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
 using MultiAdmin.ConsoleTools;
-using MultiAdmin.Features.Attributes;
 using MultiAdmin.Utility;
 
 namespace MultiAdmin.Features
 {
-	[Feature]
 	public class HelpCommand : Feature, ICommand
 	{
 		private static readonly ColoredMessage helpPrefix = new("Commands from MultiAdmin:\n", ConsoleColor.Yellow);

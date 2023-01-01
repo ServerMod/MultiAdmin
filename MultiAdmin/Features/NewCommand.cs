@@ -1,10 +1,8 @@
 using System.Diagnostics;
-using MultiAdmin.Features.Attributes;
 using MultiAdmin.Utility;
 
 namespace MultiAdmin.Features
 {
-	[Feature]
 	internal class NewCommand : Feature, ICommand, IEventServerFull
 	{
 		private string? onFullServerId;

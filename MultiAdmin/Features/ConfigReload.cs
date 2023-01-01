@@ -1,9 +1,7 @@
-using MultiAdmin.Features.Attributes;
 using MultiAdmin.Utility;
 
 namespace MultiAdmin.Features
 {
-	[Feature]
 	internal class ConfigReload : Feature, ICommand
 	{
 		public ConfigReload(Server server) : base(server)

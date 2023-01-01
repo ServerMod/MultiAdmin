@@ -1,9 +1,7 @@
 using System;
-using MultiAdmin.Features.Attributes;
 
 namespace MultiAdmin.Features
 {
-	[Feature]
 	internal class MemoryChecker : Feature, IEventTick, IEventRoundEnd
 	{
 		private const decimal BytesInMegabyte = 1048576;

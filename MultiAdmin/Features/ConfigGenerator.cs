@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using MultiAdmin.Config;
 using MultiAdmin.Config.ConfigHandler;
-using MultiAdmin.Features.Attributes;
 using MultiAdmin.Utility;
 
 namespace MultiAdmin.Features
 {
-	[Feature]
 	internal class ConfigGenerator : Feature, ICommand
 	{
 
