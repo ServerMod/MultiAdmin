@@ -444,7 +444,7 @@ namespace MultiAdmin.ServerIO
 			try
 			{
 				Random random = new();
-				Array colors = Enum.GetValues(typeof(ConsoleColor));
+				Array colors = Enum.GetValues<ConsoleColor>();
 
 				ConsoleColor random1 = (ConsoleColor)colors.GetValue(random.Next(colors.Length));
 				ConsoleColor random2 = (ConsoleColor)colors.GetValue(random.Next(colors.Length));
