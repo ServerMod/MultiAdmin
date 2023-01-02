@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
-  	<LangVersion>11</LangVersion>
+    <LangVersion>11</LangVersion>
     <IsPackable>false</IsPackable>
     <RootNamespace>MultiAdmin.Tests</RootNamespace>
     <Nullable>enable</Nullable>
-    
+
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
