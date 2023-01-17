@@ -295,6 +295,8 @@ namespace MultiAdmin
 
 				server.StartServer();
 			}
+
+			LogDebug(nameof(Main), "Exiting MultiAdmin...");
 		}
 
 		public static string? GetParamFromArgs(string?[] args, string[]? keys = null, string[]? aliases = null)
