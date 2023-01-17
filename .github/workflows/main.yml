@@ -1,6 +1,12 @@
 name: MultiAdmin Build
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+  create:
 
 jobs:
   build:
