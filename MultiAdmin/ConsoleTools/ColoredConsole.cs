@@ -5,9 +5,9 @@ namespace MultiAdmin.ConsoleTools
 {
 	public static class ColoredConsole
 	{
-		public static readonly object WriteLock = new object();
+		public static readonly object WriteLock = new();
 
-		public static void Write(string text, ConsoleColor? textColor = null, ConsoleColor? backgroundColor = null)
+		public static void Write(string? text, ConsoleColor? textColor = null, ConsoleColor? backgroundColor = null)
 		{
 			lock (WriteLock)
 			{
@@ -36,7 +36,7 @@ namespace MultiAdmin.ConsoleTools
 			}
 		}
 
-		public static void WriteLine(string text, ConsoleColor? textColor = null, ConsoleColor? backgroundColor = null)
+		public static void WriteLine(string? text, ConsoleColor? textColor = null, ConsoleColor? backgroundColor = null)
 		{
 			lock (WriteLock)
 			{
@@ -46,11 +46,11 @@ namespace MultiAdmin.ConsoleTools
 			}
 		}
 
-		public static void Write(params ColoredMessage[] message)
+		public static void Write(params ColoredMessage?[] message)
 		{
 			lock (WriteLock)
 			{
-				foreach (ColoredMessage coloredMessage in message)
+				foreach (ColoredMessage? coloredMessage in message)
 				{
 					if (coloredMessage != null)
 						Write(coloredMessage.text, coloredMessage.textColor, coloredMessage.backgroundColor);
@@ -58,7 +58,7 @@ namespace MultiAdmin.ConsoleTools
 			}
 		}
 
-		public static void WriteLine(params ColoredMessage[] message)
+		public static void WriteLine(params ColoredMessage?[] message)
 		{
 			lock (WriteLock)
 			{
@@ -68,24 +68,24 @@ namespace MultiAdmin.ConsoleTools
 			}
 		}
 
-		public static void WriteLines(params ColoredMessage[] message)
+		public static void WriteLines(params ColoredMessage?[] message)
 		{
 			lock (WriteLock)
 			{
-				foreach (ColoredMessage coloredMessage in message) WriteLine(coloredMessage);
+				foreach (ColoredMessage? coloredMessage in message) WriteLine(coloredMessage);
 			}
 		}
 	}
 
 	public class ColoredMessage : ICloneable
 	{
-		public string text;
+		public string? text;
 		public ConsoleColor? textColor;
 		public ConsoleColor? backgroundColor;
 
 		public int Length => text?.Length ?? 0;
 
-		public ColoredMessage(string text, ConsoleColor? textColor = null, ConsoleColor? backgroundColor = null)
+		public ColoredMessage(string? text, ConsoleColor? textColor = null, ConsoleColor? backgroundColor = null)
 		{
 			this.text = text;
 			this.textColor = textColor;
@@ -95,10 +95,10 @@ namespace MultiAdmin.ConsoleTools
 		public bool Equals(ColoredMessage other)
 		{
 			return string.Equals(text, other.text) && textColor == other.textColor &&
-			       backgroundColor == other.backgroundColor;
+				   backgroundColor == other.backgroundColor;
 		}
 
-		public override bool Equals(object obj)
+		public override bool Equals(object? obj)
 		{
 			if (ReferenceEquals(null, obj))
 			{
@@ -120,16 +120,10 @@ namespace MultiAdmin.ConsoleTools
 
 		public override int GetHashCode()
 		{
-			unchecked
-			{
-				int hashCode = text != null ? text.GetHashCode() : 0;
-				hashCode = (hashCode * 397) ^ textColor.GetHashCode();
-				hashCode = (hashCode * 397) ^ backgroundColor.GetHashCode();
-				return hashCode;
-			}
+			return HashCode.Combine(text, textColor, backgroundColor);
 		}
 
-		public static bool operator ==(ColoredMessage firstMessage, ColoredMessage secondMessage)
+		public static bool operator ==(ColoredMessage? firstMessage, ColoredMessage? secondMessage)
 		{
 			if (ReferenceEquals(firstMessage, secondMessage))
 				return true;
@@ -140,12 +134,12 @@ namespace MultiAdmin.ConsoleTools
 			return firstMessage.Equals(secondMessage);
 		}
 
-		public static bool operator !=(ColoredMessage firstMessage, ColoredMessage secondMessage)
+		public static bool operator !=(ColoredMessage? firstMessage, ColoredMessage? secondMessage)
 		{
 			return !(firstMessage == secondMessage);
 		}
 
-		public override string ToString()
+		public override string? ToString()
 		{
 			return text;
 		}
@@ -179,11 +173,11 @@ namespace MultiAdmin.ConsoleTools
 
 	public static class ColoredMessageArrayExtensions
 	{
-		private static string JoinTextIgnoreNull(ColoredMessage[] coloredMessages)
+		private static string JoinTextIgnoreNull(ColoredMessage?[] coloredMessages)
 		{
-			StringBuilder builder = new StringBuilder("");
+			StringBuilder builder = new("");
 
-			foreach (ColoredMessage coloredMessage in coloredMessages)
+			foreach (ColoredMessage? coloredMessage in coloredMessages)
 			{
 				if (coloredMessage != null)
 					builder.Append(coloredMessage);
@@ -192,12 +186,12 @@ namespace MultiAdmin.ConsoleTools
 			return builder.ToString();
 		}
 
-		public static string GetText(this ColoredMessage[] message)
+		public static string GetText(this ColoredMessage?[] message)
 		{
 			return JoinTextIgnoreNull(message);
 		}
 
-		public static void Write(this ColoredMessage[] message, bool clearConsoleLine = false)
+		public static void Write(this ColoredMessage?[] message, bool clearConsoleLine = false)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
@@ -205,7 +199,7 @@ namespace MultiAdmin.ConsoleTools
 			}
 		}
 
-		public static void WriteLine(this ColoredMessage[] message, bool clearConsoleLine = false)
+		public static void WriteLine(this ColoredMessage?[] message, bool clearConsoleLine = false)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
@@ -213,7 +207,7 @@ namespace MultiAdmin.ConsoleTools
 			}
 		}
 
-		public static void WriteLines(this ColoredMessage[] message, bool clearConsoleLine = false)
+		public static void WriteLines(this ColoredMessage?[] message, bool clearConsoleLine = false)
 		{
 			lock (ColoredConsole.WriteLock)
 			{

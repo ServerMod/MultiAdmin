@@ -1,10 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
-  	<LangVersion>8</LangVersion>
+    <TargetFramework>net7.0</TargetFramework>
+    <LangVersion>11</LangVersion>
     <RootNamespace>MultiAdmin</RootNamespace>
     <ApplicationIcon>Icon.ico</ApplicationIcon>
+    <Nullable>enable</Nullable>
 
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
@@ -19,6 +20,10 @@
 
     <Optimize>true</Optimize>
 
+    <!-- AOT Compilation -->
+    <PublishAot>true</PublishAot>
+    <StripSymbols>true</StripSymbols>
+
     <!-- Workaround to ILCompiler error code 139 -->
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
@@ -30,9 +35,5 @@
 
   <ItemGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
     <PackageReference Include="Mono.Posix.NETStandard" Version="1.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="7.0.0-*" />
   </ItemGroup>
 </Project>

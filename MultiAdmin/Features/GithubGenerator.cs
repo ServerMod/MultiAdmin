@@ -4,13 +4,11 @@ using System.IO;
 using System.Text;
 using MultiAdmin.Config;
 using MultiAdmin.Config.ConfigHandler;
-using MultiAdmin.Features.Attributes;
 using MultiAdmin.ServerIO;
 using MultiAdmin.Utility;
 
 namespace MultiAdmin.Features
 {
-	[Feature]
 	internal class GithubGenerator : Feature, ICommand
 	{
 		public const string EmptyIndicator = "**Empty**";
@@ -74,7 +72,7 @@ namespace MultiAdmin.Features
 				// Ignore, any proper exceptions will be presented when the file is written
 			}
 
-			List<string> lines = new List<string> {"# MultiAdmin", "", "## Features", ""};
+			List<string> lines = new() { "# MultiAdmin", "", "## Features", "" };
 
 			foreach (Feature feature in Server.features)
 			{
@@ -99,72 +97,72 @@ namespace MultiAdmin.Features
 			foreach (ConfigEntry configEntry in MultiAdminConfig.GlobalConfig.GetRegisteredConfigs())
 			{
 				StringBuilder stringBuilder =
-					new StringBuilder($"{configEntry.Key ?? EmptyIndicator}{ColumnSeparator}");
+					new($"{configEntry.Key ?? EmptyIndicator}{ColumnSeparator}");
 
 				switch (configEntry)
 				{
 					case ConfigEntry<string> config:
-					{
-						stringBuilder.Append(
-							$"String{ColumnSeparator}{(string.IsNullOrEmpty(config.Default) ? EmptyIndicator : config.Default)}");
-						break;
-					}
+						{
+							stringBuilder.Append(
+								$"String{ColumnSeparator}{(string.IsNullOrEmpty(config.Default) ? EmptyIndicator : config.Default)}");
+							break;
+						}
 
 					case ConfigEntry<string[]> config:
-					{
-						stringBuilder.Append(
-							$"String List{ColumnSeparator}{(config.Default?.IsEmpty() ?? true ? EmptyIndicator : string.Join(", ", config.Default))}");
-						break;
-					}
+						{
+							stringBuilder.Append(
+								$"String List{ColumnSeparator}{(config.Default?.IsEmpty() ?? true ? EmptyIndicator : string.Join(", ", config.Default))}");
+							break;
+						}
 
 					case ConfigEntry<int> config:
-					{
-						stringBuilder.Append($"Integer{ColumnSeparator}{config.Default}");
-						break;
-					}
+						{
+							stringBuilder.Append($"Integer{ColumnSeparator}{config.Default}");
+							break;
+						}
 
 					case ConfigEntry<uint> config:
-					{
-						stringBuilder.Append($"Unsigned Integer{ColumnSeparator}{config.Default}");
-						break;
-					}
+						{
+							stringBuilder.Append($"Unsigned Integer{ColumnSeparator}{config.Default}");
+							break;
+						}
 
 					case ConfigEntry<float> config:
-					{
-						stringBuilder.Append($"Float{ColumnSeparator}{config.Default}");
-						break;
-					}
+						{
+							stringBuilder.Append($"Float{ColumnSeparator}{config.Default}");
+							break;
+						}
 
 					case ConfigEntry<double> config:
-					{
-						stringBuilder.Append($"Double{ColumnSeparator}{config.Default}");
-						break;
-					}
+						{
+							stringBuilder.Append($"Double{ColumnSeparator}{config.Default}");
+							break;
+						}
 
 					case ConfigEntry<decimal> config:
-					{
-						stringBuilder.Append($"Decimal{ColumnSeparator}{config.Default}");
-						break;
-					}
+						{
+							stringBuilder.Append($"Decimal{ColumnSeparator}{config.Default}");
+							break;
+						}
 
 					case ConfigEntry<bool> config:
-					{
-						stringBuilder.Append($"Boolean{ColumnSeparator}{config.Default}");
-						break;
-					}
+						{
+							stringBuilder.Append($"Boolean{ColumnSeparator}{config.Default}");
+							break;
+						}
 
 					case ConfigEntry<InputHandler.ConsoleInputSystem> config:
-					{
-						stringBuilder.Append($"[ConsoleInputSystem](#ConsoleInputSystem){ColumnSeparator}{config.Default}");
-						break;
-					}
+						{
+							stringBuilder.Append($"[ConsoleInputSystem](#consoleinputsystem){ColumnSeparator}{config.Default}");
+							break;
+						}
 
 					default:
-					{
-						stringBuilder.Append(
-							$"{configEntry.ValueType?.Name ?? EmptyIndicator}{ColumnSeparator}{configEntry.ObjectDefault ?? EmptyIndicator}");
-						break;
-					}
+						{
+							stringBuilder.Append(
+								$"{configEntry.ValueType?.Name ?? EmptyIndicator}{ColumnSeparator}{configEntry.ObjectDefault ?? EmptyIndicator}");
+							break;
+						}
 				}
 
 				stringBuilder.Append($"{ColumnSeparator}{configEntry.Description ?? EmptyIndicator}");

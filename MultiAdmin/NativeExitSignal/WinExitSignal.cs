@@ -5,7 +5,7 @@ namespace MultiAdmin.NativeExitSignal
 {
 	public class WinExitSignal : IExitSignal
 	{
-		public event EventHandler Exit;
+		public event EventHandler? Exit;
 
 		[DllImport("Kernel32")]
 		public static extern bool SetConsoleCtrlHandler(HandlerRoutine handler, bool add);

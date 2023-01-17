@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using MultiAdmin.Config;
 using MultiAdmin.Config.ConfigHandler;
-using MultiAdmin.Features.Attributes;
 using MultiAdmin.Utility;
 
 namespace MultiAdmin.Features
 {
-	[Feature]
 	internal class ConfigGenerator : Feature, ICommand
 	{
 
@@ -72,22 +70,22 @@ namespace MultiAdmin.Features
 
 			ConfigEntry[] registeredConfigs = MultiAdminConfig.GlobalConfig.GetRegisteredConfigs();
 
-			List<string> lines = new List<string>(registeredConfigs.Length);
+			List<string> lines = new(registeredConfigs.Length);
 			foreach (ConfigEntry configEntry in registeredConfigs)
 			{
 				switch (configEntry)
 				{
 					case ConfigEntry<string[]> config:
-					{
-						lines.Add($"{config.Key}: {(config.Default == null ? "" : string.Join(", ", config.Default))}");
-						break;
-					}
+						{
+							lines.Add($"{config.Key}: {(config.Default == null ? "" : string.Join(", ", config.Default))}");
+							break;
+						}
 
 					default:
-					{
-						lines.Add($"{configEntry.Key}: {configEntry.ObjectDefault ?? ""}");
-						break;
-					}
+						{
+							lines.Add($"{configEntry.Key}: {configEntry.ObjectDefault ?? ""}");
+							break;
+						}
 				}
 			}
 

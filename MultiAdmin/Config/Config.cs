@@ -10,10 +10,11 @@ namespace MultiAdmin.Config
 {
 	public class Config
 	{
-		public string[] rawData = { };
+		public string[] rawData = Array.Empty<string>();
 
 		public Config(string path)
 		{
+			internalConfigPath = path;
 			ReadConfigFile(path);
 		}
 
@@ -26,7 +27,7 @@ namespace MultiAdmin.Config
 			{
 				try
 				{
-					internalConfigPath = Utils.GetFullPathSafe(value);
+					internalConfigPath = Utils.GetFullPathSafe(value) ?? value;
 				}
 				catch (Exception e)
 				{
@@ -38,13 +39,11 @@ namespace MultiAdmin.Config
 
 		public void ReadConfigFile(string configPath)
 		{
-			if (string.IsNullOrEmpty(configPath)) return;
-
 			ConfigPath = configPath;
 
 			try
 			{
-				rawData = File.Exists(ConfigPath) ? File.ReadAllLines(ConfigPath, Encoding.UTF8) : new string[] { };
+				rawData = File.Exists(ConfigPath) ? File.ReadAllLines(ConfigPath, Encoding.UTF8) : Array.Empty<string>();
 			}
 			catch (Exception e)
 			{
@@ -52,7 +51,7 @@ namespace MultiAdmin.Config
 
 				new ColoredMessage[]
 				{
-					new ColoredMessage($"Error while reading config (Path = {ConfigPath ?? "Null"}):",
+					new ColoredMessage($"Error while reading config (Path = {ConfigPath}):",
 						ConsoleColor.Red),
 					new ColoredMessage(e.ToString(), ConsoleColor.Red)
 				}.WriteLines();
@@ -67,7 +66,7 @@ namespace MultiAdmin.Config
 		public bool Contains(string key)
 		{
 			return rawData != null &&
-			       rawData.Any(entry => entry.StartsWith($"{key}:", StringComparison.CurrentCultureIgnoreCase));
+				   rawData.Any(entry => entry.StartsWith($"{key}:", StringComparison.CurrentCultureIgnoreCase));
 		}
 
 		private static string CleanValue(string value, bool removeQuotes = true)
@@ -79,7 +78,7 @@ namespace MultiAdmin.Config
 			try
 			{
 				if (removeQuotes && newValue.StartsWith("\"") && newValue.EndsWith("\""))
-					return newValue.Substring(1, newValue.Length - 2);
+					return newValue[1..^1];
 			}
 			catch (Exception e)
 			{
@@ -89,7 +88,7 @@ namespace MultiAdmin.Config
 			return newValue;
 		}
 
-		public string GetString(string key, string def = null, bool removeQuotes = true)
+		public string? GetString(string key, string? def = null, bool removeQuotes = true)
 		{
 			try
 			{
@@ -99,7 +98,7 @@ namespace MultiAdmin.Config
 
 					try
 					{
-						return CleanValue(line.Substring(key.Length + 1), removeQuotes);
+						return CleanValue(line[(key.Length + 1)..], removeQuotes);
 					}
 					catch (Exception e)
 					{
@@ -115,11 +114,11 @@ namespace MultiAdmin.Config
 			return def;
 		}
 
-		public string[] GetStringArray(string key, string[] def = null)
+		public string[]? GetStringArray(string key, string[]? def = null)
 		{
 			try
 			{
-				string value = GetString(key, removeQuotes: false);
+				string? value = GetString(key, removeQuotes: false);
 
 				if (!string.IsNullOrEmpty(value))
 				{
@@ -145,7 +144,7 @@ namespace MultiAdmin.Config
 		{
 			try
 			{
-				string value = GetString(key);
+				string? value = GetString(key);
 
 				if (!string.IsNullOrEmpty(value) && int.TryParse(value, out int parseValue))
 					return parseValue;
@@ -162,7 +161,7 @@ namespace MultiAdmin.Config
 		{
 			try
 			{
-				string value = GetString(key);
+				string? value = GetString(key);
 
 				if (!string.IsNullOrEmpty(value) && uint.TryParse(value, out uint parseValue))
 					return parseValue;
@@ -179,7 +178,7 @@ namespace MultiAdmin.Config
 		{
 			try
 			{
-				string value = GetString(key);
+				string? value = GetString(key);
 
 				if (!string.IsNullOrEmpty(value) && float.TryParse(value, out float parsedValue))
 					return parsedValue;
@@ -196,7 +195,7 @@ namespace MultiAdmin.Config
 		{
 			try
 			{
-				string value = GetString(key);
+				string? value = GetString(key);
 
 				if (!string.IsNullOrEmpty(value) && double.TryParse(value, out double parsedValue))
 					return parsedValue;
@@ -213,7 +212,7 @@ namespace MultiAdmin.Config
 		{
 			try
 			{
-				string value = GetString(key);
+				string? value = GetString(key);
 
 				if (!string.IsNullOrEmpty(value) && decimal.TryParse(value, out decimal parsedValue))
 					return parsedValue;
@@ -230,7 +229,7 @@ namespace MultiAdmin.Config
 		{
 			try
 			{
-				string value = GetString(key);
+				string? value = GetString(key);
 
 				if (!string.IsNullOrEmpty(value) && bool.TryParse(value, out bool parsedValue))
 					return parsedValue;
@@ -247,7 +246,7 @@ namespace MultiAdmin.Config
 		{
 			try
 			{
-				string value = GetString(key);
+				string? value = GetString(key);
 
 				if (!string.IsNullOrEmpty(value) && Enum.TryParse<InputHandler.ConsoleInputSystem>(value, out var consoleInputSystem))
 					return consoleInputSystem;

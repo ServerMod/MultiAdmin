@@ -16,10 +16,10 @@ namespace MultiAdmin.Tests.ServerIO
 		}
 
 		[Theory]
-		[InlineData("test string", new[] {"te", "st", " s", "tr", "in", "g"}, 2)]
-		[InlineData("test string", new[] {"tes..", ".t ..", ".st..", ".ring"}, 5, ".", "..")]
+		[InlineData("test string", new[] { "te", "st", " s", "tr", "in", "g" }, 2)]
+		[InlineData("test string", new[] { "tes..", ".t ..", ".st..", ".ring" }, 5, ".", "..")]
 		public void FromStringTest(string testString, string[] expectedSections, int sectionLength,
-			string leftIndictator = null, string rightIndictator = null)
+			string? leftIndictator = null, string? rightIndictator = null)
 		{
 			StringSections sections = StringSections.FromString(testString, sectionLength,
 				leftIndictator != null ? new ColoredMessage(leftIndictator) : null,
@@ -43,8 +43,8 @@ namespace MultiAdmin.Tests.ServerIO
 		[Theory]
 		// No further characters can be output because of the prefix and suffix
 		[InlineData("test string", 2, ".", ".")]
-		public void FromStringThrowsTest(string testString, int sectionLength, string leftIndictator = null,
-			string rightIndictator = null)
+		public void FromStringThrowsTest(string testString, int sectionLength, string? leftIndictator = null,
+			string? rightIndictator = null)
 		{
 			Assert.Throws<ArgumentException>(() =>
 			{

@@ -8,7 +8,7 @@ namespace MultiAdmin.NativeExitSignal
 {
 	public class UnixExitSignal : IExitSignal
 	{
-		public event EventHandler Exit;
+		public event EventHandler? Exit;
 
 		private static readonly UnixSignal[] Signals = {
 			new UnixSignal(Signum.SIGINT),  // CTRL + C pressed

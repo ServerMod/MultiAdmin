@@ -1,8 +1,5 @@
-using MultiAdmin.Features.Attributes;
-
 namespace MultiAdmin.Features
 {
-	[Feature]
 	internal class RestartRoundCounter : Feature, IEventRoundEnd
 	{
 		private int count;

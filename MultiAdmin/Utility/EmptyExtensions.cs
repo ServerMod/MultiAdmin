@@ -12,7 +12,7 @@ namespace MultiAdmin.Utility
 			return !enumerable.Any();
 		}
 
-		public static bool IsNullOrEmpty<T>(this IEnumerable<T> enumerable)
+		public static bool IsNullOrEmpty<T>(this IEnumerable<T?>? enumerable)
 		{
 			return enumerable?.IsEmpty() ?? true;
 		}
@@ -22,17 +22,17 @@ namespace MultiAdmin.Utility
 			return array.Length <= 0;
 		}
 
-		public static bool IsNullOrEmpty(this Array array)
+		public static bool IsNullOrEmpty(this Array? array)
 		{
 			return array?.IsEmpty() ?? true;
 		}
 
-		public static bool IsEmpty<T>(this T[] array)
+		public static bool IsEmpty<T>(this T?[] array)
 		{
 			return array.Length <= 0;
 		}
 
-		public static bool IsNullOrEmpty<T>(this T[] array)
+		public static bool IsNullOrEmpty<T>(this T?[]? array)
 		{
 			return array?.IsEmpty() ?? true;
 		}
@@ -42,7 +42,7 @@ namespace MultiAdmin.Utility
 			return collection.Count <= 0;
 		}
 
-		public static bool IsNullOrEmpty<T>(this ICollection<T> collection)
+		public static bool IsNullOrEmpty<T>(this ICollection<T?>? collection)
 		{
 			return collection?.IsEmpty() ?? true;
 		}
@@ -52,17 +52,17 @@ namespace MultiAdmin.Utility
 			return list.Count <= 0;
 		}
 
-		public static bool IsNullOrEmpty<T>(this List<T> list)
+		public static bool IsNullOrEmpty<T>(this List<T?>? list)
 		{
 			return list?.IsEmpty() ?? true;
 		}
 
-		public static bool IsEmpty<TKey, TValue>(this Dictionary<TKey, TValue> dictionary)
+		public static bool IsEmpty<TKey, TValue>(this Dictionary<TKey, TValue> dictionary) where TKey : notnull
 		{
 			return dictionary.Count <= 0;
 		}
 
-		public static bool IsNullOrEmpty<TKey, TValue>(this Dictionary<TKey, TValue> dictionary)
+		public static bool IsNullOrEmpty<TKey, TValue>(this Dictionary<TKey, TValue?>? dictionary) where TKey : notnull
 		{
 			return dictionary?.IsEmpty() ?? true;
 		}
@@ -72,7 +72,7 @@ namespace MultiAdmin.Utility
 			return stringBuilder.Length <= 0;
 		}
 
-		public static bool IsNullOrEmpty(this StringBuilder stringBuilder)
+		public static bool IsNullOrEmpty(this StringBuilder? stringBuilder)
 		{
 			return stringBuilder?.IsEmpty() ?? true;
 		}
@@ -82,7 +82,7 @@ namespace MultiAdmin.Utility
 			return @string.Length <= 0;
 		}
 
-		public static bool IsNullOrEmpty(this string @string)
+		public static bool IsNullOrEmpty(this string? @string)
 		{
 			return @string?.IsEmpty() ?? true;
 		}

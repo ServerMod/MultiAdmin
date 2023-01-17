@@ -62,11 +62,6 @@ namespace MultiAdmin.Utility
 
 		public static string[] StringToArgs(string inString, int startIndex, int count, char separator = ' ', char escapeChar = '\\', char quoteChar = '\"', bool keepQuotes = false)
 		{
-			if (inString == null)
-			{
-				return null;
-			}
-
 			if (startIndex < 0 || startIndex >= inString.Length)
 			{
 				throw new ArgumentOutOfRangeException(nameof(startIndex));
@@ -80,8 +75,8 @@ namespace MultiAdmin.Utility
 			if (inString.IsEmpty())
 				return Array.Empty<string>();
 
-			List<string> args = new List<string>();
-			StringBuilder strBuilder = new StringBuilder();
+			List<string> args = new();
+			StringBuilder strBuilder = new();
 			bool inQuotes = false;
 			bool escaped = false;
 

@@ -27,7 +27,7 @@ Make sure that you are running Mono 5.18.0 or higher, otherwise you might have i
 - Config Generator: Generates a full default MultiAdmin config file
 - Config Reload: Reloads the MultiAdmin configuration file
 - Exit Command: Adds a graceful exit command
-- Folder Copy Round Queue: Copies files from folders in a queue
+- File Copy Round Queue: Copies files from folders in a queue
 - GitHub Generator: Generates a GitHub README file outlining all the features/commands
 - Help: Display a full list of MultiAdmin commands and in game commands
 - Restart On Low Memory: Restarts the server if the working memory becomes too low
@@ -53,6 +53,7 @@ This does not include ingame commands, for a full list type `HELP` in MultiAdmin
 The arguments available for running MultiAdmin with
 
 - `--headless` or `-h`: Runs MultiAdmin in headless mode, this makes MultiAdmin not accept any input at all and only output to log files, not in console (Note: This argument is inherited by processes started by this MultiAdmin process)
+- `--input-system <ConsoleInputSystem>` or `-is <ConsoleInputSystem>`: The [ConsoleInputSystem](#consoleinputsystem) to use for this MultiAdmin instance (Note: This is used over the config option `console_input_system` and is inherited by processes started by this MultiAdmin process)
 - `--server-id <Server ID>` or `-id <Server ID>`: The Server ID to run this MultiAdmin instance with a config location (`--config` or `-c`) so that it reads the configs from the location, but stores the logs in the Server ID's folder
 - `--config <Config Location>` or `-c <Config Location>`: The config location to use for this MultiAdmin instance (Note: This is used over the config option `config_location`)
 - `--port <Server Port>` or `-p <Server Port>`: The port to use for this MultiAdmin instance (Note: This is used over the config option `port` and is inherited by processes started by this MultiAdmin process)
@@ -60,6 +61,13 @@ The arguments available for running MultiAdmin with
 ## Config Settings
 All configuration settings go into a file named `scp_multiadmin.cfg` in the same directory as MultiAdmin.exe or in your server directory within the `servers_folder` value defined in the global configuration file
 Any configuration files within the directory defined by `servers_folder` will have it's values used for that server over the global configuration file
+
+Example config:
+```yml
+port: 7777
+max_memory: 2048
+config_location: "/home/container/Server Config"
+```
 
 Config Option | Value Type | Default Value | Description
 --- | :---: | :---: | :------:
@@ -73,7 +81,7 @@ multiadmin_debug_log | Boolean | True | Enables MultiAdmin debug logging, this l
 multiadmin_debug_log_blacklist | String List | HandleMessage, StringMatches, MessageListener | Which tags to block for MultiAdmin debug logging
 multiadmin_debug_log_whitelist | String List | **Empty** | Which tags to log for MultiAdmin debug logging (Defaults to logging all if none are provided)
 use_new_input_system | Boolean | True | **OBSOLETE: Use `console_input_system` instead, this config option may be removed in a future version of MultiAdmin.** Whether to use the new input system, if false, the original input system will be used
-console_input_system | [ConsoleInputSystem](#ConsoleInputSystem) | New | Which console input system to use
+console_input_system | [ConsoleInputSystem](#consoleinputsystem) | New | Which console input system to use
 hide_input | Boolean | False | Whether to hide console input, if true, typed input will not be printed
 port | Unsigned Integer | 7777 | The port for the server to use
 copy_from_folder_on_reload | String | **Empty** | The location of a folder to copy files from into the folder defined by `config_location` whenever the configuration file is reloaded

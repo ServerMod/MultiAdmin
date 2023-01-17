@@ -1,15 +1,13 @@
 using System;
-using MultiAdmin.Features.Attributes;
 using MultiAdmin.Utility;
 
 namespace MultiAdmin.Features
 {
-	[Feature]
 	internal class FileCopyRoundQueue : Feature, IEventRoundEnd
 	{
-		private string[] queue;
-		private string[] whitelist;
-		private string[] blacklist;
+		private string[] queue = Array.Empty<string>();
+		private string[] whitelist = Array.Empty<string>();
+		private string[] blacklist = Array.Empty<string>();
 		private bool randomizeQueue;
 		private int queueIndex;
 
@@ -60,7 +58,7 @@ namespace MultiAdmin.Features
 		{
 			if (!HasValidQueue) return 0;
 
-			Random random = new Random();
+			Random random = new();
 
 			int index;
 			do
@@ -80,9 +78,9 @@ namespace MultiAdmin.Features
 
 		public override void OnConfigReload()
 		{
-			queue = Server.ServerConfig.FolderCopyRoundQueue.Value;
-			whitelist = Server.ServerConfig.FolderCopyRoundQueueWhitelist.Value;
-			blacklist = Server.ServerConfig.FolderCopyRoundQueueBlacklist.Value;
+			queue = Server.ServerConfig.FolderCopyRoundQueue.Value ?? Array.Empty<string>();
+			whitelist = Server.ServerConfig.FolderCopyRoundQueueWhitelist.Value ?? Array.Empty<string>();
+			blacklist = Server.ServerConfig.FolderCopyRoundQueueBlacklist.Value ?? Array.Empty<string>();
 			randomizeQueue = Server.ServerConfig.RandomizeFolderCopyRoundQueue.Value;
 		}
 
@@ -93,7 +91,7 @@ namespace MultiAdmin.Features
 
 		public override string GetFeatureName()
 		{
-			return "Folder Copy Round Queue";
+			return "File Copy Round Queue";
 		}
 	}
 }

@@ -10,30 +10,30 @@ namespace MultiAdmin.ServerIO
 	public class ServerSocket : IDisposable
 	{
 		private const int IntBytes = sizeof(int);
-		public static readonly UTF8Encoding Encoding = new UTF8Encoding(false, true);
+		public static readonly UTF8Encoding Encoding = new(false, true);
 
-		private readonly CancellationTokenSource disposeCancellationSource = new CancellationTokenSource();
+		private readonly CancellationTokenSource disposeCancellationSource = new();
 		private bool disposed = false;
 
 		private readonly TcpListener listener;
 
-		private TcpClient client;
-		private NetworkStream networkStream;
+		private TcpClient? client;
+		private NetworkStream? networkStream;
 
-		public struct MessageEventArgs
+		public readonly struct MessageEventArgs
 		{
-			public MessageEventArgs(string message, byte color)
+			public MessageEventArgs(string? message, byte color)
 			{
 				this.message = message;
 				this.color = color;
 			}
 
-			public readonly string message;
+			public readonly string? message;
 			public readonly byte color;
 		}
 
-		public event EventHandler<MessageEventArgs> OnReceiveMessage;
-		public event EventHandler<byte> OnReceiveAction;
+		public event EventHandler<MessageEventArgs>? OnReceiveMessage;
+		public event EventHandler<byte>? OnReceiveAction;
 
 		public int Port => ((IPEndPoint)listener.LocalEndpoint).Port;
 
@@ -74,13 +74,17 @@ namespace MultiAdmin.ServerIO
 		public async void MessageListener()
 		{
 			byte[] typeBuffer = new byte[1];
+			Memory<byte> typeBufferMemory = new(typeBuffer);
+
 			byte[] intBuffer = new byte[IntBytes];
+			Memory<byte> intBufferMemory = new(intBuffer);
+
 			while (!disposed && networkStream != null)
 			{
 				try
 				{
 					int messageTypeBytesRead =
-						await networkStream.ReadAsync(typeBuffer, 0, 1, disposeCancellationSource.Token);
+						await networkStream.ReadAsync(typeBufferMemory, disposeCancellationSource.Token);
 
 					// Socket has been disconnected
 					if (messageTypeBytesRead <= 0)
@@ -99,7 +103,7 @@ namespace MultiAdmin.ServerIO
 					}
 
 					int lengthBytesRead =
-						await networkStream.ReadAsync(intBuffer, 0, IntBytes, disposeCancellationSource.Token);
+						await networkStream.ReadAsync(intBufferMemory, disposeCancellationSource.Token);
 
 					// Socket has been disconnected or integer read is invalid
 					if (lengthBytesRead != IntBytes)
@@ -123,7 +127,7 @@ namespace MultiAdmin.ServerIO
 
 					byte[] messageBuffer = new byte[length];
 					int messageBytesRead =
-						await networkStream.ReadAsync(messageBuffer, 0, length, disposeCancellationSource.Token);
+						await networkStream.ReadAsync(messageBuffer.AsMemory(0, length), disposeCancellationSource.Token);
 
 					// Socket has been disconnected
 					if (messageBytesRead <= 0)
@@ -175,6 +179,8 @@ namespace MultiAdmin.ServerIO
 		{
 			if (disposed)
 				return;
+
+			GC.SuppressFinalize(this);
 
 			disposed = true;
 			disposeCancellationSource.Cancel();

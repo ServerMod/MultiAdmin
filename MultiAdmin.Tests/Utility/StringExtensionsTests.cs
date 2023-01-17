@@ -14,7 +14,7 @@ namespace MultiAdmin.Tests.Utility
 		[InlineData("test", "es", 1, 2)]
 		[InlineData(null, null, 0)]
 		[InlineData(null, null, 0, 1)]
-		public void EqualsTest(string main, string section, int startIndex, int count = -1)
+		public void EqualsTest(string? main, string? section, int startIndex, int count = -1)
 		{
 			Assert.True(count < 0 ? main.Equals(section, startIndex) : main.Equals(section, startIndex, count));
 		}
@@ -27,7 +27,7 @@ namespace MultiAdmin.Tests.Utility
 		[InlineData(null, "test", 0)]
 		[InlineData("test", null, 0, 1)]
 		[InlineData(null, "test", 0, 1)]
-		public void NotEqualsTest(string main, string section, int startIndex, int count = -1)
+		public void NotEqualsTest(string? main, string? section, int startIndex, int count = -1)
 		{
 			Assert.False(count < 0 ? main.Equals(section, startIndex) : main.Equals(section, startIndex, count));
 		}
@@ -37,7 +37,7 @@ namespace MultiAdmin.Tests.Utility
 		[InlineData(typeof(ArgumentOutOfRangeException), "test", "st", 3)]
 		[InlineData(typeof(ArgumentOutOfRangeException), "test", "te", -1)]
 		[InlineData(typeof(ArgumentOutOfRangeException), "test", "es", 4)]
-		public void EqualsThrowsTest(Type expected, string main, string section, int startIndex, int count = -1)
+		public void EqualsThrowsTest(Type expected, string? main, string? section, int startIndex, int count = -1)
 		{
 			Assert.Throws(expected, () =>
 			{

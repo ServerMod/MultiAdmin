@@ -4,6 +4,6 @@ namespace MultiAdmin.NativeExitSignal
 {
 	public interface IExitSignal
 	{
-		event EventHandler Exit;
+		event EventHandler? Exit;
 	}
 }

@@ -10,7 +10,7 @@ namespace MultiAdmin.Config.ConfigHandler
 		/// <summary>
 		/// A list of registered <see cref="ConfigEntry"/>s.
 		/// </summary>
-		protected readonly List<ConfigEntry> registeredConfigs = new List<ConfigEntry>();
+		protected readonly List<ConfigEntry> registeredConfigs = new();
 
 		/// <summary>
 		/// Returns an array of registered <see cref="ConfigEntry"/>s.
@@ -24,7 +24,7 @@ namespace MultiAdmin.Config.ConfigHandler
 		/// Returns the first <see cref="ConfigEntry"/> with a key matching <paramref name="key"/>.
 		/// </summary>
 		/// <param name="key">The key of the <see cref="ConfigEntry"/> to retrieve.</param>
-		public ConfigEntry GetRegisteredConfig(string key)
+		public ConfigEntry? GetRegisteredConfig(string key)
 		{
 			if (string.IsNullOrEmpty(key))
 				return null;
@@ -47,7 +47,7 @@ namespace MultiAdmin.Config.ConfigHandler
 		/// <param name="updateValue">Whether to update the value of the config after registration.</param>
 		public void RegisterConfig(ConfigEntry configEntry, bool updateValue = true)
 		{
-			if (configEntry == null || string.IsNullOrEmpty(configEntry.Key))
+			if (string.IsNullOrEmpty(configEntry.Key))
 				return;
 
 			registeredConfigs.Add(configEntry);
@@ -63,9 +63,6 @@ namespace MultiAdmin.Config.ConfigHandler
 		/// <param name="updateValue">Whether to update the value of the config after registration.</param>
 		public void RegisterConfigs(ConfigEntry[] configEntries, bool updateValue = true)
 		{
-			if (configEntries == null)
-				return;
-
 			foreach (ConfigEntry configEntry in configEntries)
 			{
 				RegisterConfig(configEntry, updateValue);
@@ -78,7 +75,7 @@ namespace MultiAdmin.Config.ConfigHandler
 		/// <param name="configEntry">The <see cref="ConfigEntry"/> to be un-registered.</param>
 		public void UnRegisterConfig(ConfigEntry configEntry)
 		{
-			if (configEntry == null || string.IsNullOrEmpty(configEntry.Key))
+			if (string.IsNullOrEmpty(configEntry.Key))
 				return;
 
 			registeredConfigs.Remove(configEntry);
@@ -90,7 +87,9 @@ namespace MultiAdmin.Config.ConfigHandler
 		/// <param name="key">The key of the <see cref="ConfigEntry"/> to be un-registered.</param>
 		public void UnRegisterConfig(string key)
 		{
-			UnRegisterConfig(GetRegisteredConfig(key));
+			ConfigEntry? entry = GetRegisteredConfig(key);
+			if (entry != null)
+				UnRegisterConfig(entry);
 		}
 
 		/// <summary>
@@ -99,9 +98,6 @@ namespace MultiAdmin.Config.ConfigHandler
 		/// <param name="configEntries">The <see cref="ConfigEntry"/>s to be un-registered.</param>
 		public void UnRegisterConfigs(params ConfigEntry[] configEntries)
 		{
-			if (configEntries == null)
-				return;
-
 			foreach (ConfigEntry configEntry in configEntries)
 			{
 				UnRegisterConfig(configEntry);
@@ -114,9 +110,6 @@ namespace MultiAdmin.Config.ConfigHandler
 		/// <param name="keys">The keys of the <see cref="ConfigEntry"/>s to be un-registered.</param>
 		public void UnRegisterConfigs(params string[] keys)
 		{
-			if (keys == null)
-				return;
-
 			foreach (string key in keys)
 			{
 				UnRegisterConfig(key);
@@ -146,9 +139,6 @@ namespace MultiAdmin.Config.ConfigHandler
 		/// <param name="configEntries">The <see cref="ConfigEntry"/>s to be assigned values.</param>
 		public void UpdateConfigValues(params ConfigEntry[] configEntries)
 		{
-			if (configEntries == null)
-				return;
-
 			foreach (ConfigEntry configEntry in configEntries)
 			{
 				UpdateConfigValue(configEntry);

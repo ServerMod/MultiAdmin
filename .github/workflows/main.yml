@@ -1,6 +1,13 @@
 name: MultiAdmin Build
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+  workflow_dispatch:
+  create:
 
 jobs:
   build:
@@ -8,26 +15,32 @@ jobs:
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
-        os: [ubuntu-18.04, windows-latest]
-        framework: ['6.0']
+        os: [ubuntu-20.04, windows-latest]
+        framework: ['7.0']
         include:
-        - os: ubuntu-18.04
+        - os: ubuntu-20.04
           target: linux-x64
         - os: windows-latest
           target: win-x64
     timeout-minutes: 30
 
     steps:
-    - uses: actions/checkout@v2.3.4
+    - uses: actions/checkout@v3
 
-    - if: matrix.os == 'ubuntu-18.04'
-      name: Install Linux packages
-      run: |
-        sudo apt update
-        sudo apt install -y clang zlib1g-dev libkrb5-dev libtinfo5
+    - if: matrix.os == 'ubuntu-20.04'
+      name: Set up Linux dependencies
+      uses: awalsh128/cache-apt-pkgs-action@latest
+      with:
+        packages: clang zlib1g-dev libkrb5-dev libtinfo5
+        # Increment to invalidate the cache
+        version: 1.0
+        # Enables a workaround to attempt to run pre and post install scripts
+        execute_install_scripts: true
+        # Disables uploading logs as a build artifact
+        debug: false
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v1.7.2
+      uses: actions/setup-dotnet@v3
       with:
         dotnet-version: ${{matrix.framework}}
 
@@ -41,13 +54,13 @@ jobs:
       run: dotnet test
 
     - name: Upload ${{matrix.target}} build
-      uses: actions/upload-artifact@v2.2.2
+      uses: actions/upload-artifact@v3
       with:
         name: MultiAdmin-${{matrix.target}}-${{matrix.framework}}
         path: ${{github.workspace}}/Builds/${{matrix.framework}}/${{matrix.target}}
 
     - name: Upload ${{matrix.target}} build to bundle
-      uses: actions/upload-artifact@v2.2.2
+      uses: actions/upload-artifact@v3
       with:
         name: MultiAdmin-all-${{matrix.framework}}
         path: ${{github.workspace}}/Builds/${{matrix.framework}}

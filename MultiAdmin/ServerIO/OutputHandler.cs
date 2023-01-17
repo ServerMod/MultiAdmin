@@ -8,9 +8,9 @@ namespace MultiAdmin.ServerIO
 	public class OutputHandler
 	{
 		public static readonly Regex SmodRegex =
-			new Regex(@"\[(DEBUG|INFO|WARN|ERROR)\] (\[.*?\]) (.*)", RegexOptions.Compiled | RegexOptions.Singleline);
+			new(@"\[(DEBUG|INFO|WARN|ERROR)\] (\[.*?\]) (.*)", RegexOptions.Compiled | RegexOptions.Singleline);
 		public static readonly char[] TrimChars = { '.', ' ', '\t', '!', '?', ',' };
-		public static readonly char[] EventSplitChars = new char[] {':'};
+		public static readonly char[] EventSplitChars = new char[] { ':' };
 
 		private readonly Server server;
 
@@ -36,20 +36,20 @@ namespace MultiAdmin.ServerIO
 			this.server = server;
 		}
 
-		public void HandleMessage(object source, ServerSocket.MessageEventArgs message)
+		public void HandleMessage(object? source, ServerSocket.MessageEventArgs message)
 		{
 			if (message.message == null)
 				return;
 
-			ColoredMessage coloredMessage = new ColoredMessage(message.message, ConsoleColor.White);
+			ColoredMessage coloredMessage = new(message.message, ConsoleColor.White);
 
-			if (!coloredMessage.text.IsEmpty())
+			if (!coloredMessage.text.IsNullOrEmpty())
 			{
 				// Parse the color byte
 				coloredMessage.textColor = (ConsoleColor)message.color;
 
 				// Smod2 loggers pretty printing
-				Match match = SmodRegex.Match(coloredMessage.text);
+				Match match = SmodRegex.Match(coloredMessage.text!);
 				if (match.Success)
 				{
 					if (match.Groups.Count >= 3)
@@ -93,7 +93,7 @@ namespace MultiAdmin.ServerIO
 					}
 				}
 
-				string lowerMessage = coloredMessage.text.ToLower();
+				string lowerMessage = coloredMessage.text!.ToLower();
 				if (!server.supportedModFeatures.HasFlag(ModFeatures.CustomEvents))
 				{
 					switch (lowerMessage.Trim(TrimChars))
@@ -127,13 +127,13 @@ namespace MultiAdmin.ServerIO
 				if (lowerMessage.StartsWith("multiadmin:"))
 				{
 					// 11 chars in "multiadmin:"
-					string eventMessage = coloredMessage.text.Substring(11);
+					string eventMessage = coloredMessage.text[11..];
 
 					// Split event and event data
 					string[] eventSplit = eventMessage.Split(EventSplitChars, 2);
 
 					string @event = eventSplit[0].ToLower();
-					string eventData = eventSplit.Length > 1 ? eventSplit[1] : null; // Handle events with no data
+					string? eventData = eventSplit.Length > 1 ? eventSplit[1] : null; // Handle events with no data
 
 					switch (@event)
 					{
@@ -177,7 +177,7 @@ namespace MultiAdmin.ServerIO
 			server.Write(coloredMessage);
 		}
 
-		public void HandleAction(object source, byte action)
+		public void HandleAction(object? source, byte action)
 		{
 			switch ((OutputCodes)action)
 			{

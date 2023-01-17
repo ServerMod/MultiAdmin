@@ -20,12 +20,12 @@ namespace MultiAdmin.Config.ConfigHandler
 		/// <summary>
 		/// The value of the <see cref="ConfigEntry"/>.
 		/// </summary>
-		public abstract object ObjectValue { get; set; }
+		public abstract object? ObjectValue { get; set; }
 
 		/// <summary>
 		/// The default value of the <see cref="ConfigEntry"/>.
 		/// </summary>
-		public abstract object ObjectDefault { get; set; }
+		public abstract object? ObjectDefault { get; set; }
 
 		/// <summary>
 		/// Whether to inherit this config value from the <see cref="ConfigRegister"/>'s parent <see cref="ConfigRegister"/>s if they support value inheritance.
@@ -35,17 +35,17 @@ namespace MultiAdmin.Config.ConfigHandler
 		/// <summary>
 		/// The name of the <see cref="ConfigEntry"/>.
 		/// </summary>
-		public string Name { get; }
+		public string? Name { get; }
 
 		/// <summary>
 		/// The description of the <see cref="ConfigEntry"/>.
 		/// </summary>
-		public string Description { get; }
+		public string? Description { get; }
 
 		/// <summary>
 		/// Creates a basic <see cref="ConfigEntry"/> with no values and indication for whether to inherit the value.
 		/// </summary>
-		public ConfigEntry(string key, bool inherit = true, string name = null, string description = null)
+		public ConfigEntry(string key, bool inherit = true, string? name = null, string? description = null)
 		{
 			Key = key;
 
@@ -58,7 +58,7 @@ namespace MultiAdmin.Config.ConfigHandler
 		/// <summary>
 		/// Creates a basic <see cref="ConfigEntry"/> with no values.
 		/// </summary>
-		public ConfigEntry(string key, string name = null, string description = null) : this(key, true, name,
+		public ConfigEntry(string key, string? name = null, string? description = null) : this(key, true, name,
 			description)
 		{
 		}
@@ -82,25 +82,26 @@ namespace MultiAdmin.Config.ConfigHandler
 		/// </summary>
 		public T Default { get; set; }
 
-		public override object ObjectValue
+		public override object? ObjectValue
 		{
 			get => Value;
-			set => Value = (T)value;
+			set => Value = (T)value!;
 		}
 
-		public override object ObjectDefault
+		public override object? ObjectDefault
 		{
 			get => Default;
-			set => Default = (T)value;
+			set => Default = (T)value!;
 		}
 
 		/// <inheritdoc />
 		/// <summary>
 		/// Creates a <see cref="ConfigEntry{T}" /> with the provided type, default value, and indication for whether to inherit the value.
 		/// </summary>
-		public ConfigEntry(string key, T defaultValue = default, bool inherit = true, string name = null,
-			string description = null) : base(key, inherit, name, description)
+		public ConfigEntry(string key, T defaultValue, bool inherit = true, string? name = null,
+			string? description = null) : base(key, inherit, name, description)
 		{
+			Value = defaultValue;
 			Default = defaultValue;
 		}
 
@@ -108,7 +109,7 @@ namespace MultiAdmin.Config.ConfigHandler
 		/// <summary>
 		/// Creates a <see cref="ConfigEntry{T}" /> with the provided type and default value.
 		/// </summary>
-		public ConfigEntry(string key, T defaultValue = default, string name = null, string description = null) : this(
+		public ConfigEntry(string key, T defaultValue, string? name = null, string? description = null) : this(
 			key, defaultValue, true, name, description)
 		{
 		}

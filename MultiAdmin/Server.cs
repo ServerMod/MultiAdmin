@@ -2,13 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using MultiAdmin.Config;
 using MultiAdmin.ConsoleTools;
-using MultiAdmin.Features.Attributes;
+using MultiAdmin.Features;
 using MultiAdmin.ServerIO;
 using MultiAdmin.Utility;
 
@@ -16,21 +14,21 @@ namespace MultiAdmin
 {
 	public class Server
 	{
-		public readonly Dictionary<string, ICommand> commands = new Dictionary<string, ICommand>();
+		public readonly Dictionary<string, ICommand> commands = new();
 
-		public readonly List<Feature> features = new List<Feature>();
+		public readonly List<Feature> features = new();
 
 		// We want a tick only list since its the only event that happens constantly, all the rest can be in a single list
-		private readonly List<IEventTick> tick = new List<IEventTick>();
+		private readonly List<IEventTick> tick = new();
 
 		private readonly MultiAdminConfig serverConfig;
 		public MultiAdminConfig ServerConfig => serverConfig ?? MultiAdminConfig.GlobalConfig;
 
-		public readonly string serverId;
-		public readonly string configLocation;
+		public readonly string? serverId;
+		public readonly string? configLocation;
 		private readonly uint? port;
-		public readonly string[] args;
-		public readonly string serverDir;
+		public readonly string?[]? args;
+		public readonly string? serverDir;
 		public readonly string logDir;
 
 		public uint Port => port ?? ServerConfig.Port.Value;
@@ -40,22 +38,22 @@ namespace MultiAdmin
 
 		public ModFeatures supportedModFeatures = ModFeatures.None;
 
-		public Server(string serverId = null, string configLocation = null, uint? port = null, string[] args = null)
+		public Server(string? serverId = null, string? configLocation = null, uint? port = null, string?[]? args = null)
 		{
 			this.serverId = serverId;
-			serverDir = string.IsNullOrEmpty(this.serverId)
+			serverDir = string.IsNullOrEmpty(serverId)
 				? null
-				: Utils.GetFullPathSafe(Path.Combine(MultiAdminConfig.GlobalConfig.ServersFolder.Value, this.serverId));
+				: Utils.GetFullPathSafe(Path.Combine(MultiAdminConfig.GlobalConfig.ServersFolder.Value, serverId));
 
 			this.configLocation = Utils.GetFullPathSafe(configLocation) ??
-			                      Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.ConfigLocation.Value) ??
-			                      Utils.GetFullPathSafe(serverDir);
+								  Utils.GetFullPathSafe(MultiAdminConfig.GlobalConfig.ConfigLocation.Value) ??
+								  Utils.GetFullPathSafe(serverDir);
 
 			// Load config
 			serverConfig = MultiAdminConfig.GlobalConfig;
 
 			// Load config hierarchy
-			string serverConfigLocation = this.configLocation;
+			string? serverConfigLocation = this.configLocation;
 			while (!string.IsNullOrEmpty(serverConfigLocation))
 			{
 				// Update the Server object's config location with the valid config location
@@ -81,7 +79,7 @@ namespace MultiAdmin
 			this.args = args;
 
 			logDir = Utils.GetFullPathSafe(Path.Combine(string.IsNullOrEmpty(serverDir) ? "" : serverDir,
-				serverConfig.LogLocation.Value));
+				serverConfig.LogLocation.Value)) ?? throw new FileNotFoundException($"Log file \"{nameof(logDir)}\" was not set");
 
 			// Register all features
 			RegisterFeatures();
@@ -104,7 +102,7 @@ namespace MultiAdmin
 		}
 
 		public bool IsStopped => Status == ServerStatus.NotStarted || Status == ServerStatus.Stopped ||
-		                         Status == ServerStatus.StoppedUnexpectedly;
+								 Status == ServerStatus.StoppedUnexpectedly;
 
 		public bool IsRunning => !IsStopped;
 		public bool IsStarted => !IsStopped && !IsStarting;
@@ -112,7 +110,7 @@ namespace MultiAdmin
 		public bool IsStarting => Status == ServerStatus.Starting;
 
 		public bool IsStopping => Status == ServerStatus.Stopping || Status == ServerStatus.ForceStopping ||
-		                          Status == ServerStatus.Restarting;
+								  Status == ServerStatus.Restarting;
 
 		public bool IsLoading { get; set; }
 
@@ -131,9 +129,9 @@ namespace MultiAdmin
 
 		#endregion
 
-		private string startDateTime;
+		private string? startDateTime;
 
-		public string StartDateTime
+		public string? StartDateTime
 		{
 			get => startDateTime;
 
@@ -160,13 +158,13 @@ namespace MultiAdmin
 		public bool CheckRestartTimeout =>
 			(DateTime.Now - initRestartTimeoutTime).Seconds > ServerConfig.ServerRestartTimeout.Value;
 
-		public string LogDirFile { get; private set; }
-		public string MaLogFile { get; private set; }
-		public string ScpLogFile { get; private set; }
+		public string? LogDirFile { get; private set; }
+		public string? MaLogFile { get; private set; }
+		public string? ScpLogFile { get; private set; }
 
-		private StreamWriter maLogStream;
+		private StreamWriter? maLogStream;
 
-		public Process GameProcess { get; private set; }
+		public Process? GameProcess { get; private set; }
 
 		public bool IsGameProcessRunning
 		{
@@ -182,16 +180,16 @@ namespace MultiAdmin
 		}
 
 
-		public static readonly string DedicatedDir = Utils.GetFullPathSafe(Path.Combine("SCPSL_Data", "Dedicated"));
+		public static readonly string? DedicatedDir = Utils.GetFullPathSafe(Path.Combine("SCPSL_Data", "Dedicated"));
 
-		public ServerSocket SessionSocket { get; private set; }
+		public ServerSocket? SessionSocket { get; private set; }
 
 		#region Server Core
 
 		private void MainLoop()
 		{
 			// Creates and starts a timer
-			Stopwatch timer = new Stopwatch();
+			Stopwatch timer = new();
 			timer.Restart();
 
 			while (IsGameProcessRunning)
@@ -255,13 +253,13 @@ namespace MultiAdmin
 				foreach (MultiAdminConfig config in ServerConfig.GetConfigHierarchy())
 				{
 					if (!string.IsNullOrEmpty(config?.Config?.ConfigPath) &&
-					    MultiAdminConfig.GlobalConfigFilePath != config.Config.ConfigPath)
+						MultiAdminConfig.GlobalConfigFilePath != config.Config.ConfigPath)
 						Write($"Using server config \"{config.Config.ConfigPath}\"...");
 				}
 			}
 		}
 
-		public string GetExecutablePath()
+		public static string GetExecutablePath()
 		{
 			string scpslExe;
 
@@ -297,7 +295,7 @@ namespace MultiAdmin
 					// Set up logging
 					maLogStream?.Close();
 					Directory.CreateDirectory(logDir);
-					maLogStream = File.AppendText(MaLogFile);
+					maLogStream = File.AppendText(MaLogFile ?? throw new FileNotFoundException($"Log file \"{nameof(MaLogFile)}\" was not set"));
 
 					#region Startup Info Printing & Logging
 
@@ -316,20 +314,20 @@ namespace MultiAdmin
 					Write($"Executing \"{scpslExe}\"...", ConsoleColor.DarkGreen);
 
 					// Start the console socket connection to the game server
-					ServerSocket consoleSocket = new ServerSocket();
+					ServerSocket consoleSocket = new();
 					// Start the connection before the game to find an open port for communication
 					consoleSocket.Connect();
 
 					SessionSocket = consoleSocket;
 
-					List<string> scpslArgs = new List<string>
+					List<string?> scpslArgs = new()
 					{
 						$"-multiadmin:{Program.MaVersion}:{(int)ModFeatures.All}",
 						"-batchmode",
 						"-nographics",
 						"-silent-crashes",
 						"-nodedicateddelete",
-						$"-id{Process.GetCurrentProcess().Id}",
+						$"-id{Environment.ProcessId}",
 						$"-console{consoleSocket.Port}",
 						$"-port{Port}"
 					};
@@ -371,7 +369,7 @@ namespace MultiAdmin
 						scpslArgs.Add(configLocation);
 					}
 
-					string appDataPath = Utils.GetFullPathSafe(ServerConfig.AppDataLocation.Value);
+					string? appDataPath = Utils.GetFullPathSafe(ServerConfig.AppDataLocation.Value);
 					if (!string.IsNullOrEmpty(appDataPath))
 					{
 						scpslArgs.Add("-appdatapath");
@@ -379,11 +377,12 @@ namespace MultiAdmin
 					}
 
 					// Add custom arguments
-					scpslArgs.AddRange(args);
+					if (args != null) scpslArgs.AddRange(args);
 
-					ProcessStartInfo startInfo = new ProcessStartInfo(scpslExe, scpslArgs.JoinArgs())
+					ProcessStartInfo startInfo = new(scpslExe, scpslArgs.JoinArgs())
 					{
-						CreateNoWindow = true, UseShellExecute = false
+						CreateNoWindow = true,
+						UseShellExecute = false
 					};
 
 					Write($"Starting server with the following parameters:\n{scpslExe} {startInfo.Arguments}");
@@ -397,8 +396,8 @@ namespace MultiAdmin
 					ForEachHandler<IEventServerPreStart>(eventPreStart => eventPreStart.OnServerPreStart());
 
 					// Start the input reader
-					CancellationTokenSource inputHandlerCancellation = new CancellationTokenSource();
-					Task inputHandler = null;
+					CancellationTokenSource inputHandlerCancellation = new();
+					Task? inputHandler = null;
 
 					if (!Program.Headless)
 					{
@@ -406,7 +405,7 @@ namespace MultiAdmin
 					}
 
 					// Start the output reader
-					OutputHandler outputHandler = new OutputHandler(this);
+					OutputHandler outputHandler = new(this);
 					// Assign the socket events to the OutputHandler
 					consoleSocket.OnReceiveMessage += outputHandler.HandleMessage;
 					consoleSocket.OnReceiveAction += outputHandler.HandleAction;
@@ -447,7 +446,7 @@ namespace MultiAdmin
 						}
 
 						// Cleanup after exit from MainLoop
-						GameProcess.Dispose();
+						GameProcess?.Dispose();
 						GameProcess = null;
 
 						// Stop the input handler if it's running
@@ -534,7 +533,7 @@ namespace MultiAdmin
 			SetStopStatus(killGame);
 
 			if ((killGame || !SendMessage("QUIT")) && IsGameProcessRunning)
-				GameProcess.Kill();
+				GameProcess?.Kill();
 		}
 
 		public void SetRestartStatus()
@@ -552,7 +551,7 @@ namespace MultiAdmin
 			SetRestartStatus();
 
 			if ((killGame || !SendMessage("SOFTRESTART")) && IsGameProcessRunning)
-				GameProcess.Kill();
+				GameProcess?.Kill();
 		}
 
 		#endregion
@@ -568,57 +567,44 @@ namespace MultiAdmin
 					break;
 
 				case ICommand command:
-				{
-					string commandKey = command.GetCommand().ToLower().Trim();
-
-					// If the command was already registered
-					if (commands.ContainsKey(commandKey))
 					{
-						string message =
-							$"Warning, {nameof(MultiAdmin)} tried to register duplicate command \"{commandKey}\"";
+						string commandKey = command.GetCommand().ToLower().Trim();
 
-						Program.LogDebug(nameof(RegisterFeature), message);
-						Write(message);
-					}
-					else
-					{
-						commands.Add(commandKey, command);
-					}
+						// If the command was already registered
+						if (commands.ContainsKey(commandKey))
+						{
+							string message =
+								$"Warning, {nameof(MultiAdmin)} tried to register duplicate command \"{commandKey}\"";
 
-					break;
-				}
+							Program.LogDebug(nameof(RegisterFeature), message);
+							Write(message);
+						}
+						else
+						{
+							commands.Add(commandKey, command);
+						}
+
+						break;
+					}
 			}
 
 			features.Add(feature);
 		}
 
-		private static IEnumerable<Type> GetTypesWithAttribute(Type attribute)
-		{
-			foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-			{
-				foreach (Type type in assembly.GetTypes())
-				{
-					object[] attributes = type.GetCustomAttributes(attribute, true);
-					if (!attributes.IsEmpty()) yield return type;
-				}
-			}
-		}
-
 		private void RegisterFeatures()
 		{
-			Type[] assembly = GetTypesWithAttribute(typeof(FeatureAttribute)).ToArray();
-			foreach (Type type in assembly)
-			{
-				try
-				{
-					object featureInstance = Activator.CreateInstance(type, this);
-					if (featureInstance is Feature feature) RegisterFeature(feature);
-				}
-				catch (Exception e)
-				{
-					Program.LogDebugException(nameof(RegisterFeatures), e);
-				}
-			}
+			RegisterFeature(new ConfigGenerator(this));
+			RegisterFeature(new ConfigReload(this));
+			RegisterFeature(new ExitCommand(this));
+			RegisterFeature(new FileCopyRoundQueue(this));
+			RegisterFeature(new GithubGenerator(this));
+			RegisterFeature(new HelpCommand(this));
+			RegisterFeature(new MemoryChecker(this));
+			RegisterFeature(new MultiAdminInfo(this));
+			RegisterFeature(new NewCommand(this));
+			RegisterFeature(new Restart(this));
+			RegisterFeature(new RestartRoundCounter(this));
+			RegisterFeature(new Titlebar(this));
 		}
 
 		private void InitFeatures()
@@ -641,7 +627,7 @@ namespace MultiAdmin
 
 		#region Console Output and Logging
 
-		public void Write(ColoredMessage[] messages, ConsoleColor? timeStampColor = null)
+		public void Write(ColoredMessage?[] messages, ConsoleColor? timeStampColor = null)
 		{
 			lock (ColoredConsole.WriteLock)
 			{
@@ -651,7 +637,7 @@ namespace MultiAdmin
 
 				if (Program.Headless) return;
 
-				ColoredMessage[] timeStampedMessage = Utils.TimeStampMessage(messages, timeStampColor);
+				ColoredMessage?[] timeStampedMessage = Utils.TimeStampMessage(messages, timeStampColor);
 
 				timeStampedMessage.WriteLine(ServerConfig.ActualConsoleInputSystem == InputHandler.ConsoleInputSystem.New);
 
@@ -664,7 +650,7 @@ namespace MultiAdmin
 		{
 			lock (ColoredConsole.WriteLock)
 			{
-				Write(new ColoredMessage[] {message}, timeStampColor ?? message.textColor);
+				Write(new ColoredMessage[] { message }, timeStampColor ?? message.textColor);
 			}
 		}
 
@@ -681,7 +667,7 @@ namespace MultiAdmin
 		{
 			lock (ColoredConsole.WriteLock)
 			{
-				if (message == null || string.IsNullOrEmpty(MaLogFile) || ServerConfig.NoLog.Value) return;
+				if (maLogStream == null || string.IsNullOrEmpty(MaLogFile) || ServerConfig.NoLog.Value) return;
 
 				try
 				{
@@ -712,7 +698,7 @@ namespace MultiAdmin
 			// Handle directory copying
 			string copyFromDir;
 			if (copyFiles && !string.IsNullOrEmpty(configLocation) &&
-			    !string.IsNullOrEmpty(copyFromDir = ServerConfig.CopyFromFolderOnReload.Value))
+				!string.IsNullOrEmpty(copyFromDir = ServerConfig.CopyFromFolderOnReload.Value))
 			{
 				CopyFromDir(copyFromDir, ServerConfig.FolderCopyWhitelist.Value,
 					ServerConfig.FolderCopyBlacklist.Value);
@@ -724,7 +710,7 @@ namespace MultiAdmin
 					feature.OnConfigReload();
 		}
 
-		public bool CopyFromDir(string sourceDir, string[] fileWhitelist = null, string[] fileBlacklist = null)
+		public bool CopyFromDir(string? sourceDir, string[]? fileWhitelist = null, string[]? fileBlacklist = null)
 		{
 			if (string.IsNullOrEmpty(configLocation) || string.IsNullOrEmpty(sourceDir)) return false;
 

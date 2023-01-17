@@ -8,7 +8,7 @@ namespace MultiAdmin.ConsoleTools
 
 		public static BufferPoint BufferCursor
 		{
-			get => new BufferPoint(Console.CursorLeft, Console.CursorTop);
+			get => new(Console.CursorLeft, Console.CursorTop);
 			set => Console.SetCursorPosition(value.x, value.y);
 		}
 
@@ -20,32 +20,32 @@ namespace MultiAdmin.ConsoleTools
 
 		public static BufferPoint BufferLeft
 		{
-			get => new BufferPoint(0, 0);
+			get => new(0, 0);
 		}
 
 		public static BufferPoint BufferRight
 		{
-			get => new BufferPoint(Console.BufferWidth - 1, 0);
+			get => new(Console.BufferWidth - 1, 0);
 		}
 
 		public static BufferPoint BufferTop
 		{
-			get => new BufferPoint(0, 0);
+			get => new(0, 0);
 		}
 
 		public static BufferPoint BufferBottom
 		{
-			get => new BufferPoint(0, Console.BufferHeight - 1);
+			get => new(0, Console.BufferHeight - 1);
 		}
 
 		#endregion
 	}
 
-	public struct ConsolePoint
+	public readonly struct ConsolePoint
 	{
 		public readonly int x, y;
 
-		public BufferPoint BufferPoint => new BufferPoint(this);
+		public BufferPoint BufferPoint => new(this);
 
 		public ConsolePoint(int x, int y)
 		{
@@ -74,11 +74,11 @@ namespace MultiAdmin.ConsoleTools
 		}
 	}
 
-	public struct BufferPoint
+	public readonly struct BufferPoint
 	{
 		public readonly int x, y;
 
-		public ConsolePoint ConsolePoint => new ConsolePoint(this);
+		public ConsolePoint ConsolePoint => new(this);
 
 		public BufferPoint(int x, int y)
 		{

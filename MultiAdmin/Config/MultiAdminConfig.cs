@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using MultiAdmin.Config.ConfigHandler;
 using MultiAdmin.ConsoleTools;
 using MultiAdmin.ServerIO;
@@ -43,11 +42,11 @@ namespace MultiAdmin.Config
 				"MultiAdmin Debug Logging", "Enables MultiAdmin debug logging, this logs to a separate file than any other logs");
 
 		public ConfigEntry<string[]> DebugLogBlacklist { get; } =
-			new ConfigEntry<string[]>("multiadmin_debug_log_blacklist", new string[] {nameof(OutputHandler.HandleMessage), nameof(Utils.StringMatches), nameof(ServerSocket.MessageListener) },
+			new ConfigEntry<string[]>("multiadmin_debug_log_blacklist", new string[] { nameof(OutputHandler.HandleMessage), nameof(Utils.StringMatches), nameof(ServerSocket.MessageListener) },
 				"MultiAdmin Debug Logging Blacklist", "Which tags to block for MultiAdmin debug logging");
 
 		public ConfigEntry<string[]> DebugLogWhitelist { get; } =
-			new ConfigEntry<string[]>("multiadmin_debug_log_whitelist", new string[0],
+			new ConfigEntry<string[]>("multiadmin_debug_log_whitelist", Array.Empty<string>(),
 				"MultiAdmin Debug Logging Whitelist", "Which tags to log for MultiAdmin debug logging (Defaults to logging all if none are provided)");
 
 		public ConfigEntry<bool> UseNewInputSystem { get; } =
@@ -71,23 +70,23 @@ namespace MultiAdmin.Config
 				"Copy from Folder on Reload", "The location of a folder to copy files from into the folder defined by `config_location` whenever the configuration file is reloaded");
 
 		public ConfigEntry<string[]> FolderCopyWhitelist { get; } =
-			new ConfigEntry<string[]>("folder_copy_whitelist", new string[0],
+			new ConfigEntry<string[]>("folder_copy_whitelist", Array.Empty<string>(),
 				"Folder Copy Whitelist", "The list of file names to copy from the folder defined by `copy_from_folder_on_reload` (accepts `*` wildcards)");
 
 		public ConfigEntry<string[]> FolderCopyBlacklist { get; } =
-			new ConfigEntry<string[]>("folder_copy_blacklist", new string[0],
+			new ConfigEntry<string[]>("folder_copy_blacklist", Array.Empty<string>(),
 				"Folder Copy Blacklist", "The list of file names to not copy from the folder defined by `copy_from_folder_on_reload` (accepts `*` wildcards)");
 
 		public ConfigEntry<string[]> FolderCopyRoundQueue { get; } =
-			new ConfigEntry<string[]>("folder_copy_round_queue", new string[0],
+			new ConfigEntry<string[]>("folder_copy_round_queue", Array.Empty<string>(),
 				"Folder Copy Round Queue", "The location of a folder to copy files from into the folder defined by `config_location` after each round, looping through the locations");
 
 		public ConfigEntry<string[]> FolderCopyRoundQueueWhitelist { get; } =
-			new ConfigEntry<string[]>("folder_copy_round_queue_whitelist", new string[0],
+			new ConfigEntry<string[]>("folder_copy_round_queue_whitelist", Array.Empty<string>(),
 				"Folder Copy Round Queue Whitelist", "The list of file names to copy from the folders defined by `folder_copy_round_queue` (accepts `*` wildcards)");
 
 		public ConfigEntry<string[]> FolderCopyRoundQueueBlacklist { get; } =
-			new ConfigEntry<string[]>("folder_copy_round_queue_blacklist", new string[0],
+			new ConfigEntry<string[]>("folder_copy_round_queue_blacklist", Array.Empty<string>(),
 				"Folder Copy Round Queue Blacklist", "The list of file names to not copy from the folders defined by `folder_copy_round_queue` (accepts `*` wildcards)");
 
 		public ConfigEntry<bool> RandomizeFolderCopyRoundQueue { get; } =
@@ -180,6 +179,11 @@ namespace MultiAdmin.Config
 		{
 			get
 			{
+				// If defined through execution arguments, use that as an override
+				var programInputSystem = Program.ConsoleInputSystem;
+				if (programInputSystem != null)
+					return (InputHandler.ConsoleInputSystem)programInputSystem;
+
 				if (UseNewInputSystem.Value)
 				{
 					switch (ConsoleInputSystem.Value)
@@ -197,19 +201,19 @@ namespace MultiAdmin.Config
 		}
 
 		public const string ConfigFileName = "scp_multiadmin.cfg";
-		public static readonly string GlobalConfigFilePath = Utils.GetFullPathSafe(ConfigFileName);
+		public static readonly string GlobalConfigFilePath = Utils.GetFullPathSafe(ConfigFileName) ?? throw new FileNotFoundException($"Config file \"{nameof(GlobalConfigFilePath)}\" was not set", ConfigFileName);
 
-		public static readonly MultiAdminConfig GlobalConfig = new MultiAdminConfig(GlobalConfigFilePath, null);
+		public static readonly MultiAdminConfig GlobalConfig = new(GlobalConfigFilePath, null);
 
-		public MultiAdminConfig ParentConfig
+		public MultiAdminConfig? ParentConfig
 		{
 			get => ParentConfigRegister as MultiAdminConfig;
 			protected set => ParentConfigRegister = value;
 		}
 
-		public Config Config { get; }
+		public Config? Config { get; }
 
-		public MultiAdminConfig(Config config, MultiAdminConfig parentConfig, bool createConfig = true)
+		public MultiAdminConfig(Config? config, MultiAdminConfig? parentConfig, bool createConfig = true)
 		{
 			Config = config;
 			ParentConfig = parentConfig;
@@ -234,29 +238,62 @@ namespace MultiAdmin.Config
 
 			#region MultiAdmin Config Register
 
-			foreach (PropertyInfo property in GetType().GetProperties())
-			{
-				if (property.GetValue(this) is ConfigEntry entry)
-				{
-					RegisterConfig(entry);
-				}
-			}
+			RegisterConfig(ConfigLocation);
+			RegisterConfig(AppDataLocation);
+			RegisterConfig(DisableConfigValidation);
+			RegisterConfig(ShareNonConfigs);
+			RegisterConfig(LogLocation);
+			RegisterConfig(NoLog);
+			RegisterConfig(DebugLog);
+			RegisterConfig(DebugLogBlacklist);
+			RegisterConfig(DebugLogWhitelist);
+			RegisterConfig(UseNewInputSystem);
+			RegisterConfig(ConsoleInputSystem);
+			RegisterConfig(HideInput);
+			RegisterConfig(Port);
+			RegisterConfig(CopyFromFolderOnReload);
+			RegisterConfig(FolderCopyWhitelist);
+			RegisterConfig(FolderCopyBlacklist);
+			RegisterConfig(FolderCopyRoundQueue);
+			RegisterConfig(FolderCopyRoundQueueWhitelist);
+			RegisterConfig(FolderCopyRoundQueueBlacklist);
+			RegisterConfig(RandomizeFolderCopyRoundQueue);
+			RegisterConfig(ManualStart);
+			RegisterConfig(MaxMemory);
+			RegisterConfig(RestartLowMemory);
+			RegisterConfig(RestartLowMemoryTicks);
+			RegisterConfig(RestartLowMemoryRoundEnd);
+			RegisterConfig(RestartLowMemoryRoundEndTicks);
+			RegisterConfig(RandomInputColors);
+			RegisterConfig(RestartEveryNumRounds);
+			RegisterConfig(RestartEveryNumRoundsCounting);
+			RegisterConfig(SafeServerShutdown);
+			RegisterConfig(SafeShutdownCheckDelay);
+			RegisterConfig(SafeShutdownTimeout);
+			RegisterConfig(ServerRestartTimeout);
+			RegisterConfig(ServerStopTimeout);
+			RegisterConfig(ServerStartRetry);
+			RegisterConfig(ServerStartRetryDelay);
+			RegisterConfig(MultiAdminTickDelay);
+			RegisterConfig(ServersFolder);
+			RegisterConfig(SetTitleBar);
+			RegisterConfig(StartConfigOnFull);
 
 			#endregion
 
 			ReloadConfig();
 		}
 
-		public MultiAdminConfig(Config config, bool createConfig = true) : this(config, GlobalConfig, createConfig)
+		public MultiAdminConfig(Config? config, bool createConfig = true) : this(config, GlobalConfig, createConfig)
 		{
 		}
 
-		public MultiAdminConfig(string path, MultiAdminConfig parentConfig, bool createConfig = true) : this(
-			new Config(path), parentConfig, createConfig)
+		public MultiAdminConfig(string? path, MultiAdminConfig? parentConfig, bool createConfig = true) : this(
+			path != null ? new Config(path) : null, parentConfig, createConfig)
 		{
 		}
 
-		public MultiAdminConfig(string path, bool createConfig = true) : this(path, GlobalConfig, createConfig)
+		public MultiAdminConfig(string? path, bool createConfig = true) : this(path, GlobalConfig, createConfig)
 		{
 		}
 
@@ -276,65 +313,65 @@ namespace MultiAdmin.Config
 			switch (configEntry)
 			{
 				case ConfigEntry<string> config:
-				{
-					config.Value = Config.GetString(config.Key, config.Default);
-					break;
-				}
+					{
+						config.Value = Config.GetString(config.Key, config.Default) ?? config.Default;
+						break;
+					}
 
 				case ConfigEntry<string[]> config:
-				{
-					config.Value = Config.GetStringArray(config.Key, config.Default);
-					break;
-				}
+					{
+						config.Value = Config.GetStringArray(config.Key, config.Default) ?? config.Default;
+						break;
+					}
 
 				case ConfigEntry<int> config:
-				{
-					config.Value = Config.GetInt(config.Key, config.Default);
-					break;
-				}
+					{
+						config.Value = Config.GetInt(config.Key, config.Default);
+						break;
+					}
 
 				case ConfigEntry<uint> config:
-				{
-					config.Value = Config.GetUInt(config.Key, config.Default);
-					break;
-				}
+					{
+						config.Value = Config.GetUInt(config.Key, config.Default);
+						break;
+					}
 
 				case ConfigEntry<float> config:
-				{
-					config.Value = Config.GetFloat(config.Key, config.Default);
-					break;
-				}
+					{
+						config.Value = Config.GetFloat(config.Key, config.Default);
+						break;
+					}
 
 				case ConfigEntry<double> config:
-				{
-					config.Value = Config.GetDouble(config.Key, config.Default);
-					break;
-				}
+					{
+						config.Value = Config.GetDouble(config.Key, config.Default);
+						break;
+					}
 
 				case ConfigEntry<decimal> config:
-				{
-					config.Value = Config.GetDecimal(config.Key, config.Default);
-					break;
-				}
+					{
+						config.Value = Config.GetDecimal(config.Key, config.Default);
+						break;
+					}
 
 				case ConfigEntry<bool> config:
-				{
-					config.Value = Config.GetBool(config.Key, config.Default);
-					break;
-				}
+					{
+						config.Value = Config.GetBool(config.Key, config.Default);
+						break;
+					}
 
 				case ConfigEntry<InputHandler.ConsoleInputSystem> config:
-				{
-					config.Value = Config.GetConsoleInputSystem(config.Key, config.Default);
-					break;
-				}
+					{
+						config.Value = Config.GetConsoleInputSystem(config.Key, config.Default);
+						break;
+					}
 
 				default:
-				{
-					throw new ArgumentException(
-						$"Config type unsupported (Config: Key = \"{configEntry.Key ?? "Null"}\" Type = \"{configEntry.ValueType.FullName ?? "Null"}\" Name = \"{configEntry.Name ?? "Null"}\" Description = \"{configEntry.Description ?? "Null"}\").",
-						nameof(configEntry));
-				}
+					{
+						throw new ArgumentException(
+							$"Config type unsupported (Config: Key = \"{configEntry.Key ?? "Null"}\" Type = \"{configEntry.ValueType.FullName ?? "Null"}\" Name = \"{configEntry.Name ?? "Null"}\" Description = \"{configEntry.Description ?? "Null"}\").",
+							nameof(configEntry));
+					}
 			}
 		}
 
@@ -365,7 +402,7 @@ namespace MultiAdmin.Config
 
 		public MultiAdminConfig[] GetConfigHierarchy(bool highestToLowest = true)
 		{
-			List<MultiAdminConfig> configHierarchy = new List<MultiAdminConfig>();
+			List<MultiAdminConfig> configHierarchy = new();
 
 			foreach (ConfigRegister configRegister in GetConfigRegisterHierarchy(highestToLowest))
 			{
@@ -376,12 +413,12 @@ namespace MultiAdmin.Config
 			return configHierarchy.ToArray();
 		}
 
-		public bool ConfigHierarchyContainsPath(string path)
+		public bool ConfigHierarchyContainsPath(string? path)
 		{
-			string fullPath = Utils.GetFullPathSafe(path);
+			string? fullPath = Utils.GetFullPathSafe(path) ?? path;
 
 			return !string.IsNullOrEmpty(fullPath) &&
-			       GetConfigHierarchy().Any(config => config.Config?.ConfigPath == path);
+				   GetConfigHierarchy().Any(config => config.Config?.ConfigPath == path);
 		}
 	}
 }

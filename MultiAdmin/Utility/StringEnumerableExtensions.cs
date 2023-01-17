@@ -6,12 +6,12 @@ namespace MultiAdmin.Utility
 {
 	public static class StringEnumerableExtensions
 	{
-		public static string JoinArgs(this IEnumerable<string> args)
+		public static string JoinArgs(this IEnumerable<string?> args)
 		{
-			StringBuilder argsStringBuilder = new StringBuilder();
-			foreach (string arg in args)
+			StringBuilder argsStringBuilder = new();
+			foreach (string? arg in args)
 			{
-				if (arg.IsNullOrEmpty())
+				if (string.IsNullOrEmpty(arg))
 					continue;
 
 				// Escape escape characters (if not on Windows) and quotation marks
