@@ -62,6 +62,13 @@ The arguments available for running MultiAdmin with
 All configuration settings go into a file named `scp_multiadmin.cfg` in the same directory as MultiAdmin.exe or in your server directory within the `servers_folder` value defined in the global configuration file
 Any configuration files within the directory defined by `servers_folder` will have it's values used for that server over the global configuration file
 
+Example config:
+```yml
+port: 7777
+max_memory: 2048
+config_location: "/home/container/Server Config"
+```
+
 Config Option | Value Type | Default Value | Description
 --- | :---: | :---: | :------:
 config_location | String | **Empty** | The default location for the game to use for storing configuration files (a directory)
