@@ -8,10 +8,10 @@ jobs:
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
-        os: [ubuntu-18.04, windows-latest]
+        os: [ubuntu-20.04, windows-latest]
         framework: ['7.0']
         include:
-        - os: ubuntu-18.04
+        - os: ubuntu-20.04
           target: linux-x64
         - os: windows-latest
           target: win-x64
@@ -20,7 +20,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - if: matrix.os == 'ubuntu-18.04'
+    - if: matrix.os == 'ubuntu-20.04'
       name: Install Linux packages
       run: |
         sudo apt update
