@@ -69,6 +69,7 @@ namespace MultiAdmin
 		#endregion
 
 		public static bool Headless { get; private set; }
+		public static InputHandler.ConsoleInputSystem? ConsoleInputSystem { get; private set; } = null;
 
 		#region Output Printing & Logging
 
@@ -78,14 +79,14 @@ namespace MultiAdmin
 			{
 				if (Headless) return;
 
-				new ColoredMessage(Utils.TimeStampMessage(message), color).WriteLine(MultiAdminConfig.GlobalConfig?.ActualConsoleInputSystem == InputHandler.ConsoleInputSystem.New);
+				new ColoredMessage(Utils.TimeStampMessage(message), color).WriteLine(MultiAdminConfig.GlobalConfig.ActualConsoleInputSystem == InputHandler.ConsoleInputSystem.New);
 			}
 		}
 
 		private static bool IsDebugLogTagAllowed(string tag)
 		{
-			return (!MultiAdminConfig.GlobalConfig?.DebugLogBlacklist?.Value?.Contains(tag) ?? true) &&
-				   ((MultiAdminConfig.GlobalConfig?.DebugLogWhitelist?.Value?.IsEmpty() ?? true) ||
+			return (!MultiAdminConfig.GlobalConfig.DebugLogBlacklist.Value.Contains(tag)) &&
+				   (MultiAdminConfig.GlobalConfig.DebugLogWhitelist.Value.IsEmpty() ||
 					MultiAdminConfig.GlobalConfig.DebugLogWhitelist.Value.Contains(tag));
 		}
 
@@ -107,7 +108,7 @@ namespace MultiAdmin
 			{
 				try
 				{
-					if ((!MultiAdminConfig.GlobalConfig?.DebugLog?.Value ?? true) ||
+					if ((!MultiAdminConfig.GlobalConfig.DebugLog?.Value ?? true) ||
 						string.IsNullOrEmpty(MaDebugLogFile) || tag == null || !IsDebugLogTagAllowed(tag)) return;
 
 					// Assign debug log stream as needed
@@ -221,6 +222,7 @@ namespace MultiAdmin
 				Args[0] = null;
 
 			Headless = GetFlagFromArgs(Args, "headless", "h");
+			ConsoleInputSystem = Enum.TryParse(GetParamFromArgs(Args, "input-system", "is"), out InputHandler.ConsoleInputSystem inputSystem) ? inputSystem : null;
 
 			string? serverIdArg = GetParamFromArgs(Args, "server-id", "id");
 			string? configArg = GetParamFromArgs(Args, "config", "c");

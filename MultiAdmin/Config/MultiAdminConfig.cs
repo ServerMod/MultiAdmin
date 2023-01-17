@@ -179,6 +179,11 @@ namespace MultiAdmin.Config
 		{
 			get
 			{
+				// If defined through execution arguments, use that as an override
+				var programInputSystem = Program.ConsoleInputSystem;
+				if (programInputSystem != null)
+					return (InputHandler.ConsoleInputSystem)programInputSystem;
+
 				if (UseNewInputSystem.Value)
 				{
 					switch (ConsoleInputSystem.Value)

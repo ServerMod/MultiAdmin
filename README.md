@@ -53,6 +53,7 @@ This does not include ingame commands, for a full list type `HELP` in MultiAdmin
 The arguments available for running MultiAdmin with
 
 - `--headless` or `-h`: Runs MultiAdmin in headless mode, this makes MultiAdmin not accept any input at all and only output to log files, not in console (Note: This argument is inherited by processes started by this MultiAdmin process)
+- `--input-system <ConsoleInputSystem>` or `-is <ConsoleInputSystem>`: The [ConsoleInputSystem](#consoleinputsystem) to use for this MultiAdmin instance (Note: This is used over the config option `console_input_system` and is inherited by processes started by this MultiAdmin process)
 - `--server-id <Server ID>` or `-id <Server ID>`: The Server ID to run this MultiAdmin instance with a config location (`--config` or `-c`) so that it reads the configs from the location, but stores the logs in the Server ID's folder
 - `--config <Config Location>` or `-c <Config Location>`: The config location to use for this MultiAdmin instance (Note: This is used over the config option `config_location`)
 - `--port <Server Port>` or `-p <Server Port>`: The port to use for this MultiAdmin instance (Note: This is used over the config option `port` and is inherited by processes started by this MultiAdmin process)
